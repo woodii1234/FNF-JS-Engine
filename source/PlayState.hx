@@ -220,15 +220,6 @@ class PlayState extends MusicBeatState
 		"shit" => FlxColor.RED,
 		"miss" => 0xFF7F2626
 	];
-	public var tgtJudgeColours:Map<String, FlxColor> = [
-		"marv" => 0xFFE367E5,
-		"sick" => 0xFF00A2E8,
-		"good" => 0xFFB5E61D,
-		"bad" => 0xFFC3C3C3,
-		"shit" => 0xFF7F7F7F,
-		"miss" => 0xFF7F2626,
-		"cb" => 0xFF7F265A
-	];
 
 	public var strumLineNotes:FlxTypedGroup<StrumNote>;
 	public var opponentStrums:FlxTypedGroup<StrumNote>;
@@ -1793,7 +1784,6 @@ class PlayState extends MusicBeatState
 		playerStrums = new FlxTypedGroup<StrumNote>();
 		opponentStrums = new FlxTypedGroup<StrumNote>();
 
-		// startCountdown();
 		trace ('Loading chart...');
 		generateSong(SONG.song);
 
@@ -1811,9 +1801,6 @@ class PlayState extends MusicBeatState
 				tankmanAscend = true;
 			}
 		}
-
-		// After all characters being loaded, it makes then invisible 0.01s later so that the player won't freeze when you change characters
-		// add(strumLine);
 
 		if (unspawnNotes[0] != null) firstNoteStrumTime = unspawnNotes[0].strumTime;
 
@@ -1845,7 +1832,6 @@ class PlayState extends MusicBeatState
 		FlxG.fixedTimestep = false;
 		moveCameraSection();
 
-		//omg its that ms text from earlier
 		msTxt = new FlxText(0, 0, 0, "");
 		msTxt.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
 		msTxt.scrollFactor.set();
@@ -1904,7 +1890,6 @@ class PlayState extends MusicBeatState
 		healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, (opponentChart ? LEFT_TO_RIGHT : RIGHT_TO_LEFT), Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this,
 			'displayedHealth', 0, maxHealth);
 		healthBar.scrollFactor.set();
-		// healthBar
 		healthBar.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 		healthBar.alpha = ClientPrefs.healthBarAlpha;
 		insert(members.indexOf(healthBarBG), healthBar);
@@ -1913,7 +1898,6 @@ class PlayState extends MusicBeatState
 		overhealthBar.scrollFactor.set();
 		overhealthBar.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 		overhealthBar.alpha = ClientPrefs.healthBarAlpha;
-		// healthBar
 		insert(members.indexOf(healthBarBG), overhealthBar);
 		healthBarBG.sprTracker = healthBar;
 		
@@ -1933,55 +1917,49 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.smoothHealth && ClientPrefs.smoothHealthType == 'Golden Apple 1.5') healthBar.numDivisions = 10000;
 
 		if (SONG.player1 == 'bf' || SONG.player1 == 'boyfriend') { //in case any mods just have bfs json name set to boyfriend and not bf
-		if (ClientPrefs.bfIconStyle == 'VS Nonsense V2') iconP1.changeIcon('bfnonsense'); 
-		if (ClientPrefs.bfIconStyle == 'Doki Doki+') iconP1.changeIcon('bfdoki'); 
-		if (ClientPrefs.bfIconStyle == 'Leather Engine') iconP1.changeIcon('bfleather'); 
+			if (ClientPrefs.bfIconStyle == 'VS Nonsense V2') iconP1.changeIcon('bfnonsense'); 
+			if (ClientPrefs.bfIconStyle == 'Doki Doki+') iconP1.changeIcon('bfdoki'); 
+			if (ClientPrefs.bfIconStyle == 'Leather Engine') iconP1.changeIcon('bfleather'); 
 		}
 
 		if (ClientPrefs.timeBarType == 'Disabled') {
-		timeBarBG.destroy();
-		timeBar.destroy();
+			timeBarBG.destroy();
+			timeBar.destroy();
 		}
 
 		if (ClientPrefs.hudType == 'Kade Engine') {
-		// Add Engine watermark
-		EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
-		EngineWatermark.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
-		EngineWatermark.scrollFactor.set();
-		add(EngineWatermark);
-		EngineWatermark.text = SONG.song + " " + CoolUtil.difficultyString() + " |  " + MainMenuState.psychEngineJSVersion;
+			EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
+			EngineWatermark.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
+			EngineWatermark.scrollFactor.set();
+			add(EngineWatermark);
+			EngineWatermark.text = SONG.song + " " + CoolUtil.difficultyString() + " |  " + MainMenuState.psychEngineJSVersion;
 		}
 		if (ClientPrefs.hudType == 'JS Engine') {
-		// Add Engine watermark
-		EngineWatermark = new FlxText(4,FlxG.height * 0.1 - 70,0,"", 15);
-		EngineWatermark.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
-		EngineWatermark.scrollFactor.set();
-		if (ClientPrefs.downScroll) EngineWatermark.y = (FlxG.height * 0.9 + 50);
-		add(EngineWatermark);
-		EngineWatermark.text = "You are now playing " + SONG.song + " on " + CoolUtil.difficultyString() + "! (JSE v" + MainMenuState.psychEngineJSVersion + ")";
+			EngineWatermark = new FlxText(4,FlxG.height * 0.1 - 70,0,"", 15);
+			EngineWatermark.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
+			EngineWatermark.scrollFactor.set();
+			if (ClientPrefs.downScroll) EngineWatermark.y = (FlxG.height * 0.9 + 50);
+			add(EngineWatermark);
+			EngineWatermark.text = "You are now playing " + SONG.song + " on " + CoolUtil.difficultyString() + "! (JSE v" + MainMenuState.psychEngineJSVersion + ")";
 		}
 		if (ClientPrefs.hudType == 'Dave and Bambi') {
-		// Add Engine watermark
-		EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
-		EngineWatermark.setFormat(Paths.font("comic.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
-		EngineWatermark.scrollFactor.set();
-		add(EngineWatermark);
-		EngineWatermark.text = SONG.song;
+			EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
+			EngineWatermark.setFormat(Paths.font("comic.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
+			EngineWatermark.scrollFactor.set();
+			add(EngineWatermark);
+			EngineWatermark.text = SONG.song;
 		}
 		if (ClientPrefs.hudType == 'Doki Doki+') {
-		// Add Engine watermark
-		EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
-		add(EngineWatermark);
+			EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
+			add(EngineWatermark);
 		}
 		if (ClientPrefs.hudType == 'Leather Engine') {
-		// Add Engine watermark BECAUSE THE ENGINE THING IS dumb
-		EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
-		add(EngineWatermark);
+			EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
+			add(EngineWatermark);
 		}
 		if (ClientPrefs.hudType == 'VS Impostor') { //unfortunately i have to do this because otherwise enginewatermark calls a null object reference
-		// Add Engine watermark
-		EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
-		add(EngineWatermark);
+			EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
+			add(EngineWatermark);
 		}
 		if (ClientPrefs.hudType == 'Psych Engine') { //unfortunately i have to do this because otherwise enginewatermark calls a null object reference
 		// Add Engine watermark
@@ -1989,229 +1967,226 @@ class PlayState extends MusicBeatState
 		add(EngineWatermark);
 		}
 		if (ClientPrefs.hudType == 'Tails Gets Trolled V4') { //unfortunately i have to do this because otherwise enginewatermark calls a null object reference
-		// Add Engine watermark
-		EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
-		add(EngineWatermark);
+			EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
+			add(EngineWatermark);
 		}
 		if (ClientPrefs.hudType == "Mic'd Up") { //unfortunately i have to do this because otherwise enginewatermark calls a null object reference
-		// Add Engine watermark
-		EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
-		add(EngineWatermark);
+			EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
+			add(EngineWatermark);
 		}
 		if (ClientPrefs.hudType == 'Box Funkin') { //unfortunately i have to do this because otherwise enginewatermark calls a null object reference
-		// Add Engine watermark
-		EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
-		add(EngineWatermark);
+			EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
+			add(EngineWatermark);
 		}
 
 		if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG) {
-		//hitTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 20, 10000, "", 42);
-		hitTxt = new FlxText(0, 20, 10000, "test", 42);
-		hitTxt.setFormat(Paths.font("vcr.ttf"), 42, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		hitTxt.scrollFactor.set();
-		hitTxt.borderSize = 2;
-		hitTxt.visible = true;
-		hitTxt.cameras = [camHUD];
-		//hitTxt.alignment = FlxTextAlign.LEFT; // center the text
-		//hitTxt.screenCenter(X);
-		hitTxt.screenCenter(Y);
-		add(hitTxt);
-			var chromaScreen = new FlxSprite(-5000, -2000).makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.GREEN);
-			chromaScreen.scrollFactor.set(0, 0);
-			chromaScreen.scale.set(3, 3);
-			chromaScreen.updateHitbox();
-			add(chromaScreen);
+			//hitTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 20, 10000, "", 42);
+			hitTxt = new FlxText(0, 20, 10000, "test", 42);
+			hitTxt.setFormat(Paths.font("vcr.ttf"), 42, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			hitTxt.scrollFactor.set();
+			hitTxt.borderSize = 2;
+			hitTxt.visible = true;
+			hitTxt.cameras = [camHUD];
+			//hitTxt.alignment = FlxTextAlign.LEFT; // center the text
+			//hitTxt.screenCenter(X);
+			hitTxt.screenCenter(Y);
+			add(hitTxt);
+				var chromaScreen = new FlxSprite(-5000, -2000).makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.GREEN);
+				chromaScreen.scrollFactor.set(0, 0);
+				chromaScreen.scale.set(3, 3);
+				chromaScreen.updateHitbox();
+				add(chromaScreen);
 		}
 		
 		if (ClientPrefs.hudType == 'Kade Engine')
 		{ 		
-		scoreTxt = new FlxText(0, healthBarBG.y + 50, FlxG.width, "", 20);
-		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
-		scoreTxt.scrollFactor.set();
-		scoreTxt.borderSize = 1;
-		scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-		add(scoreTxt);
+			scoreTxt = new FlxText(0, healthBarBG.y + 50, FlxG.width, "", 20);
+			scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
+			scoreTxt.scrollFactor.set();
+			scoreTxt.borderSize = 1;
+			scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			add(scoreTxt);
 		}
 		if (ClientPrefs.hudType == 'JS Engine')
 		{ 		
-		scoreTxt = new FlxText(0, healthBarBG.y + 50, FlxG.width, "", 20);
-            	scoreTxt.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		scoreTxt.scrollFactor.set();
-		scoreTxt.borderSize = 2;
-		scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-		add(scoreTxt);
+			scoreTxt = new FlxText(0, healthBarBG.y + 50, FlxG.width, "", 20);
+			scoreTxt.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			scoreTxt.scrollFactor.set();
+			scoreTxt.borderSize = 2;
+			scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			add(scoreTxt);
 		}
 		if (ClientPrefs.hudType == "Mic'd Up")
 		{ 
-		scoreTxt = new FlxText(healthBarBG.x - (healthBarBG.width / 2), healthBarBG.y - 26, 0, "", 20);
-		if (ClientPrefs.downScroll)
-			scoreTxt.y = healthBarBG.y + 18;
-		scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, RIGHT);
-		scoreTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-		scoreTxt.scrollFactor.set();
-		add(scoreTxt);
-		scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			scoreTxt = new FlxText(healthBarBG.x - (healthBarBG.width / 2), healthBarBG.y - 26, 0, "", 20);
+			if (ClientPrefs.downScroll)
+				scoreTxt.y = healthBarBG.y + 18;
+			scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, RIGHT);
+			scoreTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
+			scoreTxt.scrollFactor.set();
+			add(scoreTxt);
+			scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 
-		missTxt = new FlxText(scoreTxt.x, scoreTxt.y - 26, 0, "", 20);
-		if (ClientPrefs.downScroll)
-			missTxt.y = scoreTxt.y + 26;
-		missTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, RIGHT);
-		missTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-		missTxt.scrollFactor.set();
-		add(missTxt);
-		missTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			missTxt = new FlxText(scoreTxt.x, scoreTxt.y - 26, 0, "", 20);
+			if (ClientPrefs.downScroll)
+				missTxt.y = scoreTxt.y + 26;
+			missTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, RIGHT);
+			missTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
+			missTxt.scrollFactor.set();
+			add(missTxt);
+			missTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 
-		accuracyTxt = new FlxText(missTxt.x, missTxt.y - 26, 0, "", 20);
-		if (ClientPrefs.downScroll)
-			accuracyTxt.y = missTxt.y + 26;
-		accuracyTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, RIGHT);
-		accuracyTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-		accuracyTxt.scrollFactor.set();
-		add(accuracyTxt);
-		accuracyTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			accuracyTxt = new FlxText(missTxt.x, missTxt.y - 26, 0, "", 20);
+			if (ClientPrefs.downScroll)
+				accuracyTxt.y = missTxt.y + 26;
+			accuracyTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, RIGHT);
+			accuracyTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
+			accuracyTxt.scrollFactor.set();
+			add(accuracyTxt);
+			accuracyTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 
-		comboTxt = new FlxText(scoreTxt.x, scoreTxt.y + 26, 0, "", 21);
-		if (ClientPrefs.downScroll)
-			comboTxt.y = scoreTxt.y - 26;
-		comboTxt.setFormat(Paths.font("vcr.ttf"), 21, FlxColor.WHITE, RIGHT);
-		comboTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-		comboTxt.scrollFactor.set();
-		add(comboTxt);
-		comboTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			comboTxt = new FlxText(scoreTxt.x, scoreTxt.y + 26, 0, "", 21);
+			if (ClientPrefs.downScroll)
+				comboTxt.y = scoreTxt.y - 26;
+			comboTxt.setFormat(Paths.font("vcr.ttf"), 21, FlxColor.WHITE, RIGHT);
+			comboTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
+			comboTxt.scrollFactor.set();
+			add(comboTxt);
+			comboTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 
-		npsTxt = new FlxText(accuracyTxt.x, accuracyTxt.y - 46, 0, "", 20);
-		if (ClientPrefs.downScroll)
-			npsTxt.y = accuracyTxt.y + 46;
-		npsTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, RIGHT);
-		npsTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-		npsTxt.scrollFactor.set();
-		add(npsTxt);
-		npsTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			npsTxt = new FlxText(accuracyTxt.x, accuracyTxt.y - 46, 0, "", 20);
+			if (ClientPrefs.downScroll)
+				npsTxt.y = accuracyTxt.y + 46;
+			npsTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, RIGHT);
+			npsTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
+			npsTxt.scrollFactor.set();
+			add(npsTxt);
+			npsTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 		}
 		if (ClientPrefs.hudType == 'Box Funkin')
 		{ 
-		scoreTxt = new FlxText(25, healthBarBG.y - 26, 0, "", 21);
-		if (ClientPrefs.downScroll)
-			scoreTxt.y = healthBarBG.y + 26;
-		scoreTxt.setFormat(Paths.font("MilkyNice.ttf"), 21, FlxColor.WHITE, RIGHT);
-		scoreTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-		scoreTxt.scrollFactor.set();
-		add(scoreTxt);
-		scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			scoreTxt = new FlxText(25, healthBarBG.y - 26, 0, "", 21);
+			if (ClientPrefs.downScroll)
+				scoreTxt.y = healthBarBG.y + 26;
+			scoreTxt.setFormat(Paths.font("MilkyNice.ttf"), 21, FlxColor.WHITE, RIGHT);
+			scoreTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
+			scoreTxt.scrollFactor.set();
+			add(scoreTxt);
+			scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 
-		missTxt = new FlxText(scoreTxt.x, scoreTxt.y - 26, 0, "", 21);
-		if (ClientPrefs.downScroll)
-			missTxt.y = scoreTxt.y + 26;
-		missTxt.setFormat(Paths.font("MilkyNice.ttf"), 21, FlxColor.WHITE, RIGHT);
-		missTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-		missTxt.scrollFactor.set();
-		add(missTxt);
-		missTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			missTxt = new FlxText(scoreTxt.x, scoreTxt.y - 26, 0, "", 21);
+			if (ClientPrefs.downScroll)
+				missTxt.y = scoreTxt.y + 26;
+			missTxt.setFormat(Paths.font("MilkyNice.ttf"), 21, FlxColor.WHITE, RIGHT);
+			missTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
+			missTxt.scrollFactor.set();
+			add(missTxt);
+			missTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 
-		accuracyTxt = new FlxText(missTxt.x, missTxt.y - 26, 0, "", 21);
-		if (ClientPrefs.downScroll)
-			accuracyTxt.y = missTxt.y + 26;
-		accuracyTxt.setFormat(Paths.font("MilkyNice.ttf"), 21, FlxColor.WHITE, RIGHT);
-		accuracyTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-		accuracyTxt.scrollFactor.set();
-		add(accuracyTxt);
-		accuracyTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			accuracyTxt = new FlxText(missTxt.x, missTxt.y - 26, 0, "", 21);
+			if (ClientPrefs.downScroll)
+				accuracyTxt.y = missTxt.y + 26;
+			accuracyTxt.setFormat(Paths.font("MilkyNice.ttf"), 21, FlxColor.WHITE, RIGHT);
+			accuracyTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
+			accuracyTxt.scrollFactor.set();
+			add(accuracyTxt);
+			accuracyTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 
-		comboTxt = new FlxText(scoreTxt.x, scoreTxt.y + 26, 0, "", 21);
-		if (ClientPrefs.downScroll)
-			comboTxt.y = scoreTxt.y - 26;
-		comboTxt.setFormat(Paths.font("MilkyNice.ttf"), 21, FlxColor.WHITE, RIGHT);
-		comboTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-		comboTxt.scrollFactor.set();
-		add(comboTxt);
-		comboTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			comboTxt = new FlxText(scoreTxt.x, scoreTxt.y + 26, 0, "", 21);
+			if (ClientPrefs.downScroll)
+				comboTxt.y = scoreTxt.y - 26;
+			comboTxt.setFormat(Paths.font("MilkyNice.ttf"), 21, FlxColor.WHITE, RIGHT);
+			comboTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
+			comboTxt.scrollFactor.set();
+			add(comboTxt);
+			comboTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 
-		npsTxt = new FlxText(accuracyTxt.x, accuracyTxt.y - 46, 0, "", 21);
-		if (ClientPrefs.downScroll)
-			npsTxt.y = accuracyTxt.y + 46;
-		npsTxt.setFormat(Paths.font("MilkyNice.ttf"), 21, FlxColor.WHITE, RIGHT);
-		npsTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-		npsTxt.scrollFactor.set();
-		add(npsTxt);
-		npsTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			npsTxt = new FlxText(accuracyTxt.x, accuracyTxt.y - 46, 0, "", 21);
+			if (ClientPrefs.downScroll)
+				npsTxt.y = accuracyTxt.y + 46;
+			npsTxt.setFormat(Paths.font("MilkyNice.ttf"), 21, FlxColor.WHITE, RIGHT);
+			npsTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
+			npsTxt.scrollFactor.set();
+			add(npsTxt);
+			npsTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 		}
 		if (ClientPrefs.hudType == 'Leather Engine')
 		{ 		
-		scoreTxt = new FlxText(0, healthBarBG.y + 50, FlxG.width, "", 20);
-		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
-		scoreTxt.scrollFactor.set();
-		scoreTxt.borderSize = 1;
-		scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-		add(scoreTxt);
+			scoreTxt = new FlxText(0, healthBarBG.y + 50, FlxG.width, "", 20);
+			scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
+			scoreTxt.scrollFactor.set();
+			scoreTxt.borderSize = 1;
+			scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			add(scoreTxt);
 		}
 		if (ClientPrefs.hudType == 'Dave and Bambi') 
 		{
-		scoreTxt = new FlxText(0, healthBarBG.y + 40, FlxG.width, "", 20);
-		scoreTxt.setFormat(Paths.font("comic.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		scoreTxt.scrollFactor.set();
-		scoreTxt.borderSize = 1.25;
-		scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-		add(scoreTxt);
+			scoreTxt = new FlxText(0, healthBarBG.y + 40, FlxG.width, "", 20);
+			scoreTxt.setFormat(Paths.font("comic.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			scoreTxt.scrollFactor.set();
+			scoreTxt.borderSize = 1.25;
+			scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			add(scoreTxt);
 		}
 		if (ClientPrefs.hudType == 'Psych Engine') 
 		{
-		scoreTxt = new FlxText(0, healthBarBG.y + 36, FlxG.width, "", 20);
-		scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		scoreTxt.scrollFactor.set();
-		scoreTxt.borderSize = 1.25;
-		scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-		add(scoreTxt);
+			scoreTxt = new FlxText(0, healthBarBG.y + 36, FlxG.width, "", 20);
+			scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			scoreTxt.scrollFactor.set();
+			scoreTxt.borderSize = 1.25;
+			scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			add(scoreTxt);
 		}
 		if (ClientPrefs.hudType == 'Doki Doki+') 
 		{
-		scoreTxt = new FlxText(0, healthBarBG.y + 48, FlxG.width, "", 20);
-		scoreTxt.setFormat(Paths.font("Aller_rg.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		scoreTxt.scrollFactor.set();
-		scoreTxt.borderSize = 1.25;
-		scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-		add(scoreTxt);
+			scoreTxt = new FlxText(0, healthBarBG.y + 48, FlxG.width, "", 20);
+			scoreTxt.setFormat(Paths.font("Aller_rg.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			scoreTxt.scrollFactor.set();
+			scoreTxt.borderSize = 1.25;
+			scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			add(scoreTxt);
 		}
 		if (ClientPrefs.hudType == 'Tails Gets Trolled V4') 
 		{
-		scoreTxt = new FlxText(0, healthBarBG.y + 48, FlxG.width, "", 20);
-		scoreTxt.setFormat(Paths.font("calibri.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		scoreTxt.scrollFactor.set();
-		scoreTxt.borderSize = 1.25;
-		scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-		add(scoreTxt);
+			scoreTxt = new FlxText(0, healthBarBG.y + 48, FlxG.width, "", 20);
+			scoreTxt.setFormat(Paths.font("calibri.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			scoreTxt.scrollFactor.set();
+			scoreTxt.borderSize = 1.25;
+			scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			add(scoreTxt);
 		}
 		if (ClientPrefs.hudType == 'VS Impostor') 
 		{
-            	scoreTxt = new FlxText(0, healthBarBG.y + 36, FlxG.width, "", 20);
-            	scoreTxt.scrollFactor.set();
-            	scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		scoreTxt.scrollFactor.set();
-		scoreTxt.borderSize = 1.25;
-		scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-		add(scoreTxt);
+			scoreTxt = new FlxText(0, healthBarBG.y + 36, FlxG.width, "", 20);
+			scoreTxt.scrollFactor.set();
+			scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			scoreTxt.scrollFactor.set();
+			scoreTxt.borderSize = 1.25;
+			scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
+			add(scoreTxt);
 		}
 		if (ClientPrefs.hideScore || ClientPrefs.showcaseMode) {
-		scoreTxt.destroy();
-		healthBarBG.visible = false;
-		healthBar.visible = false;
-		overhealthBar.visible = false;
-		iconP2.visible = iconP1.visible = false;
+			scoreTxt.destroy();
+			healthBarBG.visible = false;
+			healthBar.visible = false;
+			overhealthBar.visible = false;
+			iconP2.visible = iconP1.visible = false;
 		}
 		if (ClientPrefs.hideHud && ClientPrefs.showcaseMode) {
-		scoreTxt.destroy();
-		botplayTxt.visible = false;
-		healthBarBG.visible = false;
-		healthBar.visible = false;
-		overhealthBar.visible = false;
-		iconP2.visible = iconP1.visible = false;
+			scoreTxt.destroy();
+			botplayTxt.visible = false;
+			healthBarBG.visible = false;
+			healthBar.visible = false;
+			overhealthBar.visible = false;
+			iconP2.visible = iconP1.visible = false;
 		}
 		if (!ClientPrefs.charsAndBG) {
-		remove(dadGroup);
-		remove(boyfriendGroup);
-		remove(gfGroup);
-		gfGroup.destroy();
-		dadGroup.destroy();
-		boyfriendGroup.destroy();
+			remove(dadGroup);
+			remove(boyfriendGroup);
+			remove(gfGroup);
+			gfGroup.destroy();
+			dadGroup.destroy();
+			boyfriendGroup.destroy();
 		}
 		if (ClientPrefs.scoreTxtSize > 0 && scoreTxt != null && !ClientPrefs.showcaseMode && !ClientPrefs.hideScore) scoreTxt.size = ClientPrefs.scoreTxtSize;
 		if (!ClientPrefs.hideScore) updateScore();
@@ -2236,113 +2211,105 @@ class PlayState extends MusicBeatState
 
 		if (ClientPrefs.hudType == 'Psych Engine')
 		{
-		botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
-		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		botplayTxt.scrollFactor.set();
-		botplayTxt.borderSize = 1.25;
-		botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-		add(botplayTxt);
-		if (ClientPrefs.downScroll) 
-			botplayTxt.y = timeBarBG.y - 78;
+			botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
+			botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			botplayTxt.scrollFactor.set();
+			botplayTxt.borderSize = 1.25;
+			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+			add(botplayTxt);
+			if (ClientPrefs.downScroll) 
+				botplayTxt.y = timeBarBG.y - 78;
 		}
 		if (ClientPrefs.hudType == 'JS Engine')
 		{
-		botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "Botplay Mode", 30);
-		botplayTxt.setFormat(Paths.font("vcr.ttf"), 30, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		botplayTxt.scrollFactor.set();
-		botplayTxt.borderSize = 1.5;
-		botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-		add(botplayTxt);
-		if (ClientPrefs.downScroll) 
-			botplayTxt.y = timeBarBG.y - 78;
+			botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "Botplay Mode", 30);
+			botplayTxt.setFormat(Paths.font("vcr.ttf"), 30, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			botplayTxt.scrollFactor.set();
+			botplayTxt.borderSize = 1.5;
+			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+			add(botplayTxt);
+			if (ClientPrefs.downScroll) 
+				botplayTxt.y = timeBarBG.y - 78;
 		}
 		if (ClientPrefs.hudType == 'Box Funkin')
 		{
-		botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
-		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		botplayTxt.scrollFactor.set();
-		botplayTxt.borderSize = 1.25;
-		botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-		add(botplayTxt);
-		if (ClientPrefs.downScroll) 
-			botplayTxt.y = timeBarBG.y - 78;
+			botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
+			botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			botplayTxt.scrollFactor.set();
+			botplayTxt.borderSize = 1.25;
+			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+			add(botplayTxt);
+			if (ClientPrefs.downScroll) 
+				botplayTxt.y = timeBarBG.y - 78;
 		}
 		if (ClientPrefs.hudType == "Mic'd Up")
 		{
-		botplayTxt = new FlxText((healthBarBG.width / 2), healthBar.y, 0, "AutoPlayCPU", 20);
-		botplayTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		botplayTxt.scrollFactor.set();
-		botplayTxt.screenCenter(X);
-		botplayTxt.borderSize = 3;
-		botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-		add(botplayTxt);
-		if (ClientPrefs.downScroll) 
-			botplayTxt.y = timeBarBG.y - 78;
-		}
-		if (ClientPrefs.hudType == 'Leather Engine')
-		{
-		botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "", 32); //yeah leather engine has no botplay text soooo
-		add(botplayTxt);
-		if (ClientPrefs.downScroll) 
-			botplayTxt.y = timeBarBG.y - 78;
-		botplayTxt.visible = false;
+			botplayTxt = new FlxText((healthBarBG.width / 2), healthBar.y, 0, "AutoPlayCPU", 20);
+			botplayTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			botplayTxt.scrollFactor.set();
+			botplayTxt.screenCenter(X);
+			botplayTxt.borderSize = 3;
+			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+			add(botplayTxt);
+			if (ClientPrefs.downScroll) 
+				botplayTxt.y = timeBarBG.y - 78;
 		}
 		if (ClientPrefs.hudType == 'Kade Engine')
 		{
-		botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
-		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		botplayTxt.scrollFactor.set();
-		botplayTxt.borderSize = 1.25;
-		botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-		add(botplayTxt);
-		if (ClientPrefs.downScroll) 
-			botplayTxt.y = timeBarBG.y - 78;
+			botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
+			botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			botplayTxt.scrollFactor.set();
+			botplayTxt.borderSize = 1.25;
+			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+			add(botplayTxt);
+			if (ClientPrefs.downScroll) 
+				botplayTxt.y = timeBarBG.y - 78;
 		}
 		if (ClientPrefs.hudType == 'Doki Doki+')
 		{
-		botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
-		botplayTxt.setFormat(Paths.font("Aller_rg.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		botplayTxt.scrollFactor.set();
-		botplayTxt.borderSize = 1.25;
-		botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-		add(botplayTxt);
-		if (ClientPrefs.downScroll) 
-			botplayTxt.y = timeBarBG.y - 78;
+			botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
+			botplayTxt.setFormat(Paths.font("Aller_rg.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			botplayTxt.scrollFactor.set();
+			botplayTxt.borderSize = 1.25;
+			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+			add(botplayTxt);
+			if (ClientPrefs.downScroll) 
+				botplayTxt.y = timeBarBG.y - 78;
 		}
 		if (ClientPrefs.hudType == 'Tails Gets Trolled V4')
 		{
-		botplayTxt = new FlxText(400, timeBarBG.y + (ClientPrefs.downScroll ? -78 : 55), FlxG.width - 800, "[BUTTPLUG]", 32);
-		botplayTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		botplayTxt.scrollFactor.set();
-		botplayTxt.borderSize = 1.25;
-		botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-		add(botplayTxt);
-		if (ClientPrefs.downScroll) 
-			botplayTxt.y = timeBarBG.y - 78;
+			botplayTxt = new FlxText(400, timeBarBG.y + (ClientPrefs.downScroll ? -78 : 55), FlxG.width - 800, "[BUTTPLUG]", 32);
+			botplayTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			botplayTxt.scrollFactor.set();
+			botplayTxt.borderSize = 1.25;
+			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+			add(botplayTxt);
+			if (ClientPrefs.downScroll) 
+				botplayTxt.y = timeBarBG.y - 78;
 		}
 		if (ClientPrefs.hudType == 'Dave and Bambi')
 		{
-		botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
-		botplayTxt.setFormat(Paths.font("comic.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		botplayTxt.scrollFactor.set();
-		botplayTxt.borderSize = 1.25;
-		botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-		add(botplayTxt);
-		if (ClientPrefs.downScroll) 
-			botplayTxt.y = timeBarBG.y - 78;
+			botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
+			botplayTxt.setFormat(Paths.font("comic.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			botplayTxt.scrollFactor.set();
+			botplayTxt.borderSize = 1.25;
+			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+			add(botplayTxt);
+			if (ClientPrefs.downScroll) 
+				botplayTxt.y = timeBarBG.y - 78;
 		}
 		if (ClientPrefs.hudType == 'VS Impostor')
 		{
-		botplayTxt = new FlxText(400, healthBarBG.y - 55, FlxG.width - 800, "BOTPLAY", 32);
-		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		botplayTxt.scrollFactor.set();
-		botplayTxt.borderSize = 1.25;
-		botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-		add(botplayTxt);
-		if (ClientPrefs.downScroll)
-		{
-			botplayTxt.y = timeBarBG.y - 78;
-		}
+			botplayTxt = new FlxText(400, healthBarBG.y - 55, FlxG.width - 800, "BOTPLAY", 32);
+			botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			botplayTxt.scrollFactor.set();
+			botplayTxt.borderSize = 1.25;
+			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+			add(botplayTxt);
+			if (ClientPrefs.downScroll)
+			{
+				botplayTxt.y = timeBarBG.y - 78;
+			}
 		}
 
 		if (ClientPrefs.communityGameBot && botplayTxt != null || ClientPrefs.showcaseMode && botplayTxt != null) botplayTxt.destroy();
@@ -2363,10 +2330,10 @@ class PlayState extends MusicBeatState
 		scoreTxt.cameras = [camHUD];
 		if(ClientPrefs.hudType == "Mic'd Up" || ClientPrefs.hudType == 'Box Funkin')
 		{
-		missTxt.cameras = [camHUD];
-		accuracyTxt.cameras = [camHUD];
-		npsTxt.cameras = [camHUD];
-		comboTxt.cameras = [camHUD];
+			missTxt.cameras = [camHUD];
+			accuracyTxt.cameras = [camHUD];
+			npsTxt.cameras = [camHUD];
+			comboTxt.cameras = [camHUD];
 		}
 		if (botplayTxt != null) botplayTxt.cameras = [camHUD];
 		timeBar.cameras = [camHUD];
@@ -2380,13 +2347,7 @@ class PlayState extends MusicBeatState
 		androidControls.visible = false;
 		#end
 
-		// if (SONG.song == 'South')
-		// FlxG.camera.alpha = 0.7;
-		// UI_camera.zoom = 1;
-
-		// cameras = [FlxG.cameras.list[1]];
 		startingSong = true;
-		// WINDOW TITLE POG
 		MusicBeatState.windowNameSuffix = " - " + SONG.song + " " + (isStoryMode ? "(Story Mode)" : "(Freeplay)");
 		
 		#if LUA_ALLOWED
@@ -3170,7 +3131,6 @@ class PlayState extends MusicBeatState
 		var songName:String = Paths.formatToSongPath(SONG.song);
 		dadGroup.alpha = 0.00001;
 		camHUD.visible = false;
-		//inCutscene = true; //this would stop the camera movement, oops
 
 		var tankman:FlxSprite = new FlxSprite(-20, 320);
 		tankman.frames = Paths.getSparrowAtlas('cutscenes/' + songName);
@@ -3509,14 +3469,12 @@ class PlayState extends MusicBeatState
 		{
 			num /= 1000.0;
 
-			// Increment tenSuffix and switch to decSuffixes after reaching 1 decillion
 			if (magnitude == suffixes1.length - 1) {
 				tenIndex++;
 			}
 
 			magnitude++;
 
-			// Handle the transition from tenSuffixes to centiSuffixes
 			if (magnitude == 21) {
 				tenIndex++;
 				magnitude = 11;
@@ -3560,7 +3518,6 @@ class PlayState extends MusicBeatState
             magnitude++;
         }
 
-        // Use the floor value for the compact representation
         var compactValue:Float = Math.floor(num * 100) / 100;
 	if (compactValue <= 0.001) {
 		return "0"; //Return 0 if compactValue = null
@@ -3652,18 +3609,18 @@ class PlayState extends MusicBeatState
 			startTimer = new FlxTimer().start(Conductor.crochet / 1000 / playbackRate, function(tmr:FlxTimer)
 			{
 				if (ClientPrefs.charsAndBG) {
-				if (gf != null && tmr.loopsLeft % Math.round(gfSpeed * gf.danceEveryNumBeats) == 0 && gf.animation.curAnim != null && !gf.animation.curAnim.name.startsWith("sing") && !gf.stunned)
-				{
-					gf.dance();
-				}
-				if (tmr.loopsLeft % boyfriend.danceEveryNumBeats == 0 && boyfriend.animation.curAnim != null && !boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.stunned)
-				{
-					boyfriend.dance();
-				}
-				if (tmr.loopsLeft % dad.danceEveryNumBeats == 0 && dad.animation.curAnim != null && !dad.animation.curAnim.name.startsWith('sing') && !dad.stunned)
-				{
-					dad.dance();
-				}
+					if (gf != null && tmr.loopsLeft % Math.round(gfSpeed * gf.danceEveryNumBeats) == 0 && gf.animation.curAnim != null && !gf.animation.curAnim.name.startsWith("sing") && !gf.stunned)
+					{
+						gf.dance();
+					}
+					if (tmr.loopsLeft % boyfriend.danceEveryNumBeats == 0 && boyfriend.animation.curAnim != null && !boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.stunned)
+					{
+						boyfriend.dance();
+					}
+					if (tmr.loopsLeft % dad.danceEveryNumBeats == 0 && dad.animation.curAnim != null && !dad.animation.curAnim.name.startsWith('sing') && !dad.stunned)
+					{
+						dad.dance();
+					}
 				}
 
 				var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
@@ -3915,19 +3872,19 @@ class PlayState extends MusicBeatState
 					npsTxt.text = npsString;
 
 				case "Doki Doki+":
-				scoreTxt.text = 'Score: ' + formattedScore + ' | Breaks: ' + formattedSongMisses + ' | Combo: ' + formattedCombo + npsString + ' | Accuracy: ' + accuracy + ' | ' + fcString + ratingCool;
+					scoreTxt.text = 'Score: ' + formattedScore + ' | Breaks: ' + formattedSongMisses + ' | Combo: ' + formattedCombo + npsString + ' | Accuracy: ' + accuracy + ' | ' + fcString + ratingCool;
 
 				case "Dave and Bambi":
-				scoreTxt.text = 'Score: ' + formattedScore + ' | Misses: ' + formattedSongMisses + ' | Combo: ' + formattedCombo + npsString + ' | Accuracy: ' + accuracy + ' | ' + fcString;
+					scoreTxt.text = 'Score: ' + formattedScore + ' | Misses: ' + formattedSongMisses + ' | Combo: ' + formattedCombo + npsString + ' | Accuracy: ' + accuracy + ' | ' + fcString;
 
 				case "Psych Engine", "JS Engine", "Tails Gets Trolled V4":
-				scoreTxt.text = 'Score: ' + formattedScore + ' | Misses: ' + formattedSongMisses  + ' | Combo: ' + formattedCombo + npsString + ' | Rating: ' + ratingName + (ratingName != '?' ? ' (${accuracy}) - $fcString' : '');
+					scoreTxt.text = 'Score: ' + formattedScore + ' | Misses: ' + formattedSongMisses  + ' | Combo: ' + formattedCombo + npsString + ' | Rating: ' + ratingName + (ratingName != '?' ? ' (${accuracy}) - $fcString' : '');
 
 				case "Leather Engine":
-				scoreTxt.text = '< Score: ' + formattedScore + ' ~ Misses: ' + formattedSongMisses + ' ~ Combo: ' + formattedCombo + npsString + ' ~ Rating: ' + ratingName + (ratingName != '?' ? ' (${accuracy}) - $fcString' : '');
+					scoreTxt.text = '< Score: ' + formattedScore + ' ~ Misses: ' + formattedSongMisses + ' ~ Combo: ' + formattedCombo + npsString + ' ~ Rating: ' + ratingName + (ratingName != '?' ? ' (${accuracy}) - $fcString' : '');
 
 				case 'VS Impostor':
-				scoreTxt.text = 'Score: ' + formattedScore + ' | Combo Breaks: ' + formattedSongMisses  + ' | Combo: ' + formattedCombo + npsString + ' | Accuracy: ' + Highscore.floorDecimal(ratingPercent * 100, 2) + '%'  + fcString;
+					scoreTxt.text = 'Score: ' + formattedScore + ' | Combo Breaks: ' + formattedSongMisses  + ' | Combo: ' + formattedCombo + npsString + ' | Accuracy: ' + Highscore.floorDecimal(ratingPercent * 100, 2) + '%'  + fcString;
 			}
 			if (ClientPrefs.healthDisplay && !cpuControlled) scoreTxt.text += ' | Health: ' + FlxMath.roundDecimal(health * 50, 2) + '%';
 
@@ -3939,19 +3896,22 @@ class PlayState extends MusicBeatState
 	{
 		if(time < 0) time = 0;
 
-		if (ClientPrefs.songLoading) FlxG.sound.music.pause();
-		if (ClientPrefs.songLoading) vocals.pause();
-
-		if (ClientPrefs.songLoading) FlxG.sound.music.time = time;
-		if (ClientPrefs.songLoading) FlxG.sound.music.pitch = playbackRate;
-		if (ClientPrefs.songLoading) FlxG.sound.music.play();
-
-		if (Conductor.songPosition <= vocals.length && ClientPrefs.songLoading)
+		if (ClientPrefs.songLoading) 
 		{
-			vocals.time = time;
-			vocals.pitch = playbackRate;
+			FlxG.sound.music.pause();
+			vocals.pause();
+
+			FlxG.sound.music.time = time;
+			FlxG.sound.music.pitch = playbackRate;
+			FlxG.sound.music.play();
+
+			if (Conductor.songPosition <= vocals.length)
+			{
+				vocals.time = time;
+				vocals.pitch = playbackRate;
+			}
+			if (ClientPrefs.songLoading) vocals.play();
 		}
-		if (ClientPrefs.songLoading) vocals.play();
 		Conductor.songPosition = time;
 		songTime = time;
 	}
@@ -4703,13 +4663,6 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-			if (FlxG.keys.pressed.CONTROL && FlxG.keys.pressed.ALT && FlxG.keys.justPressed.SPACE)
-			{
-				trace("HAH, IM CRASHING YOUR GAME NOW >:)");
-				var b:FlxSprite = null;
-				b.destroy();
-			}
-
 		switch (curStage)
 		{
 			case 'tank':
@@ -5090,68 +5043,9 @@ if (ClientPrefs.showNPS) {
 
 		if ((controls.PAUSE #if android || FlxG.android.justReleased.BACK #end) && startedCountdown && canPause && !softlocked && !heyStopTrying)
 		{
-			if (!ClientPrefs.noPausing) {
 			var ret:Dynamic = callOnLuas('onPause', [], false);
-			if(ret != FunkinLua.Function_Stop) {
+			if(ret != FunkinLua.Function_Stop)
 				openPauseMenu();
-			}
-			}
-			else if (ClientPrefs.noPausing) {
-			FlxTween.cancelTweensOf(pauseWarnText);
-			trace("Player has attempted to pause the song, but 'Force Disable Pausing' is enabled! (Tries: " + tries + ")");
-		pauseWarnText.visible = true;
-		pauseWarnText.alpha = 1;
-		FlxG.sound.play(Paths.sound('tried'), 1);
-		tries++;
-		insert(members.indexOf(strumLineNotes), pauseWarnText);
-		FlxTween.tween(pauseWarnText, {alpha: 0}, 1 / playbackRate, {
-			startDelay: 2 / playbackRate,
-			onComplete: _ -> {
-				tries = 0;
-				pauseWarnText.visible = false;
-			}
-		});
-				switch (tries)
-				{
-					case 1, 2, 3, 4, 5, 6, 7, 8, 9:
-						pauseWarnText.text = "Pausing is disabled! Turn it back on in Settings -> Gameplay -> 'Force Disable Pausing'";
-					case 10, 11, 12, 13, 14, 15, 16, 17, 18, 19:
-						pauseWarnText.text = "OK we get it, the sound's funny, now stop pausing.";
-					case 20, 21, 22, 23, 24, 25, 26, 27, 28, 29:
-						pauseWarnText.text = "dude. stop.";
-					case 30, 31, 32, 33, 34:
-						pauseWarnText.text = "OK, if you continue, I'm softlocking the game.";
-					case 35, 36, 37, 38, 39:
-						pauseWarnText.text = "STOP.";
-					case 40:
-						pauseWarnText.text = "fuck off.";
-						FlxG.sound.play(Paths.sound('pipe'), 1);
-						if (ClientPrefs.songLoading) vocals.stop();
-						if (ClientPrefs.songLoading) FlxG.sound.music.stop();
-						Conductor.songPosition = -10000000000;
-					restartTimer = new FlxTimer().start(10, function(_) {
-						PauseSubState.restartSong(true);
-					});
-					case 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59:
-						pauseWarnText.text = "stop trying to pause dumbass this is getting you nowhere";
-					case 60:
-						pauseWarnText.text = "I CAN PERMANENTLY PAUSE FOR YOU, IF THAT'S WHAT YOU WANT.";
-					case 80:
-						pauseWarnText.text = "STOP. PAUSING.";
-					case 90:
-						pauseWarnText.text = "IM WARNING YOU, STOP PAUSING.";
-					case 95:
-						pauseWarnText.text = "I WILL NOT HESITATE TO SOFTLOCK THIS GAME RIGHT NOW.";
-					case 99:
-						pauseWarnText.text = "pause one more fucking time i FUCKING DARE YOU.";
-					case 100:
-						pauseWarnText.text = "ok fine you stupid fuck ive paused your fucking game, are you happy now";
-						FlxG.sound.play(Paths.sound('loudvine'), 1);
-						if (restartTimer != null) restartTimer.cancel();
-						softlocked = true;
-						trace("softlocked the game lmao");
-				}
-			}
 		}
 
 		if (FlxG.keys.anyJustPressed(debugKeysChart) && !endingSong && !inCutscene && !softlocked)
@@ -5190,9 +5084,6 @@ if (ClientPrefs.showNPS) {
 					startVideo(SONG.event7Value);
 				}
 		}
-
-		// FlxG.watch.addQuick('VOL', vocals.amplitudeLeft);
-		// FlxG.watch.addQuick('VOLRight', vocals.amplitudeRight);
 
 		if (ClientPrefs.iconBounceType == 'Old Psych') {
 		iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, CoolUtil.boundTo(1 - (elapsed * 30 * playbackRate), 0, 1))));
@@ -5266,14 +5157,14 @@ if (ClientPrefs.showNPS) {
 		
 		if (ClientPrefs.smoothHealth && ClientPrefs.smoothHealthType != 'Golden Apple 1.5' || !ClientPrefs.smoothHealth) //checks if you're using smooth health. if you are, but are not using the indie cross one then you know what that means
 		{
-		iconP1.x = (opponentChart ? (!ClientPrefs.longHPBar ? -593 : -889.5) : 0) + healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, (opponentChart ? -100 : 100), 100, 0) * 0.01)) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
-		iconP2.x = (opponentChart ? (!ClientPrefs.longHPBar ? -593 : -889.5) : 0) + healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, (opponentChart ? -100 : 100), 100, 0) * 0.01)) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
+			iconP1.x = (opponentChart ? (!ClientPrefs.longHPBar ? -593 : -889.5) : 0) + healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, (opponentChart ? -100 : 100), 100, 0) * 0.01)) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
+			iconP2.x = (opponentChart ? (!ClientPrefs.longHPBar ? -593 : -889.5) : 0) + healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, (opponentChart ? -100 : 100), 100, 0) * 0.01)) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
 		}
 		if (ClientPrefs.smoothHealth && ClientPrefs.smoothHealthType == 'Golden Apple 1.5') //really makes it feel like the gapple 1.5 build's health tween
 		{
-		var percent:Float = 1 - (opponentChart ? FlxMath.bound(displayedHealth, 0, maxHealth) / maxHealth * -1 : FlxMath.bound(displayedHealth, 0, maxHealth) / maxHealth); //checks if you're playing as the opponent. if so, uses the negative percent, otherwise uses the normal one
-		iconP1.x = (opponentChart ? (!ClientPrefs.longHPBar ? -593 : -889.5) : 0) + healthBar.x + (healthBar.width * percent) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
-		iconP2.x = (opponentChart ? (!ClientPrefs.longHPBar ? -593 : -889.5) : 0) + healthBar.x + (healthBar.width * percent) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
+			var percent:Float = 1 - (opponentChart ? FlxMath.bound(displayedHealth, 0, maxHealth) / maxHealth * -1 : FlxMath.bound(displayedHealth, 0, maxHealth) / maxHealth); //checks if you're playing as the opponent. if so, uses the negative percent, otherwise uses the normal one
+			iconP1.x = (opponentChart ? (!ClientPrefs.longHPBar ? -593 : -889.5) : 0) + healthBar.x + (healthBar.width * percent) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
+			iconP2.x = (opponentChart ? (!ClientPrefs.longHPBar ? -593 : -889.5) : 0) + healthBar.x + (healthBar.width * percent) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
 		}
 
 		if (generatedMusic) {
@@ -5387,8 +5278,6 @@ if (ClientPrefs.showNPS) {
 				{
 					songTime = (songTime + Conductor.songPosition) / 2;
 					Conductor.lastSongPos = Conductor.songPosition;
-					// Conductor.songPosition += FlxG.elapsed * 1000;
-					// trace('MISSED FRAME');
 				}
 
 				if(updateTime) {
@@ -5408,16 +5297,13 @@ if (ClientPrefs.showNPS) {
 					if(secondsTotal < 0) secondsTotal = 0;
 					if(trollingMode && ClientPrefs.songLoading && Conductor.songPosition - FlxG.sound.music.length == endingTimeLimit) secondsTotal == secondsTotal + FlxG.sound.music.length;
 
-
 					var hoursRemaining:Int = Math.floor(secondsTotal / 3600);
 					var minutesRemaining:Int = Math.floor(secondsTotal / 60) % 60;
 					var minutesRemainingShit:String = '' + minutesRemaining;
 					var secondsRemaining:String = '' + secondsTotal % 60;
 
 					if(secondsRemaining.length < 2) secondsRemaining = '0' + secondsRemaining; //let's see if the old time format works actually
-					//if (minutesRemaining == 60) minutesRemaining = 0; //reset the minutes to 0 every time it counts another hour
 					if (minutesRemainingShit.length < 2) minutesRemainingShit = '0' + minutesRemaining; 
-					//also, i wont add a day thing because there's no way someone can mod a song that's over 24 hours long into this engine
 
 					var hoursShown:Int = Math.floor(songDurationSeconds / 3600);
 					var minutesShown:Int = Math.floor(songDurationSeconds / 60) % 60;
@@ -5428,24 +5314,24 @@ if (ClientPrefs.showNPS) {
 
 					switch (ClientPrefs.timeBarType)
 					{
-					case 'Time Left', 'Time Elapsed':
-					if(songLength <= 3600000)
-						timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
-					else
-						timeTxt.text = hoursRemaining + ':' + minutesRemainingShit + ':' + secondsRemaining;
+						case 'Time Left', 'Time Elapsed':
+							if(songLength <= 3600000)
+								timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+							else
+								timeTxt.text = hoursRemaining + ':' + minutesRemainingShit + ':' + secondsRemaining;
 
-					case 'Modern Time':
-					if(songLength <= 3600000)
-						timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false) + ' / ' + FlxStringUtil.formatTime(songLength / 1000, false);
-					else
-						timeTxt.text = hoursRemaining + ':' + minutesRemainingShit + ':' + secondsRemaining + ' / ' + hoursShown + ':' + minutesShownShit + ':' + secondsShown;
+						case 'Modern Time':
+							if(songLength <= 3600000)
+								timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false) + ' / ' + FlxStringUtil.formatTime(songLength / 1000, false);
+							else
+								timeTxt.text = hoursRemaining + ':' + minutesRemainingShit + ':' + secondsRemaining + ' / ' + hoursShown + ':' + minutesShownShit + ':' + secondsShown;
 					
-					case 'Song Name + Time':
-					if(songLength <= 3600000)
-						timeTxt.text = SONG.song + ' (' + FlxStringUtil.formatTime(secondsTotal, false) + ' / ' + FlxStringUtil.formatTime(songLength / 1000, false) + ')';
+						case 'Song Name + Time':
+							if(songLength <= 3600000)
+								timeTxt.text = SONG.song + ' (' + FlxStringUtil.formatTime(secondsTotal, false) + ' / ' + FlxStringUtil.formatTime(songLength / 1000, false) + ')';
 
-					else
-						timeTxt.text = SONG.song + ' (' + hoursRemaining + ':' + minutesRemainingShit + ':' + secondsRemaining + ' / ' + hoursShown + ':' + minutesShownShit + ':' + secondsShown + ')';
+							else
+								timeTxt.text = SONG.song + ' (' + hoursRemaining + ':' + minutesRemainingShit + ':' + secondsRemaining + ' / ' + hoursShown + ':' + minutesShownShit + ':' + secondsShown + ')';
 					}
 
 					if(ClientPrefs.timebarShowSpeed)
@@ -5454,7 +5340,7 @@ if (ClientPrefs.showNPS) {
 							timeTxt.text += ' (' + playbackRateDecimal + 'x)';
 						else timeTxt.text = SONG.song + ' (' + playbackRateDecimal + 'x)';
 					}
-		if (cpuControlled && ClientPrefs.timeBarType != 'Song Name' && !ClientPrefs.communityGameBot) timeTxt.text += ' (Bot)';
+					if (cpuControlled && ClientPrefs.timeBarType != 'Song Name' && !ClientPrefs.communityGameBot) timeTxt.text += ' (Bot)';
 					if(ClientPrefs.timebarShowSpeed && cpuControlled && ClientPrefs.timeBarType == 'Song Name') timeTxt.text = SONG.song + ' (' + playbackRateDecimal + 'x) (Bot)';
 				}
 			}
@@ -5646,7 +5532,6 @@ if (ClientPrefs.showNPS) {
 							}
 						}
 
-						// Kill extremely late notes and cause misses
 						if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
 						{
 							if (daNote.mustPress && (!cpuControlled || cpuControlled && ClientPrefs.communityGameBot) &&!daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit)) {
@@ -7164,42 +7049,42 @@ if (ClientPrefs.showNPS) {
 				case 'VS Impostor':
 					switch(daRating.name)
 					{
-					case 'marv', 'sick': health += note.hitHealth * healthGain * polyphony;
-					case 'good': health += note.hitHealth * 0.5 * healthGain * polyphony;
-					case 'bad': health += note.hitHealth * 0.25 * healthGain * polyphony;
-					case 'shit': health += note.hitHealth * 0.1 * healthGain * polyphony;
+						case 'marv', 'sick': health += note.hitHealth * healthGain * polyphony;
+						case 'good': health += note.hitHealth * 0.5 * healthGain * polyphony;
+						case 'bad': health += note.hitHealth * 0.25 * healthGain * polyphony;
+						case 'shit': health += note.hitHealth * 0.1 * healthGain * polyphony;
 					}
 				case 'Leather Engine':
 					switch(daRating.name)
 					{
-					case 'marv', 'sick': health += 0.012 * healthGain * polyphony;
-					case 'good': health += -0.008 * healthGain * polyphony;
-					case 'bad': health += -0.018 * healthGain * polyphony;
-					case 'shit': health += -0.023 * healthGain * polyphony;
+						case 'marv', 'sick': health += 0.012 * healthGain * polyphony;
+						case 'good': health += -0.008 * healthGain * polyphony;
+						case 'bad': health += -0.018 * healthGain * polyphony;
+						case 'shit': health += -0.023 * healthGain * polyphony;
 					}
 				case 'Kade (1.4.2 to 1.6)', 'Doki Doki+':
 					switch(daRating.name)
 					{
-					case 'marv', 'sick': health += (ClientPrefs.healthGainType == 'Doki Doki+' ? 0.077 : 0.1) * healthGain * polyphony;
-					case 'good': health += 0.04 * healthGain * polyphony;
-					case 'bad': health -= 0.06 * healthGain * polyphony;
-					case 'shit': health -= (ClientPrefs.healthGainType == 'Doki Doki+' ? 0.1 : 0.2) * healthGain * polyphony;
+						case 'marv', 'sick': health += (ClientPrefs.healthGainType == 'Doki Doki+' ? 0.077 : 0.1) * healthGain * polyphony;
+						case 'good': health += 0.04 * healthGain * polyphony;
+						case 'bad': health -= 0.06 * healthGain * polyphony;
+						case 'shit': health -= (ClientPrefs.healthGainType == 'Doki Doki+' ? 0.1 : 0.2) * healthGain * polyphony;
 					}
 				case 'Kade (1.6+)':
 					switch(daRating.name)
 					{
-					case 'marv', 'sick': health += 0.017 * healthGain * polyphony;
-					case 'good': health += 0 * healthGain * polyphony;
-					case 'bad': health += -0.03 * healthLoss;
-					case 'shit': health += -0.06 * healthLoss;
+						case 'marv', 'sick': health += 0.017 * healthGain * polyphony;
+						case 'good': health += 0 * healthGain * polyphony;
+						case 'bad': health += -0.03 * healthLoss;
+						case 'shit': health += -0.06 * healthLoss;
 					}
 				case 'Kade (1.2)': 
 					switch(daRating.name)
 					{
-					case 'marv', 'sick': health += 0.023 * healthGain * polyphony;
-					case 'good': health += 0.004 * healthGain * polyphony;
-					case 'bad': health += 0;
-					case 'shit': health += 0;
+						case 'marv', 'sick': health += 0.023 * healthGain * polyphony;
+						case 'good': health += 0.004 * healthGain * polyphony;
+						case 'bad': health += 0;
+						case 'shit': health += 0;
 					}
 			}
 
@@ -7277,17 +7162,17 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 		{
 		rating.color = judgeColours.get('shit');
 		}
-if (!allSicks && ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
-		{
-			switch (daRating.name) //This is so stupid, but it works
-			{
-			case 'sick':  rating.color = FlxColor.CYAN;
-			case 'good': rating.color = FlxColor.LIME;
-			case 'bad': rating.color = FlxColor.ORANGE;
-			case 'shit': rating.color = FlxColor.RED;
-			default: rating.color = FlxColor.WHITE;
-			}
-		}
+		if (!allSicks && ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
+				{
+					switch (daRating.name) //This is so stupid, but it works
+					{
+					case 'sick':  rating.color = FlxColor.CYAN;
+					case 'good': rating.color = FlxColor.LIME;
+					case 'bad': rating.color = FlxColor.ORANGE;
+					case 'shit': rating.color = FlxColor.RED;
+					default: rating.color = FlxColor.WHITE;
+					}
+				}
 		insert(members.indexOf(strumLineNotes), rating);
 
 		if (ClientPrefs.showMS && !ClientPrefs.hideHud) {
@@ -7376,30 +7261,6 @@ if (!allSicks && ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Get
 			numScore.x += ClientPrefs.comboOffset[2];
 			numScore.y -= ClientPrefs.comboOffset[3];
 			if (ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && noteDiff >= ClientPrefs.marvWindow) numScore.color = rating.color;
-			if (!allSicks && ClientPrefs.colorRatingFC && marvs > 0 && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.hudType == 'Tails Gets Trolled V4') 
-					{
-					numScore.color = tgtJudgeColours.get('marv');
-					}
-			if (!allSicks && ClientPrefs.colorRatingFC && sicks > 0 && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.hudType == 'Tails Gets Trolled V4') 
-					{
-					numScore.color = tgtJudgeColours.get('sick');
-					}
-			if (!allSicks && ClientPrefs.colorRatingFC && goods > 0 && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.hudType == 'Tails Gets Trolled V4') 
-					{
-					numScore.color = tgtJudgeColours.get('good');
-					}
-			if (!allSicks && ClientPrefs.colorRatingFC && bads > 0 && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.hudType == 'Tails Gets Trolled V4') 
-					{
-					numScore.color = tgtJudgeColours.get('bad');
-					}
-			if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.hudType == 'Tails Gets Trolled V4') 
-					{
-					numScore.color = tgtJudgeColours.get('shit');
-					}
-			if (!allSicks && ClientPrefs.colorRatingFC && songMisses > 0 && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.hudType == 'Tails Gets Trolled V4') 
-					{
-					numScore.color = FlxColor.WHITE;
-					}
 			
 			if (!ClientPrefs.comboStacking)
 				lastScore.push(numScore);
@@ -9394,8 +9255,6 @@ if (!allSicks && ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Get
 				if (songMisses >= 10) ratingFC = "Clear";
 				if (songMisses >= 100) ratingFC = "TDSB";
 				if (songMisses >= 1000) ratingFC = "QDSB";
-				if (songMisses >= 100000) ratingFC = "STDCB";
-				else if (songMisses >= 10000000) ratingFC = "SPDCB"; //i have no idea how you'd get a million misses but oh well
 
 				switch (ClientPrefs.hudType)
 				{
@@ -9410,8 +9269,6 @@ if (!allSicks && ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Get
 					if (songMisses >= 10) ratingFC = " [Clear]";
 					if (songMisses >= 100) ratingFC = " [TDSB]";
 					if (songMisses >= 1000) ratingFC = " [QDSB]";
-					if (songMisses >= 100000) ratingFC = " [STDCB]";
-					else if (songMisses >= 10000000) ratingFC = " [SPDCB]"; //i have no idea how you'd get a million misses but oh well
 
 				case "Tails Gets Trolled V4":
 					if (totalPlayed == 0) ratingFC = "No Play";
@@ -9424,8 +9281,6 @@ if (!allSicks && ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Get
 					if (songMisses >= 10) ratingFC = "Clear";
 					if (songMisses >= 100) ratingFC = "TDSB";
 					if (songMisses >= 1000) ratingFC = "QDSB";
-					if (songMisses >= 100000) ratingFC = "STDCB";
-					else if (songMisses >= 10000000) ratingFC = "SPDCB"; //i have no idea how you'd get a million misses but oh well
 
 					case 'Kade Engine', 'Doki Doki+':
 					ratingFC = "?";
@@ -9439,8 +9294,6 @@ if (!allSicks && ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Get
 					if (songMisses >= 10) ratingFC = "(Clear)";
 					if (songMisses >= 100) ratingFC = "(TDSB)";
 					if (songMisses >= 1000) ratingFC = "(QDSB)";
-					if (songMisses >= 100000) ratingFC = "(STDCB)";
-					else if (songMisses >= 10000000) ratingFC = "(SPDCB)"; //i have no idea how you'd get a million misses but oh well
 				}
 			}
 			else
@@ -9456,8 +9309,6 @@ if (!allSicks && ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Get
 				if (songMisses >= 100) ratingFC = "Triple Digit Combo Breaks";
 				if (songMisses >= 1000) ratingFC = "Quadruple Digit Combo Breaks";
 				if (songMisses >= 10000) ratingFC = "Quintuple Digit Combo Breaks";
-				if (songMisses >= 100000) ratingFC = "Sixtuple Digit Combo Breaks";
-				else if (songMisses >= 10000000) ratingFC = "Septuple Digit Combo Breaks"; //i have no idea how you'd get a million misses but oh well
 
 				switch (ClientPrefs.hudType)
 				{
@@ -9473,8 +9324,6 @@ if (!allSicks && ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Get
 					if (songMisses >= 100) ratingFC = " [Triple Digit Combo Breaks]";
 					if (songMisses >= 1000) ratingFC = " [Quadruple Digit Combo Breaks]";
 					if (songMisses >= 10000) ratingFC = " [Quintuple Digit Combo Breaks]";
-					if (songMisses >= 100000) ratingFC = " [Sixtuple Digit Combo Breaks]";
-					else if (songMisses >= 10000000) ratingFC = " [Septuple Digit Combo Breaks]"; //i have no idea how you'd get a million misses but oh well
 
 				case "Tails Gets Trolled V4":
 					if (totalPlayed == 0) ratingFC = "No Play";
@@ -9488,8 +9337,6 @@ if (!allSicks && ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Get
 					if (songMisses >= 100) ratingFC = "Triple Digit Combo Breaks";
 					if (songMisses >= 1000) ratingFC = "Quadruple Digit Combo Breaks";
 					if (songMisses >= 10000) ratingFC = "Quintuple Digit Combo Breaks";
-					if (songMisses >= 100000) ratingFC = "Sixtuple Digit Combo Breaks";
-					else if (songMisses >= 10000000) ratingFC = "Septuple Digit Combo Breaks"; //i have no idea how you'd get a million misses but oh well
 
 					case 'Kade Engine', 'Doki Doki+':
 					ratingFC = "?";
@@ -9504,8 +9351,6 @@ if (!allSicks && ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Get
 					if (songMisses >= 100) ratingFC = "(Triple Digit Combo Breaks)";
 					if (songMisses >= 1000) ratingFC = "(Quadruple Digit Combo Breaks)";
 					if (songMisses >= 10000) ratingFC = "(Quintuple Digit Combo Breaks)";
-					if (songMisses >= 100000) ratingFC = "(Sixtuple Digit Combo Breaks)";
-					else if (songMisses >= 10000000) ratingFC = "(Septuple Digit Combo Breaks)"; //i have no idea how you'd get a million misses but oh well
 				}
 			}
 

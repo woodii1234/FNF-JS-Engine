@@ -311,7 +311,7 @@ class Paths
 	*/
 	//Loads images.
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
-	static public function image(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxGraphic
+	static public function image(key:String, ?library:String = null):FlxGraphic
 	{
 		var bitmap:BitmapData = null;
 		var file:String = null;
@@ -341,7 +341,7 @@ class Paths
 		if (bitmap != null)
 		{
 			localTrackedAssets.push(file);
-			if (allowGPU && ClientPrefs.cacheOnGPU)
+			if (ClientPrefs.cacheOnGPU)
 			{
 				var texture:RectangleTexture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
 				texture.uploadFromBitmapData(bitmap);
