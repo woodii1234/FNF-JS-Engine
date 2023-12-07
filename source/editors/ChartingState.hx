@@ -1143,7 +1143,7 @@ class ChartingState extends MusicBeatState
 		blockPressWhileTypingOnStepper.push(CopyFutureSectionCount);
 
 		CopyLoopCount = new FlxUINumericStepper(CopyFutureSectionCount.x - 60, CopyLastSectionCount.y + 40, 1, 1, -16384, 16384, 0);
-		blockPressWhileTypingOnStepper.push(CopyLoopSectionCount);
+		blockPressWhileTypingOnStepper.push(CopyLoopCount);
 
 		copyMultiSectButton = new FlxButton(CopyFutureSectionCount.x, CopyLastSectionCount.y + 40, "Copy from the last " + Std.int(CopyFutureSectionCount.value) + " to the next " + Std.int(CopyFutureSectionCount.value) + " sections, " + Std.int(CopyLoopCount.value) + " times", function()
 		{
