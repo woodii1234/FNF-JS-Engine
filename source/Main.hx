@@ -42,8 +42,6 @@ class Main extends Sprite {
 	public static var fpsVar:FPS;
 	public static var changeID:Int = 0;
 
-	public static var textGenerations:Int = 0;
-
 	public static var superDangerMode:Bool = Sys.args().contains("-troll");
 
     public static var __superCoolErrorMessagesArray:Array<String> = [

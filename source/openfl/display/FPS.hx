@@ -101,7 +101,6 @@ class FPS extends TextField
 				if (FlxG.state.subState != null)
 					text += '\nSubstate: ${Type.getClassName(Type.getClass(FlxG.state.subState))}';
 				text += "\nSystem: " + '${lime.system.System.platformLabel} ${lime.system.System.platformVersion}';
-				text += "\nText bitmaps generated: " + Main.textGenerations;
 			}
 
     			if (ClientPrefs.rainbowFPS)
