@@ -1,7 +1,7 @@
 1.16.0;
 
 Added back Chart Drawing for the OS 'Engine' fans who like charting that way, along with a delete mode if you hold CTRL
-Added character-specific noteskins (WIP, put them in assets/images/noteskins
+Added character-specific noteskins (WIP, put them in assets/images/noteskins)
 All rating types now have pixelated sprites
 Added Anti-Crash for the Chart Editor and Character Editor
 You can now go past the normal max health, granted you actually figure out how
