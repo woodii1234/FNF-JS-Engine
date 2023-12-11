@@ -350,8 +350,8 @@ class PlayState extends MusicBeatState
 
 	var notesHitArray:Array<Float> = [];
 	var oppNotesHitArray:Array<Float> = [];
-	var notesHitDateArray:Array<Float> = [];
-	var oppNotesHitDateArray:Array<Float> = [];
+	var notesHitDateArray:Array<Date> = [];
+	var oppNotesHitDateArray:Array<Date> = [];
 
 	var dialogue:Array<String> = ['blah blah blah', 'coolswag'];
 	var dialogueJson:DialogueFile = null;
@@ -4811,6 +4811,7 @@ class PlayState extends MusicBeatState
 			moveCamTo[1] = FlxMath.lerp(moveCamTo[1], 0, panLerpVal);
 		}
 if (ClientPrefs.showNPS) {
+	final currentTime = Date.now().getTime();
     timeThreshold = (ClientPrefs.npsWithSpeed ? 1000 / playbackRate : 1000) * npsSpeedMult;
 
     // Track the count of items to remove for notesHitDateArray
@@ -4818,7 +4819,7 @@ if (ClientPrefs.showNPS) {
 
     // Filter notesHitDateArray and notesHitArray in place
     for (i in 0...notesHitDateArray.length) {
-        if (!Math.isNaN(notesHitDateArray[i]) && (notesHitDateArray[i] + timeThreshold < Conductor.songPosition)) {
+        if (notesHitDateArray[i] != null && (notesHitDateArray[i].getTime() + timeThreshold < currentTime)) {
             notesToRemoveCount++;
         }
     }
@@ -4842,7 +4843,7 @@ if (ClientPrefs.showNPS) {
     var oppNotesToRemoveCount:Int = 0;
     
     for (i in 0...oppNotesHitDateArray.length) {
-        if (!Math.isNaN(oppNotesHitDateArray[i]) && (oppNotesHitDateArray[i] + timeThreshold < Conductor.songPosition)) {
+        if (oppNotesHitDateArray[i] != null && (oppNotesHitDateArray[i].getTime() + timeThreshold < currentTime)) {
             oppNotesToRemoveCount++;
         }
     }
@@ -5282,31 +5283,27 @@ if (ClientPrefs.showNPS) {
 
 				if(updateTime) {
 					var curTime:Float = Conductor.songPosition - ClientPrefs.noteOffset;
-					if(curTime < 0) curTime = 0;
+					if (curTime < 0) curTime = 0;
 					songPercent = (curTime / songLength);
-					var songDurationSeconds:Float = FlxMath.roundDecimal(songLength / 1000, 0);
+					final songDurationSeconds:Float = FlxMath.roundDecimal(songLength / 1000, 0);
 					songPercentThing = FlxMath.roundDecimal(curTime / songLength * 100, ClientPrefs.percentDecimals);
 					playbackRateDecimal = FlxMath.roundDecimal(playbackRate, 2);
 
-					var songCalc:Float = (songLength - curTime);
-					if(ClientPrefs.timeBarType == 'Time Elapsed' || ClientPrefs.timeBarType == 'Modern Time' || ClientPrefs.timeBarType == 'Song Name + Time') songCalc = curTime;
+					final songCalc:Float = (ClientPrefs.timeBarType == 'Time Elapsed' || ClientPrefs.timeBarType == 'Modern Time' || ClientPrefs.timeBarType == 'Song Name + Time') ? curTime : (songLength - curTime);
 
-					var secondsTotal:Int = 0;
+					var secondsTotal:Int = Math.floor(songCalc / 1000);
+					if (secondsTotal < 0) secondsTotal = 0;
 
-					secondsTotal = Math.floor(songCalc / 1000);
-					if(secondsTotal < 0) secondsTotal = 0;
-					if(trollingMode && ClientPrefs.songLoading && Conductor.songPosition - FlxG.sound.music.length == endingTimeLimit) secondsTotal == secondsTotal + FlxG.sound.music.length;
-
-					var hoursRemaining:Int = Math.floor(secondsTotal / 3600);
-					var minutesRemaining:Int = Math.floor(secondsTotal / 60) % 60;
+					final hoursRemaining:Int = Math.floor(secondsTotal / 3600);
+					final minutesRemaining:Int = Math.floor(secondsTotal / 60) % 60;
 					var minutesRemainingShit:String = '' + minutesRemaining;
 					var secondsRemaining:String = '' + secondsTotal % 60;
 
 					if(secondsRemaining.length < 2) secondsRemaining = '0' + secondsRemaining; //let's see if the old time format works actually
 					if (minutesRemainingShit.length < 2) minutesRemainingShit = '0' + minutesRemaining; 
 
-					var hoursShown:Int = Math.floor(songDurationSeconds / 3600);
-					var minutesShown:Int = Math.floor(songDurationSeconds / 60) % 60;
+					final hoursShown:Int = Math.floor(songDurationSeconds / 3600);
+					final minutesShown:Int = Math.floor(songDurationSeconds / 60) % 60;
 					var minutesShownShit:String = '' + minutesShown;
 					var secondsShown:String = '' + songDurationSeconds % 60;
 					if(secondsShown.length < 2) secondsShown = '0' + secondsShown; //let's see if the old time format works actually
@@ -5429,7 +5426,7 @@ if (ClientPrefs.showNPS) {
 							totalNotesPlayed += 1 * polyphony;
 							if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
 								notesHitArray.push(1 * polyphony);
-								notesHitDateArray.push(Conductor.songPosition);
+								notesHitDateArray.push(Date.now());
 							}
 						}
 					}
@@ -5446,7 +5443,7 @@ if (ClientPrefs.showNPS) {
 						enemyHits += 1 * polyphony;
 						if (ClientPrefs.showNPS) {
 							oppNotesHitArray.push(1 * polyphony);
-							oppNotesHitDateArray.push(Conductor.songPosition);
+							oppNotesHitDateArray.push(Date.now());
 						}
 					}
 					daNote.hitByOpponent = true;
@@ -5500,7 +5497,7 @@ if (ClientPrefs.showNPS) {
 									enemyHits += 1 * polyphony;
 								if (ClientPrefs.showNPS) {
 									oppNotesHitArray.push(1 * polyphony);
-									oppNotesHitDateArray.push(Conductor.songPosition);
+									oppNotesHitDateArray.push(Date.now());
 									}
 								}
 								if (!daNote.isSustainNote) {
@@ -5521,7 +5518,7 @@ if (ClientPrefs.showNPS) {
 								totalNotesPlayed += 1 * polyphony;
 								if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
 								notesHitArray.push(1 * polyphony);
-								notesHitDateArray.push(Conductor.songPosition);
+								notesHitDateArray.push(Date.now());
 								}
 								if (shouldKillNotes)
 								{
@@ -6168,6 +6165,16 @@ if (ClientPrefs.showNPS) {
 							songSpeedTween = null;
 						}
 					});
+				}
+
+			case 'Change Song Name':
+				if (value1.length > 1)
+					SONG.song = value1;
+				else SONG.song = curSong;
+
+				if(ClientPrefs.timeBarType == 'Song Name' && !ClientPrefs.timebarShowSpeed)
+				{
+					timeTxt.text = SONG.song;
 				}
 
 			case 'Set Property':
@@ -7802,7 +7809,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 				missCombo = 0;
 				if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
 				notesHitArray.push(1 * polyphony);
-				notesHitDateArray.push(Conductor.songPosition);
+				notesHitDateArray.push(Date.now());
 				}
 				popUpScore(note);
 			}
@@ -7848,7 +7855,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 				totalNotesPlayed += 1 * polyphony;
 				if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
 				notesHitArray.push(1 * polyphony);
-				notesHitDateArray.push(Conductor.songPosition);
+				notesHitDateArray.push(Date.now());
 				}
 				if(!note.noteSplashDisabled && !note.isSustainNote) {
 					spawnNoteSplashOnNote(false, note, note.gfNote);
@@ -7861,7 +7868,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 				missCombo = 0;
 				if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
 				notesHitArray.push(1 * polyphony);
-				notesHitDateArray.push(Conductor.songPosition);
+				notesHitDateArray.push(Date.now());
 				}
 				popUpScore(note);
 			}
@@ -7872,7 +7879,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 				missCombo = 0;
 				if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
 				notesHitArray.push(1 * polyphony);
-				notesHitDateArray.push(Conductor.songPosition);
+				notesHitDateArray.push(Date.now());
 				}
 				final noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset) / playbackRate;
 				final daRating:Rating = Conductor.judgeNote(note, noteDiff);
@@ -7896,7 +7903,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 				missCombo = 0;
 				if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
 				notesHitArray.push(1 * polyphony);
-				notesHitDateArray.push(Conductor.songPosition);
+				notesHitDateArray.push(Date.now());
 				}
 				popUpScore(note);
 			}
@@ -8281,7 +8288,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 			{
 					if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
 					oppNotesHitArray.push(1 * polyphony);
-					oppNotesHitDateArray.push(Conductor.songPosition);
+					oppNotesHitDateArray.push(Date.now());
 					}
 				enemyHits += 1 * polyphony;
 				if (ClientPrefs.showNotes) notes.remove(daNote, true);
