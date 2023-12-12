@@ -22,6 +22,7 @@ class CreditsPopUp extends FlxSpriteGroup
 	public var bgHeading:FlxSprite;
 
 	public var funnyText:FlxText;
+	public var funnyIcon:FlxSprite;
 	var curHeading:SongHeading;
 
 	public function new(x:Float, y:Float, title:String = '', songCreator:String = '')
@@ -29,9 +30,13 @@ class CreditsPopUp extends FlxSpriteGroup
 		super(x, y);
 		bg = new FlxSprite().makeGraphic(400, 50, FlxColor.WHITE);
 		add(bg);
+		var songCreatorIcon:String = '';
 		var headingPath:SongHeading = null;
 
-				headingPath = {path: 'JSEHeading', antiAliasing: false, iconOffset: 0};
+				headingPath = {path: PlayState.SONG.songCreditBarPath.length <= 0 ? 'JSEHeading' : 'songHeadings/' + PlayState.SONG.songCreditBarPath, antiAliasing: false, iconOffset: 0};
+
+		if (PlayState.SONG.songCreditIcon.length > 0) songCreatorIcon = PlayState.SONG.songCreditIcon;
+			else funnyIcon.visible = false;
 
 		if (headingPath != null)
 		{
@@ -40,7 +45,11 @@ class CreditsPopUp extends FlxSpriteGroup
 			curHeading = headingPath;
 		}
 		createHeadingText(title + "\nComposed by" + ' ' + songCreator + (!ClientPrefs.ratingCounter ? '\nNote Count: ${FlxStringUtil.formatMoney(PlayState.instance.totalNotes, false)} / ${FlxStringUtil.formatMoney(PlayState.instance.opponentNoteTotal, false)}' : ''));
-		if (PlayState.instance != null) bg.color = FlxColor.fromRGB(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2]);
+			funnyIcon = new FlxSprite(0, 0).loadGraphic(Paths.image('songCreators/$songCreatorIcon'));
+		rescaleIcon();
+		add(funnyIcon);
+
+		if (PlayState.instance != null && headingPath.path == 'JSEHeading') bg.color = FlxColor.fromRGB(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2]);
 
 		rescaleBG();
 
@@ -64,14 +73,32 @@ class CreditsPopUp extends FlxSpriteGroup
 		
 		rescaleBG();
 	}
-	public function changeText(newText:String, rescaleHeading:Bool = true)
+	public function changeText(newText:String, newIcon:String, rescaleHeading:Bool = true)
 	{
 		createHeadingText(newText);
+		if (funnyIcon != null)
+		{
+			remove(funnyIcon);
+		}
+			funnyIcon = new FlxSprite(0, 0).loadGraphic(Paths.image('songCreators/$newIcon'));
+		rescaleIcon();
+		add(funnyIcon);
 
 		if (rescaleHeading)
 		{
 			rescaleBG();
 		}
+	}
+	public function rescaleIcon()
+	{
+		var offset = (curHeading == null ? 0 : curHeading.iconOffset);
+
+		var scaleValues = CoolUtil.getMinAndMax(funnyIcon.height, funnyText.height);
+		funnyIcon.setGraphicSize(Std.int(funnyIcon.height / (scaleValues[1] / scaleValues[0])));
+		funnyIcon.updateHitbox();
+
+		var heightValues = CoolUtil.getMinAndMax(funnyIcon.height, funnyText.height);
+		funnyIcon.setPosition(funnyText.textField.textWidth + offset, (heightValues[0] - heightValues[1]) / 2);
 	}
 	function createHeadingText(text:String)
 	{

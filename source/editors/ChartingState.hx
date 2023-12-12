@@ -262,6 +262,8 @@ class ChartingState extends MusicBeatState
 				player2: 'dad',
 				gfVersion: 'gf',
 				songCredit: '',
+				songCreditBarPath: '',
+				songCreditIcon: '',
 				windowName: '',
 				event7: '',
 				event7Value: '',
@@ -809,6 +811,8 @@ class ChartingState extends MusicBeatState
 		}
 
 	var creditInputText:FlxUIInputText;
+	var creditPathInputText:FlxUIInputText;
+	var creditIconInputText:FlxUIInputText;
 	var winNameInputText:FlxUIInputText;
 	function addSongDataUI():Void //therell be more added here later
 	{
@@ -819,12 +823,24 @@ class ChartingState extends MusicBeatState
 		blockPressWhileTypingOn.push(creditInputText);
 		creditInputText.focusGained = () -> FlxG.stage.window.textInputEnabled = true;
 
-		winNameInputText = new FlxUIInputText(10, 60, 100, _song.windowName, 8);
+		creditPathInputText = new FlxUIInputText(10, 60, 100, _song.songCreditBarPath, 8);
+		blockPressWhileTypingOn.push(creditPathInputText);
+		creditPathInputText.focusGained = () -> FlxG.stage.window.textInputEnabled = true;
+
+		creditIconInputText = new FlxUIInputText(10, 90, 100, _song.songCreditIcon, 8);
+		blockPressWhileTypingOn.push(creditIconInputText);
+		creditIconInputText.focusGained = () -> FlxG.stage.window.textInputEnabled = true;
+
+		winNameInputText = new FlxUIInputText(10, 120, 100, _song.windowName, 8);
 		blockPressWhileTypingOn.push(winNameInputText);
 		winNameInputText.focusGained = () -> FlxG.stage.window.textInputEnabled = true;
 
 		tab_group_songdata.add(creditInputText);
+		tab_group_songdata.add(creditPathInputText);
+		tab_group_songdata.add(creditIconInputText);
 		tab_group_songdata.add(new FlxText(creditInputText.x, creditInputText.y - 15, 0, 'Song Credit:'));
+		tab_group_songdata.add(new FlxText(creditPathInputText.x, creditPathInputText.y - 15, 0, 'Credit Bar Path:'));
+		tab_group_songdata.add(new FlxText(creditIconInputText.x, creditIconInputText.y - 15, 0, 'Credit Icon:'));
 		tab_group_songdata.add(winNameInputText);
 		tab_group_songdata.add(new FlxText(winNameInputText.x, winNameInputText.y - 15, 0, 'Window Name:'));
 
@@ -2020,6 +2036,8 @@ class ChartingState extends MusicBeatState
 		_song.song = UI_songTitle.text;
 
 		_song.songCredit = creditInputText.text;
+		_song.songCreditIcon = creditIconInputText.text;
+		_song.songCreditBarPath = creditPathInputText.text;
 
 		_song.windowName = winNameInputText.text;
 

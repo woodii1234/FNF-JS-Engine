@@ -423,6 +423,8 @@ class PlayState extends MusicBeatState
 	var accuracyTxt:FlxText;
 	var npsTxt:FlxText;
 	var timeTxt:FlxText;
+	public var timerNow:FlxText = null;
+	public var timerFinal:FlxText = null;
 	var timePercentTxt:FlxText;
 
 	var hitTxt:FlxText;
@@ -1410,87 +1412,56 @@ class PlayState extends MusicBeatState
 		strumLine.scrollFactor.set();
 
 		var showTime:Bool = (ClientPrefs.timeBarType != 'Disabled');
+		
+		timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 32);
+		timeTxt.scrollFactor.set();
+		timeTxt.alpha = 0;
+		timeTxt.borderSize = 2;
+		timeTxt.visible = showTime;
+		if(ClientPrefs.downScroll) timeTxt.y = FlxG.height - 44;
+		switch (ClientPrefs.hudType)
+		{
+		case 'Psych Engine':
+			timeTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			timeTxt.borderSize = 2;
 
-		if (ClientPrefs.hudType == 'Psych Engine') {
-		timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 32);
-		timeTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		timeTxt.scrollFactor.set();
-		timeTxt.alpha = 0;
-		timeTxt.borderSize = 2;
-		timeTxt.visible = showTime;
-		if(ClientPrefs.downScroll) timeTxt.y = FlxG.height - 44;
-		}
-		if (ClientPrefs.hudType == 'Leather Engine') {
-		timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 32);
-		timeTxt.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		timeTxt.scrollFactor.set();
-		timeTxt.alpha = 0;
-		timeTxt.borderSize = 2;
-		timeTxt.visible = showTime;
-		if(ClientPrefs.downScroll) timeTxt.y = FlxG.height - 44;
-		}
-		if (ClientPrefs.hudType == 'JS Engine') {
-		timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 20);
-		timeTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		timeTxt.scrollFactor.set();
-		timeTxt.alpha = 0;
-		timeTxt.borderSize = 3;
-		timeTxt.visible = showTime;
-		if(ClientPrefs.downScroll) timeTxt.y = FlxG.height - 44;
-		}
-		if (ClientPrefs.hudType == 'Tails Gets Trolled V4') {
-		timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 32);
-		timeTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		timeTxt.scrollFactor.set();
-		timeTxt.alpha = 0;
-		timeTxt.borderSize = 2;
-		timeTxt.visible = showTime;
-		if(ClientPrefs.downScroll) timeTxt.y = FlxG.height - 44;
-		}
-		if (ClientPrefs.hudType == 'Kade Engine') {
-		timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 18);
-		timeTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		timeTxt.scrollFactor.set();
-		timeTxt.alpha = 0;
-		timeTxt.borderSize = 1;
-		timeTxt.visible = showTime;
-		if(ClientPrefs.downScroll) timeTxt.y = FlxG.height - 44; 
-		}
-		if (ClientPrefs.hudType == 'Dave and Bambi') {
-		timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 32);
-		timeTxt.setFormat(Paths.font("comic.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		timeTxt.scrollFactor.set();
-		timeTxt.alpha = 0;
-		timeTxt.borderSize = 2;
-		timeTxt.visible = showTime;
-		if(ClientPrefs.downScroll) timeTxt.y = FlxG.height - 44;
-		}
-		if (ClientPrefs.hudType == 'Doki Doki+') {
-		timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 32);
-		timeTxt.setFormat(Paths.font("Aller_rg.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		timeTxt.scrollFactor.set();
-		timeTxt.alpha = 0;
-		timeTxt.borderSize = 2;
-		timeTxt.visible = showTime;
-		if(ClientPrefs.downScroll) timeTxt.y = FlxG.height - 44;
-		}
-		if (ClientPrefs.hudType == 'VS Impostor') {
-		timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 585, 20, 400, "", 32);
-		timeTxt.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		timeTxt.scrollFactor.set();
-		timeTxt.alpha = 0;
-		timeTxt.borderSize = 1;
-		timeTxt.visible = showTime;
-		if (ClientPrefs.downScroll) timeTxt.y = FlxG.height - 45;
-		}
-		if (ClientPrefs.hudType == "Mic'd Up") {
-			timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 16);
-			if (ClientPrefs.downScroll)
-				timeTxt.y = FlxG.height - 44;
+		case 'Leather Engine': 
+			timeTxt.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			timeTxt.borderSize = 2;
+
+		case 'JS Engine': 
+			timeTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			timeTxt.borderSize = 3;
+
+		case 'Tails Gets Trolled V4':
+			timeTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			timeTxt.borderSize = 2;
+	
+		case 'Kade Engine':
+			timeTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			timeTxt.borderSize = 1;
+
+		case 'Dave and Bambi':
+			timeTxt.setFormat(Paths.font("comic.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			timeTxt.borderSize = 2;
+
+		case 'Doki Doki+':
+			timeTxt.setFormat(Paths.font("Aller_rg.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			timeTxt.borderSize = 2;
+
+		case 'VS Impostor':
+			timeTxt.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			timeTxt.borderSize = 1;
+
+		case "Mic'd Up":
 			timeTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			timeTxt.scrollFactor.set();
 			timeTxt.screenCenter(X);
-			timeTxt.visible = showTime;
+			timeTxt.borderSize = 2;
+
+		case 'Box Funkin':
+			timeTxt = new FlxText(0, (ClientPrefs.downScroll ? timeBarBG.y + 32 : timeBarBG.y - 32), 400, "", 20);
+			timeTxt.setFormat(Paths.font("MilkyNice.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			timeTxt.borderSize = 2;
 		}
 
 
@@ -1507,7 +1478,6 @@ class PlayState extends MusicBeatState
 		timeBarBG.scrollFactor.set();
 		timeBarBG.alpha = 0;
 		timeBarBG.visible = showTime;
-		// timeBarBG.color = FlxColor.BLACK;
 		timeBarBG.antialiasing = false;
 		timeBarBG.xAdd = -4;
 		timeBarBG.yAdd = -4;
@@ -1611,13 +1581,6 @@ class PlayState extends MusicBeatState
 		timeBarBG.screenCenter(X);
 				timeBarBG.color = FlxColor.BLACK;
 
-				timeTxt = new FlxText(0, (ClientPrefs.downScroll ? timeBarBG.y + 32 : timeBarBG.y - 32), 400, "", 20);
-				timeTxt.setFormat(Paths.font("MilkyNice.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-				timeTxt.alpha = 0;
-				timeTxt.borderSize = 3;
-				timeTxt.screenCenter(X);
-				timeTxt.antialiasing = ClientPrefs.globalAntialiasing;
-				updateTime = true;
 				timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 5, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 24), Std.int(timeBarBG.height - 8), this, 'songPercent', 0, 1);
 				timeBar.scrollFactor.set();
 				timeBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
@@ -1823,7 +1786,6 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.charsAndBG)
 		{
 		FlxG.camera.follow(camFollowPos, LOCKON, 1);
-		// FlxG.camera.setScrollBounds(0, FlxG.width, 0, FlxG.height);
 		FlxG.camera.zoom = defaultCamZoom;
 		FlxG.camera.focusOn(camFollow);
 
@@ -1962,7 +1924,6 @@ class PlayState extends MusicBeatState
 			add(EngineWatermark);
 		}
 		if (ClientPrefs.hudType == 'Psych Engine') { //unfortunately i have to do this because otherwise enginewatermark calls a null object reference
-		// Add Engine watermark
 		EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
 		add(EngineWatermark);
 		}
@@ -1980,7 +1941,6 @@ class PlayState extends MusicBeatState
 		}
 
 		if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG) {
-			//hitTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 20, 10000, "", 42);
 			hitTxt = new FlxText(0, 20, 10000, "test", 42);
 			hitTxt.setFormat(Paths.font("vcr.ttf"), 42, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			hitTxt.scrollFactor.set();
@@ -4806,7 +4766,7 @@ class PlayState extends MusicBeatState
 				boyfriendIdleTime = 0;
 			}
 			}
-			var panLerpVal:Float = CoolUtil.clamp(elapsed * 4.4 * cameraSpeed, 0, 1);
+			final panLerpVal:Float = CoolUtil.clamp(elapsed * 4.4 * cameraSpeed, 0, 1);
 			moveCamTo[0] = FlxMath.lerp(moveCamTo[0], 0, panLerpVal);
 			moveCamTo[1] = FlxMath.lerp(moveCamTo[1], 0, panLerpVal);
 		}
@@ -5163,7 +5123,7 @@ if (ClientPrefs.showNPS) {
 		}
 		if (ClientPrefs.smoothHealth && ClientPrefs.smoothHealthType == 'Golden Apple 1.5') //really makes it feel like the gapple 1.5 build's health tween
 		{
-			var percent:Float = 1 - (opponentChart ? FlxMath.bound(displayedHealth, 0, maxHealth) / maxHealth * -1 : FlxMath.bound(displayedHealth, 0, maxHealth) / maxHealth); //checks if you're playing as the opponent. if so, uses the negative percent, otherwise uses the normal one
+			final percent:Float = 1 - (opponentChart ? FlxMath.bound(displayedHealth, 0, maxHealth) / maxHealth * -1 : FlxMath.bound(displayedHealth, 0, maxHealth) / maxHealth); //checks if you're playing as the opponent. if so, uses the negative percent, otherwise uses the normal one
 			iconP1.x = (opponentChart ? (!ClientPrefs.longHPBar ? -593 : -889.5) : 0) + healthBar.x + (healthBar.width * percent) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
 			iconP2.x = (opponentChart ? (!ClientPrefs.longHPBar ? -593 : -889.5) : 0) + healthBar.x + (healthBar.width * percent) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
 		}
@@ -5480,10 +5440,9 @@ if (ClientPrefs.showNPS) {
 					{
 						if (ClientPrefs.showNotes)
 						{
-						var strumGroup:FlxTypedGroup<StrumNote> = playerStrums;
-						if(!daNote.mustPress) strumGroup = opponentStrums;
+						final strumGroup:FlxTypedGroup<StrumNote> = daNote.mustPress ? playerStrums : opponentStrums;
 
-							var strum:StrumNote = strumGroup.members[daNote.noteData];
+							final strum:StrumNote = strumGroup.members[daNote.noteData];
 							daNote.followStrumNote(strum, fakeCrochet, songSpeed);
 							if(daNote.isSustainNote && strum.sustainReduce) daNote.clipToStrumNote(strum);
 						}
