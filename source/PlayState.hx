@@ -5375,7 +5375,7 @@ if (ClientPrefs.showNPS) {
 		notesAddedCount = 0;
 
 		for (i in 0...unspawnNotes.length) {
-			var daNote = unspawnNotes[i];
+			final daNote = unspawnNotes[i];
 			if(daNote.mustPress && cpuControlled) {
 				if (daNote.strumTime + (ClientPrefs.communityGameBot ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition || daNote.isSustainNote && daNote.strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * daNote.earlyHitMult /2)) 
 				{
@@ -5500,10 +5500,6 @@ if (ClientPrefs.showNPS) {
 
 							daNote.active = false;
 							daNote.visible = false;
-						if (shouldKillNotes)
-						{
-							daNote.kill();
-						}
 							group.remove(daNote, true);
 						if (shouldKillNotes)
 						{
@@ -8114,20 +8110,15 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 						if (!daNote.isSustainNote && noteRows[daNote.mustPress?0:1][daNote.row].length > 1)
 							{
 								// potentially have jump anims?
-								var chord = noteRows[daNote.mustPress?0:1][daNote.row];
-								var animNote = chord[0];
-								var realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
+								final chord = noteRows[daNote.mustPress?0:1][daNote.row];
+								final animNote = chord[0];
+								final realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
 								if (gf.mostRecentRow != daNote.row)
 								{
 									gf.playAnim(realAnim, true);
 								}
 		
-								// if (daNote != animNote)
-								// dad.playGhostAnim(chord.indexOf(daNote)-1, animToPlay, true);
-
-		
 								gf.mostRecentRow = daNote.row;
-								// dad.angle += 15; lmaooooo
 								doGhostAnim('gf', animToPlay);
 								}
 							}
@@ -8153,11 +8144,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 								{
 									char.playAnim(realAnim, true);
 								}
-		
-								// if (daNote != animNote)
-								// dad.playGhostAnim(chord.indexOf(daNote)-1, animToPlay, true);
-		
-								// dad.angle += 15; lmaooooo
+
 										if (!daNote.noAnimation && !daNote.gfNote)
 										{
 											if(char.mostRecentRow != daNote.row)

@@ -36,7 +36,7 @@ class CreditsPopUp extends FlxSpriteGroup
 				headingPath = {path: PlayState.SONG.songCreditBarPath.length <= 0 ? 'JSEHeading' : 'songHeadings/' + PlayState.SONG.songCreditBarPath, antiAliasing: false, iconOffset: 0};
 
 		if (PlayState.SONG.songCreditIcon.length > 0) songCreatorIcon = PlayState.SONG.songCreditIcon;
-			else funnyIcon.visible = false;
+			else songCreatorIcon = 'ExampleIcon';
 
 		if (headingPath != null)
 		{
@@ -46,6 +46,7 @@ class CreditsPopUp extends FlxSpriteGroup
 		}
 		createHeadingText(title + "\nComposed by" + ' ' + songCreator + (!ClientPrefs.ratingCounter ? '\nNote Count: ${FlxStringUtil.formatMoney(PlayState.instance.totalNotes, false)} / ${FlxStringUtil.formatMoney(PlayState.instance.opponentNoteTotal, false)}' : ''));
 			funnyIcon = new FlxSprite(0, 0).loadGraphic(Paths.image('songCreators/$songCreatorIcon'));
+			funnyIcon.visible = PlayState.SONG.songCreditIcon.length > 0;
 		rescaleIcon();
 		add(funnyIcon);
 
