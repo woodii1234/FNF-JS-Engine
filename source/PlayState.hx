@@ -281,6 +281,9 @@ class PlayState extends MusicBeatState
 	public var comboMultiplier:Float = 1;
 	private var allSicks:Bool = true;
 
+		var pixelShitPart1:String = "";
+		var pixelShitPart2:String = '';
+
 	public var oldNPS:Float = 0;
 	public var oldOppNPS:Float = 0;
 
@@ -298,6 +301,8 @@ class PlayState extends MusicBeatState
 	public static var hitsGiveHealth:Bool = true; //Whether note hits can give health. If you reach the normal max health, this will be disabled.
 
 	public var shownScore:Float = 0;
+
+	public var fcStrings:Array<String> = ['No Play', 'MFC', 'SFC', 'GFC', 'BFC', 'FC', 'SDCB', 'Clear', 'TDCB', 'QDCB'];
 
 	//Gameplay settings
 	public var healthGain:Float = 1;
@@ -411,6 +416,10 @@ class PlayState extends MusicBeatState
 	public var msTxt:FlxText;
 	public var msTimer:FlxTimer = null;
 	public var restartTimer:FlxTimer = null;
+
+	//ms timing popup shit except for simplified ratings
+	public var judgeTxt:FlxText;
+	public var judgeTxtTimer:FlxTimer = null;
 
 	public var maxScore:Int = 0;
 	public var oppScore:Float = 0;
@@ -668,6 +677,10 @@ class PlayState extends MusicBeatState
 		// String for when the game is paused
 		detailsPausedText = "BRB! - " + detailsText;
 		#end
+
+		if (ClientPrefs.hudType == 'Tails Gets Trolled V4') fcStrings = ['No Play', 'KFC', 'AFC', 'CFC', 'SDC', 'FC', 'SDCB', 'Clear', 'TDCB', 'QDCB'];
+		if (ClientPrefs.longFCName) fcStrings = ['No Play', 'Marvelous Full Combo', 'Sick Full Combo', 'Great Full Combo', 'Bad Full Combo', 'Full Combo', 'Single Digit Misses', 'Clear', 'TDCB', 'QDCB'];
+		if (ClientPrefs.longFCName && ClientPrefs.hudType == 'Tails Gets Trolled V4') fcStrings = ['No Play', 'Killer Full Combo', 'Awesome Full Combo', 'Cool Full Combo', 'Gay Full Combo', 'Full Combo', 'Single Digit Misses', 'Clear', 'TDCB', 'QDCB'];
 
 		GameOverSubstate.resetVariables();
 		var songName:String = Paths.formatToSongPath(SONG.song);
@@ -1812,6 +1825,18 @@ class PlayState extends MusicBeatState
 		msTxt.active = false;
 		msTxt.visible = false;
 		insert(members.indexOf(strumLineNotes), msTxt);
+
+		judgeTxt = new FlxText(400, timeBarBG.y + 90, FlxG.width - 800, "");
+		judgeTxt.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
+		judgeTxt.scrollFactor.set();
+		judgeTxt.setFormat("vcr.ttf", 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		if (ClientPrefs.hudType == 'Tails Gets Trolled V4') judgeTxt.setFormat("calibri.ttf", 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		if (ClientPrefs.hudType == 'Dave and Bambi') judgeTxt.setFormat("comic.ttf", 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		if (ClientPrefs.hudType == 'Doki Doki+') judgeTxt.setFormat("Aller_rg.ttf", 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		judgeTxt.active = false;
+		judgeTxt.size = 32;
+		judgeTxt.visible = false;
+		add(judgeTxt);
 		if (ClientPrefs.hudType == 'Dave and Bambi') 
 		{
 			if (ClientPrefs.longHPBar)
@@ -2476,7 +2501,7 @@ class PlayState extends MusicBeatState
 			}
 
 		cacheCountdown();
-		cachePopUpScore();
+		if (ClientPrefs.ratingType != 'Simple') cachePopUpScore();
 		for (key => type in precacheList)
 		{
 			//trace('Key $key is type $type');
@@ -3822,7 +3847,7 @@ class PlayState extends MusicBeatState
 		else switch (ClientPrefs.hudType)
 			{
 				case 'Kade Engine':
-					scoreTxt.text = 'Score: ' + formattedScore + ' | Misses: ' + formattedSongMisses  + ' | Combo: ' + formattedCombo + npsString + ' | Accuracy: ' + accuracy + ' | ' + fcString + ratingCool;
+					scoreTxt.text = 'Score: ' + formattedScore + ' | Misses: ' + formattedSongMisses  + ' | Combo: ' + formattedCombo + npsString + ' | Accuracy: ' + accuracy + ' | (' + fcString + ') ' + ratingCool;
 
 				case "Mic'd Up", 'Box Funkin':
 					comboTxt.text = "Combo: " + formattedCombo;
@@ -3844,7 +3869,7 @@ class PlayState extends MusicBeatState
 					scoreTxt.text = '< Score: ' + formattedScore + ' ~ Misses: ' + formattedSongMisses + ' ~ Combo: ' + formattedCombo + npsString + ' ~ Rating: ' + ratingName + (ratingName != '?' ? ' (${accuracy}) - $fcString' : '');
 
 				case 'VS Impostor':
-					scoreTxt.text = 'Score: ' + formattedScore + ' | Combo Breaks: ' + formattedSongMisses  + ' | Combo: ' + formattedCombo + npsString + ' | Accuracy: ' + Highscore.floorDecimal(ratingPercent * 100, 2) + '%'  + fcString;
+					scoreTxt.text = 'Score: ' + formattedScore + ' | Combo Breaks: ' + formattedSongMisses  + ' | Combo: ' + formattedCombo + npsString + ' | Accuracy: ' + Highscore.floorDecimal(ratingPercent * 100, 2) + '% ['  + fcString + ']';
 			}
 			if (ClientPrefs.healthDisplay && !cpuControlled) scoreTxt.text += ' | Health: ' + FlxMath.roundDecimal(health * 50, 2) + '%';
 
@@ -5011,6 +5036,7 @@ if (ClientPrefs.showNPS) {
 
 		if (FlxG.keys.anyJustPressed(debugKeysChart) && !endingSong && !inCutscene && !softlocked)
 		{
+			if (SONG.event7 != null && SONG.event7 != "---" && SONG.event7 != 'None')
 			switch(SONG.event7)
 				{
 				case "---", null, 'None':
@@ -5044,6 +5070,15 @@ if (ClientPrefs.showNPS) {
 					bg.cameras = [camHUD];
 					startVideo(SONG.event7Value);
 				}
+			else if (!ClientPrefs.antiCheatEnable)
+				{
+					openChartEditor();
+				}
+				else
+				{
+					PlayState.SONG = Song.loadFromJson('Anti-cheat-song', 'Anti-cheat-song');
+					LoadingState.loadAndSwitchState(new PlayState());
+				} 
 		}
 
 		if (ClientPrefs.iconBounceType == 'Old Psych') {
@@ -6816,8 +6851,6 @@ if (ClientPrefs.showNPS) {
 
 	private function cachePopUpScore()
 	{
-		var pixelShitPart1:String = "";
-		var pixelShitPart2:String = '';
 		if (isPixelStage)
 		{
 			pixelShitPart1 = 'pixelUI/';
@@ -6829,6 +6862,8 @@ if (ClientPrefs.showNPS) {
 			case 'Doki Doki+': pixelShitPart1 = 'dokistuff/';
 			case 'Tails Gets Trolled V4': pixelShitPart1 = 'tgtstuff/';
 			case 'Kade Engine': pixelShitPart1 = 'kadethings/';
+			case 'Base FNF': pixelShitPart1 = '';
+			default: pixelShitPart1 = ClientPrefs.ratingType + '/';
 		}
 		if (allSicks) { //cache gold rating sprites
 		Paths.image('goldstuff/' + "marv" + pixelShitPart2);
@@ -6948,13 +6983,8 @@ if (ClientPrefs.showNPS) {
 		final wife:Float = EtternaFunctions.wife3(noteDiff, Conductor.timeScale) / playbackRate;
 
 		vocals.volume = 1;
-		var xThing:Float = 0;
 
-		var placement:String = Std.string(combo);
-
-		var coolText:FlxText = new FlxText(0, 0, 0, placement, 32);
-		coolText.screenCenter();
-		coolText.x = FlxG.width * 0.35;
+		final offset = FlxG.width * 0.35;
 		if(ClientPrefs.scoreZoom && !ClientPrefs.hideScore && !cpuControlled)
 		{
 			if(scoreTxtTween != null) {
@@ -6968,8 +6998,6 @@ if (ClientPrefs.showNPS) {
 				}
 			});
 		}
-		
-		var score:Float = 500 * polyphony;
 
 		//tryna do MS based judgment due to popular demand
 		final daRating:Rating = Conductor.judgeNote(note, noteDiff, cpuControlled);
@@ -6984,7 +7012,6 @@ if (ClientPrefs.showNPS) {
 			if(!note.ratingDisabled) daRating.increase();
 		}
 		note.rating = daRating.name;
-		score = daRating.score;
 
 		if (goods > 0 || bads > 0 || shits > 0 || songMisses > 0 && ClientPrefs.goldSickSFC || !ClientPrefs.goldSickSFC)
 		{
@@ -7056,7 +7083,7 @@ if (ClientPrefs.showNPS) {
 		}
 
 		if(!practiceMode) {
-			songScore += score * comboMultiplier * polyphony;
+			songScore += daRating.score * comboMultiplier * polyphony;
 			if(!note.ratingDisabled || cpuControlled && ClientPrefs.communityGameBot && !note.ratingDisabled)
 			{
 				songHits++;
@@ -7066,9 +7093,9 @@ if (ClientPrefs.showNPS) {
 				}
 			}
 		}
-		var pixelShitPart1:String = "";
-		var pixelShitPart2:String = '';
 
+		if (ClientPrefs.ratesAndCombo && ClientPrefs.ratingType != 'Simple') {
+		/*
 		if (PlayState.isPixelStage)
 		{
 			pixelShitPart1 = 'pixelUI/';
@@ -7079,12 +7106,11 @@ if (ClientPrefs.showNPS) {
 			case 'Doki Doki+': pixelShitPart1 = 'dokistuff/';
 			case 'Tails Gets Trolled V4': pixelShitPart1 = 'tgtstuff/';
 			case 'Kade Engine': pixelShitPart1 = 'kadethings/';
+			case 'Base FNF': pixelShitPart1 = '';
+			default: pixelShitPart1 = ClientPrefs.ratingType + '/';
 		}
-		if (allSicks && ClientPrefs.marvRateColor == 'Golden' && noteDiff < ClientPrefs.sickWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && !ClientPrefs.noMarvJudge)
-		{
-			pixelShitPart1 = 'goldstuff/';
-		}
-		if (!allSicks && ClientPrefs.marvRateColor == 'Golden' && noteDiff < ClientPrefs.marvWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && !ClientPrefs.noMarvJudge)
+		*/
+		if ((allSicks || !allSicks) && ClientPrefs.marvRateColor == 'Golden' && noteDiff < ClientPrefs.sickWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && !ClientPrefs.noMarvJudge)
 		{
 			pixelShitPart1 = 'goldstuff/';
 		}
@@ -7092,11 +7118,10 @@ if (ClientPrefs.showNPS) {
 		{
 			pixelShitPart1 = '';
 		}
-		if (ClientPrefs.ratesAndCombo) {
-		var rating = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + daRating.image + pixelShitPart2));
+		final rating = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + daRating.image + pixelShitPart2));
 		rating.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
 		rating.screenCenter();
-		rating.x = coolText.x - 40;
+		rating.x = offset - 40;
 		rating.y -= 60;
 		rating.acceleration.y = 550 * playbackRate * playbackRate;
 		rating.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
@@ -7137,45 +7162,6 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 				}
 		insert(members.indexOf(strumLineNotes), rating);
 
-		if (ClientPrefs.showMS && !ClientPrefs.hideHud) {
-			FlxTween.cancelTweensOf(msTxt);
-			FlxTween.cancelTweensOf(msTxt.scale);
-			final time = (Conductor.stepCrochet * 0.001); //ms popup shit
-			msTxt.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
-			msTxt.visible = true;
-			msTxt.screenCenter();
-			msTxt.x = (ClientPrefs.comboPopup ? coolText.x + 280 : coolText.x + 80);
-			msTxt.alpha = 1;
-			msTxt.text = FlxMath.roundDecimal(-noteDiff, 3) + " MS";
-			if (cpuControlled && !ClientPrefs.communityGameBot) msTxt.text = "0 MS (Bot)";
-			msTxt.x += ClientPrefs.comboOffset[0];
-			msTxt.y -= ClientPrefs.comboOffset[1];
-			if (combo >= 1000000) msTxt.x += 30;
-			if (combo >= 100000) msTxt.x += 30;
-			if (combo >= 10000) msTxt.x += 30;
-			FlxTween.tween(msTxt, 
-				{y: msTxt.y + 8}, 
-				0.1 / playbackRate,
-				{onComplete: function(_){
-
-						FlxTween.tween(msTxt, {alpha: 0}, time, {
-							// ease: FlxEase.circOut,
-							onComplete: function(_){msTxt.visible = false;},
-							startDelay: time * 5 / playbackRate
-						});
-					}
-				});
-			switch (daRating.name) //This is so stupid, but it works
-			{
-			case 'marv': msTxt.color = FlxColor.YELLOW;
-			case 'sick':  msTxt.color = FlxColor.CYAN;
-			case 'good': msTxt.color = FlxColor.LIME;
-			case 'bad': msTxt.color = FlxColor.ORANGE;
-			case 'shit': msTxt.color = FlxColor.RED;
-			default: msTxt.color = FlxColor.WHITE;
-			}
-		}
-
 		if (!PlayState.isPixelStage)
 		{
 			rating.setGraphicSize(Std.int(rating.width * 0.7));
@@ -7193,7 +7179,6 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 			seperatedScore.push(Std.parseInt(Std.string(combo).split("")[i]));
 		}
 
-		var daLoop:Int = 0;
 		if (!ClientPrefs.comboStacking)
 		{
 			if (lastRating != null) 
@@ -7217,7 +7202,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 			final numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + 'num' + Std.int(i) + pixelShitPart2));
 			numScore.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
 			numScore.screenCenter();
-			numScore.x = coolText.x + (43 * daLoop) - 90;
+			numScore.x = offset + (43 * daLoop) - 90;
 			numScore.y += 80;
 
 			numScore.x += ClientPrefs.comboOffset[2];
@@ -7250,20 +7235,17 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 				onComplete: function(tween:FlxTween)
 				{
 					numScore.destroy();
-					coolText.destroy();
 				},
 				startDelay: Conductor.crochet * 0.002 / playbackRate
 			});
-
-			if(numScore.x > xThing) xThing = numScore.x;
 		}
 
-		if (ClientPrefs.comboPopup)
+		if (ClientPrefs.comboPopup && ClientPrefs.ratingType != 'Simple')
 		{
 			final comboSpr = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + 'combo' + pixelShitPart2));
 			comboSpr.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
 			comboSpr.screenCenter();
-			comboSpr.x = coolText.x;
+			comboSpr.x = offset;
 			comboSpr.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
 			comboSpr.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
 			comboSpr.visible = (!ClientPrefs.hideHud && showCombo);
@@ -7276,7 +7258,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 			{
 				insert(members.indexOf(strumLineNotes), comboSpr);
 			}
-			comboSpr.x = xThing + 50;
+			comboSpr.x = offset + (43 * Std.string(combo).length) - 90 + 50;
 			if (!ClientPrefs.comboStacking)
 			{
 				if (lastCombo != null) 
@@ -7300,14 +7282,11 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 			FlxTween.tween(comboSpr, {alpha: 0}, 0.2 / playbackRate, {
 				onComplete: function(tween:FlxTween)
 				{
-					coolText.destroy();
 					comboSpr.destroy();
 				},
 				startDelay: Conductor.crochet * 0.002 / playbackRate
 			});
 		}
-
-		coolText.text = Std.string(seperatedScore);
 
 			FlxTween.tween(rating, {alpha: 0}, 0.2 / playbackRate, {
 				startDelay: Conductor.crochet * 0.001 / playbackRate,
@@ -7316,6 +7295,84 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 					rating.destroy();
 				}
 			});
+		}
+
+		if (ClientPrefs.showMS && !ClientPrefs.hideHud) {
+			FlxTween.cancelTweensOf(msTxt);
+			msTxt.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
+			msTxt.visible = true;
+			msTxt.screenCenter();
+			msTxt.x = (ClientPrefs.comboPopup ? offset + 280 : offset + 80);
+			msTxt.alpha = 1;
+			msTxt.text = FlxMath.roundDecimal(-noteDiff, 3) + " MS";
+			if (cpuControlled && !ClientPrefs.communityGameBot) msTxt.text = "0 MS (Bot)";
+			msTxt.x += ClientPrefs.comboOffset[0];
+			msTxt.y -= ClientPrefs.comboOffset[1];
+			if (combo >= 1000000) msTxt.x += 30;
+			if (combo >= 100000) msTxt.x += 30;
+			if (combo >= 10000) msTxt.x += 30;
+			FlxTween.tween(msTxt, 
+				{y: msTxt.y + 8}, 
+				0.1 / playbackRate,
+				{onComplete: function(_){
+
+						FlxTween.tween(msTxt, {alpha: 0}, 0.2 / playbackRate, {
+							// ease: FlxEase.circOut,
+							onComplete: function(_){msTxt.visible = false;},
+							startDelay: Conductor.stepCrochet * 0.005 / playbackRate
+						});
+					}
+				});
+			switch (daRating.name) //This is so stupid, but it works
+			{
+			case 'marv': msTxt.color = FlxColor.YELLOW;
+			case 'sick':  msTxt.color = FlxColor.CYAN;
+			case 'good': msTxt.color = FlxColor.LIME;
+			case 'bad': msTxt.color = FlxColor.ORANGE;
+			case 'shit': msTxt.color = FlxColor.RED;
+			default: msTxt.color = FlxColor.WHITE;
+			}
+		}
+
+		if (ClientPrefs.ratingType == 'Simple' && !ClientPrefs.hideHud) {
+			FlxTween.cancelTweensOf(judgeTxt);
+			FlxTween.cancelTweensOf(judgeTxt.scale);
+			judgeTxt.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
+			judgeTxt.visible = true;
+			judgeTxt.screenCenter(X);
+			judgeTxt.y = !ClientPrefs.downScroll ? botplayTxt.y + 30 : botplayTxt.y - 30;
+			judgeTxt.alpha = 1;
+			switch (daRating.name) //This is so stupid, but it works
+			{
+			case 'marv': 
+				judgeTxt.color = FlxColor.YELLOW;
+				judgeTxt.text = 'Marvelous!!!\n' + FlxStringUtil.formatMoney(combo, false);
+			case 'sick':  
+				judgeTxt.color = FlxColor.CYAN;
+				judgeTxt.text = 'Sick!!\n' + FlxStringUtil.formatMoney(combo, false);
+			case 'good': 
+				judgeTxt.color = FlxColor.LIME;
+				judgeTxt.text = 'Good!\n' + FlxStringUtil.formatMoney(combo, false);
+			case 'bad':
+				judgeTxt.color = FlxColor.ORANGE;
+				judgeTxt.text = 'Bad.\n' + FlxStringUtil.formatMoney(combo, false);
+			case 'shit': 
+				judgeTxt.color = FlxColor.RED;
+				judgeTxt.text = 'Shit.\n' + FlxStringUtil.formatMoney(combo, false);
+			default: judgeTxt.color = FlxColor.WHITE;
+			}
+			judgeTxt.scale.x = 1.075;
+			judgeTxt.scale.y = 1.075;
+			FlxTween.tween(judgeTxt.scale, 
+				{x: 1, y: 1}, 
+				0.1 / playbackRate,
+				{onComplete: function(_){
+						FlxTween.tween(judgeTxt, {alpha: 0}, 0.2 / playbackRate, {
+							onComplete: function(_){judgeTxt.visible = false;},
+							startDelay: Conductor.stepCrochet * 0.005 / playbackRate
+						});
+					}
+				});
 		}
 	}
 
@@ -9196,116 +9253,16 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 
 			// Rating FC
 			ratingFC = "";
-			if (!ClientPrefs.longFCName)
-			{
-				if (totalPlayed == 0) ratingFC = "No Play";
-				if (marvs > 0) ratingFC = "MFC";
-				if (sicks > 0) ratingFC = "SFC";
-				if (goods > 0) ratingFC = "GFC";
-				if (bads > 0) ratingFC = "BFC";
-				if (shits > 0) ratingFC = "FC";
-				if (songMisses > 0 && songMisses < 10) ratingFC = "SDCB";
-				if (songMisses >= 10) ratingFC = "Clear";
-				if (songMisses >= 100) ratingFC = "TDSB";
-				if (songMisses >= 1000) ratingFC = "QDSB";
-
-				switch (ClientPrefs.hudType)
-				{
-					case 'VS Impostor':
-					if (totalPlayed == 0) ratingFC = " [No Play]";
-					if (marvs > 0) ratingFC = " [MFC]";
-					if (sicks > 0) ratingFC = " [SFC]";
-					if (goods > 0) ratingFC = " [GFC]";
-					if (bads > 0) ratingFC = " [BFC]";
-					if (shits > 0) ratingFC = " [FC]";
-					if (songMisses > 0 && songMisses < 10) ratingFC = " [SDCB]";
-					if (songMisses >= 10) ratingFC = " [Clear]";
-					if (songMisses >= 100) ratingFC = " [TDSB]";
-					if (songMisses >= 1000) ratingFC = " [QDSB]";
-
-				case "Tails Gets Trolled V4":
-					if (totalPlayed == 0) ratingFC = "No Play";
-					if (marvs > 0) ratingFC = "KFC";
-					if (sicks > 0) ratingFC = "AFC";
-					if (goods > 0) ratingFC = "CFC";
-					if (bads > 0) ratingFC = "SDC";
-					if (shits > 0) ratingFC = "FC";
-					if (songMisses > 0 && songMisses < 10) ratingFC = "SDCB";
-					if (songMisses >= 10) ratingFC = "Clear";
-					if (songMisses >= 100) ratingFC = "TDSB";
-					if (songMisses >= 1000) ratingFC = "QDSB";
-
-					case 'Kade Engine', 'Doki Doki+':
-					ratingFC = "?";
-					if (totalPlayed == 0) ratingFC = "No Play";
-					if (marvs > 0) ratingFC = "(MFC)";
-					if (sicks > 0) ratingFC = "(SFC)";
-					if (goods > 0) ratingFC = "(GFC)";
-					if (bads > 0) ratingFC = "(BFC)";
-					if (shits > 0) ratingFC = "(FC)";
-					if (songMisses > 0 && songMisses < 10) ratingFC = "(SDCB)";
-					if (songMisses >= 10) ratingFC = "(Clear)";
-					if (songMisses >= 100) ratingFC = "(TDSB)";
-					if (songMisses >= 1000) ratingFC = "(QDSB)";
-				}
-			}
-			else
-			{
-				if (totalPlayed == 0) ratingFC = "No Play";
-				if (marvs > 0) ratingFC = "Marvelous Full Combo";
-				if (sicks > 0) ratingFC = "Sick Full Combo";
-				if (goods > 0) ratingFC = "Great Full Combo";
-				if (bads > 0) ratingFC = "Bad Full Combo";
-				if (shits > 0) ratingFC = "Shit Full Combo";
-				if (songMisses > 0 && songMisses < 10) ratingFC = "Single Digit Combo Breaks";
-				if (songMisses >= 10) ratingFC = "Double Digit Combo Breaks";
-				if (songMisses >= 100) ratingFC = "Triple Digit Combo Breaks";
-				if (songMisses >= 1000) ratingFC = "Quadruple Digit Combo Breaks";
-				if (songMisses >= 10000) ratingFC = "Quintuple Digit Combo Breaks";
-
-				switch (ClientPrefs.hudType)
-				{
-				case 'VS Impostor':
-					if (totalPlayed == 0) ratingFC = " [No Play]";
-					if (marvs > 0) ratingFC = " [Marvelous Full Combo]";
-					if (sicks > 0) ratingFC = " [Sick Full Combo]";
-					if (goods > 0) ratingFC = " [Great Full Combo]";
-					if (bads > 0) ratingFC = " [Bad Full Combo]";
-					if (shits > 0) ratingFC = " [Shit Full Combo]";
-					if (songMisses > 0 && songMisses < 10) ratingFC = " [Single Digit Combo Breaks]";
-					if (songMisses >= 10) ratingFC = " [Double Digit Combo Breaks]";
-					if (songMisses >= 100) ratingFC = " [Triple Digit Combo Breaks]";
-					if (songMisses >= 1000) ratingFC = " [Quadruple Digit Combo Breaks]";
-					if (songMisses >= 10000) ratingFC = " [Quintuple Digit Combo Breaks]";
-
-				case "Tails Gets Trolled V4":
-					if (totalPlayed == 0) ratingFC = "No Play";
-					if (marvs > 0) ratingFC = "Killer Full Combo";
-					if (sicks > 0) ratingFC = "Awesome Full Combo";
-					if (goods > 0) ratingFC = "Cool Full Combo";
-					if (bads > 0) ratingFC = "Gay Full Combo";
-					if (shits > 0) ratingFC = "Retarded Full Combo";
-					if (songMisses > 0 && songMisses < 10) ratingFC = "Single Digit Combo Breaks";
-					if (songMisses >= 10) ratingFC = "Double Digit Combo Breaks";
-					if (songMisses >= 100) ratingFC = "Triple Digit Combo Breaks";
-					if (songMisses >= 1000) ratingFC = "Quadruple Digit Combo Breaks";
-					if (songMisses >= 10000) ratingFC = "Quintuple Digit Combo Breaks";
-
-					case 'Kade Engine', 'Doki Doki+':
-					ratingFC = "?";
-					if (totalPlayed == 0) ratingFC = "(No Play)";
-					if (marvs > 0) ratingFC = "(Marvelous Full Combo)";
-					if (sicks > 0) ratingFC = "(Sick Full Combo)";
-					if (goods > 0) ratingFC = "(Great Full Combo)";
-					if (bads > 0) ratingFC = "(Bad Full Combo)";
-					if (shits > 0) ratingFC = "(Shit Full Combo)";
-					if (songMisses > 0 && songMisses < 10) ratingFC = "(Single Digit Combo Breaks)";
-					if (songMisses >= 10) ratingFC = "(Double Digit Combo Breaks)";
-					if (songMisses >= 100) ratingFC = "(Triple Digit Combo Breaks)";
-					if (songMisses >= 1000) ratingFC = "(Quadruple Digit Combo Breaks)";
-					if (songMisses >= 10000) ratingFC = "(Quintuple Digit Combo Breaks)";
-				}
-			}
+				if (totalPlayed == 0) ratingFC = fcStrings[0];
+				if (marvs > 0) ratingFC = fcStrings[1];
+				if (sicks > 0) ratingFC = fcStrings[2];
+				if (goods > 0) ratingFC = fcStrings[3];
+				if (bads > 0) ratingFC = fcStrings[4];
+				if (shits > 0) ratingFC = fcStrings[5];
+				if (songMisses > 0 && songMisses < 10) ratingFC = fcStrings[6];
+				if (songMisses >= 10) ratingFC = fcStrings[7];
+				if (songMisses >= 100) ratingFC = fcStrings[8];
+				if (songMisses >= 1000) ratingFC = fcStrings[9];
 
 			ratingCool = "";
             if (ratingPercent*100 <= 60) ratingCool = " F";

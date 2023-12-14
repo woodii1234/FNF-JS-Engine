@@ -35,7 +35,7 @@ class CreditsPopUp extends FlxSpriteGroup
 
 				headingPath = {path: PlayState.SONG.songCreditBarPath.length <= 0 ? 'JSEHeading' : 'songHeadings/' + PlayState.SONG.songCreditBarPath, antiAliasing: false, iconOffset: 0};
 
-		if (PlayState.SONG.songCreditIcon.length > 0) songCreatorIcon = PlayState.SONG.songCreditIcon;
+		if (PlayState.SONG.songCreditIcon.length >= 1) songCreatorIcon = PlayState.SONG.songCreditIcon;
 			else songCreatorIcon = 'ExampleIcon';
 
 		if (headingPath != null)

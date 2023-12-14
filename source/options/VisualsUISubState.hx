@@ -350,7 +350,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			'ratingType',
 			'string',
 			'Base FNF',
-			['Base FNF', 'Kade Engine', 'Tails Gets Trolled V4', 'Doki Doki+']);
+			['Base FNF', 'Kade Engine', 'Tails Gets Trolled V4', 'Doki Doki+', 'NMCW', 'Simple']);
 		addOption(option);
 
 		var option:Option = new Option('Icon Bounce:',
