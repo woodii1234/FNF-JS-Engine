@@ -1826,7 +1826,7 @@ class PlayState extends MusicBeatState
 		msTxt.visible = false;
 		insert(members.indexOf(strumLineNotes), msTxt);
 
-		judgeTxt = new FlxText(400, timeBarBG.y + 90, FlxG.width - 800, "");
+		judgeTxt = new FlxText(400, timeBarBG.y + 120, FlxG.width - 800, "");
 		judgeTxt.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
 		judgeTxt.scrollFactor.set();
 		judgeTxt.setFormat("vcr.ttf", 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -7095,7 +7095,6 @@ if (ClientPrefs.showNPS) {
 		}
 
 		if (ClientPrefs.ratesAndCombo && ClientPrefs.ratingType != 'Simple') {
-		/*
 		if (PlayState.isPixelStage)
 		{
 			pixelShitPart1 = 'pixelUI/';
@@ -7109,14 +7108,13 @@ if (ClientPrefs.showNPS) {
 			case 'Base FNF': pixelShitPart1 = '';
 			default: pixelShitPart1 = ClientPrefs.ratingType + '/';
 		}
-		*/
-		if ((allSicks || !allSicks) && ClientPrefs.marvRateColor == 'Golden' && noteDiff < ClientPrefs.sickWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && !ClientPrefs.noMarvJudge)
+		if (allSicks && ClientPrefs.marvRateColor == 'Golden' && noteDiff < ClientPrefs.sickWindow && ClientPrefs.ratingType != 'Tails Gets Trolled V4' && ClientPrefs.ratingType != 'Doki Doki+' && !ClientPrefs.noMarvJudge)
 		{
 			pixelShitPart1 = 'goldstuff/';
 		}
-		if (!allSicks && ClientPrefs.marvRateColor == 'Rainbow' && noteDiff < ClientPrefs.marvWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && !ClientPrefs.noMarvJudge)
+		if (!allSicks && ClientPrefs.marvRateColor == 'Golden' && noteDiff < ClientPrefs.marvWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && !ClientPrefs.noMarvJudge)
 		{
-			pixelShitPart1 = '';
+			pixelShitPart1 = 'goldstuff/';
 		}
 		final rating = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + daRating.image + pixelShitPart2));
 		rating.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
@@ -7340,7 +7338,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 			judgeTxt.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
 			judgeTxt.visible = true;
 			judgeTxt.screenCenter(X);
-			judgeTxt.y = !ClientPrefs.downScroll ? botplayTxt.y + 30 : botplayTxt.y - 30;
+			judgeTxt.y = !ClientPrefs.downScroll ? botplayTxt.y + 60 : botplayTxt.y - 60;
 			judgeTxt.alpha = 1;
 			switch (daRating.name) //This is so stupid, but it works
 			{
@@ -7367,7 +7365,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 				{x: 1, y: 1}, 
 				0.1 / playbackRate,
 				{onComplete: function(_){
-						FlxTween.tween(judgeTxt, {alpha: 0}, 0.2 / playbackRate, {
+						FlxTween.tween(judgeTxt.scale, {x: 0, y: 0}, 0.1 / playbackRate, {
 							onComplete: function(_){judgeTxt.visible = false;},
 							startDelay: Conductor.stepCrochet * 0.005 / playbackRate
 						});
