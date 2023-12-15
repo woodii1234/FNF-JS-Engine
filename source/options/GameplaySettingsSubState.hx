@@ -181,8 +181,8 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			['Leather', 'Psych']);
 		addOption(option);
 
-		var option:Option = new Option('Remove Marvelous!! Judgement',
-			"If unchecked, removes the Marvelous judgement.",
+		var option:Option = new Option('Remove Perfect!! Judgement',
+			"If checked, removes the Perfect judgement.",
 			'noMarvJudge',
 			'bool',
 			false);
@@ -305,9 +305,9 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.maxValue = 30;
 		addOption(option);
 
-		var option:Option = new Option('Marvelous! Hit Window',
-			'Changes the amount of time you have\nfor hitting a "Marvelous!" in milliseconds.',
-			'marvWindow',
+		var option:Option = new Option('Perfect! Hit Window',
+			'Changes the amount of time you have\nfor hitting a "Perfect!" in milliseconds.',
+			'perfectWindow',
 			'int',
 			22);
 		option.displayFormat = '%vms';
@@ -323,7 +323,7 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			45);
 		option.displayFormat = '%vms';
 		option.scrollSpeed = 15;
-		option.minValue = ClientPrefs.marvWindow + 1;
+		option.minValue = ClientPrefs.perfectWindow + 1;
 		option.maxValue = ClientPrefs.goodWindow - 1;
 		addOption(option);
 

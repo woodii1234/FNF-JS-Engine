@@ -213,7 +213,7 @@ class PlayState extends MusicBeatState
 	private static var prevCamFollow:FlxPoint;
 	private static var prevCamFollowPos:FlxObject;
 	public var judgeColours:Map<String, FlxColor> = [
-		"marv" => 0xFFE367E5,
+		"perfect" => 0xFFE367E5,
 		"sick" => FlxColor.CYAN,
 		"good" => FlxColor.LIME,
 		"bad" => FlxColor.ORANGE,
@@ -266,7 +266,7 @@ class PlayState extends MusicBeatState
 	public var timeBar:FlxBar;
 
 	public var ratingsData:Array<Rating> = [];
-	public var marvs:Int = 0;
+	public var perfects:Int = 0;
 	public var sicks:Int = 0;
 	public var goods:Int = 0;
 	public var bads:Int = 0;
@@ -302,7 +302,8 @@ class PlayState extends MusicBeatState
 
 	public var shownScore:Float = 0;
 
-	public var fcStrings:Array<String> = ['No Play', 'MFC', 'SFC', 'GFC', 'BFC', 'FC', 'SDCB', 'Clear', 'TDCB', 'QDCB'];
+	public var fcStrings:Array<String> = ['No Play', 'PFC', 'SFC', 'GFC', 'BFC', 'FC', 'SDCB', 'Clear', 'TDCB', 'QDCB'];
+	public var hitStrings:Array<String> = ['Perfect!!!', 'Sick!!', 'Good!', 'Bad.', 'Shit.'];
 
 	//Gameplay settings
 	public var healthGain:Float = 1;
@@ -574,7 +575,7 @@ class PlayState extends MusicBeatState
 		//Ratings
 		if (!ClientPrefs.noMarvJudge) 
 		{
-		ratingsData.push(new Rating('marv')); 
+		ratingsData.push(new Rating('perfect')); 
 		}
 
 		var rating:Rating = new Rating('sick');
@@ -678,9 +679,22 @@ class PlayState extends MusicBeatState
 		detailsPausedText = "BRB! - " + detailsText;
 		#end
 
-		if (ClientPrefs.hudType == 'Tails Gets Trolled V4') fcStrings = ['No Play', 'KFC', 'AFC', 'CFC', 'SDC', 'FC', 'SDCB', 'Clear', 'TDCB', 'QDCB'];
-		if (ClientPrefs.longFCName) fcStrings = ['No Play', 'Marvelous Full Combo', 'Sick Full Combo', 'Great Full Combo', 'Bad Full Combo', 'Full Combo', 'Single Digit Misses', 'Clear', 'TDCB', 'QDCB'];
-		if (ClientPrefs.longFCName && ClientPrefs.hudType == 'Tails Gets Trolled V4') fcStrings = ['No Play', 'Killer Full Combo', 'Awesome Full Combo', 'Cool Full Combo', 'Gay Full Combo', 'Full Combo', 'Single Digit Misses', 'Clear', 'TDCB', 'QDCB'];
+		if (ClientPrefs.hudType == 'Tails Gets Trolled V4') 
+		{
+			fcStrings = ['No Play', 'KFC', 'AFC', 'CFC', 'SDC', 'FC', 'SDCB', 'Clear', 'TDCB', 'QDCB'];
+			hitStrings = ['Killer!!!', 'Awesome!!', 'Cool!', 'Gay.', 'Retarded.'];
+		}
+		if (ClientPrefs.longFCName) fcStrings = ['No Play', 'Perfect Full Combo', 'Sick Full Combo', 'Great Full Combo', 'Bad Full Combo', 'Full Combo', 'Single Digit Misses', 'Clear', 'TDCB', 'QDCB'];
+		if (ClientPrefs.longFCName && ClientPrefs.hudType == 'Tails Gets Trolled V4') 
+		{
+			fcStrings = ['No Play', 'Killer Full Combo', 'Awesome Full Combo', 'Cool Full Combo', 'Gay Full Combo', 'Full Combo', 'Single Digit Misses', 'Clear', 'TDCB', 'QDCB'];
+			hitStrings = ['Killer!!!', 'Awesome!!', 'Cool!', 'Gay.', 'Retarded.'];
+		}
+
+		if (ClientPrefs.hudType == 'Doki Doki+') 
+		{
+			hitStrings = ['Very Doki!!!', 'Doki!!', 'Good!', 'OK.', 'No.'];
+		}
 
 		GameOverSubstate.resetVariables();
 		var songName:String = Paths.formatToSongPath(SONG.song);
@@ -1607,7 +1621,7 @@ class PlayState extends MusicBeatState
 		}
 
 		if (ClientPrefs.hudType == 'Kade Engine') {
-		timeBarBG = new AttachedSprite('healthBar');
+		timeBarBG = new AttachedSprite('editorHealthBar');
 		timeBarBG.x = timeTxt.x;
 		timeBarBG.y = timeTxt.y + (timeTxt.height / 8);
 		timeBarBG.scrollFactor.set();
@@ -1632,7 +1646,7 @@ class PlayState extends MusicBeatState
 		}
 
 		if (ClientPrefs.hudType == "Mic'd Up") {
-		timeBarBG = new AttachedSprite('healthBar');
+		timeBarBG = new AttachedSprite('editorHealthBar');
 		timeBarBG.x = timeTxt.x;
 		timeBarBG.y = timeTxt.y + (timeTxt.height / 8);
 		timeBarBG.scrollFactor.set();
@@ -1701,7 +1715,7 @@ class PlayState extends MusicBeatState
 			add(timeTxt);
 		}
 		if (ClientPrefs.hudType == 'JS Engine') {
-		timeBarBG = new AttachedSprite('healthBar');
+		timeBarBG = new AttachedSprite('editorHealthBar');
 			timeBarBG.screenCenter(X);
 		timeBarBG.x = timeTxt.x;
 		timeBarBG.y = timeTxt.y + (timeTxt.height / 8);
@@ -1903,10 +1917,14 @@ class PlayState extends MusicBeatState
 
 		if (ClientPrefs.smoothHealth && ClientPrefs.smoothHealthType == 'Golden Apple 1.5') healthBar.numDivisions = 10000;
 
-		if (SONG.player1 == 'bf' || SONG.player1 == 'boyfriend') { //in case any mods just have bfs json name set to boyfriend and not bf
+		if (SONG.player1 == 'bf' || SONG.player1 == 'boyfriend') {
 			if (ClientPrefs.bfIconStyle == 'VS Nonsense V2') iconP1.changeIcon('bfnonsense'); 
 			if (ClientPrefs.bfIconStyle == 'Doki Doki+') iconP1.changeIcon('bfdoki'); 
 			if (ClientPrefs.bfIconStyle == 'Leather Engine') iconP1.changeIcon('bfleather'); 
+			if (ClientPrefs.bfIconStyle == "Mic'd Up") iconP1.changeIcon('bfmup'); 
+			if (ClientPrefs.bfIconStyle == "FPS Plus") iconP1.changeIcon('bffps'); 
+			if (ClientPrefs.bfIconStyle == "SB Engine") iconP1.changeIcon('bfsb'); 
+			if (ClientPrefs.bfIconStyle == "OS 'Engine'") iconP1.changeIcon('bfos'); 
 		}
 
 		if (ClientPrefs.timeBarType == 'Disabled') {
@@ -2295,6 +2313,10 @@ class PlayState extends MusicBeatState
 			{
 				botplayTxt.y = timeBarBG.y - 78;
 			}
+		}
+		if (!cpuControlled && practiceMode) {
+		botplayTxt.text = 'Practice Mode';
+		botplayTxt.visible = true;
 		}
 
 		if (ClientPrefs.communityGameBot && botplayTxt != null || ClientPrefs.showcaseMode && botplayTxt != null) botplayTxt.destroy();
@@ -3857,7 +3879,7 @@ class PlayState extends MusicBeatState
 					npsTxt.text = npsString;
 
 				case "Doki Doki+":
-					scoreTxt.text = 'Score: ' + formattedScore + ' | Breaks: ' + formattedSongMisses + ' | Combo: ' + formattedCombo + npsString + ' | Accuracy: ' + accuracy + ' | ' + fcString + ratingCool;
+					scoreTxt.text = 'Score: ' + formattedScore + ' | Breaks: ' + formattedSongMisses + ' | Combo: ' + formattedCombo + npsString + ' | Accuracy: ' + accuracy + ' | (' + fcString + ') ' + ratingCool;
 
 				case "Dave and Bambi":
 					scoreTxt.text = 'Score: ' + formattedScore + ' | Misses: ' + formattedSongMisses + ' | Combo: ' + formattedCombo + npsString + ' | Accuracy: ' + accuracy + ' | ' + fcString;
@@ -6028,7 +6050,16 @@ if (ClientPrefs.showNPS) {
 							boyfriend.alpha = 0.00001;
 							boyfriend = boyfriendMap.get(value2);
 							boyfriend.alpha = lastAlpha;
-							iconP1.changeIcon(boyfriend.healthIcon);
+							if (value2 != 'bf' || value2 != 'boyfriend') iconP1.changeIcon(boyfriend.healthIcon);
+							else {
+								if (ClientPrefs.bfIconStyle == 'VS Nonsense V2') iconP1.changeIcon('bfnonsense'); 
+								if (ClientPrefs.bfIconStyle == 'Doki Doki+') iconP1.changeIcon('bfdoki'); 
+								if (ClientPrefs.bfIconStyle == 'Leather Engine') iconP1.changeIcon('bfleather'); 
+								if (ClientPrefs.bfIconStyle == "Mic'd Up") iconP1.changeIcon('bfmup'); 
+								if (ClientPrefs.bfIconStyle == "FPS Plus") iconP1.changeIcon('bffps'); 
+								if (ClientPrefs.bfIconStyle == "SB Engine") iconP1.changeIcon('bfsb'); 
+								if (ClientPrefs.bfIconStyle == "OS 'Engine'") iconP1.changeIcon('bfos'); 
+							}
 						}
 						setOnLuas('boyfriendName', boyfriend.curCharacter);
 
@@ -6634,7 +6665,7 @@ if (ClientPrefs.showNPS) {
 				persistentUpdate = false;
 				persistentDraw = true;
 				paused = true;
-				openSubState(new ResultsScreenSubState([marvs, sicks, goods, bads, shits], Std.int(songScore), songMisses, Highscore.floorDecimal(ratingPercent * 100, 2),
+				openSubState(new ResultsScreenSubState([perfects, sicks, goods, bads, shits], Std.int(songScore), songMisses, Highscore.floorDecimal(ratingPercent * 100, 2),
 								ratingName + (' [' + ratingFC + '] ')));
 			} else {
 			endedTheSong = true;
@@ -6866,14 +6897,14 @@ if (ClientPrefs.showNPS) {
 			default: pixelShitPart1 = ClientPrefs.ratingType + '/';
 		}
 		if (allSicks) { //cache gold rating sprites
-		Paths.image('goldstuff/' + "marv" + pixelShitPart2);
+		Paths.image('goldstuff/' + "perfect" + pixelShitPart2);
 		Paths.image('goldstuff/' + "sick" + pixelShitPart2);
 		Paths.image('goldstuff/' + "combo" + pixelShitPart2);
 		for (i in 0...10) Paths.image('goldstuff/' + 'num' + i + pixelShitPart2);
 			trace('cached gold ratings');
 		}
 		//cache normal/pixel ratings
-		Paths.image(pixelShitPart1 + "marv" + pixelShitPart2);
+		Paths.image(pixelShitPart1 + "perfect" + pixelShitPart2);
 		Paths.image(pixelShitPart1 + "sick" + pixelShitPart2);
 		Paths.image(pixelShitPart1 + "good" + pixelShitPart2);
 		Paths.image(pixelShitPart1 + "bad" + pixelShitPart2);
@@ -7002,7 +7033,7 @@ if (ClientPrefs.showNPS) {
 		//tryna do MS based judgment due to popular demand
 		final daRating:Rating = Conductor.judgeNote(note, noteDiff, cpuControlled);
 
-		if (daRating.name == 'sick' && !ClientPrefs.noMarvJudge) maxScore -= 150 * Std.int(polyphony); //if you enable marvelous judges and hit a sick, lower the max score by 150 points. otherwise it won't make sense
+		if (daRating.name == 'sick' && !ClientPrefs.noMarvJudge) maxScore -= 150 * Std.int(polyphony); //if you enable perfect judges and hit a sick, lower the max score by 150 points. otherwise it won't make sense
 
 		if (cpuControlled && ClientPrefs.communityGameBot || cpuControlled && !ClientPrefs.lessBotLag || !cpuControlled)
 		{
@@ -7038,7 +7069,7 @@ if (ClientPrefs.showNPS) {
 				case 'VS Impostor':
 					switch(daRating.name)
 					{
-						case 'marv', 'sick': health += note.hitHealth * healthGain * polyphony;
+						case 'perfect', 'sick': health += note.hitHealth * healthGain * polyphony;
 						case 'good': health += note.hitHealth * 0.5 * healthGain * polyphony;
 						case 'bad': health += note.hitHealth * 0.25 * healthGain * polyphony;
 						case 'shit': health += note.hitHealth * 0.1 * healthGain * polyphony;
@@ -7046,7 +7077,7 @@ if (ClientPrefs.showNPS) {
 				case 'Leather Engine':
 					switch(daRating.name)
 					{
-						case 'marv', 'sick': health += 0.012 * healthGain * polyphony;
+						case 'perfect', 'sick': health += 0.012 * healthGain * polyphony;
 						case 'good': health += -0.008 * healthGain * polyphony;
 						case 'bad': health += -0.018 * healthGain * polyphony;
 						case 'shit': health += -0.023 * healthGain * polyphony;
@@ -7054,7 +7085,7 @@ if (ClientPrefs.showNPS) {
 				case 'Kade (1.4.2 to 1.6)', 'Doki Doki+':
 					switch(daRating.name)
 					{
-						case 'marv', 'sick': health += (ClientPrefs.healthGainType == 'Doki Doki+' ? 0.077 : 0.1) * healthGain * polyphony;
+						case 'perfect', 'sick': health += (ClientPrefs.healthGainType == 'Doki Doki+' ? 0.077 : 0.1) * healthGain * polyphony;
 						case 'good': health += 0.04 * healthGain * polyphony;
 						case 'bad': health -= 0.06 * healthGain * polyphony;
 						case 'shit': health -= (ClientPrefs.healthGainType == 'Doki Doki+' ? 0.1 : 0.2) * healthGain * polyphony;
@@ -7062,7 +7093,7 @@ if (ClientPrefs.showNPS) {
 				case 'Kade (1.6+)':
 					switch(daRating.name)
 					{
-						case 'marv', 'sick': health += 0.017 * healthGain * polyphony;
+						case 'perfect', 'sick': health += 0.017 * healthGain * polyphony;
 						case 'good': health += 0 * healthGain * polyphony;
 						case 'bad': health += -0.03 * healthLoss;
 						case 'shit': health += -0.06 * healthLoss;
@@ -7070,7 +7101,7 @@ if (ClientPrefs.showNPS) {
 				case 'Kade (1.2)': 
 					switch(daRating.name)
 					{
-						case 'marv', 'sick': health += 0.023 * healthGain * polyphony;
+						case 'perfect', 'sick': health += 0.023 * healthGain * polyphony;
 						case 'good': health += 0.004 * healthGain * polyphony;
 						case 'bad': health += 0;
 						case 'shit': health += 0;
@@ -7112,7 +7143,7 @@ if (ClientPrefs.showNPS) {
 		{
 			pixelShitPart1 = 'goldstuff/';
 		}
-		if (!allSicks && ClientPrefs.marvRateColor == 'Golden' && noteDiff < ClientPrefs.marvWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && !ClientPrefs.noMarvJudge)
+		if (!allSicks && ClientPrefs.marvRateColor == 'Golden' && noteDiff < ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && !ClientPrefs.noMarvJudge)
 		{
 			pixelShitPart1 = 'goldstuff/';
 		}
@@ -7127,23 +7158,23 @@ if (ClientPrefs.showNPS) {
 		rating.visible = (!ClientPrefs.hideHud && showRating);
 		rating.x += ClientPrefs.comboOffset[0];
 		rating.y -= ClientPrefs.comboOffset[1];
-if (!allSicks && ClientPrefs.colorRatingFC && marvs > 0 && noteDiff > ClientPrefs.marvWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.noMarvJudge) 
+if (!allSicks && ClientPrefs.colorRatingFC && perfects > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.noMarvJudge) 
 		{
-		rating.color = judgeColours.get('marv');
+		rating.color = judgeColours.get('perfect');
 		}
-if (!allSicks && ClientPrefs.colorRatingFC && sicks > 0 && noteDiff > ClientPrefs.marvWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.marvRateColor != 'Golden' && !ClientPrefs.noMarvJudge) 
+if (!allSicks && ClientPrefs.colorRatingFC && sicks > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.marvRateColor != 'Golden' && !ClientPrefs.noMarvJudge) 
 		{
 		rating.color = judgeColours.get('sick');
 		}
-if (!allSicks && ClientPrefs.colorRatingFC && goods > 0 && noteDiff > ClientPrefs.marvWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
+if (!allSicks && ClientPrefs.colorRatingFC && goods > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
 		{
 		rating.color = judgeColours.get('good');
 		}
-if (!allSicks && ClientPrefs.colorRatingFC && bads > 0 && noteDiff > ClientPrefs.marvWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
+if (!allSicks && ClientPrefs.colorRatingFC && bads > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
 		{
 		rating.color = judgeColours.get('bad');
 		}
-if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPrefs.marvWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
+if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
 		{
 		rating.color = judgeColours.get('shit');
 		}
@@ -7205,7 +7236,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 
 			numScore.x += ClientPrefs.comboOffset[2];
 			numScore.y -= ClientPrefs.comboOffset[3];
-			if (ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && noteDiff >= ClientPrefs.marvWindow) numScore.color = rating.color;
+			if (ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && noteDiff >= ClientPrefs.perfectWindow) numScore.color = rating.color;
 			
 			if (!ClientPrefs.comboStacking)
 				lastScore.push(numScore);
@@ -7323,7 +7354,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 				});
 			switch (daRating.name) //This is so stupid, but it works
 			{
-			case 'marv': msTxt.color = FlxColor.YELLOW;
+			case 'perfect': msTxt.color = FlxColor.YELLOW;
 			case 'sick':  msTxt.color = FlxColor.CYAN;
 			case 'good': msTxt.color = FlxColor.LIME;
 			case 'bad': msTxt.color = FlxColor.ORANGE;
@@ -7340,23 +7371,23 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 			judgeTxt.screenCenter(X);
 			judgeTxt.y = !ClientPrefs.downScroll ? botplayTxt.y + 60 : botplayTxt.y - 60;
 			judgeTxt.alpha = 1;
-			switch (daRating.name) //This is so stupid, but it works
+			switch (daRating.name)
 			{
-			case 'marv': 
+			case 'perfect': 
 				judgeTxt.color = FlxColor.YELLOW;
-				judgeTxt.text = 'Marvelous!!!\n' + FlxStringUtil.formatMoney(combo, false);
+				judgeTxt.text = hitStrings[0] + '\n' + FlxStringUtil.formatMoney(combo, false);
 			case 'sick':  
 				judgeTxt.color = FlxColor.CYAN;
-				judgeTxt.text = 'Sick!!\n' + FlxStringUtil.formatMoney(combo, false);
+				judgeTxt.text = hitStrings[1] + '\n' + FlxStringUtil.formatMoney(combo, false);
 			case 'good': 
 				judgeTxt.color = FlxColor.LIME;
-				judgeTxt.text = 'Good!\n' + FlxStringUtil.formatMoney(combo, false);
+				judgeTxt.text = hitStrings[2] + '\n' + FlxStringUtil.formatMoney(combo, false);
 			case 'bad':
 				judgeTxt.color = FlxColor.ORANGE;
-				judgeTxt.text = 'Bad.\n' + FlxStringUtil.formatMoney(combo, false);
+				judgeTxt.text = hitStrings[3] + '\n' + FlxStringUtil.formatMoney(combo, false);
 			case 'shit': 
 				judgeTxt.color = FlxColor.RED;
-				judgeTxt.text = 'Shit.\n' + FlxStringUtil.formatMoney(combo, false);
+				judgeTxt.text = hitStrings[4] + '\n' + FlxStringUtil.formatMoney(combo, false);
 			default: judgeTxt.color = FlxColor.WHITE;
 			}
 			judgeTxt.scale.x = 1.075;
@@ -7928,7 +7959,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 				final daRating:Rating = Conductor.judgeNote(note, noteDiff / playbackRate);
 				switch(daRating.name)
 					{
-						case 'marv': health += angelNoteDamage[4] * healthGain * polyphony;
+						case 'perfect': health += angelNoteDamage[4] * healthGain * polyphony;
 						case 'sick': health += angelNoteDamage[3] * healthGain * polyphony;
 						case 'good': health += angelNoteDamage[2] * healthGain * polyphony;
 						case 'bad': 
@@ -9189,11 +9220,11 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 		final formattedEnemyHits = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(enemyHits, false) : formatCompactNumber(enemyHits);
 		if (!ClientPrefs.noMarvJudge)
 		{
-		judgementCounter.text = 'Combo (Max): ' + formattedCombo + ' (' + formattedMaxCombo + ')\nHits: ' + (!ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(totalNotesPlayed, false) : compactTotalPlays) + ' / ' + FlxStringUtil.formatMoney(totalNotes, false) + ' (' + FlxMath.roundDecimal((totalNotesPlayed/totalNotes) * 100, 2) + '%)\nMarvelous!!!: ' + marvs + '\nSicks!!: ' + sicks + '\nGoods!: ' + goods + '\nBads: ' + bads + '\nShits: ' + shits + '\nMisses: ' + formattedSongMisses + (ClientPrefs.comboScoreEffect ? '\nScore Multiplier: ' + comboMultiplier + 'x' : '');
+		judgementCounter.text = 'Combo (Max): ' + formattedCombo + ' (' + formattedMaxCombo + ')\nHits: ' + (!ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(totalNotesPlayed, false) : compactTotalPlays) + ' / ' + FlxStringUtil.formatMoney(totalNotes, false) + ' (' + FlxMath.roundDecimal((totalNotesPlayed/totalNotes) * 100, 2) + '%)\nPerfects!!!: ' + perfects + '\nSicks!!: ' + sicks + '\nGoods!: ' + goods + '\nBads: ' + bads + '\nShits: ' + shits + '\nMisses: ' + formattedSongMisses + (ClientPrefs.comboScoreEffect ? '\nScore Multiplier: ' + comboMultiplier + 'x' : '');
 
-		if (ClientPrefs.hudType == 'Doki Doki+') judgementCounter.text = 'Combo (Max): ' + formattedCombo + ' (' + formattedMaxCombo + ')\nHits: ' + (!ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(totalNotesPlayed, false) : compactTotalPlays) + ' / ' + FlxStringUtil.formatMoney(totalNotes, false) + ' (' + FlxMath.roundDecimal((totalNotesPlayed/totalNotes) * 100, 2) + '%)\nVery Doki: ' + marvs + '\nDoki: ' + sicks + '\nGood: ' + goods + '\nOK: ' + bads + '\nNO: ' + shits + '\nMiss: ' + formattedSongMisses + (ClientPrefs.comboScoreEffect ? '\nScore Multiplier: ' + comboMultiplier + 'x' : '');
+		if (ClientPrefs.hudType == 'Doki Doki+') judgementCounter.text = 'Combo (Max): ' + formattedCombo + ' (' + formattedMaxCombo + ')\nHits: ' + (!ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(totalNotesPlayed, false) : compactTotalPlays) + ' / ' + FlxStringUtil.formatMoney(totalNotes, false) + ' (' + FlxMath.roundDecimal((totalNotesPlayed/totalNotes) * 100, 2) + '%)\nVery Doki: ' + perfects + '\nDoki: ' + sicks + '\nGood: ' + goods + '\nOK: ' + bads + '\nNO: ' + shits + '\nMiss: ' + formattedSongMisses + (ClientPrefs.comboScoreEffect ? '\nScore Multiplier: ' + comboMultiplier + 'x' : '');
 
-		if (ClientPrefs.hudType == 'VS Impostor') judgementCounter.text = 'Combo (Max): ' + formattedCombo + ' (' + formattedMaxCombo + ')\nHits: ' + (!ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(totalNotesPlayed, false) : compactTotalPlays) + ' / ' + FlxStringUtil.formatMoney(totalNotes, false) + ' (' + FlxMath.roundDecimal((totalNotesPlayed/totalNotes) * 100, 2) + '%)\nSO SUSSY: ' + marvs + '\nSussy: ' + sicks + '\nSus: ' + goods + '\nSad: ' + bads + '\nAss: ' + shits + '\nMiss: ' + formattedSongMisses + (ClientPrefs.comboScoreEffect ? '\nScore Multiplier: ' + comboMultiplier + 'x' : '');
+		if (ClientPrefs.hudType == 'VS Impostor') judgementCounter.text = 'Combo (Max): ' + formattedCombo + ' (' + formattedMaxCombo + ')\nHits: ' + (!ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(totalNotesPlayed, false) : compactTotalPlays) + ' / ' + FlxStringUtil.formatMoney(totalNotes, false) + ' (' + FlxMath.roundDecimal((totalNotesPlayed/totalNotes) * 100, 2) + '%)\nSO SUSSY: ' + perfects + '\nSussy: ' + sicks + '\nSus: ' + goods + '\nSad: ' + bads + '\nAss: ' + shits + '\nMiss: ' + formattedSongMisses + (ClientPrefs.comboScoreEffect ? '\nScore Multiplier: ' + comboMultiplier + 'x' : '');
 		}
 		if (ClientPrefs.noMarvJudge)
 		{
@@ -9252,7 +9283,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 			// Rating FC
 			ratingFC = "";
 				if (totalPlayed == 0) ratingFC = fcStrings[0];
-				if (marvs > 0) ratingFC = fcStrings[1];
+				if (perfects > 0) ratingFC = fcStrings[1];
 				if (sicks > 0) ratingFC = fcStrings[2];
 				if (goods > 0) ratingFC = fcStrings[3];
 				if (bads > 0) ratingFC = fcStrings[4];

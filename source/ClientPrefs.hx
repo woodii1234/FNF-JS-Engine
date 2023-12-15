@@ -190,7 +190,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 
 	public static var comboOffset:Array<Int> = [0, 0, 0, 0];
 	public static var ratingOffset:Int = 0;
-	public static var marvWindow:Int = 15;
+	public static var perfectWindow:Int = 15;
 	public static var sickWindow:Int = 45;
 	public static var goodWindow:Int = 90;
 	public static var badWindow:Int = 135;
@@ -377,7 +377,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.henchmenDeath = Achievements.henchmenDeath;
 		FlxG.save.data.showcaseMode = showcaseMode;
 		FlxG.save.data.ratingOffset = ratingOffset;
-		FlxG.save.data.marvWindow = marvWindow;
+		FlxG.save.data.perfectWindow = perfectWindow;
 		FlxG.save.data.sickWindow = sickWindow;
 		FlxG.save.data.goodWindow = goodWindow;
 		FlxG.save.data.badWindow = badWindow;
@@ -859,7 +859,10 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 			noMarvJudge = FlxG.save.data.noMarvJudge;
 		}
 		if(FlxG.save.data.marvWindow != null) {
-			marvWindow = FlxG.save.data.marvWindow;
+			perfectWindow = FlxG.save.data.perfectWindow;
+		}
+		if(FlxG.save.data.perfectWindow != null) {
+			perfectWindow = FlxG.save.data.perfectWindow;
 		}
 		if(FlxG.save.data.sickWindow != null) {
 			sickWindow = FlxG.save.data.sickWindow;

@@ -234,7 +234,7 @@ class VisualsUISubState extends BaseOptionsMenu
 		addOption(option);
 
 		var option:Option = new Option('Golden Sick on MFC/SFC',
-			'If checked, your Sick! & Marvelous!! ratings will be golden if your FC rating is better than GFC.',
+			'If checked, your Sick! & Perfect!! ratings will be golden if your FC rating is better than GFC.',
 			'goldSickSFC',
 			'bool',
 			true);
@@ -254,8 +254,8 @@ class VisualsUISubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
-		var option:Option = new Option('Marvelous Rating Color:',
-			"What should the Marvelous Rating Color be?",
+		var option:Option = new Option('Perfect Rating Color:',
+			"What should the Perfect Rating Color be?",
 			'marvRateColor',
 			'string',
 			'Golden',
@@ -342,7 +342,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			'bfIconStyle',
 			'string',
 			'Default',
-			['Default', 'VS Nonsense V2', 'Leather Engine', 'Doki Doki+']);
+			['Default', 'VS Nonsense V2', 'Leather Engine', 'Doki Doki+', "Mic'd Up", 'FPS Plus', 'SB Engine', "OS 'Engine'"]);
 		addOption(option);
 
 		var option:Option = new Option('Rating Style:',
