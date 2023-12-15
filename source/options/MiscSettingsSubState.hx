@@ -43,6 +43,13 @@ class MiscSettingsSubState extends BaseOptionsMenu
 			false); //Default value
 		addOption(option);
 
+		var option:Option = new Option('Always Play Cutscenes', //Name
+			'If checked, cutscenes will always play even if you\nenter the song through Freeplay.', //Description
+			'alwaysTriggerCutscene', //Save data variable name
+			'bool', //Variable type
+			false); //Default value
+		addOption(option);
+
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length-1]];
 		
 		super();

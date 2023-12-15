@@ -142,15 +142,20 @@ class Note extends FlxSprite
 				var time = strumTime;
 				var theCurBPM = Conductor.bpm;
 				var stepCrochet:Float = (60 / theCurBPM) * 1000;
-				for (i in 0...Conductor.bpmChangeMap.length)
-				{
+				var latestBpmChangeIndex = -1;
+				var latestBpmChange = null;
+
+				for (i in 0...Conductor.bpmChangeMap.length) {
 					var bpmchange = Conductor.bpmChangeMap[i];
-					if (strumTime >= bpmchange.songTime)
-					{
-						theCurBPM = bpmchange.bpm;
-						time -= bpmchange.songTime;
-						stepCrochet = (60 / theCurBPM) * 1000;
+					if (strumTime >= bpmchange.songTime) {
+						latestBpmChangeIndex = i; // Update index of latest change
+						latestBpmChange = bpmchange;
 					}
+				}
+				if (latestBpmChangeIndex >= 0) {
+					theCurBPM = latestBpmChange.bpm;
+					time -= latestBpmChange.songTime;
+					stepCrochet = (60 / theCurBPM) * 1000;
 				}
 
 				var beat = Math.round((time / stepCrochet) * 48);
