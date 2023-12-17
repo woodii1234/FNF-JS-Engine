@@ -65,6 +65,7 @@ jobs:
           haxelib install hxjsonast
           haxelib install hxCodec 2.6.1
           haxelib install hscript
+          haxelib run set openfl 9.2.1
           haxelib git SScript https://github.com/Fearester2008/SScript
           haxelib install hxcpp-debug-server
           haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit
