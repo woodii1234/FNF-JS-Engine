@@ -59,8 +59,8 @@ jobs:
           haxelib install flixel 5.2.2
           haxelib run lime setup flixel
           haxelib run lime setup
-          haxelib install flixel-addons
-          haxelib install flixel-ui
+          haxelib install flixel-addons 3.0.2
+          haxelib install flixel-ui 2.5.0
           haxelib install tjson
           haxelib install hxjsonast
           haxelib install hxCodec 2.6.1
