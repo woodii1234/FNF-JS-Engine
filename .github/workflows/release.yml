@@ -31,7 +31,7 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ github.ref_name }}
         file: build.zip
-        asset_name: Windows64.zip
+        asset_name: FNF-JS-Engine.zip
         overwrite: false
 
   release-android:
@@ -54,7 +54,7 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ github.ref_name }}
         file: build.zip
-        asset_name: Android Build.zip
+        asset_name: FNF-JS-Engine-Android.zip
         overwrite: false
       
   release-linux:
@@ -78,7 +78,7 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ github.ref_name }}
         file: build.tar.gz
-        asset_name: Linux64.tar.gz
+        asset_name: FNF-JS-Engine-Linux.tar.gz
         overwrite: false
 
   release-mac:
@@ -101,5 +101,5 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ github.ref_name }}
         file: build.zip
-        asset_name: Mac64.zip
+        asset_name: FNF-JS-Engine-macOS.zip
         overwrite: false
