@@ -137,7 +137,7 @@ class Note extends FlxSprite
 
 	function quantCheck():Void 
 	{
-		if (ClientPrefs.noteColorStyle == 'Quant-Based' && !isSustainNote)
+		if (ClientPrefs.noteColorStyle == 'Quant-Based' && !isSustainNote && (ClientPrefs.showNotes && ClientPrefs.enableColorShader))
 			{
 				var time = strumTime;
 				var theCurBPM = Conductor.bpm;
@@ -423,7 +423,7 @@ class Note extends FlxSprite
 			animation.play(colArray[noteData % 4] + 'holdend');
 			if (ClientPrefs.showNotes)
 			{
-				if (ClientPrefs.noteColorStyle == 'Quant-Based')
+				if (ClientPrefs.noteColorStyle == 'Quant-Based' && ClientPrefs.enableColorShader)
 				{
 				colorSwap.hue = prevNote.colorSwap.hue;
 				colorSwap.saturation = prevNote.colorSwap.saturation;

@@ -8124,7 +8124,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 				final spr:StrumNote = playerStrums.members[note.noteData];
 
 				if(spr != null) {
-				if ((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.rainbowNotes) && ClientPrefs.showNotes) {
+				if ((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.rainbowNotes) && ClientPrefs.showNotes && ClientPrefs.enableColorShader) {
 				spr.playAnim('confirm', true, note.colorSwap.hue, note.colorSwap.saturation, note.colorSwap.brightness);
 				} else {
 				spr.playAnim('confirm', true, 0, 0, 0, ClientPrefs.noteColorStyle == 'Char-Based', note.mustPress, note.gfNote);
@@ -8136,7 +8136,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 				final spr = playerStrums.members[note.noteData];
 				if(spr != null)
 				{
-				if ((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.rainbowNotes) && ClientPrefs.showNotes) {
+				if ((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.rainbowNotes) && ClientPrefs.showNotes && ClientPrefs.enableColorShader) {
 				spr.playAnim('confirm', true, note.colorSwap.hue, note.colorSwap.saturation, note.colorSwap.brightness);
 				} else {
 				spr.playAnim('confirm', true, 0, 0, 0, ClientPrefs.noteColorStyle == 'Char-Based', note.mustPress, note.gfNote);
@@ -8300,7 +8300,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 					final spr:StrumNote = opponentStrums.members[daNote.noteData];
 
 					if(spr != null) {
-					if ((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.rainbowNotes) && ClientPrefs.showNotes) {
+					if ((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.rainbowNotes) && ClientPrefs.showNotes && ClientPrefs.enableColorShader) {
 					spr.playAnim('confirm', true, daNote.colorSwap.hue, daNote.colorSwap.saturation, daNote.colorSwap.brightness);
 					} else {
 					spr.playAnim('confirm', true, 0, 0, 0, ClientPrefs.noteColorStyle == 'Char-Based', false, daNote.gfNote);
@@ -8355,8 +8355,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 	}
 
 	public function spawnNoteSplash(x:Float, y:Float, data:Int, ?note:Note = null, ?hue:Float = 0, ?sat:Float = 0, ?brt:Float = 0, ?isGfNote:Bool = false, ?isDadNote:Bool = true) {
-		var skin:String = 'noteSplashes';
-		if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
+		var skin:String = (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) ? PlayState.SONG.splashSkin : 'noteSplashes';
 
 		if (data > -1 && data < ClientPrefs.arrowHSV.length)
 		{
@@ -8693,7 +8692,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 					cameraSpeed = 1;
 			}
 		}
-		var gamerValue = 20 * playbackRate;
+		final gamerValue = 20 * playbackRate;
 		if (!ClientPrefs.noSyncing && ClientPrefs.songLoading && playbackRate < 256) //much better resync code, doesn't just resync every step!!
 		{
 		if (FlxG.sound.music.time > Conductor.songPosition + gamerValue

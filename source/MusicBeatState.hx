@@ -162,7 +162,7 @@ class MusicBeatState extends FlxUIState
 	override function update(elapsed:Float)
 	{
 		//everyStep();
-		var oldStep:Int = curStep;
+		final oldStep:Int = curStep;
 
 		updateCurStep();
 		updateBeat();
@@ -206,7 +206,7 @@ class MusicBeatState extends FlxUIState
 	{
 		if(curStep < 0) return;
 
-		var lastSection:Int = curSection;
+		final lastSection:Int = curSection;
 		curSection = 0;
 		stepsToDo = 0;
 		for (i in 0...PlayState.SONG.notes.length)
