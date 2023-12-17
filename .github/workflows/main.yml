@@ -53,13 +53,27 @@ jobs:
           sudo apt-get install libvlc-dev
           sudo apt-get install libvlccore-dev
           haxelib setup ~/haxelib
-          haxelib install hxcpp > /dev/null --quiet
-          haxelib install hmm --quiet
-          haxelib run hmm install
+         haxelib install hxcpp 4.2.1 > /dev/null
+          haxelib install lime
+          haxelib install openfl
+          haxelib install flixel
+          haxelib run lime setup flixel
+          haxelib run lime setup
+          haxelib install flixel-addons
+          haxelib install flixel-ui
+          haxelib install tjson
+          haxelib install hxjsonast
+          haxelib install hxCodec 2.6.1
+          haxelib install hscript
+          haxelib install hxcpp-debug-server
+          haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit
+          haxelib git hscript-ex https://github.com/ianharrigan/hscript-ex
+          haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
+		
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
       - name: Compile
-        run: haxelib run lime build Project.xml linux --app-version="4.0.0-${{ github.run_id}}"
+        run: haxelib run lime build Project.xml linux --app-version="4.0.0-${{ github.run_id}}"  -D ${{ inputs.buildFlags }}
       - name: Clear Previous Cache
         uses: actions/github-script@main
         with:
