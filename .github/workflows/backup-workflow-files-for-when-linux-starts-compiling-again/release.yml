@@ -56,6 +56,30 @@ jobs:
         file: build.zip
         asset_name: FNF-JS-Engine-Android.zip
         overwrite: false
+      
+  release-linux:
+    name: Release linuxBuild
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download Linux artifact
+      uses: actions/download-artifact@v3
+      with:
+        path: build
+        name: linuxBuild
+    - name: Compress build
+      run: |
+        sudo apt-get install p7zip-full
+        7z a -y -ttar build.tar -w ./build/.
+        gzip build.tar
+    - name: Upload linuxBuild to release
+      uses: svenstaro/upload-release-action@2.5.0
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ github.ref_name }}
+        file: build.tar.gz
+        asset_name: FNF-JS-Engine-Linux.tar.gz
+        overwrite: false
 
   release-mac:
     name: Release macBuild

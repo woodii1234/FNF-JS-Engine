@@ -639,11 +639,11 @@ class Note extends FlxSprite
 
 	public function followStrumNote(myStrum:StrumNote, fakeCrochet:Float, songSpeed:Float = 1)
 	{
-		var strumX:Float = myStrum.x;
-		var strumY:Float = myStrum.y;
-		var strumAngle:Float = myStrum.angle;
-		var strumAlpha:Float = myStrum.alpha;
-		var strumDirection:Float = myStrum.direction;
+		final strumX:Float = myStrum.x;
+		final strumY:Float = myStrum.y;
+		final strumAngle:Float = myStrum.angle;
+		final strumAlpha:Float = myStrum.alpha;
+		final strumDirection:Float = myStrum.direction;
 
 		distance = (0.45 * (Conductor.songPosition - strumTime) * songSpeed * multSpeed);
 		if (!myStrum.downScroll) distance *= -1;
