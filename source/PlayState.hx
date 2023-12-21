@@ -353,6 +353,7 @@ class PlayState extends MusicBeatState
 	public var scoreTxtUpdateFrame:Int = 0;
 	public var judgeCountUpdateFrame:Int = 0;
 	public var compactUpdateFrame:Int = 0;
+	public var popUpsFrame:Int = 0;
 
 	var notesHitArray:Array<Float> = [];
 	var oppNotesHitArray:Array<Float> = [];
@@ -512,7 +513,12 @@ class PlayState extends MusicBeatState
 		var formattedScore:String;
 		var formattedSongMisses:String;
 		var formattedCombo:String;
+		var formattedMaxCombo:String;
 		var formattedNPS:String;
+		var formattedMaxNPS:String;
+		var formattedOppNPS:String;
+		var formattedMaxOppNPS:String;
+		var formattedEnemyHits:String;
 		var npsString:String;
 		var accuracy:String;
 		var fcString:String;
@@ -632,7 +638,7 @@ class PlayState extends MusicBeatState
 		trollingMode = ClientPrefs.getGameplaySetting('thetrollingever', false);
 		jackingtime = ClientPrefs.getGameplaySetting('jacks', 0);
 
-		if (trollingMode)
+		if (trollingMode || SONG.song.toLowerCase() == 'anti-cheat-song')
 			shouldKillNotes = false;
 
 		if (ClientPrefs.showcaseMode)
@@ -3846,7 +3852,7 @@ class PlayState extends MusicBeatState
 		formattedSongMisses = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(songMisses, false) : compactMisses;
 		formattedCombo = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(combo, false) : compactCombo;
 		formattedNPS = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(nps, false) : compactNPS;
-		final formattedMaxNPS = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(maxNPS, false) : formatCompactNumber(maxNPS);
+		formattedMaxNPS = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(maxNPS, false) : formatCompactNumber(maxNPS);
 		npsString = ClientPrefs.showNPS ? (ClientPrefs.hudType != 'Leather Engine' ? ' | ' : ' ~ ') + (cpuControlled && !ClientPrefs.communityGameBot ? 'Bot ' : '') + 'NPS/Max: ' + formattedNPS + '/' + formattedMaxNPS : '';
 		accuracy = Highscore.floorDecimal(ratingPercent * 100, 2) + '%';
 		fcString = ratingFC;
@@ -4619,6 +4625,7 @@ class PlayState extends MusicBeatState
 	var pbRM:Float = 2.0;
 	override public function update(elapsed:Float)
 	{
+		popUpsFrame = 0;
 		if (health <= 0 && practiceMode && ClientPrefs.zeroHealthLimit) 
 		{
 		health = 0; //set health to 0 if on practice mode and you get to 0%
@@ -5299,8 +5306,7 @@ if (ClientPrefs.showNPS) {
 				}
 
 				if(updateTime) {
-					var curTime:Float = Conductor.songPosition - ClientPrefs.noteOffset;
-					if (curTime < 0) curTime = 0;
+					final curTime:Float = Conductor.songPosition - ClientPrefs.noteOffset;
 					songPercent = (curTime / songLength);
 					final songDurationSeconds:Float = FlxMath.roundDecimal(songLength / 1000, 0);
 					songPercentThing = FlxMath.roundDecimal(curTime / songLength * 100, ClientPrefs.percentDecimals);
@@ -5360,8 +5366,7 @@ if (ClientPrefs.showNPS) {
 			}
 
 				if(updateThePercent) {
-					var curTime:Float = Conductor.songPosition - ClientPrefs.noteOffset;
-					if(curTime < 0) curTime = 0;
+					final curTime:Float = Conductor.songPosition - ClientPrefs.noteOffset;
 					songPercent = (curTime / songLength);
 					songPercentThing = FlxMath.roundDecimal(curTime / songLength * 100, ClientPrefs.percentDecimals);
 					if (ClientPrefs.hudType != 'Kade Engine' && ClientPrefs.hudType != 'Dave and Bambi')
@@ -7010,6 +7015,7 @@ if (ClientPrefs.showNPS) {
 
 	private function popUpScore(note:Note = null):Void
 	{
+		popUpsFrame += 1;
 		final noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset) / playbackRate;
 		final wife:Float = EtternaFunctions.wife3(noteDiff, Conductor.timeScale) / playbackRate;
 
@@ -7125,284 +7131,284 @@ if (ClientPrefs.showNPS) {
 			}
 		}
 
-		if (ClientPrefs.ratesAndCombo && ClientPrefs.ratingType != 'Simple') {
-		if (PlayState.isPixelStage)
-		{
-			pixelShitPart1 = 'pixelUI/';
-			pixelShitPart2 = '-pixel';
-		}
-		switch (ClientPrefs.ratingType)
-		{
-			case 'Doki Doki+': pixelShitPart1 = 'dokistuff/';
-			case 'Tails Gets Trolled V4': pixelShitPart1 = 'tgtstuff/';
-			case 'Kade Engine': pixelShitPart1 = 'kadethings/';
-			case 'Base FNF': pixelShitPart1 = '';
-			default: pixelShitPart1 = ClientPrefs.ratingType + '/';
-		}
-		if (allSicks && ClientPrefs.marvRateColor == 'Golden' && noteDiff < ClientPrefs.sickWindow && ClientPrefs.ratingType != 'Tails Gets Trolled V4' && ClientPrefs.ratingType != 'Doki Doki+' && !ClientPrefs.noMarvJudge)
-		{
-			pixelShitPart1 = 'goldstuff/';
-		}
-		if (!allSicks && ClientPrefs.marvRateColor == 'Golden' && noteDiff < ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && !ClientPrefs.noMarvJudge)
-		{
-			pixelShitPart1 = 'goldstuff/';
-		}
-		final rating = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + daRating.image + pixelShitPart2));
-		rating.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
-		rating.screenCenter();
-		rating.x = offset - 40;
-		rating.y -= 60;
-		rating.acceleration.y = 550 * playbackRate * playbackRate;
-		rating.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
-		rating.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
-		rating.visible = (!ClientPrefs.hideHud && showRating);
-		rating.x += ClientPrefs.comboOffset[0];
-		rating.y -= ClientPrefs.comboOffset[1];
-if (!allSicks && ClientPrefs.colorRatingFC && perfects > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.noMarvJudge) 
-		{
-		rating.color = judgeColours.get('perfect');
-		}
-if (!allSicks && ClientPrefs.colorRatingFC && sicks > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.marvRateColor != 'Golden' && !ClientPrefs.noMarvJudge) 
-		{
-		rating.color = judgeColours.get('sick');
-		}
-if (!allSicks && ClientPrefs.colorRatingFC && goods > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
-		{
-		rating.color = judgeColours.get('good');
-		}
-if (!allSicks && ClientPrefs.colorRatingFC && bads > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
-		{
-		rating.color = judgeColours.get('bad');
-		}
-if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
-		{
-		rating.color = judgeColours.get('shit');
-		}
-		if (!allSicks && ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
+			if (ClientPrefs.ratesAndCombo && ClientPrefs.ratingType != 'Simple' && popUpsFrame <= 3) {
+				if (PlayState.isPixelStage)
 				{
+					pixelShitPart1 = 'pixelUI/';
+					pixelShitPart2 = '-pixel';
+				}
+				switch (ClientPrefs.ratingType)
+				{
+					case 'Doki Doki+': pixelShitPart1 = 'dokistuff/';
+					case 'Tails Gets Trolled V4': pixelShitPart1 = 'tgtstuff/';
+					case 'Kade Engine': pixelShitPart1 = 'kadethings/';
+					case 'Base FNF': pixelShitPart1 = '';
+					default: pixelShitPart1 = ClientPrefs.ratingType + '/';
+				}
+				if (allSicks && ClientPrefs.marvRateColor == 'Golden' && noteDiff < ClientPrefs.sickWindow && ClientPrefs.ratingType != 'Tails Gets Trolled V4' && ClientPrefs.ratingType != 'Doki Doki+' && !ClientPrefs.noMarvJudge)
+				{
+					pixelShitPart1 = 'goldstuff/';
+				}
+				if (!allSicks && ClientPrefs.marvRateColor == 'Golden' && noteDiff < ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && !ClientPrefs.noMarvJudge)
+				{
+					pixelShitPart1 = 'goldstuff/';
+				}
+				final rating = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + daRating.image + pixelShitPart2));
+				rating.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
+				rating.screenCenter();
+				rating.x = offset - 40;
+				rating.y -= 60;
+				rating.acceleration.y = 550 * playbackRate * playbackRate;
+				rating.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
+				rating.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
+				rating.visible = (!ClientPrefs.hideHud && showRating);
+				rating.x += ClientPrefs.comboOffset[0];
+				rating.y -= ClientPrefs.comboOffset[1];
+		if (!allSicks && ClientPrefs.colorRatingFC && perfects > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.noMarvJudge) 
+				{
+				rating.color = judgeColours.get('perfect');
+				}
+		if (!allSicks && ClientPrefs.colorRatingFC && sicks > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.marvRateColor != 'Golden' && !ClientPrefs.noMarvJudge) 
+				{
+				rating.color = judgeColours.get('sick');
+				}
+		if (!allSicks && ClientPrefs.colorRatingFC && goods > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
+				{
+				rating.color = judgeColours.get('good');
+				}
+		if (!allSicks && ClientPrefs.colorRatingFC && bads > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
+				{
+				rating.color = judgeColours.get('bad');
+				}
+		if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
+				{
+				rating.color = judgeColours.get('shit');
+				}
+				if (!allSicks && ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
+						{
+							switch (daRating.name) //This is so stupid, but it works
+							{
+							case 'sick':  rating.color = FlxColor.CYAN;
+							case 'good': rating.color = FlxColor.LIME;
+							case 'bad': rating.color = FlxColor.ORANGE;
+							case 'shit': rating.color = FlxColor.RED;
+							default: rating.color = FlxColor.WHITE;
+							}
+						}
+				insert(members.indexOf(strumLineNotes), rating);
+
+				if (!PlayState.isPixelStage)
+				{
+					rating.setGraphicSize(Std.int(rating.width * 0.7));
+					rating.antialiasing = ClientPrefs.globalAntialiasing;
+				}
+				else
+				{
+					rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.85));
+				}
+
+				rating.updateHitbox();
+
+				final seperatedScore:Array<Int> = [];
+				for (i in 0...Std.string(Std.int(combo)).length) {
+					seperatedScore.push(Std.parseInt(Std.string(combo).split("")[i]));
+				}
+
+				if (!ClientPrefs.comboStacking)
+				{
+					if (lastRating != null) 
+					{
+						FlxTween.cancelTweensOf(lastRating);
+						remove(lastRating, true);
+						lastRating.destroy();
+					}
+						lastRating = rating;
+					if (lastScore != null) {
+						for (sprite in lastScore) {
+							FlxTween.cancelTweensOf(sprite);
+							remove(sprite, true);
+							sprite.destroy();
+						}
+						lastScore = []; // Clear the array
+					}
+				}
+				for (daLoop=>i in seperatedScore)
+				{
+					final numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + 'num' + Std.int(i) + pixelShitPart2));
+					numScore.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
+					numScore.screenCenter();
+					numScore.x = offset + (43 * daLoop) - 90;
+					numScore.y += 80;
+
+					numScore.x += ClientPrefs.comboOffset[2];
+					numScore.y -= ClientPrefs.comboOffset[3];
+					if (ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && noteDiff >= ClientPrefs.perfectWindow) numScore.color = rating.color;
+			
+					if (!ClientPrefs.comboStacking)
+						lastScore.push(numScore);
+
+					if (!PlayState.isPixelStage)
+					{
+						numScore.antialiasing = ClientPrefs.globalAntialiasing;
+						numScore.setGraphicSize(Std.int(numScore.width * 0.5));
+					}
+					else
+					{
+						numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
+					}
+					numScore.updateHitbox();
+
+					numScore.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
+					numScore.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
+					numScore.velocity.x = FlxG.random.float(-5, 5) * playbackRate;
+					numScore.visible = !ClientPrefs.hideHud;
+
+					if(showComboNum)
+						insert(members.indexOf(strumLineNotes), numScore);
+
+					FlxTween.tween(numScore, {alpha: 0}, 0.2 / playbackRate, {
+						onComplete: function(tween:FlxTween)
+						{
+							numScore.destroy();
+						},
+						startDelay: Conductor.crochet * 0.002 / playbackRate
+					});
+				}
+
+				if (ClientPrefs.comboPopup && ClientPrefs.ratingType != 'Simple' && popUpsFrame <= 3)
+				{
+					final comboSpr = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + 'combo' + pixelShitPart2));
+					comboSpr.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
+					comboSpr.screenCenter();
+					comboSpr.x = offset;
+					comboSpr.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
+					comboSpr.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
+					comboSpr.visible = (!ClientPrefs.hideHud && showCombo);
+					comboSpr.x += ClientPrefs.comboOffset[0];
+					comboSpr.y -= ClientPrefs.comboOffset[1];
+					comboSpr.y += 60;
+					comboSpr.color = rating.color;
+					comboSpr.velocity.x += FlxG.random.int(1, 10) * playbackRate;
+					if (ClientPrefs.comboPopup && !cpuControlled)
+					{
+						insert(members.indexOf(strumLineNotes), comboSpr);
+					}
+					comboSpr.x = offset + (43 * Std.string(combo).length) - 90 + 50;
+					if (!ClientPrefs.comboStacking)
+					{
+						if (lastCombo != null) 
+						{
+							FlxTween.cancelTweensOf(lastCombo);
+							remove(lastCombo, true);
+							lastCombo.destroy();
+						}
+							lastCombo = comboSpr;
+					}
+					if (!PlayState.isPixelStage)
+					{
+						comboSpr.setGraphicSize(Std.int(comboSpr.width * 0.7));
+						comboSpr.antialiasing = ClientPrefs.globalAntialiasing;
+					}
+					else
+					{
+						comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.85));
+					}
+						comboSpr.updateHitbox();
+					FlxTween.tween(comboSpr, {alpha: 0}, 0.2 / playbackRate, {
+						onComplete: function(tween:FlxTween)
+						{
+							comboSpr.destroy();
+						},
+						startDelay: Conductor.crochet * 0.002 / playbackRate
+					});
+				}
+
+					FlxTween.tween(rating, {alpha: 0}, 0.2 / playbackRate, {
+						startDelay: Conductor.crochet * 0.001 / playbackRate,
+						onComplete: function(tween:FlxTween)
+						{
+							rating.destroy();
+						}
+					});
+				}
+
+				if (ClientPrefs.ratesAndCombo && ClientPrefs.showMS && !ClientPrefs.hideHud && popUpsFrame <= 3) {
+					FlxTween.cancelTweensOf(msTxt);
+					msTxt.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
+					msTxt.visible = true;
+					msTxt.screenCenter();
+					msTxt.x = (ClientPrefs.comboPopup ? offset + 280 : offset + 80);
+					msTxt.alpha = 1;
+					msTxt.text = FlxMath.roundDecimal(-noteDiff, 3) + " MS";
+					if (cpuControlled && !ClientPrefs.communityGameBot) msTxt.text = "0 MS (Bot)";
+					msTxt.x += ClientPrefs.comboOffset[0];
+					msTxt.y -= ClientPrefs.comboOffset[1];
+					if (combo >= 1000000) msTxt.x += 30;
+					if (combo >= 100000) msTxt.x += 30;
+					if (combo >= 10000) msTxt.x += 30;
+					FlxTween.tween(msTxt, 
+						{y: msTxt.y + 8}, 
+						0.1 / playbackRate,
+						{onComplete: function(_){
+
+								FlxTween.tween(msTxt, {alpha: 0}, 0.2 / playbackRate, {
+									// ease: FlxEase.circOut,
+									onComplete: function(_){msTxt.visible = false;},
+									startDelay: Conductor.stepCrochet * 0.005 / playbackRate
+								});
+							}
+						});
 					switch (daRating.name) //This is so stupid, but it works
 					{
-					case 'sick':  rating.color = FlxColor.CYAN;
-					case 'good': rating.color = FlxColor.LIME;
-					case 'bad': rating.color = FlxColor.ORANGE;
-					case 'shit': rating.color = FlxColor.RED;
-					default: rating.color = FlxColor.WHITE;
+					case 'perfect': msTxt.color = FlxColor.YELLOW;
+					case 'sick':  msTxt.color = FlxColor.CYAN;
+					case 'good': msTxt.color = FlxColor.LIME;
+					case 'bad': msTxt.color = FlxColor.ORANGE;
+					case 'shit': msTxt.color = FlxColor.RED;
+					default: msTxt.color = FlxColor.WHITE;
 					}
 				}
-		insert(members.indexOf(strumLineNotes), rating);
 
-		if (!PlayState.isPixelStage)
-		{
-			rating.setGraphicSize(Std.int(rating.width * 0.7));
-			rating.antialiasing = ClientPrefs.globalAntialiasing;
-		}
-		else
-		{
-			rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.85));
-		}
-
-		rating.updateHitbox();
-
-		final seperatedScore:Array<Int> = [];
-		for (i in 0...Std.string(Std.int(combo)).length) {
-			seperatedScore.push(Std.parseInt(Std.string(combo).split("")[i]));
-		}
-
-		if (!ClientPrefs.comboStacking)
-		{
-			if (lastRating != null) 
-			{
-				FlxTween.cancelTweensOf(lastRating);
-				remove(lastRating, true);
-				lastRating.destroy();
-			}
-				lastRating = rating;
-			if (lastScore != null) {
-				for (sprite in lastScore) {
-					FlxTween.cancelTweensOf(sprite);
-					remove(sprite, true);
-					sprite.destroy();
-				}
-				lastScore = []; // Clear the array
-			}
-		}
-		for (daLoop=>i in seperatedScore)
-		{
-			final numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + 'num' + Std.int(i) + pixelShitPart2));
-			numScore.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
-			numScore.screenCenter();
-			numScore.x = offset + (43 * daLoop) - 90;
-			numScore.y += 80;
-
-			numScore.x += ClientPrefs.comboOffset[2];
-			numScore.y -= ClientPrefs.comboOffset[3];
-			if (ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && noteDiff >= ClientPrefs.perfectWindow) numScore.color = rating.color;
-			
-			if (!ClientPrefs.comboStacking)
-				lastScore.push(numScore);
-
-			if (!PlayState.isPixelStage)
-			{
-				numScore.antialiasing = ClientPrefs.globalAntialiasing;
-				numScore.setGraphicSize(Std.int(numScore.width * 0.5));
-			}
-			else
-			{
-				numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
-			}
-			numScore.updateHitbox();
-
-			numScore.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
-			numScore.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
-			numScore.velocity.x = FlxG.random.float(-5, 5) * playbackRate;
-			numScore.visible = !ClientPrefs.hideHud;
-
-			if(showComboNum)
-				insert(members.indexOf(strumLineNotes), numScore);
-
-			FlxTween.tween(numScore, {alpha: 0}, 0.2 / playbackRate, {
-				onComplete: function(tween:FlxTween)
-				{
-					numScore.destroy();
-				},
-				startDelay: Conductor.crochet * 0.002 / playbackRate
-			});
-		}
-
-		if (ClientPrefs.comboPopup && ClientPrefs.ratingType != 'Simple')
-		{
-			final comboSpr = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + 'combo' + pixelShitPart2));
-			comboSpr.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
-			comboSpr.screenCenter();
-			comboSpr.x = offset;
-			comboSpr.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
-			comboSpr.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
-			comboSpr.visible = (!ClientPrefs.hideHud && showCombo);
-			comboSpr.x += ClientPrefs.comboOffset[0];
-			comboSpr.y -= ClientPrefs.comboOffset[1];
-			comboSpr.y += 60;
-			comboSpr.color = rating.color;
-			comboSpr.velocity.x += FlxG.random.int(1, 10) * playbackRate;
-			if (ClientPrefs.comboPopup && !cpuControlled)
-			{
-				insert(members.indexOf(strumLineNotes), comboSpr);
-			}
-			comboSpr.x = offset + (43 * Std.string(combo).length) - 90 + 50;
-			if (!ClientPrefs.comboStacking)
-			{
-				if (lastCombo != null) 
-				{
-					FlxTween.cancelTweensOf(lastCombo);
-					remove(lastCombo, true);
-					lastCombo.destroy();
-				}
-					lastCombo = comboSpr;
-			}
-			if (!PlayState.isPixelStage)
-			{
-				comboSpr.setGraphicSize(Std.int(comboSpr.width * 0.7));
-				comboSpr.antialiasing = ClientPrefs.globalAntialiasing;
-			}
-			else
-			{
-				comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.85));
-			}
-				comboSpr.updateHitbox();
-			FlxTween.tween(comboSpr, {alpha: 0}, 0.2 / playbackRate, {
-				onComplete: function(tween:FlxTween)
-				{
-					comboSpr.destroy();
-				},
-				startDelay: Conductor.crochet * 0.002 / playbackRate
-			});
-		}
-
-			FlxTween.tween(rating, {alpha: 0}, 0.2 / playbackRate, {
-				startDelay: Conductor.crochet * 0.001 / playbackRate,
-				onComplete: function(tween:FlxTween)
-				{
-					rating.destroy();
-				}
-			});
-		}
-
-		if (ClientPrefs.showMS && !ClientPrefs.hideHud) {
-			FlxTween.cancelTweensOf(msTxt);
-			msTxt.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
-			msTxt.visible = true;
-			msTxt.screenCenter();
-			msTxt.x = (ClientPrefs.comboPopup ? offset + 280 : offset + 80);
-			msTxt.alpha = 1;
-			msTxt.text = FlxMath.roundDecimal(-noteDiff, 3) + " MS";
-			if (cpuControlled && !ClientPrefs.communityGameBot) msTxt.text = "0 MS (Bot)";
-			msTxt.x += ClientPrefs.comboOffset[0];
-			msTxt.y -= ClientPrefs.comboOffset[1];
-			if (combo >= 1000000) msTxt.x += 30;
-			if (combo >= 100000) msTxt.x += 30;
-			if (combo >= 10000) msTxt.x += 30;
-			FlxTween.tween(msTxt, 
-				{y: msTxt.y + 8}, 
-				0.1 / playbackRate,
-				{onComplete: function(_){
-
-						FlxTween.tween(msTxt, {alpha: 0}, 0.2 / playbackRate, {
-							// ease: FlxEase.circOut,
-							onComplete: function(_){msTxt.visible = false;},
-							startDelay: Conductor.stepCrochet * 0.005 / playbackRate
+				if (ClientPrefs.ratesAndCombo && ClientPrefs.ratingType == 'Simple' && popUpsFrame <= 3 && !ClientPrefs.hideHud) {
+					FlxTween.cancelTweensOf(judgeTxt);
+					FlxTween.cancelTweensOf(judgeTxt.scale);
+					judgeTxt.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
+					judgeTxt.visible = true;
+					judgeTxt.screenCenter(X);
+					judgeTxt.y = !ClientPrefs.downScroll ? botplayTxt.y + 60 : botplayTxt.y - 60;
+					judgeTxt.alpha = 1;
+					switch (daRating.name)
+					{
+					case 'perfect': 
+						judgeTxt.color = FlxColor.YELLOW;
+						judgeTxt.text = hitStrings[0] + '\n' + FlxStringUtil.formatMoney(combo, false);
+					case 'sick':  
+						judgeTxt.color = FlxColor.CYAN;
+						judgeTxt.text = hitStrings[1] + '\n' + FlxStringUtil.formatMoney(combo, false);
+					case 'good': 
+						judgeTxt.color = FlxColor.LIME;
+						judgeTxt.text = hitStrings[2] + '\n' + FlxStringUtil.formatMoney(combo, false);
+					case 'bad':
+						judgeTxt.color = FlxColor.ORANGE;
+						judgeTxt.text = hitStrings[3] + '\n' + FlxStringUtil.formatMoney(combo, false);
+					case 'shit': 
+						judgeTxt.color = FlxColor.RED;
+						judgeTxt.text = hitStrings[4] + '\n' + FlxStringUtil.formatMoney(combo, false);
+					default: judgeTxt.color = FlxColor.WHITE;
+					}
+					judgeTxt.scale.x = 1.075;
+					judgeTxt.scale.y = 1.075;
+					FlxTween.tween(judgeTxt.scale, 
+						{x: 1, y: 1}, 
+						0.1 / playbackRate,
+						{onComplete: function(_){
+								FlxTween.tween(judgeTxt.scale, {x: 0, y: 0}, 0.1 / playbackRate, {
+									onComplete: function(_){judgeTxt.visible = false;},
+									startDelay: Conductor.stepCrochet * 0.005 / playbackRate
+								});
+							}
 						});
-					}
-				});
-			switch (daRating.name) //This is so stupid, but it works
-			{
-			case 'perfect': msTxt.color = FlxColor.YELLOW;
-			case 'sick':  msTxt.color = FlxColor.CYAN;
-			case 'good': msTxt.color = FlxColor.LIME;
-			case 'bad': msTxt.color = FlxColor.ORANGE;
-			case 'shit': msTxt.color = FlxColor.RED;
-			default: msTxt.color = FlxColor.WHITE;
 			}
-		}
-
-		if (ClientPrefs.ratingType == 'Simple' && !ClientPrefs.hideHud) {
-			FlxTween.cancelTweensOf(judgeTxt);
-			FlxTween.cancelTweensOf(judgeTxt.scale);
-			judgeTxt.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
-			judgeTxt.visible = true;
-			judgeTxt.screenCenter(X);
-			judgeTxt.y = !ClientPrefs.downScroll ? botplayTxt.y + 60 : botplayTxt.y - 60;
-			judgeTxt.alpha = 1;
-			switch (daRating.name)
-			{
-			case 'perfect': 
-				judgeTxt.color = FlxColor.YELLOW;
-				judgeTxt.text = hitStrings[0] + '\n' + FlxStringUtil.formatMoney(combo, false);
-			case 'sick':  
-				judgeTxt.color = FlxColor.CYAN;
-				judgeTxt.text = hitStrings[1] + '\n' + FlxStringUtil.formatMoney(combo, false);
-			case 'good': 
-				judgeTxt.color = FlxColor.LIME;
-				judgeTxt.text = hitStrings[2] + '\n' + FlxStringUtil.formatMoney(combo, false);
-			case 'bad':
-				judgeTxt.color = FlxColor.ORANGE;
-				judgeTxt.text = hitStrings[3] + '\n' + FlxStringUtil.formatMoney(combo, false);
-			case 'shit': 
-				judgeTxt.color = FlxColor.RED;
-				judgeTxt.text = hitStrings[4] + '\n' + FlxStringUtil.formatMoney(combo, false);
-			default: judgeTxt.color = FlxColor.WHITE;
-			}
-			judgeTxt.scale.x = 1.075;
-			judgeTxt.scale.y = 1.075;
-			FlxTween.tween(judgeTxt.scale, 
-				{x: 1, y: 1}, 
-				0.1 / playbackRate,
-				{onComplete: function(_){
-						FlxTween.tween(judgeTxt.scale, {x: 0, y: 0}, 0.1 / playbackRate, {
-							onComplete: function(_){judgeTxt.visible = false;},
-							startDelay: Conductor.stepCrochet * 0.005 / playbackRate
-						});
-					}
-				});
-		}
 	}
 
 	public var strumsBlocked:Array<Bool> = [];
@@ -7866,7 +7872,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 				combo += 1 * polyphony;
 				totalNotesPlayed += 1 * polyphony;
 				missCombo = 0;
-				popUpScore(note);
+				if (popUpsFrame <= 3) popUpScore(note);
 			}
 			if (note.isSustainNote && cpuControlled && ClientPrefs.holdNoteHits && ClientPrefs.lessBotLag)
 			{
@@ -7911,7 +7917,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 				notesHitArray.push(1 * polyphony);
 				notesHitDateArray.push(Date.now());
 				}
-				popUpScore(note);
+				if (popUpsFrame <= 3) popUpScore(note);
 			}
 			if (!note.isSustainNote && !cpuControlled && ClientPrefs.lessBotLag && !ClientPrefs.communityGameBot)
 			{
@@ -7946,7 +7952,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 				notesHitArray.push(1 * polyphony);
 				notesHitDateArray.push(Date.now());
 				}
-				popUpScore(note);
+				if (popUpsFrame <= 3) popUpScore(note);
 			}
 
 			if (combo > maxCombo)
@@ -8180,14 +8186,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 				char.specialAnim = true;
 				char.heyTimer = 0.6;
 			} else if(!daNote.noAnimation) {
-				var altAnim:String = daNote.animSuffix;
-
-				if (SONG.notes[curSection] != null)
-				{
-					if (SONG.notes[curSection].altAnim && !SONG.notes[curSection].gfSection && !opponentChart) {
-						altAnim = '-alt';
-					}
-				}
+				final altAnim:String = (SONG.notes[curSection] != null && SONG.notes[curSection].altAnim && !SONG.notes[curSection].gfSection && !opponentChart) ? '-alt' : daNote.animSuffix;
 
 				final animToPlay:String = singAnimations[Std.int(Math.abs(daNote.noteData))] + altAnim;
 				if(daNote.gfNote && ClientPrefs.charsAndBG) {
@@ -8288,11 +8287,12 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 			if (SONG.needsVoices)
 				vocals.volume = 1;
 
+
+			if (ClientPrefs.opponentLightStrum)
+			{
 			var time:Float = 0;
 			if (ClientPrefs.strumLitStyle == 'Full Anim') time = 0.15 / playbackRate;
 			if (ClientPrefs.strumLitStyle == 'BPM Based') time = (Conductor.stepCrochet * 1.5 / 1000) / playbackRate;
-			if (ClientPrefs.opponentLightStrum)
-			{
 			if(daNote.isSustainNote && (ClientPrefs.showNotes && !daNote.animation.curAnim.name.endsWith('end'))) {
 			if (ClientPrefs.strumLitStyle == 'Full Anim') time += 0.15 / playbackRate;
 			if (ClientPrefs.strumLitStyle == 'BPM Based') time += (Conductor.stepCrochet * 1.5 / 1000) / playbackRate;
@@ -8342,12 +8342,7 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 
 	public function spawnNoteSplashOnNote(isDad:Bool, note:Note, ?isGf:Bool = false) {
 		if(ClientPrefs.noteSplashes && note != null) {
-			var strum:StrumNote = playerStrums.members[note.noteData];
-			if (isDad) {
-			strum = opponentStrums.members[note.noteData];
-			} else {
-			strum = playerStrums.members[note.noteData];
-			}
+			final strum:StrumNote = !isDad ? playerStrums.members[note.noteData] : opponentStrums.members[note.noteData];
 			if(strum != null) {
 				ClientPrefs.showNotes && ClientPrefs.enableColorShader ? spawnNoteSplash(strum.x, strum.y, note.noteData, null, note.colorSwap.hue, note.colorSwap.saturation, note.colorSwap.brightness, isGf, isDad) : spawnNoteSplash(strum.x, strum.y, note.noteData, null, 0, 0, 0, isGf, isDad);
 			}
@@ -9211,12 +9206,12 @@ if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPref
 
 		formattedSongMisses = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(songMisses, false) : compactMisses;
 		formattedCombo = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(combo, false) : compactCombo;
-		var formattedMaxCombo:String = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(maxCombo, false) : compactMaxCombo;
+		formattedMaxCombo = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(maxCombo, false) : compactMaxCombo;
 		formattedNPS = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(nps, false) : compactNPS;
-		final formattedMaxNPS = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(maxNPS, false) : formatCompactNumber(maxNPS);
-		final formattedOppNPS = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(oppNPS, false) : formatCompactNumber(oppNPS);
-		final formattedMaxOppNPS = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(maxOppNPS, false) : formatCompactNumber(maxOppNPS);
-		final formattedEnemyHits = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(enemyHits, false) : formatCompactNumber(enemyHits);
+		formattedMaxNPS = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(maxNPS, false) : formatCompactNumber(maxNPS);
+		formattedOppNPS = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(oppNPS, false) : formatCompactNumber(oppNPS);
+		formattedMaxOppNPS = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(maxOppNPS, false) : formatCompactNumber(maxOppNPS);
+		formattedEnemyHits = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(enemyHits, false) : formatCompactNumber(enemyHits);
 		if (!ClientPrefs.noMarvJudge)
 		{
 		judgementCounter.text = 'Combo (Max): ' + formattedCombo + ' (' + formattedMaxCombo + ')\nHits: ' + (!ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(totalNotesPlayed, false) : compactTotalPlays) + ' / ' + FlxStringUtil.formatMoney(totalNotes, false) + ' (' + FlxMath.roundDecimal((totalNotesPlayed/totalNotes) * 100, 2) + '%)\nPerfects!!!: ' + perfects + '\nSicks!!: ' + sicks + '\nGoods!: ' + goods + '\nBads: ' + bads + '\nShits: ' + shits + '\nMisses: ' + formattedSongMisses + (ClientPrefs.comboScoreEffect ? '\nScore Multiplier: ' + comboMultiplier + 'x' : '');
