@@ -31,6 +31,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var progAudioLoad:Bool = false;
 	public static var JSEngineRecharts:Bool = false;
 	public static var alwaysTriggerCutscene:Bool = false;
+	public static var missRating:Bool = false;
 	public static var oppNoteSplashes:Bool = true;
 	public static var instaRestart:Bool = false;
 	public static var charsAndBG:Bool = true;
@@ -248,6 +249,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.evenLessBotLag = evenLessBotLag;
 		FlxG.save.data.JSEngineRecharts = JSEngineRecharts;
 		FlxG.save.data.alwaysTriggerCutscene = alwaysTriggerCutscene;
+		FlxG.save.data.missRating = missRating;
 		FlxG.save.data.framerate = framerate;
 		//FlxG.save.data.cursing = cursing;
 		//FlxG.save.data.violence = violence;
@@ -434,6 +436,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.alwaysTriggerCutscene != null) {
 			alwaysTriggerCutscene = FlxG.save.data.alwaysTriggerCutscene;
+		}
+		if(FlxG.save.data.missRating != null) {
+			missRating = FlxG.save.data.missRating;
 		}
 		if(FlxG.save.data.progAudioLoad != null) {
 			progAudioLoad = FlxG.save.data.progAudioLoad;

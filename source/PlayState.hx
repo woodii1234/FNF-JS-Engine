@@ -303,7 +303,7 @@ class PlayState extends MusicBeatState
 	public var shownScore:Float = 0;
 
 	public var fcStrings:Array<String> = ['No Play', 'PFC', 'SFC', 'GFC', 'BFC', 'FC', 'SDCB', 'Clear', 'TDCB', 'QDCB'];
-	public var hitStrings:Array<String> = ['Perfect!!!', 'Sick!!', 'Good!', 'Bad.', 'Shit.'];
+	public var hitStrings:Array<String> = ['Perfect!!!', 'Sick!!', 'Good!', 'Bad.', 'Shit.', 'Miss..'];
 
 	//Gameplay settings
 	public var healthGain:Float = 1;
@@ -354,6 +354,9 @@ class PlayState extends MusicBeatState
 	public var judgeCountUpdateFrame:Int = 0;
 	public var compactUpdateFrame:Int = 0;
 	public var popUpsFrame:Int = 0;
+	public var missRecalcsPerFrame:Int = 0;
+	public var charAnimsFrame:Int = 0;
+	public var oppAnimsFrame:Int = 0;
 
 	var notesHitArray:Array<Float> = [];
 	var oppNotesHitArray:Array<Float> = [];
@@ -688,18 +691,18 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.hudType == 'Tails Gets Trolled V4') 
 		{
 			fcStrings = ['No Play', 'KFC', 'AFC', 'CFC', 'SDC', 'FC', 'SDCB', 'Clear', 'TDCB', 'QDCB'];
-			hitStrings = ['Killer!!!', 'Awesome!!', 'Cool!', 'Gay.', 'Retarded.'];
+			hitStrings = ['Killer!!!', 'Awesome!!', 'Cool!', 'Gay.', 'Retarded.', 'Fail..'];
 		}
 		if (ClientPrefs.longFCName) fcStrings = ['No Play', 'Perfect Full Combo', 'Sick Full Combo', 'Great Full Combo', 'Bad Full Combo', 'Full Combo', 'Single Digit Misses', 'Clear', 'TDCB', 'QDCB'];
 		if (ClientPrefs.longFCName && ClientPrefs.hudType == 'Tails Gets Trolled V4') 
 		{
 			fcStrings = ['No Play', 'Killer Full Combo', 'Awesome Full Combo', 'Cool Full Combo', 'Gay Full Combo', 'Full Combo', 'Single Digit Misses', 'Clear', 'TDCB', 'QDCB'];
-			hitStrings = ['Killer!!!', 'Awesome!!', 'Cool!', 'Gay.', 'Retarded.'];
+			hitStrings = ['Killer!!!', 'Awesome!!', 'Cool!', 'Gay.', 'Retarded.', 'Fail..'];
 		}
 
 		if (ClientPrefs.hudType == 'Doki Doki+') 
 		{
-			hitStrings = ['Very Doki!!!', 'Doki!!', 'Good!', 'OK.', 'No.'];
+			hitStrings = ['Very Doki!!!', 'Doki!!', 'Good!', 'OK.', 'No.', 'Miss..'];
 		}
 
 		GameOverSubstate.resetVariables();
@@ -4625,7 +4628,6 @@ class PlayState extends MusicBeatState
 	var pbRM:Float = 2.0;
 	override public function update(elapsed:Float)
 	{
-		popUpsFrame = 0;
 		if (health <= 0 && practiceMode && ClientPrefs.zeroHealthLimit) 
 		{
 		health = 0; //set health to 0 if on practice mode and you get to 0%
@@ -4923,6 +4925,10 @@ if (ClientPrefs.showNPS) {
 		compactUpdateFrame = 0;
 		scoreTxtUpdateFrame = 0;
 		iconBopsThisFrame = 0;
+		popUpsFrame = 0;
+		missRecalcsPerFrame = 0;
+		charAnimsFrame = 0;
+		oppAnimsFrame = 0;
 
 		if (deathCounter < 0) botplayTxt.text = 'DEAR GOD YOU OVERFLOWED THE DEATH COUNTER';
 
@@ -5552,7 +5558,7 @@ if (ClientPrefs.showNPS) {
 
 						if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
 						{
-							if (daNote.mustPress && (!cpuControlled || cpuControlled && ClientPrefs.communityGameBot) &&!daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit)) {
+							if (daNote.mustPress && (!cpuControlled || cpuControlled && ClientPrefs.communityGameBot) &&!daNote.ignoreNote && !endingSong && !daNote.wasGoodHit) {
 								noteMiss(daNote);
 								if (ClientPrefs.missSoundShit)
 								{
@@ -6915,6 +6921,7 @@ if (ClientPrefs.showNPS) {
 		Paths.image(pixelShitPart1 + "bad" + pixelShitPart2);
 		Paths.image(pixelShitPart1 + "shit" + pixelShitPart2);
 		Paths.image(pixelShitPart1 + "combo" + pixelShitPart2);
+		Paths.image(pixelShitPart1 + "miss" + pixelShitPart2);
 		
 		for (i in 0...10) Paths.image(pixelShitPart1 + 'num' + i + pixelShitPart2);
 	}
@@ -7013,13 +7020,13 @@ if (ClientPrefs.showNPS) {
 		}
 	}
 
-	private function popUpScore(note:Note = null):Void
+	private function popUpScore(note:Note = null, ?miss:Bool = false):Void
 	{
 		popUpsFrame += 1;
 		final noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset) / playbackRate;
 		final wife:Float = EtternaFunctions.wife3(noteDiff, Conductor.timeScale) / playbackRate;
 
-		vocals.volume = 1;
+		if (!miss) vocals.volume = 1;
 
 		final offset = FlxG.width * 0.35;
 		if(ClientPrefs.scoreZoom && !ClientPrefs.hideScore && !cpuControlled)
@@ -7037,11 +7044,14 @@ if (ClientPrefs.showNPS) {
 		}
 
 		//tryna do MS based judgment due to popular demand
-		final daRating:Rating = Conductor.judgeNote(note, noteDiff, cpuControlled);
+		final daRating:Rating = Conductor.judgeNote(note, noteDiff, cpuControlled, miss);
+
+		if (miss) daRating.image = 'miss';
+			else if (ratingsData[0].image == 'miss') ratingsData[0].image = !ClientPrefs.noMarvJudge ? 'perfect' : 'sick';
 
 		if (daRating.name == 'sick' && !ClientPrefs.noMarvJudge) maxScore -= 150 * Std.int(polyphony); //if you enable perfect judges and hit a sick, lower the max score by 150 points. otherwise it won't make sense
 
-		if (cpuControlled && ClientPrefs.communityGameBot || cpuControlled && !ClientPrefs.lessBotLag || !cpuControlled)
+		if ((cpuControlled && ClientPrefs.communityGameBot || cpuControlled && !ClientPrefs.lessBotLag || !cpuControlled) && !miss)
 		{
 			if (!ClientPrefs.complexAccuracy) totalNotesHit += daRating.ratingMod;
 			if (ClientPrefs.complexAccuracy) totalNotesHit += wife;
@@ -7119,7 +7129,7 @@ if (ClientPrefs.showNPS) {
 			spawnNoteSplashOnNote(false, note, note.gfNote);
 		}
 
-		if(!practiceMode) {
+		if(!practiceMode && !miss) {
 			songScore += daRating.score * comboMultiplier * polyphony;
 			if(!note.ratingDisabled || cpuControlled && ClientPrefs.communityGameBot && !note.ratingDisabled)
 			{
@@ -7164,37 +7174,40 @@ if (ClientPrefs.showNPS) {
 				rating.visible = (!ClientPrefs.hideHud && showRating);
 				rating.x += ClientPrefs.comboOffset[0];
 				rating.y -= ClientPrefs.comboOffset[1];
-		if (!allSicks && ClientPrefs.colorRatingFC && perfects > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.noMarvJudge) 
+				if (!miss)
 				{
-				rating.color = judgeColours.get('perfect');
-				}
-		if (!allSicks && ClientPrefs.colorRatingFC && sicks > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.marvRateColor != 'Golden' && !ClientPrefs.noMarvJudge) 
-				{
-				rating.color = judgeColours.get('sick');
-				}
-		if (!allSicks && ClientPrefs.colorRatingFC && goods > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
-				{
-				rating.color = judgeColours.get('good');
-				}
-		if (!allSicks && ClientPrefs.colorRatingFC && bads > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
-				{
-				rating.color = judgeColours.get('bad');
-				}
-		if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
-				{
-				rating.color = judgeColours.get('shit');
-				}
-				if (!allSicks && ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
-						{
-							switch (daRating.name) //This is so stupid, but it works
+					if (!allSicks && ClientPrefs.colorRatingFC && perfects > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.noMarvJudge) 
 							{
-							case 'sick':  rating.color = FlxColor.CYAN;
-							case 'good': rating.color = FlxColor.LIME;
-							case 'bad': rating.color = FlxColor.ORANGE;
-							case 'shit': rating.color = FlxColor.RED;
-							default: rating.color = FlxColor.WHITE;
+							rating.color = judgeColours.get('perfect');
 							}
-						}
+					if (!allSicks && ClientPrefs.colorRatingFC && sicks > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && ClientPrefs.marvRateColor != 'Golden' && !ClientPrefs.noMarvJudge) 
+							{
+							rating.color = judgeColours.get('sick');
+							}
+					if (!allSicks && ClientPrefs.colorRatingFC && goods > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
+							{
+							rating.color = judgeColours.get('good');
+							}
+					if (!allSicks && ClientPrefs.colorRatingFC && bads > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
+							{
+							rating.color = judgeColours.get('bad');
+							}
+					if (!allSicks && ClientPrefs.colorRatingFC && shits > 0 && noteDiff > ClientPrefs.perfectWindow && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') 
+							{
+							rating.color = judgeColours.get('shit');
+							}
+					if (!allSicks && ClientPrefs.colorRatingHit && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+' && !miss) 
+							{
+								switch (daRating.name) //This is so stupid, but it works
+								{
+								case 'sick':  rating.color = FlxColor.CYAN;
+								case 'good': rating.color = FlxColor.LIME;
+								case 'bad': rating.color = FlxColor.ORANGE;
+								case 'shit': rating.color = FlxColor.RED;
+								default: rating.color = FlxColor.WHITE;
+								}
+							}
+				}
 				insert(members.indexOf(strumLineNotes), rating);
 
 				if (!PlayState.isPixelStage)
@@ -7209,10 +7222,18 @@ if (ClientPrefs.showNPS) {
 
 				rating.updateHitbox();
 
-				final seperatedScore:Array<Int> = [];
-				for (i in 0...Std.string(Std.int(combo)).length) {
-					seperatedScore.push(Std.parseInt(Std.string(combo).split("")[i]));
+				final separatedScore:Array<Dynamic> = [];
+				if (combo < 0) {
+					separatedScore.push("neg");
 				}
+				if (combo > 0)
+					for (i in 0...Std.string(Std.int(combo)).length) {
+						separatedScore.push(Std.parseInt(Std.string(combo).split("")[i]));
+					}
+				else //a dumb fix if the combo is negative
+					for (i in 0...Std.string(Std.int(-combo)).length) {
+						separatedScore.push(Std.parseInt(Std.string(-combo).split("")[i]));
+					}
 
 				if (!ClientPrefs.comboStacking)
 				{
@@ -7232,13 +7253,14 @@ if (ClientPrefs.showNPS) {
 						lastScore = []; // Clear the array
 					}
 				}
-				for (daLoop=>i in seperatedScore)
+				for (daLoop=>i in separatedScore)
 				{
-					final numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + 'num' + Std.int(i) + pixelShitPart2));
+					final numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + 'num' + i + pixelShitPart2));
 					numScore.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
 					numScore.screenCenter();
 					numScore.x = offset + (43 * daLoop) - 90;
 					numScore.y += 80;
+					if (miss) numScore.color = FlxColor.fromRGB(204, 66, 66);
 
 					numScore.x += ClientPrefs.comboOffset[2];
 					numScore.y -= ClientPrefs.comboOffset[3];
@@ -7367,6 +7389,7 @@ if (ClientPrefs.showNPS) {
 					case 'shit': msTxt.color = FlxColor.RED;
 					default: msTxt.color = FlxColor.WHITE;
 					}
+					if (miss) msTxt.color = FlxColor.fromRGB(204, 66, 66);
 				}
 
 				if (ClientPrefs.ratesAndCombo && ClientPrefs.ratingType == 'Simple' && popUpsFrame <= 3 && !ClientPrefs.hideHud) {
@@ -7377,7 +7400,7 @@ if (ClientPrefs.showNPS) {
 					judgeTxt.screenCenter(X);
 					judgeTxt.y = !ClientPrefs.downScroll ? botplayTxt.y + 60 : botplayTxt.y - 60;
 					judgeTxt.alpha = 1;
-					switch (daRating.name)
+					if (!miss) switch (daRating.name)
 					{
 					case 'perfect': 
 						judgeTxt.color = FlxColor.YELLOW;
@@ -7395,6 +7418,11 @@ if (ClientPrefs.showNPS) {
 						judgeTxt.color = FlxColor.RED;
 						judgeTxt.text = hitStrings[4] + '\n' + FlxStringUtil.formatMoney(combo, false);
 					default: judgeTxt.color = FlxColor.WHITE;
+					}
+					else
+					{
+						judgeTxt.color = FlxColor.fromRGB(204, 66, 66);
+						judgeTxt.text = hitStrings[5] + '\n' + FlxStringUtil.formatMoney(combo, false);
 					}
 					judgeTxt.scale.x = 1.075;
 					judgeTxt.scale.y = 1.075;
@@ -7671,7 +7699,9 @@ if (ClientPrefs.showNPS) {
 				}
 			}
 		});
-		combo = 0;
+		if (combo > 0)
+			combo = 0;
+		else combo -= 1;
     		comboMultiplier = 1; // Reset to 1 on a miss
 		if (ClientPrefs.healthGainType == 'Psych Engine') {
 		health -= daNote.missHealth * healthLoss;
@@ -7710,7 +7740,7 @@ if (ClientPrefs.showNPS) {
 		if(!practiceMode) songScore -= 10 * Std.int(polyphony);
 
 		totalPlayed++;
-		RecalculateRating(true);
+		if (missRecalcsPerFrame <= 3) RecalculateRating(true);
 
 		final char:Character = !daNote.gfNote ? !opponentChart ? boyfriend : dad : gf;
 		if(daNote.gfNote) {
@@ -7728,6 +7758,7 @@ if (ClientPrefs.showNPS) {
 		if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
            	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
+		if (ClientPrefs.missRating) popUpScore(daNote, true);
 	}
 
 	function noteMissPress(direction:Int = 1):Void //You pressed a key when there was no notes to press for this key
@@ -7849,6 +7880,7 @@ if (ClientPrefs.showNPS) {
 					comboMultiplier = Math.fceil((combo+1)/10);
 				}
 
+				if (combo < 0) combo = 0;
 			if (!note.isSustainNote && !cpuControlled && !ClientPrefs.lessBotLag || !note.isSustainNote && cpuControlled && ClientPrefs.communityGameBot)
 			{
 				combo += 1 * polyphony;
@@ -7980,7 +8012,8 @@ if (ClientPrefs.showNPS) {
 			if (ClientPrefs.healthGainType == 'Psych Engine' || ClientPrefs.healthGainType == 'Leather Engine' || ClientPrefs.healthGainType == 'Kade (1.2)' || ClientPrefs.healthGainType == 'Kade (1.6+)' || ClientPrefs.healthGainType == 'Doki Doki+' || ClientPrefs.healthGainType == 'VS Impostor') {
 				if (hitsGiveHealth || note.bypassHPGainLimit) health += note.hitHealth * healthGain * polyphony;
 			}
-			if(!note.noAnimation && ClientPrefs.charsAndBG) {
+			if(!note.noAnimation && ClientPrefs.charsAndBG && charAnimsFrame < 4) {
+				charAnimsFrame += 1;
 				final animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))];
        			
 				final char:Character = !note.gfNote ? !opponentChart ? boyfriend : dad : gf;
@@ -8185,7 +8218,9 @@ if (ClientPrefs.showNPS) {
 				char.playAnim('hey', true);
 				char.specialAnim = true;
 				char.heyTimer = 0.6;
-			} else if(!daNote.noAnimation) {
+			} else if(!daNote.noAnimation && oppAnimsFrame < 4) {
+				oppAnimsFrame += 1;
+
 				final altAnim:String = (SONG.notes[curSection] != null && SONG.notes[curSection].altAnim && !SONG.notes[curSection].gfSection && !opponentChart) ? '-alt' : daNote.animSuffix;
 
 				final animToPlay:String = singAnimations[Std.int(Math.abs(daNote.noteData))] + altAnim;
@@ -8859,7 +8894,7 @@ if (ClientPrefs.showNPS) {
 		if (ClientPrefs.iconBopWhen == 'Every Beat')
 		{
 		if (ClientPrefs.iconBounceType == 'Dave and Bambi') {
-		var funny:Float = Math.max(Math.min(healthBar.value,(maxHealth/0.95)),0.1);
+		final funny:Float = Math.max(Math.min(healthBar.value,(maxHealth/0.95)),0.1);
 
 		//health icon bounce but epic
 		if (!opponentChart)
@@ -8876,7 +8911,7 @@ if (ClientPrefs.showNPS) {
 		iconP2.setGraphicSize(Std.int(iconP2.width + 30));
 		}
 		if (ClientPrefs.iconBounceType == 'Strident Crisis') {
-		var funny:Float = (healthBar.percent * 0.01) + 0.01;
+		final funny:Float = (healthBar.percent * 0.01) + 0.01;
 
 		//health icon bounce but epic
 		iconP1.setGraphicSize(Std.int(iconP1.width + (50 * (2 + funny))),Std.int(iconP2.height - (25 * (2 + funny))));
@@ -8990,7 +9025,7 @@ if (ClientPrefs.showNPS) {
 		{
 		iconBopsTotal++;
 		if (ClientPrefs.iconBounceType == 'Dave and Bambi') {
-		var funny:Float = Math.max(Math.min(healthBar.value,(maxHealth/0.95)),0.1);
+		final funny:Float = Math.max(Math.min(healthBar.value,(maxHealth/0.95)),0.1);
 
 		//health icon bounce but epic
 		if (!opponentChart)
@@ -9007,7 +9042,7 @@ if (ClientPrefs.showNPS) {
 		else iconP2.setGraphicSize(Std.int(iconP2.width + 30));
 		}
 		if (ClientPrefs.iconBounceType == 'Strident Crisis') {
-		var funny:Float = (healthBar.percent * 0.01) + 0.01;
+		final funny:Float = (healthBar.percent * 0.01) + 0.01;
 
 		//health icon bounce but epic
 		iconP1.setGraphicSize(Std.int(iconP1.width + (50 * (2 + funny))),Std.int(iconP2.height - (25 * (2 + funny))));
@@ -9241,6 +9276,7 @@ if (ClientPrefs.showNPS) {
 		setOnLuas('score', songScore);
 		setOnLuas('misses', songMisses);
 		setOnLuas('hits', songHits);
+		if (badHit) missRecalcsPerFrame += 1;
 
 		var ret:Dynamic = callOnLuas('onRecalculateRating', [], false);
 		if(ret != FunkinLua.Function_Stop)
