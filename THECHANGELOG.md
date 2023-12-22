@@ -1,26 +1,17 @@
-1.16.0;
+1.17.0;
 
-Added back Chart Drawing for the OS 'Engine' fans who like charting that way, along with a delete mode if you hold CTRL
-Added character-specific noteskins (WIP, put them in assets/images/noteskins)
-All rating types now have pixelated sprites
-Added Anti-Crash for the Chart Editor and Character Editor
-You can now go past the normal max health, granted you actually figure out how
-You can now set if a note bypasses the health limit
-You can now have the icons bop every time a note is hit
-Optimized some stuff
-Improved loading time with Extra Keys Lua songs
-Char-Based note colors, Quantized Note Colors and Rainbow Notes now have pixelated assets
-Troll Mode now supports Events
-The results screen's background color now changes depending on how you played
-The credits popup now displays the note count for both sides in a song IF the Rating Counter is turned off
-The scoreTxt now shows your maximum NPS in a song!
-GPU Caching is no longer forced on?? (Another user reported that)
-Removed the Memory Leaks option
-Fixed a bug where the Copy Section Loop stepper wouldn't block BACKSPACE presses
-Fixed 3 bugs when playing as the opponent:
-- icons are no longer incorrectly positioned
-- the health bar is no longer just 1 color
-- fixed char-based note colors applying to the wrong side
-Fixed a bug where having the results screen turned on would cause the first song to loop infinitely
-Fixed Char-Based note colors crashing if there's a GF note and GF is hidden
-Fixed Double Note Ghosts crashing when triggered with GF notes if GF is hidden
+Added a miss rating (turned off by default)
+Improved performance and reduced memory leaks
+Renamed Marvelous to Perfect
+Fixed some time bars having transparent backgrounds
+Added 4 BF icon styles, and they now work with character changes
+Added an option that forces cutscenes with lua
+Quantized Notes now work with as many BPM changes as you desire!
+Fixed rainbow perfect ratings not changing to the user's specified perfect rating
+Added "No More Cuss Words" rating skin by StinktheStinker
+Added a simplified popup
+Added custom heading bars and credits icons for those credits popups (For mods, put icons in mods/(your mod)/images/songCreators and headings in songHeadings!)
+Added a new event that allows you to change the song name
+Fixed not being able to preview dialogue in the dialogue editor
+Fixed stretched stuff with Long D&B health bar
+Fixed an issue where turning off color shaders would crash the game because of notes
