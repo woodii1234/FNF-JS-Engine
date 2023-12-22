@@ -35,7 +35,7 @@ jobs:
         overwrite: false
 
   release-android:
-    name: Release Android Build
+    name: Release androidBuild
     needs: build
     runs-on: ubuntu-latest
     steps:
