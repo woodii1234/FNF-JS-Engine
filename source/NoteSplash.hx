@@ -3,12 +3,16 @@ package;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
+import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 import NoteShader.ColoredNoteShader;
 import flixel.util.FlxColor;
+import flixel.system.FlxAssets.FlxShader;
+import flixel.FlxCamera;
 
 class NoteSplash extends FlxSprite
 {
 	public var colorSwap:ColorSwap = null;
+	public var rgbShader:ColoredNoteShader = null;
 	private var idleAnim:String;
 	private var textureLoaded:String = null;
 
@@ -31,7 +35,11 @@ class NoteSplash extends FlxSprite
 
 		setupNoteSplash(x, y, note);
 		antialiasing = ClientPrefs.globalAntialiasing;
-        	if (ClientPrefs.noteColorStyle == 'Char-Based') shader = new ColoredNoteShader(255, 255, 255, false);
+        	if (ClientPrefs.noteColorStyle == 'Char-Based') 
+		{
+			rgbShader = new ColoredNoteShader(255, 255, 255, false);
+			shader = rgbShader;
+		}
 	}
 
 	public function setupNoteSplash(x:Float, y:Float, note:Int = 0, texture:String = null, hueColor:Float = 0, satColor:Float = 0, brtColor:Float = 0, color:FlxColor = null) {
@@ -66,8 +74,8 @@ class NoteSplash extends FlxSprite
 			colorSwap.saturation = satColor;
 			colorSwap.brightness = brtColor;
 		} else if (color != null && ClientPrefs.noteColorStyle == 'Char-Based') { //null check
-		        cast(shader, ColoredNoteShader).enabled.value = [true];
-       			cast(shader, ColoredNoteShader).setColors(color.red, color.green, color.blue);
+		        rgbShader.enabled.value = [true];
+       			rgbShader.setColors(color.red, color.green, color.blue);
 		}
 		if (ClientPrefs.splashType != 'Base Game') {
 		offset.set(10, 10);

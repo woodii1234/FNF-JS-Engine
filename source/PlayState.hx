@@ -402,6 +402,11 @@ class PlayState extends MusicBeatState
 	var grpLimoDancers:FlxTypedGroup<BackgroundDancer>;
 	var fastCar:BGSprite;
 
+	public static var screenshader:Shaders.PulseEffectAlt = new PulseEffectAlt();
+
+	var disableTheTripper:Bool = false;
+	var disableTheTripperAt:Int;
+
 	var upperBoppers:BGSprite;
 	var bottomBoppers:BGSprite;
 	var santa:BGSprite;
@@ -616,6 +621,19 @@ class PlayState extends MusicBeatState
 		{
 			keysPressed.push(false);
 		}
+
+		screenshader.waveAmplitude = 1;
+		screenshader.waveFrequency = 2;
+		screenshader.waveSpeed = 1;
+		screenshader.shader.uTime.value[0] = new flixel.math.FlxRandom().float(-100000, 100000);
+		screenshader.shader.uampmul.value[0] = 0;
+
+		#if windows
+		screenshader.waveAmplitude = 1;
+       		screenshader.waveFrequency = 2;
+        	screenshader.waveSpeed = 1;
+        	screenshader.shader.uTime.value[0] = new flixel.math.FlxRandom().float(-100000, 100000);
+		#end
 
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
@@ -4628,6 +4646,23 @@ class PlayState extends MusicBeatState
 	var pbRM:Float = 2.0;
 	override public function update(elapsed:Float)
 	{
+		if(disableTheTripperAt == curStep)
+			{
+				disableTheTripper = true;
+			}
+		if(isDead)
+			{
+				disableTheTripper = true;
+			}
+		
+
+
+		FlxG.camera.setFilters([new ShaderFilter(screenshader.shader)]);
+		screenshader.update(elapsed);
+		if(disableTheTripper)
+			{
+				screenshader.shader.uampmul.value[0] -= (elapsed / 2);
+			}
 		if (health <= 0 && practiceMode && ClientPrefs.zeroHealthLimit) 
 		{
 		health = 0; //set health to 0 if on practice mode and you get to 0%
@@ -6174,6 +6209,35 @@ if (ClientPrefs.showNPS) {
 
 			case 'BG Freaks Expression':
 				if(bgGirls != null) bgGirls.swapDanceType();
+
+			case 'Rainbow Eyesore':
+					if(ClientPrefs.flashing) {
+						var timeRainbow:Int = Std.parseInt(value1);
+						var speedRainbow:Float = Std.parseFloat(value2);
+						disableTheTripper = false;
+						disableTheTripperAt = timeRainbow;
+						FlxG.camera.setFilters([new ShaderFilter(screenshader.shader)]);
+						screenshader.waveAmplitude = 1;
+						screenshader.waveFrequency = 2;
+						screenshader.waveSpeed = speedRainbow * playbackRate;
+						screenshader.shader.uTime.value[0] = new flixel.math.FlxRandom().float(-100000, 100000);
+						screenshader.shader.uampmul.value[0] = 1;
+						screenshader.Enabled = true;
+					}
+			case 'Popup':
+				var title:String = (value1);
+				var message:String = (value2);
+				FlxG.sound.music.pause();
+				vocals.pause();
+
+				lime.app.Application.current.window.alert(message, title);
+				FlxG.sound.music.resume();
+				vocals.resume();
+			case 'Popup (No Pause)':
+				var title:String = (value1);
+				var message:String = (value2);
+
+				lime.app.Application.current.window.alert(message, title);
 
 			case 'Change Scroll Speed':
 				if (songSpeedType == "constant")
@@ -7904,7 +7968,7 @@ if (ClientPrefs.showNPS) {
 				combo += 1 * polyphony;
 				totalNotesPlayed += 1 * polyphony;
 				missCombo = 0;
-				if (popUpsFrame <= 3) popUpScore(note);
+				popUpScore(note);
 			}
 			if (note.isSustainNote && cpuControlled && ClientPrefs.holdNoteHits && ClientPrefs.lessBotLag)
 			{
@@ -7949,7 +8013,7 @@ if (ClientPrefs.showNPS) {
 				notesHitArray.push(1 * polyphony);
 				notesHitDateArray.push(Date.now());
 				}
-				if (popUpsFrame <= 3) popUpScore(note);
+				popUpScore(note);
 			}
 			if (!note.isSustainNote && !cpuControlled && ClientPrefs.lessBotLag && !ClientPrefs.communityGameBot)
 			{
@@ -7984,7 +8048,7 @@ if (ClientPrefs.showNPS) {
 				notesHitArray.push(1 * polyphony);
 				notesHitDateArray.push(Date.now());
 				}
-				if (popUpsFrame <= 3) popUpScore(note);
+				popUpScore(note);
 			}
 
 			if (combo > maxCombo)
