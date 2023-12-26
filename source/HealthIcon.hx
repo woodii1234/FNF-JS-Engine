@@ -14,13 +14,46 @@ class HealthIcon extends FlxSprite
 	private var isOldIcon:Bool = false;
 	private var isPlayer:Bool = false;
 	private var char:String = '';
+	public var iconAmount:Int = 2;
+
+	public function changeIconAmount(amount:Int) {
+		if(this.iconAmount != amount) {
+			var name:String = 'icons/' + char;
+			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char; //Older versions of psych engine's support
+			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
+			var file:Dynamic = Paths.image(name);
+
+			loadGraphic(file); //Load stupidly first for getting the file size
+			switch(iconAmount) 
+			{
+				case 3:
+					loadGraphic(file, true, Math.floor(width / 3), Math.floor(height)); //Then load it fr
+					iconOffsets[0] = (width - 150) / 3;
+					iconOffsets[1] = (width - 150) / 3;
+					iconOffsets[2] = (width - 150) / 3;
+				case 2:
+					loadGraphic(file, true, Math.floor(width / 2), Math.floor(height)); //Then load it fr
+					iconOffsets[0] = (width - 150) / 2;
+					iconOffsets[1] = (width - 150) / 2;
+				case 1:
+					loadGraphic(file, true, Math.floor(width), Math.floor(height)); //Then load it fr
+					iconOffsets[0] = (width - 150);
+			}
+			
+			updateHitbox();
+			var frames:Array<Int> = [];
+			for (i in 0...iconAmount) frames.push(i);
+				animation.add(char, frames, 0, false, isPlayer);
+			this.iconAmount = amount;
+		}
+	}
 
 	public function new(char:String = 'bf', isPlayer:Bool = false, ?allowGPU:Bool = true)
 	{
 		super();
 		isOldIcon = (char == 'bf-old');
 		this.isPlayer = isPlayer;
-		changeIcon(char);
+		changeIcon(char, true);
 		scrollFactor.set();
 	}
 
@@ -44,7 +77,7 @@ class HealthIcon extends FlxSprite
 	}
 
 	private var iconOffsets:Array<Float> = [0, 0, 0];
-	public function changeIcon(char:String) {
+	public function changeIcon(char:String, ?oldStyle:Bool = false) {
 		if(this.char != char) {
 			var name:String = 'icons/' + char;
 			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char; //Older versions of psych engine's support
@@ -58,10 +91,12 @@ class HealthIcon extends FlxSprite
 				iconOffsets[0] = (width - 150) / 3;
 				iconOffsets[1] = (width - 150) / 3;
 				iconOffsets[2] = (width - 150) / 3;
+				iconAmount = 3;
 			} else {
 				loadGraphic(file, true, Math.floor(width / 2), Math.floor(height)); //Then load it fr // winning icons go br
 				iconOffsets[0] = (width - 150) / 2;
 				iconOffsets[1] = (width - 150) / 2;
+				iconAmount = 2;
 			}
 			
 			updateHitbox();

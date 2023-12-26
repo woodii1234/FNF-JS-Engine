@@ -1931,12 +1931,14 @@ class PlayState extends MusicBeatState
 		
 		iconP1 = new HealthIcon(boyfriend.healthIcon, true);
 		iconP1.y = healthBar.y - 75;
+		iconP1.changeIconAmount(boyfriend.iconAmount);
 		iconP1.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 		iconP1.alpha = ClientPrefs.healthBarAlpha;
 		add(iconP1);
 
 		iconP2 = new HealthIcon(dad.healthIcon, false);
 		iconP2.y = healthBar.y - 75;
+		iconP2.changeIconAmount(dad.iconAmount);
 		iconP2.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 		iconP2.alpha = ClientPrefs.healthBarAlpha;
 		add(iconP2);
@@ -5286,28 +5288,30 @@ if (ClientPrefs.showNPS) {
 			hitsGiveHealth = true;
 		}
 
-		if ((opponentChart ? iconP2 : iconP1).animation.frames == 3) {
+		switch ((opponentChart ? iconP2 : iconP1).iconAmount) {
+		case 3:
 			if (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20))
 				(opponentChart ? iconP2 : iconP1).animation.curAnim.curFrame = 1;
 			else if (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80))
 				(opponentChart ? iconP2 : iconP1).animation.curAnim.curFrame = 2;
 			else
 				(opponentChart ? iconP2 : iconP1).animation.curAnim.curFrame = 0;
-		} 
-		else {
+		case 2:
 			if (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20))
 				(opponentChart ? iconP2 : iconP1).animation.curAnim.curFrame = 1;
 			else
 				(opponentChart ? iconP2 : iconP1).animation.curAnim.curFrame = 0;
 		}
-		if ((opponentChart ? iconP1 : iconP2).animation.frames == 3) {
+
+		switch ((opponentChart ? iconP1 : iconP2).iconAmount) {
+		case 3:
 			if (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80))
 				(opponentChart ? iconP1 : iconP2).animation.curAnim.curFrame = 1;
 			else if (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20))
 				(opponentChart ? iconP1 : iconP2).animation.curAnim.curFrame = 2;
 			else 
 				(opponentChart ? iconP1 : iconP2).animation.curAnim.curFrame = 0;
-		} else {
+		case 2: 
 			if (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80))
 				(opponentChart ? iconP1 : iconP2).animation.curAnim.curFrame = 1;
 			else 
@@ -6106,6 +6110,7 @@ if (ClientPrefs.showNPS) {
 								if (ClientPrefs.bfIconStyle == "SB Engine") iconP1.changeIcon('bfsb'); 
 								if (ClientPrefs.bfIconStyle == "OS 'Engine'") iconP1.changeIcon('bfos'); 
 							}
+							iconP1.changeIconAmount(boyfriend.iconAmount);
 						}
 						setOnLuas('boyfriendName', boyfriend.curCharacter);
 
@@ -6135,6 +6140,7 @@ if (ClientPrefs.showNPS) {
 							}
 							if (ClientPrefs.hudType == 'JS Engine') {
 								if (!ClientPrefs.hideScore) FlxTween.color(scoreTxt, 1, scoreTxt.color, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]));
+							iconP2.changeIconAmount(dad.iconAmount);
 							}
 						}
 						setOnLuas('dadName', dad.curCharacter);
