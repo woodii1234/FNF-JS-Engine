@@ -22,6 +22,7 @@ class HealthIcon extends FlxSprite
 		isOldIcon = (char == 'bf-old');
 		this.isPlayer = isPlayer;
 		changeIcon(char, true);
+		if (char == 'bf') iconAmount = 3;
 		scrollFactor.set();
 	}
 
@@ -90,27 +91,33 @@ class HealthIcon extends FlxSprite
 			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
 			var file:Dynamic = Paths.image(name);
 
-			loadGraphic(file); //Load stupidly first for getting the file size
-			var width2 = width;
-			if (width == 450) {
-				loadGraphic(file, true, Math.floor(width / 3), Math.floor(height)); //Then load it fr // winning icons go br
-				iconOffsets[0] = (width - 150) / 3;
-				iconOffsets[1] = (width - 150) / 3;
-				iconOffsets[2] = (width - 150) / 3;
-				iconAmount = 3;
-			} else {
-				loadGraphic(file, true, Math.floor(width / 2), Math.floor(height)); //Then load it fr // winning icons go br
-				iconOffsets[0] = (width - 150) / 2;
-				iconOffsets[1] = (width - 150) / 2;
-				iconAmount = 2;
-			}
+			if (oldStyle)
+			{
+				loadGraphic(file); //Load stupidly first for getting the file size
+				var width2 = width;
+				if (width == 450) {
+					loadGraphic(file, true, Math.floor(width / 3), Math.floor(height)); //Then load it fr // winning icons go br
+					iconOffsets[0] = (width - 150) / 3;
+					iconOffsets[1] = (width - 150) / 3;
+					iconOffsets[2] = (width - 150) / 3;
+					iconAmount = 3;
+				} else {
+					loadGraphic(file, true, Math.floor(width / 2), Math.floor(height)); //Then load it fr // winning icons go br
+					iconOffsets[0] = (width - 150) / 2;
+					iconOffsets[1] = (width - 150) / 2;
+					iconAmount = 2;
+				}
 			
-			updateHitbox();
-			if (width2 == 450) {
-				animation.add(char, [0, 1, 2], 0, false, isPlayer);
+				updateHitbox();
+				if (width2 == 450) {
+					animation.add(char, [0, 1, 2], 0, false, isPlayer);
+				} else {
+					animation.add(char, [0, 1], 0, false, isPlayer);
+				}
 			} else {
-				animation.add(char, [0, 1], 0, false, isPlayer);
-			}
+			getIconAmount(char);
+			{
+			updateHitbox();
 			animation.play(char);
 			this.char = char;
 
@@ -131,11 +138,11 @@ class HealthIcon extends FlxSprite
 			loadGraphic(file); //Load stupidly first for getting the file size
 			var width2 = width;
 			if (width > 300)
-				iconAmount = 3;
+				changeIconAmount(3);
 			else if (width > 150 && width < 300)
-				iconAmount = 2;
+				changeIconAmount(2);
 			else if (width <= 150)
-				iconAmount = 1;
+				changeIconAmount(1);
 	}
 
 	public function bounce() {

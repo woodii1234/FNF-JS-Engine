@@ -5291,7 +5291,8 @@ if (ClientPrefs.showNPS) {
 			hitsGiveHealth = true;
 		}
 
-		switch ((opponentChart ? iconP2 : iconP1).iconAmount) {
+		switch ((opponentChart ? iconP2 : iconP1).iconAmount) 
+		{
 		case 3:
 			if (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20))
 				(opponentChart ? iconP2 : iconP1).animation.curAnim.curFrame = 1;
@@ -5306,7 +5307,8 @@ if (ClientPrefs.showNPS) {
 				(opponentChart ? iconP2 : iconP1).animation.curAnim.curFrame = 0;
 		}
 
-		switch ((opponentChart ? iconP1 : iconP2).iconAmount) {
+		switch ((opponentChart ? iconP1 : iconP2).iconAmount) 
+		{
 		case 3:
 			if (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80))
 				(opponentChart ? iconP1 : iconP2).animation.curAnim.curFrame = 1;
@@ -7197,7 +7199,7 @@ if (ClientPrefs.showNPS) {
 					}
 			}
 
-		if(daRating.noteSplash && !note.noteSplashDisabled)
+		if(daRating.noteSplash && !note.noteSplashDisabled && !miss)
 		{
 			spawnNoteSplashOnNote(false, note, note.gfNote);
 		}

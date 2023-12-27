@@ -76,7 +76,7 @@ class ResultsScreenSubState extends MusicBeatSubstate {
 		add(resultsText);
 
 		results = new FlxText(5, resultsText.height, FlxG.width, '', 48);
-		results.text = 'Marvelous: ' + daResults[0] + '\nSicks: ' + daResults[1] + '\nGoods: ' + daResults[2] + '\nBads: ' + daResults[3] + '\nShits: ' + daResults[4];
+		results.text = 'Perfect: ' + daResults[0] + '\nSicks: ' + daResults[1] + '\nGoods: ' + daResults[2] + '\nBads: ' + daResults[3] + '\nShits: ' + daResults[4];
 		results.scrollFactor.set();
 		results.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		results.updateHitbox();
