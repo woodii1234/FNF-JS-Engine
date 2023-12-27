@@ -3205,6 +3205,12 @@ class ChartingState extends MusicBeatState
 			path = SUtil.getPath() + Paths.getPreloadPath('characters/' + Character.DEFAULT_CHARACTER + '.json'); //If a character couldn't be found, change him to BF just to prevent a crash
 		}
 
+		if (!FileSystem.exists(path) && !FileSystem.exists(SUtil.getPath() + Paths.getPreloadPath('characters/' + Character.DEFAULT_CHARACTER + '.json')))
+		{
+			trace ('bruh how did you delete the BF CHARACTER JSON??');
+			CoolUtil.coolError("The engine couldn't find the default BF .json!\nHow did you even delete the bf json, anyway?", 'JS Engine Anti-Crash');
+			return 'face';
+		}
 		#if MODS_ALLOWED
 		var rawJson = File.getContent(path);
 		#else
@@ -3266,8 +3272,8 @@ class ChartingState extends MusicBeatState
 							event.destroy();
 						}
 					});
-					nextRenderedNotes.clear();
 				}
+			curRenderedSustains.clear();
 		if (!onlyEvents)
 		{
 			//classic fnf styled grid updating
@@ -3287,6 +3293,16 @@ class ChartingState extends MusicBeatState
 				txt.destroy();
 			});
 			curRenderedNoteType.clear();
+			//Why did i remove this?
+			if (andNext) 
+			{
+			nextRenderedNotes.forEach(TheNoteThatShouldBeKilledBecauseWeDontNeedIt -> {
+				nextRenderedNotes.remove(TheNoteThatShouldBeKilledBecauseWeDontNeedIt, true);
+				TheNoteThatShouldBeKilledBecauseWeDontNeedIt.destroy();
+			});
+			nextRenderedNotes.clear();
+			nextRenderedSustains.clear();
+			}
 
 			if (_song.notes[curSec] != null)
 			{
@@ -3794,22 +3810,23 @@ class ChartingState extends MusicBeatState
 	{
 		//shitty null fix, i fucking hate it when this happens
 		//make it look sexier if possible
-		if(sys.FileSystem.exists(Paths.json(song + '/' + song)) || sys.FileSystem.exists(Paths.modsJson(song + '/' + song)))
+			var songName:String = Paths.formatToSongPath(_song.song);
+		if(sys.FileSystem.exists(Paths.json(songName + '/' + songName)) || sys.FileSystem.exists(Paths.modsJson(songName + '/' + songName)))
 		{
 		if (CoolUtil.difficulties[PlayState.storyDifficulty] != CoolUtil.defaultDifficulty) {
 			if(CoolUtil.difficulties[PlayState.storyDifficulty] == null){
-				PlayState.SONG = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
+				PlayState.SONG = Song.loadFromJson(songName.toLowerCase(), songName.toLowerCase());
 			}else{
-				PlayState.SONG = Song.loadFromJson(song.toLowerCase() + "-" + CoolUtil.difficulties[PlayState.storyDifficulty], song.toLowerCase());
+				PlayState.SONG = Song.loadFromJson(songName.toLowerCase() + "-" + CoolUtil.difficulties[PlayState.storyDifficulty], songName.toLowerCase());
 			}
 		}else{
-		PlayState.SONG = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
+		PlayState.SONG = Song.loadFromJson(songName.toLowerCase(), songName.toLowerCase());
 		}
 		MusicBeatState.resetState();
 		}
 		else
 		{
-			trace (song + "'s JSON doesn't exist!");
+			trace (songName + "'s JSON doesn't exist!");
 			songJsonPopup(); //HAH, IT AINT CRASHING NOW
 		}
 	}

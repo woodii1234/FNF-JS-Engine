@@ -181,6 +181,8 @@ class Character extends FlxSprite
 				noteskin = json.noteskin;
 				if (json.iconAmount != null) {
 					iconAmount = json.iconAmount;
+				} else {
+					iconAmount = 2;
 				}
 
 				if(json.scale != 1) {

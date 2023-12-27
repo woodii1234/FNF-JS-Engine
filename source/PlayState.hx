@@ -175,6 +175,8 @@ class PlayState extends MusicBeatState
 	public static var angelNoteDamage:Array<Float> = [-2, -0.5, 0.5, 1, 1.25]; //the array of healths that the angel note should give when hit from worst to best
 
 	public var spawnTime:Float = 1800; //just enough for the notes to barely inch off the screen
+	
+	public var strumAnimsPerFrame:Array<Int> = [0, 0];
 
 	public var vocals:FlxSound;
 	public var dadGhostTween:FlxTween;
@@ -4966,6 +4968,7 @@ if (ClientPrefs.showNPS) {
 		missRecalcsPerFrame = 0;
 		charAnimsFrame = 0;
 		oppAnimsFrame = 0;
+		strumAnimsPerFrame = [0, 0];
 
 		if (deathCounter < 0) botplayTxt.text = 'DEAR GOD YOU OVERFLOWED THE DEATH COUNTER';
 
@@ -8218,8 +8221,9 @@ if (ClientPrefs.showNPS) {
 			}
 
 			if(cpuControlled) {
-				if (ClientPrefs.botLightStrum)
+				if (ClientPrefs.botLightStrum && strumAnimsPerFrame[1] < 4)
 				{
+				strumAnimsPerFrame[1] += 1;
 				var time:Float = 0;
 
 				if (ClientPrefs.strumLitStyle == 'Full Anim' && !ClientPrefs.communityGameBot) time = 0.15 / playbackRate;
@@ -8393,8 +8397,9 @@ if (ClientPrefs.showNPS) {
 				vocals.volume = 1;
 
 
-			if (ClientPrefs.opponentLightStrum)
+			if (ClientPrefs.opponentLightStrum && strumAnimsPerFrame[0] < 4)
 			{
+			strumAnimsPerFrame[0] += 1;
 			var time:Float = 0;
 			if (ClientPrefs.strumLitStyle == 'Full Anim') time = 0.15 / playbackRate;
 			if (ClientPrefs.strumLitStyle == 'BPM Based') time = (Conductor.stepCrochet * 1.5 / 1000) / playbackRate;
