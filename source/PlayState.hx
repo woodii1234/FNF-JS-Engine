@@ -248,7 +248,9 @@ class PlayState extends MusicBeatState
 
 	public var timeThreshold:Float = 0;
 
-    	public var notesAddedCount:Int = 0;
+    	var notesAddedCount:Int = 0;
+    	var notesToRemoveCount:Int = 0;
+    	var oppNotesToRemoveCount:Int = 0;
 	public var iconBopsThisFrame:Int = 0;
 	public var iconBopsTotal:Int = 0;
 
@@ -1933,14 +1935,12 @@ class PlayState extends MusicBeatState
 		
 		iconP1 = new HealthIcon(boyfriend.healthIcon, true);
 		iconP1.y = healthBar.y - 75;
-		iconP1.changeIconAmount(boyfriend.iconAmount);
 		iconP1.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 		iconP1.alpha = ClientPrefs.healthBarAlpha;
 		add(iconP1);
 
 		iconP2 = new HealthIcon(dad.healthIcon, false);
 		iconP2.y = healthBar.y - 75;
-		iconP2.changeIconAmount(dad.iconAmount);
 		iconP2.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 		iconP2.alpha = ClientPrefs.healthBarAlpha;
 		add(iconP2);
@@ -4870,7 +4870,7 @@ if (ClientPrefs.showNPS) {
     timeThreshold = (ClientPrefs.npsWithSpeed ? 1000 / playbackRate : 1000) * npsSpeedMult;
 
     // Track the count of items to remove for notesHitDateArray
-    var notesToRemoveCount:Int = 0;
+    notesToRemoveCount = 0;
 
     // Filter notesHitDateArray and notesHitArray in place
     for (i in 0...notesHitDateArray.length) {
@@ -4888,14 +4888,13 @@ if (ClientPrefs.showNPS) {
            	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
     }
 
-	var sum:Float = 0;
+	nps = 0;
     for (value in notesHitArray) {
-        sum += value;
+        nps += value;
     }
-	nps = sum;
 
     // Similar tracking and filtering logic for oppNotesHitDateArray
-    var oppNotesToRemoveCount:Int = 0;
+    oppNotesToRemoveCount = 0;
     
     for (i in 0...oppNotesHitDateArray.length) {
         if (oppNotesHitDateArray[i] != null && (oppNotesHitDateArray[i].getTime() + timeThreshold < currentTime)) {
@@ -4912,12 +4911,11 @@ if (ClientPrefs.showNPS) {
     }
 
     // Calculate sum of NPS values for the opponent
-	var oppSum:Float = 0;
+	oppNPS = 0;
     for (value in oppNotesHitArray) {
-        oppSum += value;
+        oppNPS += value;
     }
 
-	oppNPS = oppSum;
     // Update maxNPS and maxOppNPS if needed
     if (oppNPS > maxOppNPS) {
         maxOppNPS = oppNPS;
@@ -5291,32 +5289,26 @@ if (ClientPrefs.showNPS) {
 			hitsGiveHealth = true;
 		}
 
-		switch ((opponentChart ? iconP2 : iconP1).iconAmount) 
-		{
-		case 3:
+		if ((opponentChart ? iconP2 : iconP1).animation.frames == 3) {
 			if (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20))
 				(opponentChart ? iconP2 : iconP1).animation.curAnim.curFrame = 1;
 			else if (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80))
 				(opponentChart ? iconP2 : iconP1).animation.curAnim.curFrame = 2;
 			else
 				(opponentChart ? iconP2 : iconP1).animation.curAnim.curFrame = 0;
-		case 2:
+		} 
+		else {
 			if (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20))
 				(opponentChart ? iconP2 : iconP1).animation.curAnim.curFrame = 1;
-			else
-				(opponentChart ? iconP2 : iconP1).animation.curAnim.curFrame = 0;
 		}
-
-		switch ((opponentChart ? iconP1 : iconP2).iconAmount) 
-		{
-		case 3:
+		if ((opponentChart ? iconP1 : iconP2).animation.frames == 3) {
 			if (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80))
 				(opponentChart ? iconP1 : iconP2).animation.curAnim.curFrame = 1;
 			else if (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20))
 				(opponentChart ? iconP1 : iconP2).animation.curAnim.curFrame = 2;
 			else 
 				(opponentChart ? iconP1 : iconP2).animation.curAnim.curFrame = 0;
-		case 2: 
+		} else {
 			if (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80))
 				(opponentChart ? iconP1 : iconP2).animation.curAnim.curFrame = 1;
 			else 
@@ -5364,8 +5356,7 @@ if (ClientPrefs.showNPS) {
 
 					final songCalc:Float = (ClientPrefs.timeBarType == 'Time Elapsed' || ClientPrefs.timeBarType == 'Modern Time' || ClientPrefs.timeBarType == 'Song Name + Time') ? curTime : (songLength - curTime);
 
-					var secondsTotal:Int = Math.floor(songCalc / 1000);
-					if (secondsTotal < 0) secondsTotal = 0;
+					final secondsTotal:Int = Math.floor(songCalc / 1000);
 
 					final hoursRemaining:Int = Math.floor(secondsTotal / 3600);
 					final minutesRemaining:Int = Math.floor(secondsTotal / 60) % 60;
@@ -6115,7 +6106,6 @@ if (ClientPrefs.showNPS) {
 								if (ClientPrefs.bfIconStyle == "SB Engine") iconP1.changeIcon('bfsb'); 
 								if (ClientPrefs.bfIconStyle == "OS 'Engine'") iconP1.changeIcon('bfos'); 
 							}
-							iconP1.changeIconAmount(boyfriend.iconAmount);
 						}
 						setOnLuas('boyfriendName', boyfriend.curCharacter);
 
@@ -6145,7 +6135,6 @@ if (ClientPrefs.showNPS) {
 							}
 							if (ClientPrefs.hudType == 'JS Engine') {
 								if (!ClientPrefs.hideScore) FlxTween.color(scoreTxt, 1, scoreTxt.color, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]));
-							iconP2.changeIconAmount(dad.iconAmount);
 							}
 						}
 						setOnLuas('dadName', dad.curCharacter);
@@ -8112,13 +8101,8 @@ if (ClientPrefs.showNPS) {
 							{
 								gf.playAnim(realAnim, true);
 							}
-		
-							// if (daNote != animNote)
-							// dad.playGhostAnim(chord.indexOf(daNote)-1, animToPlay, true);
 
-		
 							gf.mostRecentRow = note.row;
-							// dad.angle += 15; lmaooooo
 							doGhostAnim('gf', animToPlay);
 					gfGhost.color = FlxColor.fromRGB(gf.healthColorArray[0] + 50, gf.healthColorArray[1] + 50, gf.healthColorArray[2] + 50);
 					gfGhostTween = FlxTween.tween(gfGhost, {alpha: 0}, 0.75, {

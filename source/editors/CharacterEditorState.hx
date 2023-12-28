@@ -507,7 +507,6 @@ class CharacterEditorState extends MusicBeatState
 
 	var singDurationStepper:FlxUINumericStepper;
 	var scaleStepper:FlxUINumericStepper;
-	var iconAmountStepper:FlxUINumericStepper;
 	var positionXStepper:FlxUINumericStepper;
 	var positionYStepper:FlxUINumericStepper;
 	var positionCameraXStepper:FlxUINumericStepper;
@@ -601,8 +600,6 @@ class CharacterEditorState extends MusicBeatState
 		healthColorStepperG = new FlxUINumericStepper(singDurationStepper.x + 65, saveCharacterButton.y, 20, char.healthColorArray[1], 0, 255, 0);
 		healthColorStepperB = new FlxUINumericStepper(singDurationStepper.x + 130, saveCharacterButton.y, 20, char.healthColorArray[2], 0, 255, 0);
 
-		iconAmountStepper = new FlxUINumericStepper(15, healthColorStepperR.y + 120, 1, char.iconAmount, 1, 3, 0);
-
 		tab_group.add(new FlxText(15, saveCharacterButton.y + 20, 0, 'Noteskin:'));
 		noteskinText = new FlxUIInputText(15, saveCharacterButton.y + 48, 200, '', 8);
 		noteskinText.focusGained = () -> FlxG.stage.window.textInputEnabled = true;
@@ -612,12 +609,10 @@ class CharacterEditorState extends MusicBeatState
 		tab_group.add(new FlxText(15, healthIconInputText.y - 18, 0, 'Health icon name:'));
 		tab_group.add(new FlxText(15, singDurationStepper.y - 18, 0, 'Sing Animation length:'));
 		tab_group.add(new FlxText(15, scaleStepper.y - 18, 0, 'Scale:'));
-		tab_group.add(new FlxText(15, iconAmountStepper.y - 18, 0, 'Amount of Icons:'));
 		tab_group.add(new FlxText(positionXStepper.x, positionXStepper.y - 18, 0, 'Character X/Y:'));
 		tab_group.add(new FlxText(positionCameraXStepper.x, positionCameraXStepper.y - 18, 0, 'Camera X/Y:'));
 		tab_group.add(new FlxText(healthColorStepperR.x, healthColorStepperR.y - 18, 0, 'Health bar R/G/B:'));
 		tab_group.add(imageInputText);
-		tab_group.add(iconAmountStepper);
 		tab_group.add(reloadImage);
 		tab_group.add(decideIconColor);
 		tab_group.add(healthIconInputText);
@@ -807,11 +802,6 @@ class CharacterEditorState extends MusicBeatState
 				char.noteskin = noteskinText.text;
 			}
 		} else if(id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper)) {
-			if(sender == iconAmountStepper)
-			{
-				char.iconAmount = Std.int(iconAmountStepper.value);
-				leHealthIcon.changeIconAmount(Std.int(iconAmountStepper.value));
-			}
 			if (sender == scaleStepper)
 			{
 				reloadCharacterImage();
@@ -1333,7 +1323,6 @@ class CharacterEditorState extends MusicBeatState
 			"sing_duration": char.singDuration,
 			"healthicon": char.healthIcon,
 			"noteskin": char.noteskin,
-			"iconAmount": char.iconAmount,
 
 			"position":	char.positionArray,
 			"camera_position": char.cameraPosition,

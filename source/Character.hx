@@ -35,7 +35,6 @@ typedef CharacterFile = {
 	var no_antialiasing:Bool;
 	var healthbar_colors:Array<Int>;
 	var noteskin:String;
-	var iconAmount:Null<Int>;
 }
 
 typedef AnimArray = {
@@ -71,7 +70,6 @@ class Character extends FlxSprite
 	public var healthIcon:String = 'face';
 	public var animationsArray:Array<AnimArray> = [];
 	public var noteskin:String;
-	public var iconAmount:Int;
 
 	public var positionArray:Array<Float> = [0, 0];
 	public var cameraPosition:Array<Float> = [0, 0];
@@ -179,11 +177,6 @@ class Character extends FlxSprite
 				}
 				imageFile = json.image;
 				noteskin = json.noteskin;
-				if (json.iconAmount != null) {
-					iconAmount = json.iconAmount;
-				} else {
-					iconAmount = 2;
-				}
 
 				if(json.scale != 1) {
 					jsonScale = json.scale;
