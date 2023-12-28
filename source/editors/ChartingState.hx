@@ -1173,7 +1173,7 @@ class ChartingState extends MusicBeatState
 			if(value1 == 0) {
 			return;
 			} 
-			if(Math.isNaN(_song.notes[curSection].sectionNotes.length)) {
+			if(_song.notes[curSection] != null && Math.isNaN(_song.notes[curSection].sectionNotes.length)) {
 			trace ("HEY! your section doesn't have any notes! please place at least 1 note then try using this.");
 			return; //prevent a crash if the section doesn't have any notes
 			}
@@ -1193,7 +1193,11 @@ class ChartingState extends MusicBeatState
 				trace ("value1's section is less than 0 LMAO");
 				break;
 				}
-				if (_song.notes[curSec+1].sectionNotes != null) changeSection(curSec+1);
+				if (_song.notes[curSec + 1] == null)
+				{
+					addSection(getSectionBeats());
+				}
+				changeSection(curSec+1);
 				daSec = FlxMath.maxInt(curSec, Std.int(CopyLastSectionCount.value)-1);
 			}
 			updateGrid(false);
@@ -2236,7 +2240,7 @@ class ChartingState extends MusicBeatState
 			}
 			if (FlxG.keys.justPressed.ENTER #if android || virtualPad.buttonA.justPressed #end)
 			{
-				autosaveSong();
+				if (CoolUtil.getNoteAmount(_song) <= 1000000) autosaveSong();
 				FlxG.mouse.visible = false;
 				PlayState.SONG = _song;
 				FlxG.sound.music.stop();

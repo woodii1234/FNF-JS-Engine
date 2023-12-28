@@ -5521,7 +5521,7 @@ if (ClientPrefs.showNPS) {
 					daNote.hitByOpponent = true;
 				}
 			}
-			if (daNote.strumTime <= Conductor.songPosition - 100) notesAddedCount++; //we remove the notes 100ms later so that it doesnt cause unnecessary note removals at high nps's
+			if (daNote.strumTime <= Conductor.songPosition - 1000) notesAddedCount++; //we remove the notes 1s later so that it doesnt cause unnecessary note removals at high nps's
 		}
 
 		if (notesAddedCount > 0) {
