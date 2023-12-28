@@ -1188,11 +1188,6 @@ class ChartingState extends MusicBeatState
 				var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
 				_song.notes[daSec].sectionNotes.push(copiedNote);
 			}
-				if (_song.notes[curSec+1] == null)
-				{
-				trace ("UH OH! looks like we've hit a null section! we're gonna have to stop this to prevent it from crashing the engine!");
-				break;
-				}
 				if (curSection - value1 < 0)
 				{
 				trace ("value1's section is less than 0 LMAO");
