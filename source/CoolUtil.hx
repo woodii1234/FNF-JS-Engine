@@ -145,6 +145,40 @@ public static function updateTheEngine():Void {
 		}
 		return tasklist.contains("obs64.exe") || tasklist.contains("obs32.exe");
 	}
+
+	public static function getSongDuration(musicTime:Float, musicLength:Float):String
+	{
+		final secondsMax:Int = Math.floor((musicLength - musicTime) / 1000); // 1 second = 1000 miliseconds
+		var secs:String = '' + Math.floor(secondsMax) % 60;
+		var mins:String = "" + Math.floor(secondsMax / 60)%60;
+		final hour:String = '' + Math.floor(secondsMax / 3600)%24;
+
+		if (secs.length < 2)
+			secs = '0' + secs;
+
+		var shit:String = mins + ":" + secs;
+		if (hour != "0"){
+			if (mins.length < 2) mins = "0"+ mins;
+			shit = hour+":"+mins + ":" + secs;
+		}
+		return shit;
+	}
+	public static function formatTime(musicTime:Float):String
+	{
+		var secs:String = '' + Math.floor(musicTime / 1000) % 60;
+		var mins:String = "" + Math.floor(musicTime / 1000 / 60)%60;
+		final hour:String = '' + Math.floor((musicTime / 1000 / 3600))%24;
+
+		if (secs.length < 2)
+			secs = '0' + secs;
+
+		var shit:String = mins + ":" + secs;
+		if (hour != "0"){
+			if (mins.length < 2) mins = "0"+ mins;
+			shit = hour+":"+mins + ":" + secs;
+		}
+		return shit;
+	}
 	
 	public static function getDifficultyFilePath(num:Null<Int> = null)
 	{

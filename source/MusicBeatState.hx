@@ -30,6 +30,8 @@ class MusicBeatState extends FlxUIState
 	private var curStep:Int = 0;
 	private var curBeat:Int = 0;
 
+	private var oldStep:Int = 0;
+
 	private var curDecStep:Float = 0;
 	private var curDecBeat:Float = 0;
 	private var controls(get, never):Controls;
@@ -162,7 +164,7 @@ class MusicBeatState extends FlxUIState
 	override function update(elapsed:Float)
 	{
 		//everyStep();
-		final oldStep:Int = curStep;
+		if (oldStep != curStep) oldStep = curStep;
 
 		updateCurStep();
 		updateBeat();
@@ -196,7 +198,7 @@ class MusicBeatState extends FlxUIState
 		while(curStep >= stepsToDo)
 		{
 			curSection++;
-			var beats:Float = getBeatsOnSection();
+			final beats:Float = getBeatsOnSection();
 			stepsToDo += Math.round(beats * 4);
 			sectionHit();
 		}
@@ -231,9 +233,9 @@ class MusicBeatState extends FlxUIState
 
 	private function updateCurStep():Void
 	{
-		var lastChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
+		final lastChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
 
-		var shit = ((Conductor.songPosition - ClientPrefs.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
+		final shit = ((Conductor.songPosition - ClientPrefs.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
 		curDecStep = lastChange.stepTime + shit;
 		curStep = lastChange.stepTime + Math.floor(shit);
 		updateBeat();
@@ -241,8 +243,8 @@ class MusicBeatState extends FlxUIState
 
 	public static function switchState(nextState:FlxState) {
 		// Custom made Trans in
-		var curState:Dynamic = FlxG.state;
-		var leState:MusicBeatState = curState;
+		final curState:Dynamic = FlxG.state;
+		final leState:MusicBeatState = curState;
 		if(!FlxTransitionableState.skipNextTransIn) {
 			leState.openSubState(new CustomFadeTransition(0.6, false));
 			if(nextState == FlxG.state) {
@@ -296,9 +298,4 @@ class MusicBeatState extends FlxUIState
 		if(PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
 		return val == null ? 4 : val;
 	}
-	/*public function stepHit():Void
-	{
-		if (curStep % 4 == 0)
-			beatHit();
-	}*/
 }

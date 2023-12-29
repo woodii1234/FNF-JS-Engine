@@ -108,6 +108,8 @@ class PlayState extends MusicBeatState
 	public var camHUDShaders:Array<ShaderEffect> = [];
 	public var camOtherShaders:Array<ShaderEffect> = [];
 
+	var lastUpdateTime:Float = 0.0;
+
 	//event variables
 	private var isCameraOnForcedPos:Bool = false;
 
@@ -171,6 +173,9 @@ class PlayState extends MusicBeatState
 	public var tries:Int = 0;
 	public var notesLoadedRN:Int = 0;
 	public var firstNoteStrumTime:Float = 0;
+
+	var curTime:Float = 0;
+	var songCalc:Float = 0;
 
 	public static var angelNoteDamage:Array<Float> = [-2, -0.5, 0.5, 1, 1.25]; //the array of healths that the angel note should give when hit from worst to best
 
@@ -297,7 +302,6 @@ class PlayState extends MusicBeatState
 	public var endingSong:Bool = false;
 	public var startingSong:Bool = false;
 	private var updateTime:Bool = true;
-	private var updateThePercent:Bool = true;
 	public static var changedDifficulty:Bool = false;
 	public static var chartingMode:Bool = false;
 	public static var playerIsCheating:Bool = false; //Whether the player is cheating. Enables if you change BOTPLAY or Practice Mode in the Pause menu
@@ -1529,41 +1533,14 @@ class PlayState extends MusicBeatState
 		}
 		updateTime = showTime;
 
-		if (ClientPrefs.hudType == 'VS Impostor') {
-		timeBarBG = new AttachedSprite('impostorTimeBar');
-		timeBarBG.x = timeTxt.x;
-		timeBarBG.y = timeTxt.y + (timeTxt.height / 4);
-		timeBarBG.scrollFactor.set();
-		timeBarBG.alpha = 0;
-		timeBarBG.visible = showTime;
-		timeBarBG.antialiasing = false;
-		timeBarBG.xAdd = -4;
-		timeBarBG.yAdd = -4;
-		add(timeBarBG);
-		
 
-		timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
-			'songPercent', 0, 1);
-		timeBar.scrollFactor.set();
-		timeBar.createFilledBar(0xFF2e412e, 0xFF44d844);
-		timeBar.numDivisions = 800; // How much lag this causes?? Should i tone it down to idk, 400 or 200?
-		timeBar.alpha = 0;
-		timeBar.visible = showTime;
-		add(timeBar);
-		add(timeTxt);
-		timeBarBG.sprTracker = timeBar;
-		timeTxt.x += 10;
-		timeTxt.y += 4;
-		}
-
-		if (ClientPrefs.hudType == 'Psych Engine') {
+		// Create the time bar background and time bar objects with common properties
 		timeBarBG = new AttachedSprite('timeBar');
 		timeBarBG.x = timeTxt.x;
-		timeBarBG.y = timeTxt.y + (timeTxt.height / 4);
+		timeBarBG.y = timeTxt.y + (timeTxt.height / 4);  // Adjust y position if needed for specific hudTypes
 		timeBarBG.scrollFactor.set();
 		timeBarBG.alpha = 0;
-		timeBarBG.visible = showTime;
-		timeBarBG.color = FlxColor.BLACK;
+		timeBarBG.visible = showTime && !ClientPrefs.timeBarType.contains('(No Bar)');
 		timeBarBG.xAdd = -4;
 		timeBarBG.yAdd = -4;
 		add(timeBarBG);
@@ -1571,219 +1548,63 @@ class PlayState extends MusicBeatState
 		timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
 			'songPercent', 0, 1);
 		timeBar.scrollFactor.set();
-		timeBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
-		timeBar.numDivisions = 800; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
+		timeBar.numDivisions = 800; // Adjust numDivisions if needed for performance
 		timeBar.alpha = 0;
-		timeBar.visible = showTime;
-		add(timeBar);
+		timeBar.visible = showTime && !ClientPrefs.timeBarType.contains('(No Bar)');
+		if (ClientPrefs.hudType != 'Dave and Bambi') add(timeBar);
 		add(timeTxt);
 		timeBarBG.sprTracker = timeBar;
-		}
-		if (ClientPrefs.hudType == 'Leather Engine') {
-		timeBarBG = new AttachedSprite('healthBar');
-		timeBarBG.x = timeTxt.x;
-		timeBarBG.y = timeTxt.y + (timeTxt.height / 8);
-		timeBarBG.scrollFactor.set();
-		timeBarBG.alpha = 0;
-		timeBarBG.visible = showTime;
-		timeBarBG.color = FlxColor.BLACK;
-		timeBarBG.xAdd = -4;
-		timeBarBG.yAdd = -4;
-		timeBarBG.screenCenter(X);
-		add(timeBarBG);
 
-				timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
-					'songPercent', 0, 1);
-				timeBar.scrollFactor.set();
+		switch (ClientPrefs.hudType) {
+			case 'VS Impostor':
+				timeBarBG.loadGraphic(Paths.image('impostorTimeBar'));
+				timeBar.createFilledBar(0xFF2e412e, 0xFF44d844);
+				timeTxt.x += 10;
+				timeTxt.y += 4;
+
+			case 'Psych Engine', 'Tails Gets Trolled V4':
+				timeBarBG.loadGraphic(Paths.image('timeBar'));
 				timeBar.createFilledBar(FlxColor.BLACK, FlxColor.WHITE);
-				timeBar.numDivisions = 400;
-				timeBar.alpha = 0;
-				timeBar.visible = showTime;
-				add(timeBar);
-				add(timeTxt);
-		}
-		if (ClientPrefs.hudType == 'Tails Gets Trolled V4') {
-		timeBarBG = new AttachedSprite('timeBar');
-		timeBarBG.x = timeTxt.x;
-		timeBarBG.y = timeTxt.y + (timeTxt.height / 4);
-		timeBarBG.scrollFactor.set();
-		timeBarBG.alpha = 0;
-		timeBarBG.visible = showTime;
-		timeBarBG.color = FlxColor.BLACK;
-		timeBarBG.xAdd = -4;
-		timeBarBG.yAdd = -4;
-		add(timeBarBG);
-
-		timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
-			'songPercent', 0, 1);
-		timeBar.scrollFactor.set();
-		timeBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
-		timeBar.numDivisions = 800; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
-		timeBar.alpha = 0;
-		timeBar.visible = showTime;
-		add(timeBar);
-		add(timeTxt);
-		timeBarBG.sprTracker = timeBar;
-		}
-		if (ClientPrefs.hudType == 'Box Funkin') {
-				timeBarBG = new AttachedSprite('WITimeBar');
-				timeBarBG.y = 695;
-				if (ClientPrefs.downScroll) timeBarBG.y = 3;
-				timeBarBG.scrollFactor.set();
-				timeBarBG.updateHitbox();
-				timeBarBG.screenCenter(X);
-				timeBarBG.alpha = 0;
-				add(timeBarBG);
-				timeBarBG.xAdd = -12;
-				timeBarBG.yAdd = -4;
-		timeBarBG.screenCenter(X);
 				timeBarBG.color = FlxColor.BLACK;
 
-				timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 5, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 24), Std.int(timeBarBG.height - 8), this, 'songPercent', 0, 1);
-				timeBar.scrollFactor.set();
-				timeBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
-				timeBar.numDivisions = 800; // How much lag this causes?? Should i tone it down to idk, 400 or 200?
-				timeBar.alpha = 0;
+			case 'Leather Engine':
+				timeBarBG.loadGraphic(Paths.image("editorHealthBar"));
+				timeBar.createFilledBar(FlxColor.BLACK, FlxColor.WHITE);
+				timeBar.numDivisions = 400;
+				timeBarBG.color = FlxColor.BLACK;
+
+			case 'Box Funkin':
+				timeBarBG.loadGraphic(Paths.image("WITimeBar"));
+				timeBarBG.y = !ClientPrefs.downScroll ? 695 : 3;
+				timeBarBG.updateHitbox();
+				timeBarBG.screenCenter(X);
 				timeBarBG.xAdd = -12;
-				timeBar.screenCenter(X);
-				add(timeBar);
-				add(timeTxt);
-		timeBarBG.sprTracker = timeBar;
-		}
+				timeBar.createFilledBar(FlxColor.BLACK, FlxColor.WHITE);
+				timeBarBG.color = FlxColor.BLACK;
 
-		if (ClientPrefs.hudType == 'Kade Engine') {
-		timeBarBG = new AttachedSprite('editorHealthBar');
-		timeBarBG.x = timeTxt.x;
-		timeBarBG.y = timeTxt.y + (timeTxt.height / 8);
-		timeBarBG.scrollFactor.set();
-		timeBarBG.alpha = 0;
-		timeBarBG.visible = showTime;
-		timeBarBG.color = FlxColor.BLACK;
-		timeBarBG.xAdd = -4;
-		timeBarBG.yAdd = -4;
-		timeBarBG.screenCenter(X);
-		add(timeBarBG);
+			case 'Kade Engine', "Mic'd Up":
+				timeBarBG.loadGraphic(Paths.image("editorHealthBar"));
+				timeBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
+				timeBarBG.color = FlxColor.BLACK;
 
-		timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
-			'songPercent', 0, 1);
-		timeBar.scrollFactor.set();
-		timeBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
-		timeBar.numDivisions = 800; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
-		timeBar.alpha = 0;
-		timeBar.visible = showTime;
-		add(timeBar);
-		add(timeTxt);
-		timeBarBG.sprTracker = timeBar;
-		}
+			case 'Dave and Bambi':
+				timeBarBG.loadGraphic(Paths.image("DnBTimeBar"));
+				timeBarBG.screenCenter(X);
+				timeBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
+				insert(members.indexOf(timeBarBG), timeBar);
 
-		if (ClientPrefs.hudType == "Mic'd Up") {
-		timeBarBG = new AttachedSprite('editorHealthBar');
-		timeBarBG.x = timeTxt.x;
-		timeBarBG.y = timeTxt.y + (timeTxt.height / 8);
-		timeBarBG.scrollFactor.set();
-		timeBarBG.alpha = 0;
-		timeBarBG.visible = showTime;
-		timeBarBG.color = FlxColor.BLACK;
-		timeBarBG.xAdd = -4;
-		timeBarBG.yAdd = -4;
-		timeBarBG.screenCenter(X);
-		add(timeBarBG);
-
-		timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
-			'songPercent', 0, 1);
-		timeBar.scrollFactor.set();
-		timeBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
-		timeBar.numDivisions = 800; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
-		timeBar.alpha = 0;
-		timeBar.visible = showTime;
-		add(timeBar);
-		timeBarBG.sprTracker = timeBar;
-			add(timeTxt);
-		}
-
-		if (ClientPrefs.hudType == 'Dave and Bambi') {
-			timeBarBG = new AttachedSprite('DnBTimeBar');
-			timeBarBG.screenCenter(X);
-			timeBarBG.y = timeTxt.y + (timeTxt.height / 4);
-			timeBarBG.antialiasing = true;
-			timeBarBG.scrollFactor.set();
-			timeBarBG.visible = showTime;
-			timeBarBG.xAdd = -4;
-			timeBarBG.yAdd = -4;
-			add(timeBarBG);
+			case 'Doki Doki+':
+				timeBarBG.loadGraphic(Paths.image("dokiTimeBar"));
+				timeBarBG.screenCenter(X);
+				timeBar.createGradientBar([FlxColor.TRANSPARENT], [FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2])]);
 			
-			timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
-				'songPercent', 0, 1);
-			timeBar.scrollFactor.set();
-			timeBar.numDivisions = 800; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
-			timeBar.alpha = 0;
-			timeBar.visible = showTime;
-			add(timeTxt);
-			timeBarBG.sprTracker = timeBar;
-			timeBar.createFilledBar(FlxColor.GRAY, FlxColor.fromRGB(57, 255, 20));
-			insert(members.indexOf(timeBarBG), timeBar);
+			case 'JS Engine':
+				timeBarBG.loadGraphic(Paths.image("editorHealthBar"));
+				timeBarBG.screenCenter(X);
+				timeBar.createGradientBar([FlxColor.TRANSPARENT], [FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]), FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2])]);
+				timeBar.numDivisions = 1000;
+				timeBarBG.color = FlxColor.BLACK;
 		}
-		if (ClientPrefs.hudType == 'Doki Doki+') {
-		timeBarBG = new AttachedSprite('dokiTimeBar');
-			timeBarBG.screenCenter(X);
-			timeBarBG.y = timeTxt.y + (timeTxt.height / 4);
-			timeBarBG.antialiasing = true;
-			timeBarBG.scrollFactor.set();
-			timeBarBG.visible = showTime;
-			timeBarBG.xAdd = -4;
-			timeBarBG.yAdd = -4;
-			add(timeBarBG);
-
-			timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
-				'songPercent', 0, 1);
-			timeBar.scrollFactor.set();
-			timeBar.numDivisions = 800; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
-			timeBar.alpha = 0;
-			timeBar.visible = showTime;
-			timeBarBG.sprTracker = timeBar;
-			timeBar.createGradientBar([FlxColor.TRANSPARENT], [FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), 				FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2])]);
-			add(timeBar);
-			add(timeTxt);
-		}
-		if (ClientPrefs.hudType == 'JS Engine') {
-		timeBarBG = new AttachedSprite('editorHealthBar');
-			timeBarBG.screenCenter(X);
-		timeBarBG.x = timeTxt.x;
-		timeBarBG.y = timeTxt.y + (timeTxt.height / 8);
-		timeBarBG.scrollFactor.set();
-		timeBarBG.alpha = 0;
-		timeBarBG.visible = showTime;
-		timeBarBG.color = FlxColor.BLACK;
-		timeBarBG.xAdd = -4;
-		timeBarBG.yAdd = -4;
-		timeBarBG.screenCenter(X);
-		add(timeBarBG);
-
-			timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
-				'songPercent', 0, 1);
-			timeBar.scrollFactor.set();
-			timeBar.numDivisions = 1000; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
-			timeBar.alpha = 0;
-			timeBar.visible = showTime;
-			timeBarBG.sprTracker = timeBar;
-			timeBar.createGradientBar([FlxColor.TRANSPARENT], [FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]), FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2])]);
-			add(timeBar);
-			add(timeTxt);
-		}
-		timePercentTxt = new FlxText(800, 19, 400, "", 32);
-		if (ClientPrefs.hudType == 'Doki Doki+') timePercentTxt.setFormat(Paths.font("Aller_rg.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		if (ClientPrefs.hudType == 'Tails Gets Trolled V4') timePercentTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		if (ClientPrefs.hudType == 'Dave and Bambi') timePercentTxt.setFormat(Paths.font("comic.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		if (ClientPrefs.hudType != 'Dave and Bambi' && ClientPrefs.hudType != 'Tails Gets Trolled V4' && ClientPrefs.hudType != 'Doki Doki+') timePercentTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		timePercentTxt.scrollFactor.set();
-		timePercentTxt.alpha = 0;
-		timePercentTxt.borderSize = 2;
-		timePercentTxt.visible = ClientPrefs.songPercentage;
-		updateThePercent = ClientPrefs.songPercentage;
-		if(ClientPrefs.downScroll) timePercentTxt.y = FlxG.height - 44;
-		if (ClientPrefs.timeBarType == 'Disabled') timePercentTxt.screenCenter(X);
-		if (ClientPrefs.hudType == 'Kade Engine' && ClientPrefs.hudType == 'Dave and Bambi') timePercentTxt.x = timeBarBG.x + 600;
-		add(timePercentTxt);
 
 		sustainNotes = new FlxTypedGroup<Note>();
 		add(sustainNotes);
@@ -2206,7 +2027,7 @@ class PlayState extends MusicBeatState
 			overhealthBar.visible = false;
 			iconP2.visible = iconP1.visible = false;
 		}
-		if (ClientPrefs.hideHud && ClientPrefs.showcaseMode) {
+		if (ClientPrefs.hideHud) {
 			scoreTxt.destroy();
 			botplayTxt.visible = false;
 			healthBarBG.visible = false;
@@ -2377,7 +2198,6 @@ class PlayState extends MusicBeatState
 		timeBar.cameras = [camHUD];
 		timeBarBG.cameras = [camHUD];
 		timeTxt.cameras = [camHUD];
-		timePercentTxt.cameras = [camHUD];
 		doof.cameras = [camHUD];
 
 		#if android
@@ -3998,7 +3818,7 @@ class PlayState extends MusicBeatState
 			vocals.pause();
 			}
 		}
-		var curTime:Float = Conductor.songPosition - ClientPrefs.noteOffset;
+		curTime = Conductor.songPosition - ClientPrefs.noteOffset;
 		songPercent = (curTime / songLength);
 
 
@@ -4012,7 +3832,6 @@ class PlayState extends MusicBeatState
 		FlxTween.tween(timeBarBG, {alpha: 1, "scale.x": 1}, 1, {ease: FlxEase.expoOut});
 		FlxTween.tween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 		}
-		FlxTween.tween(timePercentTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 
 
 
@@ -4671,9 +4490,6 @@ class PlayState extends MusicBeatState
 		{
 		health = 0; //set health to 0 if on practice mode and you get to 0%
 		}
-		if (combo >= 1.79e+308) combo = 1.79e+308; //Combo exceeded the maximum value that a Float can go up to, lock it at 1.79e+308 to avoid a reset to 0
-		if (totalNotesPlayed >= 1.79e+308) totalNotesPlayed = 1.79e+308; //Note hit count exceeded the maximum value that a Float can go up to, lock it at 1.79e+308 to avoid a reset to 0
-		if (enemyHits >= 1.79e+308) enemyHits = 1.79e+308; //Opponent's note hit count exceeded the maximum value that a Float can go up to, lock it at 1.79e+308 to avoid a reset to 0
 		if (FlxG.sound.music.length - Conductor.songPosition <= 1000 && ClientPrefs.communityGameBot && cpuControlled) {
 		ratingName = 'you used the community game bot option LMFAOOO';
 		ratingFC = 'skill issue';
@@ -4683,9 +4499,9 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.pbRControls)
 		{
 		if (FlxG.keys.pressed.SHIFT) {
-		pbRM = 4.0;
+			if (pbRM != 4.0) pbRM = 4.0;
 		} else {
-		pbRM = 2.0;
+			if (pbRM != 2.0) pbRM = 2.0;
 		}
        		if (FlxG.keys.justPressed.SLASH) {
             		playbackRate /= pbRM;
@@ -4695,11 +4511,7 @@ class PlayState extends MusicBeatState
        		}
 		}
 
-				healthBar.setRange(0, maxHealth);
-
 		callOnLuas('onUpdate', [elapsed]);
-
-		playbackRateDecimal = FlxMath.roundDecimal(playbackRate, 2);
 
 		if (goods > 0 || bads > 0 || shits > 0 || songMisses > 0 && sickOnly)
 		{
@@ -4866,15 +4678,13 @@ class PlayState extends MusicBeatState
 			moveCamTo[1] = FlxMath.lerp(moveCamTo[1], 0, panLerpVal);
 		}
 if (ClientPrefs.showNPS) {
-	final currentTime = Date.now().getTime();
-    timeThreshold = (ClientPrefs.npsWithSpeed ? 1000 / playbackRate : 1000) * npsSpeedMult;
 
     // Track the count of items to remove for notesHitDateArray
     notesToRemoveCount = 0;
 
     // Filter notesHitDateArray and notesHitArray in place
     for (i in 0...notesHitDateArray.length) {
-        if (notesHitDateArray[i] != null && (notesHitDateArray[i].getTime() + timeThreshold < currentTime)) {
+        if (notesHitDateArray[i] != null && (notesHitDateArray[i].getTime() + (ClientPrefs.npsWithSpeed ? 1000 / playbackRate : 1000) * npsSpeedMult < Date.now().getTime())) {
             notesToRemoveCount++;
         }
     }
@@ -4897,7 +4707,7 @@ if (ClientPrefs.showNPS) {
     oppNotesToRemoveCount = 0;
     
     for (i in 0...oppNotesHitDateArray.length) {
-        if (oppNotesHitDateArray[i] != null && (oppNotesHitDateArray[i].getTime() + timeThreshold < currentTime)) {
+        if (oppNotesHitDateArray[i] != null && (oppNotesHitDateArray[i].getTime() + (ClientPrefs.npsWithSpeed ? 1000 / playbackRate : 1000) * npsSpeedMult < Date.now().getTime())) {
             oppNotesToRemoveCount++;
         }
     }
@@ -5189,7 +4999,7 @@ if (ClientPrefs.showNPS) {
 		iconP1.scale.set(mult, mult);
 		iconP1.updateHitbox();
 
-		var mult:Float = FlxMath.lerp(1, iconP2.scale.x, CoolUtil.boundTo(1 - (elapsed * 9 * playbackRate), 0, 1));
+		final mult:Float = FlxMath.lerp(1, iconP2.scale.x, CoolUtil.boundTo(1 - (elapsed * 9 * playbackRate), 0, 1));
 		iconP2.scale.set(mult, mult);
 		iconP2.updateHitbox();
 		}
@@ -5198,26 +5008,24 @@ if (ClientPrefs.showNPS) {
 		iconP1.centerOffsets();
 		iconP2.centerOffsets();
 		}
-		var speed:Float = 1;
 		//you're welcome Stefan2008 :)
 		if (ClientPrefs.iconBounceType == 'SB Engine') {
-			speed *= playbackRate;
 			if (iconP1.angle >= 0) {
 				if (iconP1.angle != 0) {
-					iconP1.angle -= speed;
+					iconP1.angle -= 1 * playbackRate;
 				}
 			} else {
 				if (iconP1.angle != 0) {
-					iconP1.angle += speed;
+					iconP1.angle += 1 * playbackRate;
 				}
 			}
 			if (iconP2.angle >= 0) {
 				if (iconP2.angle != 0) {
-					iconP2.angle -= speed;
+					iconP2.angle -= 1 * playbackRate;
 				}
 			} else {
 				if (iconP2.angle != 0) {
-					iconP2.angle += speed;
+					iconP2.angle += 1 * playbackRate;
 				}
 			}
 		}
@@ -5340,87 +5148,35 @@ if (ClientPrefs.showNPS) {
 			{
 				songTime += FlxG.game.ticks - previousFrameTime;
 				previousFrameTime = FlxG.game.ticks;
-				//Interpolation type beat
 				if (Conductor.lastSongPos != Conductor.songPosition && ClientPrefs.songLoading)
 				{
 					songTime = (songTime + Conductor.songPosition) / 2;
 					Conductor.lastSongPos = Conductor.songPosition;
 				}
+				
+				if(updateTime && FlxG.game.ticks % (Std.int(ClientPrefs.framerate / 60 / playbackRate) > 0 ? Std.int(ClientPrefs.framerate / 60 / playbackRate) : 1) == 0) {
+					if (timeBar.visible) songPercent = Conductor.songPosition / songLength;
 
-				if(updateTime) {
-					final curTime:Float = Conductor.songPosition - ClientPrefs.noteOffset;
-					songPercent = (curTime / songLength);
-					final songDurationSeconds:Float = FlxMath.roundDecimal(songLength / 1000, 0);
-					songPercentThing = FlxMath.roundDecimal(curTime / songLength * 100, ClientPrefs.percentDecimals);
-					playbackRateDecimal = FlxMath.roundDecimal(playbackRate, 2);
-
-					final songCalc:Float = (ClientPrefs.timeBarType == 'Time Elapsed' || ClientPrefs.timeBarType == 'Modern Time' || ClientPrefs.timeBarType == 'Song Name + Time') ? curTime : (songLength - curTime);
-
-					final secondsTotal:Int = Math.floor(songCalc / 1000);
-
-					final hoursRemaining:Int = Math.floor(secondsTotal / 3600);
-					final minutesRemaining:Int = Math.floor(secondsTotal / 60) % 60;
-					var minutesRemainingShit:String = '' + minutesRemaining;
-					var secondsRemaining:String = '' + secondsTotal % 60;
-
-					if(secondsRemaining.length < 2) secondsRemaining = '0' + secondsRemaining; //let's see if the old time format works actually
-					if (minutesRemainingShit.length < 2) minutesRemainingShit = '0' + minutesRemaining; 
-
-					final hoursShown:Int = Math.floor(songDurationSeconds / 3600);
-					final minutesShown:Int = Math.floor(songDurationSeconds / 60) % 60;
-					var minutesShownShit:String = '' + minutesShown;
-					var secondsShown:String = '' + songDurationSeconds % 60;
-					if(secondsShown.length < 2) secondsShown = '0' + secondsShown; //let's see if the old time format works actually
-					if (minutesShownShit.length < 2) minutesShownShit = '0' + minutesShown;
-
-					switch (ClientPrefs.timeBarType)
-					{
-						case 'Time Left', 'Time Elapsed':
-							if(songLength <= 3600000)
-								timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
-							else
-								timeTxt.text = hoursRemaining + ':' + minutesRemainingShit + ':' + secondsRemaining;
-
-						case 'Modern Time':
-							if(songLength <= 3600000)
-								timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false) + ' / ' + FlxStringUtil.formatTime(songLength / 1000, false);
-							else
-								timeTxt.text = hoursRemaining + ':' + minutesRemainingShit + ':' + secondsRemaining + ' / ' + hoursShown + ':' + minutesShownShit + ':' + secondsShown;
-					
-						case 'Song Name + Time':
-							if(songLength <= 3600000)
-								timeTxt.text = SONG.song + ' (' + FlxStringUtil.formatTime(secondsTotal, false) + ' / ' + FlxStringUtil.formatTime(songLength / 1000, false) + ')';
-
-							else
-								timeTxt.text = SONG.song + ' (' + hoursRemaining + ':' + minutesRemainingShit + ':' + secondsRemaining + ' / ' + hoursShown + ':' + minutesShownShit + ':' + secondsShown + ')';
-					}
-
-					if(ClientPrefs.timebarShowSpeed)
-					{
 						if (ClientPrefs.timeBarType != 'Song Name')
-							timeTxt.text += ' (' + playbackRateDecimal + 'x)';
-						else timeTxt.text = SONG.song + ' (' + playbackRateDecimal + 'x)';
-					}
-					if (cpuControlled && ClientPrefs.timeBarType != 'Song Name' && !ClientPrefs.communityGameBot) timeTxt.text += ' (Bot)';
-					if(ClientPrefs.timebarShowSpeed && cpuControlled && ClientPrefs.timeBarType == 'Song Name') timeTxt.text = SONG.song + ' (' + playbackRateDecimal + 'x) (Bot)';
+						{
+							timeTxt.text = ClientPrefs.timeBarType.contains('Time Left') ? CoolUtil.getSongDuration(Conductor.songPosition, songLength) : CoolUtil.formatTime(FlxG.sound.music.time) 
+							+ (ClientPrefs.timeBarType.contains('Modern Time') ? ' / ' + CoolUtil.formatTime(songLength) : '');
+
+							if (ClientPrefs.timeBarType == 'Song Name + Time')
+								timeTxt.text = SONG.song + ' (' + CoolUtil.formatTime(Conductor.songPosition) + ' / ' + CoolUtil.formatTime(songLength) + ')';
+						}
+
+						if(ClientPrefs.timebarShowSpeed)
+						{
+							playbackRateDecimal = FlxMath.roundDecimal(playbackRate, 2);
+							if (ClientPrefs.timeBarType != 'Song Name')
+								timeTxt.text += ' (' + playbackRateDecimal + 'x)';
+							else timeTxt.text = SONG.song + ' (' + playbackRateDecimal + 'x)';
+						}
+						if (cpuControlled && ClientPrefs.timeBarType != 'Song Name' && !ClientPrefs.communityGameBot) timeTxt.text += ' (Bot)';
+						if(ClientPrefs.timebarShowSpeed && cpuControlled && ClientPrefs.timeBarType == 'Song Name') timeTxt.text = SONG.song + ' (' + FlxMath.roundDecimal(playbackRate, 2) + 'x) (Bot)';
 				}
 			}
-
-				if(updateThePercent) {
-					final curTime:Float = Conductor.songPosition - ClientPrefs.noteOffset;
-					songPercent = (curTime / songLength);
-					songPercentThing = FlxMath.roundDecimal(curTime / songLength * 100, ClientPrefs.percentDecimals);
-					if (ClientPrefs.hudType != 'Kade Engine' && ClientPrefs.hudType != 'Dave and Bambi')
-					{
-					timePercentTxt.text = songPercentThing  + '% Completed';
-					}
-					else
-					{
-					timePercentTxt.text = songPercentThing  + '%';
-				}
-			}
-
-			// Conductor.lastSongPos = FlxG.sound.music.time;
 		}
 
 		if (camZooming)
@@ -5478,14 +5234,13 @@ if (ClientPrefs.showNPS) {
 		notesAddedCount = 0;
 
 		for (i in 0...unspawnNotes.length) {
-			final daNote = unspawnNotes[i];
-			if(daNote.mustPress && cpuControlled) {
-				if (daNote.strumTime + (ClientPrefs.communityGameBot ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition || daNote.isSustainNote && daNote.strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * daNote.earlyHitMult /2)) 
+			if(unspawnNotes[i].mustPress && cpuControlled) {
+				if (unspawnNotes[i].strumTime + (ClientPrefs.communityGameBot ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition || unspawnNotes[i].isSustainNote && unspawnNotes[i].strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * unspawnNotes[i].earlyHitMult /2)) 
 				{
-					if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) goodNoteHit(daNote);
-					if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG && !daNote.wasGoodHit)
+					if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) goodNoteHit(unspawnNotes[i]);
+					if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG && !unspawnNotes[i].wasGoodHit)
 					{
-						if (!daNote.isSustainNote) {
+						if (!unspawnNotes[i].isSustainNote) {
 							totalNotesPlayed += 1 * polyphony;
 							if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
 								notesHitArray.push(1 * polyphony);
@@ -5493,15 +5248,15 @@ if (ClientPrefs.showNPS) {
 							}
 						}
 					}
-					daNote.wasGoodHit = true;
+					unspawnNotes[i].wasGoodHit = true;
 				}
 			}
-			else if (!daNote.mustPress && daNote.strumTime <= Conductor.songPosition && !daNote.hitByOpponent)
+			else if (!unspawnNotes[i].mustPress && unspawnNotes[i].strumTime <= Conductor.songPosition && !unspawnNotes[i].hitByOpponent)
 			{
-				if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) opponentNoteHit(daNote);
+				if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) opponentNoteHit(unspawnNotes[i]);
 				if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
 				{
-					if (!daNote.isSustainNote) 
+					if (!unspawnNotes[i].isSustainNote) 
 					{
 						enemyHits += 1 * polyphony;
 						if (ClientPrefs.showNPS) {
@@ -5509,10 +5264,10 @@ if (ClientPrefs.showNPS) {
 							oppNotesHitDateArray.push(Date.now());
 						}
 					}
-					daNote.hitByOpponent = true;
+					unspawnNotes[i].hitByOpponent = true;
 				}
 			}
-			if (daNote.strumTime <= Conductor.songPosition - 1000) notesAddedCount++; //we remove the notes 1s later so that it doesnt cause unnecessary note removals at high nps's
+			if (unspawnNotes[i].strumTime <= Conductor.songPosition - 1000) notesAddedCount++; //we remove the notes 1s later so that it doesnt cause unnecessary note removals at high nps's
 		}
 
 		if (notesAddedCount > 0) {
@@ -5538,7 +5293,6 @@ if (ClientPrefs.showNPS) {
 
 				if(startedCountdown)
 				{
-					var fakeCrochet:Float = (60 / SONG.bpm) * 1000;
 					for (group in [notes, sustainNotes]) group.forEachAlive(function(daNote:Note) //inspired by denpa, but not directly denpa code
 					{
 						if (ClientPrefs.showNotes)
@@ -5546,7 +5300,7 @@ if (ClientPrefs.showNPS) {
 						final strumGroup:FlxTypedGroup<StrumNote> = daNote.mustPress ? playerStrums : opponentStrums;
 
 							final strum:StrumNote = strumGroup.members[daNote.noteData];
-							daNote.followStrumNote(strum, fakeCrochet, songSpeed);
+							daNote.followStrumNote(strum, (60 / SONG.bpm) * 1000, songSpeed);
 							if(daNote.isSustainNote && strum.sustainReduce) daNote.clipToStrumNote(strum);
 						}
 

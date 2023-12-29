@@ -65,6 +65,7 @@ class FreeplayState extends MusicBeatState
 	{
 		Paths.clearStoredMemory();
 		Paths.clearUnusedMemory();
+		Paths.gc();
 		
 		persistentUpdate = true;
 		PlayState.isStoryMode = false;
