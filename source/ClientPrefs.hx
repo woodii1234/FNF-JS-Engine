@@ -98,6 +98,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var comboMultiType:String = 'osu!';
 	public static var noteOffset:Int = 0;
 	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
+	public static var crossFadeData:Array<Dynamic> = ['Default', 'Healthbar', [255, 255, 255], 0.3, 0.35];
 	public static var ghostTapping:Bool = true;
 	public static var communityGameMode:Bool = false;
 	public static var wrongCameras:Bool = false;
@@ -346,6 +347,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.hideHud = hideHud;
 		FlxG.save.data.lengthIntro = lengthIntro;
 		FlxG.save.data.arrowHSV = arrowHSV;
+		FlxG.save.data.crossFadeData = crossFadeData;
 		FlxG.save.data.longHPBar = longHPBar;
 		FlxG.save.data.moreMaxHP = moreMaxHP;
 		FlxG.save.data.npsWithSpeed = npsWithSpeed;
@@ -801,6 +803,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.arrowHSV != null) {
 			arrowHSV = FlxG.save.data.arrowHSV;
+		}
+		if(FlxG.save.data.crossFadeData != null) {
+			crossFadeData = FlxG.save.data.crossFadeData;
 		}
 		if(FlxG.save.data.lessBotLag != null) {
 			lessBotLag = FlxG.save.data.lessBotLag;

@@ -89,7 +89,7 @@ class SuperSecretDebugMenu extends BaseOptionsMenu
 		var option:Option = new Option('Crash the Engine',
 			"Select this to crash the engine.",
 			'crashEngine',
-			'bool',
+			'link',
 			false);
 
 		option.onChange = crashDaEngine;
@@ -98,7 +98,7 @@ class SuperSecretDebugMenu extends BaseOptionsMenu
 		var option:Option = new Option('Test Update Screen',
 			"Select this to test the engine's update screen.",
 			'updateThing',
-			'bool',
+			'link',
 			false);
 
 		option.onChange = doDaUpdate;

@@ -2170,8 +2170,12 @@ class PlayState extends MusicBeatState
 		botplayTxt.text = 'Practice Mode';
 		botplayTxt.visible = true;
 		}
+		if (ClientPrefs.showcaseMode && ClientPrefs.showNotes) {
+		botplayTxt.text = 'Rendered Notes: ' + notes.length;
+		botplayTxt.visible = true;
+		}
 
-		if (ClientPrefs.communityGameBot && botplayTxt != null || ClientPrefs.showcaseMode && botplayTxt != null) botplayTxt.destroy();
+		if (ClientPrefs.communityGameBot && botplayTxt != null) botplayTxt.destroy();
 
 		laneunderlayOpponent.cameras = [camHUD];
 		laneunderlay.cameras = [camHUD];
@@ -4138,6 +4142,8 @@ class PlayState extends MusicBeatState
 	function eventPushed(event:EventNote) {
 		switch(event.event) {
 			case 'Change Character':
+			if (ClientPrefs.charsAndBG)
+			{
 				var charType:Int = 0;
 				switch(event.value1.toLowerCase()) {
 					case 'gf' | 'girlfriend' | '1':
@@ -4151,6 +4157,7 @@ class PlayState extends MusicBeatState
 
 				var newCharacter:String = event.value2;
 				addCharacterToList(newCharacter, charType);
+			}
 
 			case 'Dadbattle Spotlight':
 				dadbattleBlack = new BGSprite(null, -800, -400, 0, 0);
@@ -4509,6 +4516,11 @@ class PlayState extends MusicBeatState
         	if (FlxG.keys.justPressed.PERIOD) {
            	playbackRate *= pbRM;
        		}
+		}
+
+		if (ClientPrefs.showcaseMode && ClientPrefs.showNotes)
+		{
+			botplayTxt.text = 'Rendered Notes: ' + notes.length;
 		}
 
 		callOnLuas('onUpdate', [elapsed]);
@@ -5828,6 +5840,8 @@ if (ClientPrefs.showNPS) {
 
 
 			case 'Change Character':
+			if (ClientPrefs.charsAndBG)
+			{
 				var charType:Int = 0;
 				switch(value1.toLowerCase().trim()) {
 					case 'gf' | 'girlfriend':
@@ -5960,6 +5974,7 @@ if (ClientPrefs.showNPS) {
 					note.updateRGBColors(false);
 				}	
 				}
+			}
 
 			case 'BG Freaks Expression':
 				if(bgGirls != null) bgGirls.swapDanceType();
