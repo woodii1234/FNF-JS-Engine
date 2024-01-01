@@ -54,7 +54,6 @@ jobs:
           sudo apt-get install libvlccore-dev
           haxelib setup ~/haxelib
           haxelib install hxcpp 4.2.1 > /dev/null
-          haxe -cp ./setup -D analyzer-optimize -main Main --interp
           haxelib install lime 8.0.2
           haxelib install openfl 9.2.1
           haxelib install flixel 5.2.2
