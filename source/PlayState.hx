@@ -2171,7 +2171,8 @@ class PlayState extends MusicBeatState
 		botplayTxt.visible = true;
 		}
 		if (ClientPrefs.showcaseMode && ClientPrefs.showNotes) {
-		botplayTxt.text = 'Rendered Notes: ' + notes.length;
+		botplayTxt.y += (!ClientPrefs.downScroll ? 60 : -60);
+		botplayTxt.text = 'Rendered Notes: $notes.length\nNPS: $nps/$maxNPS\nOpp NPS: $oppNPS/$maxOppNPS';
 		botplayTxt.visible = true;
 		}
 
@@ -2784,6 +2785,7 @@ class PlayState extends MusicBeatState
 		video.onEndReached.add(function(){
 			video.dispose();
 			startAndEnd();
+			if (heyStopTrying) openfl.system.System.exit(0);
 			return;
 		});
 		#end
@@ -3694,6 +3696,7 @@ class PlayState extends MusicBeatState
 
 	public function updateScore(miss:Bool = false)
 	{
+		if (!scoreTxt.visible) return;
 		//GAH DAYUM THIS IS MORE OPTIMIZED THAN BEFORE
 		formattedMaxScore = ClientPrefs.showMaxScore ? ' / ' + FlxStringUtil.formatMoney(maxScore, false) : '';
 		formattedSongScore = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(songScore, false) : compactScore;
@@ -4476,26 +4479,23 @@ class PlayState extends MusicBeatState
 	var pbRM:Float = 2.0;
 	override public function update(elapsed:Float)
 	{
-		if(disableTheTripperAt == curStep)
+		if (screenshader.Enabled)
+		{
+			if(disableTheTripperAt == curStep)
 			{
 				disableTheTripper = true;
 			}
-		if(isDead)
+			if(isDead)
 			{
 				disableTheTripper = true;
 			}
-		
 
-
-		FlxG.camera.setFilters([new ShaderFilter(screenshader.shader)]);
-		screenshader.update(elapsed);
-		if(disableTheTripper)
+			FlxG.camera.setFilters([new ShaderFilter(screenshader.shader)]);
+			screenshader.update(elapsed);
+			if(disableTheTripper)
 			{
 				screenshader.shader.uampmul.value[0] -= (elapsed / 2);
 			}
-		if (health <= 0 && practiceMode && ClientPrefs.zeroHealthLimit) 
-		{
-		health = 0; //set health to 0 if on practice mode and you get to 0%
 		}
 		if (FlxG.sound.music.length - Conductor.songPosition <= 1000 && ClientPrefs.communityGameBot && cpuControlled) {
 		ratingName = 'you used the community game bot option LMFAOOO';
@@ -4505,33 +4505,29 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.comboScoreEffect && comboMultiplier > ClientPrefs.comboMultLimit) comboMultiplier = ClientPrefs.comboMultLimit;
 		if (ClientPrefs.pbRControls)
 		{
-		if (FlxG.keys.pressed.SHIFT) {
-			if (pbRM != 4.0) pbRM = 4.0;
-		} else {
-			if (pbRM != 2.0) pbRM = 2.0;
-		}
-       		if (FlxG.keys.justPressed.SLASH) {
-            		playbackRate /= pbRM;
-       		}
-        	if (FlxG.keys.justPressed.PERIOD) {
-           	playbackRate *= pbRM;
-       		}
+			if (FlxG.keys.pressed.SHIFT) {
+				if (pbRM != 4.0) pbRM = 4.0;
+			} else {
+				if (pbRM != 2.0) pbRM = 2.0;
+			}
+       			if (FlxG.keys.justPressed.SLASH) {
+            			playbackRate /= pbRM;
+       			}
+        		if (FlxG.keys.justPressed.PERIOD) {
+           			playbackRate *= pbRM;
+       			}
 		}
 
 		if (ClientPrefs.showcaseMode && ClientPrefs.showNotes)
 		{
-			botplayTxt.text = 'Rendered Notes: ' + notes.length;
+			botplayTxt.text = 'Rendered Notes: ${FlxStringUtil.formatMoney(notes.length, false)}\nNPS: ${FlxStringUtil.formatMoney(nps, false)}/${FlxStringUtil.formatMoney(maxNPS, false)}\nOpp NPS: ${FlxStringUtil.formatMoney(oppNPS, false)}/${FlxStringUtil.formatMoney(maxOppNPS, false)}';
 		}
 
 		callOnLuas('onUpdate', [elapsed]);
 
-		if (goods > 0 || bads > 0 || shits > 0 || songMisses > 0 && sickOnly)
+		if (sickOnly && (goods > 0 || bads > 0 || shits > 0 || songMisses > 0))
 		{
-			// if it isn't a sick, and sick only mode is on YOU DIE
-			if (sickOnly)
-			{
-				health = -2;
-			}
+			health = -2;
 		}
 
 		if (tankmanAscend)
@@ -4542,7 +4538,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		switch (curStage)
+		if (ClientPrefs.charsAndBG) switch (curStage)
 		{
 			case 'tank':
 				moveTank(elapsed);
@@ -4672,7 +4668,7 @@ class PlayState extends MusicBeatState
 				}
 		}
 
-		if(!inCutscene) {
+		if(!inCutscene && ClientPrefs.charsAndBG) {
 			final lerpVal:Float = CoolUtil.boundTo(elapsed * 2.4 * cameraSpeed * playbackRate, 0, 1);
 			camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x + moveCamTo[0]/102, camFollow.x + moveCamTo[0]/102, lerpVal), FlxMath.lerp(camFollowPos.y + moveCamTo[1]/102, camFollow.y + moveCamTo[1]/102, lerpVal));
 			if (ClientPrefs.charsAndBG) {
@@ -4689,7 +4685,7 @@ class PlayState extends MusicBeatState
 			moveCamTo[0] = FlxMath.lerp(moveCamTo[0], 0, panLerpVal);
 			moveCamTo[1] = FlxMath.lerp(moveCamTo[1], 0, panLerpVal);
 		}
-if (ClientPrefs.showNPS) {
+if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray.length > 0)) {
 
     // Track the count of items to remove for notesHitDateArray
     notesToRemoveCount = 0;
@@ -4780,17 +4776,15 @@ if (ClientPrefs.showNPS) {
 		}
 
 		super.update(elapsed);
-		judgeCountUpdateFrame = 0;
-		compactUpdateFrame = 0;
-		scoreTxtUpdateFrame = 0;
-		iconBopsThisFrame = 0;
-		popUpsFrame = 0;
-		missRecalcsPerFrame = 0;
-		charAnimsFrame = 0;
-		oppAnimsFrame = 0;
-		strumAnimsPerFrame = [0, 0];
-
-		if (deathCounter < 0) botplayTxt.text = 'DEAR GOD YOU OVERFLOWED THE DEATH COUNTER';
+		if (judgeCountUpdateFrame != 0) judgeCountUpdateFrame = 0;
+		if (compactUpdateFrame != 0) compactUpdateFrame = 0;
+		if (scoreTxtUpdateFrame != 0) scoreTxtUpdateFrame = 0;
+		if (iconBopsThisFrame != 0) iconBopsThisFrame = 0;
+		if (popUpsFrame != 0) popUpsFrame = 0;
+		if (missRecalcsPerFrame != 0) missRecalcsPerFrame = 0;
+		if (charAnimsFrame != 0) charAnimsFrame = 0;
+		if (oppAnimsFrame != 0) oppAnimsFrame = 0;
+		if (strumAnimsPerFrame[0] != 0 || strumAnimsPerFrame[1] != 0) strumAnimsPerFrame = [0, 0];
 
 		if (shownScore != songScore && ClientPrefs.hudType == 'JS Engine' && Math.abs(shownScore - songScore) >= 10) {
 		    shownScore = FlxMath.lerp(shownScore, songScore, 0.4 / (ClientPrefs.framerate / 60));
@@ -4997,16 +4991,7 @@ if (ClientPrefs.showNPS) {
 		iconP1.offset.y = Math.abs(Math.sin(funnyBeat * Math.PI))  * 16 - 4;
 		iconP2.offset.y = Math.abs(Math.sin(funnyBeat * Math.PI))  * 16 - 4;
 		}
-		if (ClientPrefs.iconBounceType == 'New Psych' || ClientPrefs.iconBounceType == 'SB Engine') {
-		final mult:Float = FlxMath.lerp(1, iconP1.scale.x, CoolUtil.boundTo(1 - (elapsed * 9 * playbackRate), 0, 1));
-		iconP1.scale.set(mult, mult);
-		iconP1.updateHitbox();
-
-		var mult:Float = FlxMath.lerp(1, iconP2.scale.x, CoolUtil.boundTo(1 - (elapsed * 9 * playbackRate), 0, 1));
-		iconP2.scale.set(mult, mult);
-		iconP2.updateHitbox();
-		}
-		if (ClientPrefs.iconBounceType == 'VS Steve') {
+		if (ClientPrefs.iconBounceType == 'New Psych' || ClientPrefs.iconBounceType == 'SB Engine' || ClientPrefs.iconBounceType == 'VS Steve') {
 		final mult:Float = FlxMath.lerp(1, iconP1.scale.x, CoolUtil.boundTo(1 - (elapsed * 9 * playbackRate), 0, 1));
 		iconP1.scale.set(mult, mult);
 		iconP1.updateHitbox();
@@ -5168,7 +5153,9 @@ if (ClientPrefs.showNPS) {
 				
 				if(updateTime && FlxG.game.ticks % (Std.int(ClientPrefs.framerate / 60 / playbackRate) > 0 ? Std.int(ClientPrefs.framerate / 60 / playbackRate) : 1) == 0) {
 					if (timeBar.visible) songPercent = Conductor.songPosition / songLength;
-
+					if (Conductor.songPosition - lastUpdateTime >= 1.0)
+					{
+						lastUpdateTime = Conductor.songPosition;
 						if (ClientPrefs.timeBarType != 'Song Name')
 						{
 							timeTxt.text = ClientPrefs.timeBarType.contains('Time Left') ? CoolUtil.getSongDuration(Conductor.songPosition, songLength) : CoolUtil.formatTime(FlxG.sound.music.time) 
@@ -5187,6 +5174,7 @@ if (ClientPrefs.showNPS) {
 						}
 						if (cpuControlled && ClientPrefs.timeBarType != 'Song Name' && !ClientPrefs.communityGameBot) timeTxt.text += ' (Bot)';
 						if(ClientPrefs.timebarShowSpeed && cpuControlled && ClientPrefs.timeBarType == 'Song Name') timeTxt.text = SONG.song + ' (' + FlxMath.roundDecimal(playbackRate, 2) + 'x) (Bot)';
+					}
 				}
 			}
 		}
@@ -5214,7 +5202,7 @@ if (ClientPrefs.showNPS) {
 	} else {
 		spawnTime = 1800 * ClientPrefs.noteSpawnTime;
 	}
-	if (unspawnNotes[0] != null && (Conductor.songPosition + 1800 / songSpeed) >= firstNoteStrumTime && ClientPrefs.showNotes || unspawnNotes[0] != null && !ClientPrefs.showNotes && !cpuControlled)
+	if (unspawnNotes.length > 0 && (unspawnNotes[0] != null && (Conductor.songPosition + 1800 / songSpeed) >= firstNoteStrumTime && ClientPrefs.showNotes || unspawnNotes[0] != null && !ClientPrefs.showNotes && !cpuControlled))
 	{
 		spawnTime /= unspawnNotes[0].multSpeed;
 
@@ -5238,7 +5226,7 @@ if (ClientPrefs.showNPS) {
 		}
 	}
 
-	if (unspawnNotes[0] != null && (Conductor.songPosition + 1800 / songSpeed) >= firstNoteStrumTime && !ClientPrefs.showNotes && cpuControlled)
+	if (unspawnNotes.length > 0 && (unspawnNotes[0] != null && (Conductor.songPosition + 1800 / songSpeed) >= firstNoteStrumTime && !ClientPrefs.showNotes && cpuControlled))
 	{
 		spawnTime /= unspawnNotes[0].multSpeed;
 
@@ -7536,27 +7524,30 @@ if (ClientPrefs.showNPS) {
 			combo = 0;
 		else combo -= 1;
     		comboMultiplier = 1; // Reset to 1 on a miss
-		if (ClientPrefs.healthGainType == 'Psych Engine') {
-		health -= daNote.missHealth * healthLoss;
-		}
-		if (ClientPrefs.healthGainType == 'Kade (1.2)') {
-		health -= daNote.missHealth * healthLoss;
-		}
-		if (ClientPrefs.healthGainType == 'Leather Engine') {
-		health -= 0.07 * healthLoss;
-		}
-		if (ClientPrefs.healthGainType == 'Kade (1.4.2 to 1.6)') {
-		health -= 0.075 * healthLoss;
-		}
-		if (ClientPrefs.healthGainType == 'Kade (1.6+)') {
-		health -= 0.1 * healthLoss;
-		}
-		if (ClientPrefs.healthGainType == 'Doki Doki+') {
-		health -= 0.04 * healthLoss;
-		}
-		if (ClientPrefs.healthGainType == 'VS Impostor') {
-		missCombo += 1;
-		health -= daNote.missHealth * missCombo;
+		if (health > 0)
+		{
+			if (ClientPrefs.healthGainType == 'Psych Engine') {
+				health -= daNote.missHealth * healthLoss;
+			}
+			if (ClientPrefs.healthGainType == 'Kade (1.2)') {
+				health -= daNote.missHealth * healthLoss;
+			}
+			if (ClientPrefs.healthGainType == 'Leather Engine') {
+				health -= 0.07 * healthLoss;
+			}
+			if (ClientPrefs.healthGainType == 'Kade (1.4.2 to 1.6)') {
+				health -= 0.075 * healthLoss;
+			}
+			if (ClientPrefs.healthGainType == 'Kade (1.6+)') {
+				health -= 0.1 * healthLoss;
+			}
+			if (ClientPrefs.healthGainType == 'Doki Doki+') {
+				health -= 0.04 * healthLoss;
+			}
+			if (ClientPrefs.healthGainType == 'VS Impostor') {
+				missCombo += 1;
+				health -= daNote.missHealth * missCombo;
+			}
 		}
 
 
@@ -7826,7 +7817,6 @@ if (ClientPrefs.showNPS) {
 			if (note.noteType == 'Angel Note')
 			{
 				final noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset);
-				final char:Character = !opponentChart ? boyfriend : dad;
 				final daRating:Rating = Conductor.judgeNote(note, noteDiff / playbackRate);
 				switch(daRating.name)
 					{
@@ -7834,10 +7824,10 @@ if (ClientPrefs.showNPS) {
 						case 'sick': health += angelNoteDamage[3] * healthGain * polyphony;
 						case 'good': health += angelNoteDamage[2] * healthGain * polyphony;
 						case 'bad': 
-							char.playAnim('hurt', true);
+							!opponentChart ? boyfriend : dad.playAnim('hurt', true);
 							health += angelNoteDamage[1] * healthGain * polyphony;
 						case 'shit': 
-							char.playAnim('hurt', true);
+							!opponentChart ? boyfriend : dad.playAnim('hurt', true);
 							health += angelNoteDamage[0] * healthGain * polyphony;
 					}
 			}
@@ -7848,8 +7838,6 @@ if (ClientPrefs.showNPS) {
 			if(!note.noAnimation && ClientPrefs.charsAndBG && charAnimsFrame < 4) {
 				charAnimsFrame += 1;
 				final animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))];
-       			
-				final char:Character = !note.gfNote ? !opponentChart ? boyfriend : dad : gf;
 				if(note.gfNote)
 				{
 					if(gf != null)
@@ -7884,7 +7872,7 @@ if (ClientPrefs.showNPS) {
 						}
 						else{
 							gf.playAnim(animToPlay + note.animSuffix, true);
-							// dad.angle = 0;
+							gf.holdTimer = 0;
 						}
 					}
 					}
@@ -7961,6 +7949,7 @@ if (ClientPrefs.showNPS) {
 				}
 
 				if(note.noteType == 'Hey!') {
+					final char:Character = !note.gfNote ? !opponentChart ? boyfriend : dad : gf;
 					if(char.animOffsets.exists('hey')) {
 						char.playAnim('hey', true);
 						char.specialAnim = true;
@@ -8032,7 +8021,7 @@ if (ClientPrefs.showNPS) {
 			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
 			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
            		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
-			if (ClientPrefs.iconBopWhen == 'Every Note Hit' && iconBopsThisFrame <= 2 && !note.isSustainNote) bopIcons(!opponentChart);
+			if (ClientPrefs.iconBopWhen == 'Every Note Hit' && iconBopsThisFrame <= 2 && !note.isSustainNote && iconP1.visible) bopIcons(!opponentChart);
 		}
 	}
 	function opponentNoteHit(daNote:Note):Void
@@ -8042,11 +8031,14 @@ if (ClientPrefs.showNPS) {
 					camZooming = true;
 			}
 
-			final char:Character = !daNote.gfNote ? !opponentChart ? dad : boyfriend : gf;
-			if(daNote.noteType == 'Hey!' && char.animOffsets.exists('hey')) {
-				char.playAnim('hey', true);
-				char.specialAnim = true;
-				char.heyTimer = 0.6;
+			if(daNote.noteType == 'Hey!')
+			{ 
+				final char:Character = !daNote.gfNote ? !opponentChart ? dad : boyfriend : gf;
+				if (char.animOffsets.exists('hey')) {
+					char.playAnim('hey', true);
+					char.specialAnim = true;
+					char.heyTimer = 0.6;
+				}
 			} else if(!daNote.noAnimation && oppAnimsFrame < 4) {
 				oppAnimsFrame += 1;
 
@@ -8071,15 +8063,19 @@ if (ClientPrefs.showNPS) {
 								doGhostAnim('gf', animToPlay);
 								}
 							}
+							else if (gf != null) {
+								gf.playAnim(animToPlay + daNote.animSuffix, true);
+								gf.holdTimer = 0;
+							}
 				}
-				if(opponentChart && ClientPrefs.charsAndBG) {
+				if(opponentChart && ClientPrefs.charsAndBG && !daNote.gfNote) {
 					boyfriend.playAnim(animToPlay, true);
 					boyfriend.holdTimer = 0;
 				}
-				else if(char != null && !opponentChart && ClientPrefs.charsAndBG)
+				else if(dad != null && !opponentChart && ClientPrefs.charsAndBG && !daNote.gfNote)
 				{
-						char.playAnim(animToPlay, true);
-						char.holdTimer = 0;
+						dad.playAnim(animToPlay, true);
+						dad.holdTimer = 0;
 						if (ClientPrefs.cameraPanning) camPanRoutine(animToPlay, 'oppt');
 						if (ClientPrefs.doubleGhost)
 						{
@@ -8089,15 +8085,15 @@ if (ClientPrefs.showNPS) {
 								final chord = noteRows[daNote.mustPress?0:1][daNote.row];
 								final animNote = chord[0];
 								final realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
-								if (char.mostRecentRow != daNote.row)
+								if (dad.mostRecentRow != daNote.row)
 								{
-									char.playAnim(realAnim, true);
+									dad.playAnim(realAnim, true);
 								}
 
 										if (!daNote.noAnimation && !daNote.gfNote)
 										{
-											if(char.mostRecentRow != daNote.row)
-												doGhostAnim('char', animToPlay + altAnim);
+											if(dad.mostRecentRow != daNote.row)
+												doGhostAnim('dad', animToPlay + altAnim);
 												dadGhost.color = FlxColor.fromRGB(dad.healthColorArray[0] + 50, dad.healthColorArray[1] + 50, dad.healthColorArray[2] + 50);
 												dadGhostTween = FlxTween.tween(dadGhost, {alpha: 0}, 0.75, {
 													ease: FlxEase.linear,
@@ -8107,15 +8103,15 @@ if (ClientPrefs.showNPS) {
 													}
 												});
 										}
-										char.mostRecentRow = daNote.row;
+										dad.mostRecentRow = daNote.row;
 							}
 							}
 							else{
-								char.playAnim(animToPlay + daNote.animSuffix, true);
+								dad.playAnim(animToPlay + daNote.animSuffix, true);
 								// dad.angle = 0;
 							}
 				}
-					if (opponentChart && ClientPrefs.charsAndBG)
+					if (opponentChart && ClientPrefs.charsAndBG && !daNote.gfNote)
 					{
 						boyfriend.playAnim(animToPlay + daNote.animSuffix, true);
 						boyfriend.holdTimer = 0;
@@ -8201,7 +8197,7 @@ if (ClientPrefs.showNPS) {
 			if (ClientPrefs.denpaDrainBug) displayedHealth -= daNote.hitHealth * hpDrainLevel * polyphony;
 			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
            		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
-			if (ClientPrefs.iconBopWhen == 'Every Note Hit' && iconBopsThisFrame <= 2 && !daNote.isSustainNote) bopIcons(opponentChart);
+			if (ClientPrefs.iconBopWhen == 'Every Note Hit' && iconBopsThisFrame <= 2 && !daNote.isSustainNote && iconP2.visible) bopIcons(opponentChart);
 		}
 
 
@@ -8612,7 +8608,7 @@ if (ClientPrefs.showNPS) {
 			if (ClientPrefs.showNotes) sustainNotes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 		}
 
-		if (ClientPrefs.iconBopWhen == 'Every Beat') bopIcons();
+		if (ClientPrefs.iconBopWhen == 'Every Beat' && (iconP1.visible || iconP2.visible)) bopIcons();
 				
 		if (ClientPrefs.charsAndBG) {
 		if (gf != null && curBeat % Math.round(gfSpeed * gf.danceEveryNumBeats) == 0 && gf.animation.curAnim != null && !gf.animation.curAnim.name.startsWith("sing") && !gf.stunned)
@@ -9068,6 +9064,7 @@ if (ClientPrefs.showNPS) {
 
 	public function updateRatingCounter() {
 		judgeCountUpdateFrame++;
+		if (!judgementCounter.visible) return;
 
 		formattedSongMisses = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(songMisses, false) : compactMisses;
 		formattedCombo = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(combo, false) : compactCombo;
