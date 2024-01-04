@@ -636,16 +636,11 @@ class Note extends FlxSprite
 		}
 	}
 
-	public function followStrumNote(myStrum:StrumNote, fakeCrochet:Float, songSpeed:Float = 1)
+	public function followStrumNote(strum:StrumNote, fakeCrochet:Float, songSpeed:Float = 1)
 	{
-		final strumX:Float = myStrum.x;
-		final strumY:Float = myStrum.y;
-		final strumAngle:Float = myStrum.angle;
-		final strumAlpha:Float = myStrum.alpha;
-		final strumDirection:Float = myStrum.direction;
 
 		distance = (0.45 * (Conductor.songPosition - strumTime) * songSpeed * multSpeed);
-		if (!myStrum.downScroll) distance *= -1;
+		if (!strum.downScroll) distance *= -1;
 
 						if(animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end'))
 						{
@@ -657,24 +652,23 @@ class Note extends FlxSprite
 						}
 
 		if(copyScale && isSustainNote)
-			//scale.set(myStrum.scale.x, myStrum.scale.y);
 			if (!dumbHitboxThing)
 				updateHitbox();
 
-		var angleDir = strumDirection * Math.PI / 180;
+		final angleDir = strum.direction * Math.PI / 180;
 		if (copyAngle)
-			angle = strumDirection - 90 + strumAngle + offsetAngle;
+			angle = strum.direction - 90 + strum.angle + offsetAngle;
 
 		if(copyAlpha)
-			alpha = strumAlpha * multAlpha;
+			alpha = strum.alpha * multAlpha;
 
 		if(copyX)
-			x = strumX + offsetX + Math.cos(angleDir) * distance;
+			x = strum.x + offsetX + Math.cos(angleDir) * distance;
 
 		if(copyY)
 		{
-			y = strumY + offsetY + correctionOffset + Math.sin(angleDir) * distance;
-			if(myStrum.downScroll && isSustainNote)
+			y = strum.y + offsetY + correctionOffset + Math.sin(angleDir) * distance;
+			if(strum.downScroll && isSustainNote)
 			{
 				if(PlayState.isPixelStage)
 				{
@@ -687,12 +681,11 @@ class Note extends FlxSprite
 
 	public function clipToStrumNote(myStrum:StrumNote)
 	{
-		var center:Float = myStrum.y + offsetY + Note.swagWidth / 2;
+		final center:Float = myStrum.y + offsetY + Note.swagWidth / 2;
 		if(isSustainNote && (mustPress || !ignoreNote) &&
 			(!mustPress || (wasGoodHit || (prevNote.wasGoodHit && !canBeHit))))
 		{
-			var swagRect:FlxRect = clipRect;
-			if(swagRect == null) swagRect = new FlxRect(0, 0, frameWidth, frameHeight);
+			final swagRect:FlxRect = clipRect != null ? clipRect : new FlxRect(0, 0, frameWidth, frameHeight);
 
 			if (myStrum.downScroll)
 			{

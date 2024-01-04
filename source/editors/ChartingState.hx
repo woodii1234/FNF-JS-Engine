@@ -1629,6 +1629,7 @@ class ChartingState extends MusicBeatState
 	var waveformUseVoices:FlxUICheckBox;
 	#end
 	var lilBuddiesBox:FlxUICheckBox;
+	var saveUndoCheck:FlxUICheckBox;
 	var instVolume:FlxUINumericStepper;
 	var voicesVolume:FlxUINumericStepper;
 	var hitsoundVolume:FlxUINumericStepper;
@@ -1693,6 +1694,14 @@ class ChartingState extends MusicBeatState
 				lilStage.visible = lilBuddiesBox.checked;
 			};
 
+			saveUndoCheck = new FlxUICheckBox(mouseScrollingQuant.x + 150, mouseScrollingQuant.y + 25, null, null, "Save Undos", 100);
+			if (FlxG.save.data.allowUndo == null) FlxG.save.data.allowUndo = true;
+			saveUndoCheck.checked = FlxG.save.data.allowUndo;
+			saveUndoCheck.callback = function()
+			{
+				FlxG.save.data.allowUndo = saveUndoCheck.checked;
+			};
+
 		check_vortex = new FlxUICheckBox(10, 160, null, null, "Vortex Editor (BETA)", 100);
 		if (FlxG.save.data.chart_vortex == null) FlxG.save.data.chart_vortex = false;
 		check_vortex.checked = FlxG.save.data.chart_vortex;
@@ -1704,7 +1713,7 @@ class ChartingState extends MusicBeatState
 			reloadGridLayer();
 		};
 
-		check_showGrid = new FlxUICheckBox(10, 220, null, null, "Show Grid", 100);
+		check_showGrid = new FlxUICheckBox(10, 225, null, null, "Show Grid", 100);
 		if (FlxG.save.data.showGrid == null) FlxG.save.data.showGrid = false;
 		check_showGrid.checked = FlxG.save.data.showGrid;
 
@@ -1811,6 +1820,7 @@ class ChartingState extends MusicBeatState
 		tab_group_chart.add(waveformUseVoices);
 		#end
 		tab_group_chart.add(lilBuddiesBox);
+		tab_group_chart.add(saveUndoCheck);
 		tab_group_chart.add(instVolume);
 		tab_group_chart.add(voicesVolume);
 		tab_group_chart.add(hitsoundVolume);
@@ -3765,32 +3775,29 @@ class ChartingState extends MusicBeatState
 
     public function saveUndo(_song:SwagSong)
     {
-	if (CoolUtil.getNoteAmount(_song) <= 50000) {
+
+	if (CoolUtil.getNoteAmount(_song) <= 50000 && FlxG.save.data.allowUndo) {
         var shit = Json.stringify({ //doin this so it doesnt act as a reference
 			"song": _song
 		});
         var song:SwagSong = Song.parseJSONshit(shit);
 
         undos.unshift(song.notes);
-	redos = []; //Reset redos
+		redos = []; //Reset redos
         if (undos.length >= 100) //if you save more than 100 times, remove the oldest undo
             undos.remove(undos[100]);
-	} else {
-	trace("there's too many notes! to prevent lag and excessive memory usage, you can't save undos if a song has over 50K notes.");
 	}
     }
 
     public function undo()
     {
-	if (undos.length > 0) {
-        _song.notes = undos[0];
-        redos.unshift(undos[0]);
-        undos.splice(0, 1);
-	trace("Performed an Undo! Undos remaining: " + undos.length);
-	updateGrid();
-	} else {
-	trace ("Hold on there! You can't undo if there's nothing to undo yet!");
-	}
+		if (undos.length > 0 && saveUndoCheck.checked) {
+			_song.notes = undos[0];
+			redos.unshift(undos[0]);
+			undos.splice(0, 1);
+		trace("Performed an Undo! Undos remaining: " + undos.length);
+		updateGrid();
+		}
     }
 
 	function getNotes():Array<Dynamic>

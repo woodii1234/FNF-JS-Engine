@@ -179,7 +179,8 @@ class PlayState extends MusicBeatState
 
 	public static var angelNoteDamage:Array<Float> = [-2, -0.5, 0.5, 1, 1.25]; //the array of healths that the angel note should give when hit from worst to best
 
-	public var spawnTime:Float = 1800; //just enough for the notes to barely inch off the screen
+	public var spawnTime:Float = 1600; //just enough for the notes to barely inch off the screen
+	public var changedSpawnTime:Float = 1600; //just enough for the notes to barely inch off the screen
 	
 	public var strumAnimsPerFrame:Array<Int> = [0, 0];
 
@@ -1163,6 +1164,13 @@ class PlayState extends MusicBeatState
 			case 'tank':
 				add(foregroundSprites);
 		}
+
+		if (ClientPrefs.dynamicSpawnTime) {
+    			spawnTime /= songSpeed;
+		} else {
+			spawnTime *= ClientPrefs.noteSpawnTime;
+		}
+		changedSpawnTime = spawnTime;
 
 		#if LUA_ALLOWED
 		luaDebugGroup = new FlxTypedGroup<DebugLuaText>();
@@ -5197,20 +5205,16 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 		doDeathCheck();
 
-	if (ClientPrefs.dynamicSpawnTime) {
-    		spawnTime = 1800 / songSpeed;
-	} else {
-		spawnTime = 1800 * ClientPrefs.noteSpawnTime;
-	}
 	if (unspawnNotes.length > 0 && (unspawnNotes[0] != null && (Conductor.songPosition + 1800 / songSpeed) >= firstNoteStrumTime && ClientPrefs.showNotes || unspawnNotes[0] != null && !ClientPrefs.showNotes && !cpuControlled))
 	{
-		spawnTime /= unspawnNotes[0].multSpeed;
+		if (!Math.isNaN(unspawnNotes[0].multSpeed) && unspawnNotes[0].multSpeed != 1) changedSpawnTime = spawnTime / unspawnNotes[0].multSpeed;
 
 		// Track the count of notes added
 		notesAddedCount = 0;
 
 		for (i in 0...unspawnNotes.length) {
-			if (unspawnNotes[i].strumTime - Conductor.songPosition < spawnTime) {
+			if (unspawnNotes[i].strumTime - Conductor.songPosition < (changedSpawnTime != spawnTime ? changedSpawnTime : spawnTime))
+			{
 				if (ClientPrefs.showNotes) {
 					!unspawnNotes[i].isSustainNote ? notes.insert(0, unspawnNotes[i]) : sustainNotes.insert(0, unspawnNotes[i]); //If it's NOT a sustain note, we add it to notes. else, we add it to sustainNotes
 				} else {
