@@ -1,17 +1,17 @@
-1.17.0;
+1.18.0;
 
-Added a miss rating (turned off by default)
-Improved performance and reduced memory leaks
-Renamed Marvelous to Perfect
-Fixed some time bars having transparent backgrounds
-Added 4 BF icon styles, and they now work with character changes
-Added an option that forces cutscenes with lua
-Quantized Notes now work with as many BPM changes as you desire!
-Fixed rainbow perfect ratings not changing to the user's specified perfect rating
-Added "No More Cuss Words" rating skin by StinktheStinker
-Added a simplified popup
-Added custom heading bars and credits icons for those credits popups (For mods, put icons in mods/(your mod)/images/songCreators and headings in songHeadings!)
-Added a new event that allows you to change the song name
-Fixed not being able to preview dialogue in the dialogue editor
-Fixed stretched stuff with Long D&B health bar
-Fixed an issue where turning off color shaders would crash the game because of notes
+General
+Fixed a bug where missing a note with the MISS rating option would cause note splashes
+Fixed results screen calling Perfect "Marvelous"
+Further reduced memory leaks at high FPS
+Added 3 new time bar options
+Removed song percentage
+Turning on Showcase Mode and having Show Notes turned on now changes the botplay text to instead show how many notes are currently being rendered by the game (WIP, DOES NOT INCLUDE SUSTAIN NOTES YET!)
+Fixed crashes due to Change Character events with Chars & BG turned off
+Added VS Impostor ratings
+
+Chart Editor
+added a toggle for undos.
+The chart editor now shows how many notes are being rendered on screen, and how many notes are in your current section.
+Fixed a bug where the anti-crash wouldn't pick up songs with spaces
+Added anti-crash for missing character jsons.. incase you delete the bf json
