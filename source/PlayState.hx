@@ -1528,8 +1528,7 @@ class PlayState extends MusicBeatState
 			timeTxt.borderSize = 1;
 
 		case "Mic'd Up":
-			timeTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorder
-.OUTLINE, FlxColor.BLACK);
+			timeTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			timeTxt.screenCenter(X);
 			timeTxt.borderSize = 2;
 
