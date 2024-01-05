@@ -1165,12 +1165,11 @@ class PlayState extends MusicBeatState
 				add(foregroundSprites);
 		}
 
-		if (ClientPrefs.dynamicSpawnTime) {
-    			spawnTime /= songSpeed;
-		} else {
-			spawnTime *= ClientPrefs.noteSpawnTime;
+		if (!ClientPrefs.dynamicSpawnTime) 
+		{
+			spawnTime = 1600 * ClientPrefs.noteSpawnTime;
+			changedSpawnTime = spawnTime;
 		}
-		changedSpawnTime = spawnTime;
 
 		#if LUA_ALLOWED
 		luaDebugGroup = new FlxTypedGroup<DebugLuaText>();
@@ -2506,6 +2505,10 @@ class PlayState extends MusicBeatState
 					note.resizeByRatio(ratio);
 				}	
 			}
+		}
+		if (ClientPrefs.dynamicSpawnTime) {
+    			spawnTime = 1600 / value;
+			changedSpawnTime = spawnTime;
 		}
 		songSpeed = value;
 		noteKillOffset = 350 / songSpeed;
@@ -4538,15 +4541,12 @@ class PlayState extends MusicBeatState
 			health = -2;
 		}
 
-		if (tankmanAscend)
+		if (tankmanAscend && curStep > 895 && curStep < 1151)
 		{
-			if (curStep > 895 && curStep < 1151)
-			{
-				camGame.zoom = 0.8;
-			}
+			camGame.zoom = 0.8;
 		}
 
-		if (ClientPrefs.charsAndBG) switch (curStage)
+		if (ClientPrefs.charsAndBG && curStage != 'stage') switch (curStage)
 		{
 			case 'tank':
 				moveTank(elapsed);
@@ -4693,7 +4693,7 @@ class PlayState extends MusicBeatState
 			moveCamTo[0] = FlxMath.lerp(moveCamTo[0], 0, panLerpVal);
 			moveCamTo[1] = FlxMath.lerp(moveCamTo[1], 0, panLerpVal);
 		}
-if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray.length > 0)) {
+if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray.length > 0) && FlxG.game.ticks % (Std.int(ClientPrefs.framerate / 60) > 0 ? Std.int(ClientPrefs.framerate / 60) : 1) == 0) {
 
     // Track the count of items to remove for notesHitDateArray
     notesToRemoveCount = 0;
@@ -4784,15 +4784,15 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 
 		super.update(elapsed);
-		if (judgeCountUpdateFrame != 0) judgeCountUpdateFrame = 0;
-		if (compactUpdateFrame != 0) compactUpdateFrame = 0;
-		if (scoreTxtUpdateFrame != 0) scoreTxtUpdateFrame = 0;
-		if (iconBopsThisFrame != 0) iconBopsThisFrame = 0;
-		if (popUpsFrame != 0) popUpsFrame = 0;
-		if (missRecalcsPerFrame != 0) missRecalcsPerFrame = 0;
-		if (charAnimsFrame != 0) charAnimsFrame = 0;
-		if (oppAnimsFrame != 0) oppAnimsFrame = 0;
-		if (strumAnimsPerFrame[0] != 0 || strumAnimsPerFrame[1] != 0) strumAnimsPerFrame = [0, 0];
+		if (judgeCountUpdateFrame > 0) judgeCountUpdateFrame = 0;
+		if (compactUpdateFrame > 0) compactUpdateFrame = 0;
+		if (scoreTxtUpdateFrame > 0) scoreTxtUpdateFrame = 0;
+		if (iconBopsThisFrame > 0) iconBopsThisFrame = 0;
+		if (popUpsFrame > 0) popUpsFrame = 0;
+		if (missRecalcsPerFrame > 0) missRecalcsPerFrame = 0;
+		if (charAnimsFrame > 0) charAnimsFrame = 0;
+		if (oppAnimsFrame > 0) oppAnimsFrame = 0;
+		if (strumAnimsPerFrame[0] > 0 || strumAnimsPerFrame[1] > 0) strumAnimsPerFrame = [0, 0];
 
 		if (shownScore != songScore && ClientPrefs.hudType == 'JS Engine' && Math.abs(shownScore - songScore) >= 10) {
 		    shownScore = FlxMath.lerp(shownScore, songScore, 0.4 / (ClientPrefs.framerate / 60));
@@ -4926,7 +4926,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 		if ((controls.PAUSE #if android || FlxG.android.justReleased.BACK #end) && startedCountdown && canPause && !softlocked && !heyStopTrying)
 		{
-			var ret:Dynamic = callOnLuas('onPause', [], false);
+			final ret:Dynamic = callOnLuas('onPause', [], false);
 			if(ret != FunkinLua.Function_Stop)
 				openPauseMenu();
 		}
@@ -5051,11 +5051,11 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 		if (generatedMusic) {
 			if (startedCountdown && canPause && !endingSong) {
-				if (playbackRate <= 256) endingTimeLimit = 20;
 				// Song ends abruptly on slow rate even with second condition being deleted,
 				// and if it's deleted on songs like cocoa then it would end without finishing instrumental fully,
 				// so no reason to delete it at all
 				if (ClientPrefs.songLoading && FlxG.sound.music.length - Conductor.songPosition <= endingTimeLimit && trollingMode) { //stop crashes when playing normally
+					if (playbackRate <= 256) endingTimeLimit = 20;
 					if (ClientPrefs.trollMaxSpeed == 'Highest') loopSongHighest();
 					if (ClientPrefs.trollMaxSpeed == 'High') loopSongHigh();
 					if (ClientPrefs.trollMaxSpeed == 'Medium') loopSongMedium();
@@ -5159,7 +5159,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					Conductor.lastSongPos = Conductor.songPosition;
 				}
 				
-				if(updateTime && FlxG.game.ticks % (Std.int(ClientPrefs.framerate / 60 / playbackRate) > 0 ? Std.int(ClientPrefs.framerate / 60 / playbackRate) : 1) == 0) {
+				if(updateTime && FlxG.game.ticks % (Std.int(ClientPrefs.framerate / 60) > 0 ? Std.int(ClientPrefs.framerate / 60) : 1) == 0) {
 					if (timeBar.visible) songPercent = Conductor.songPosition / songLength;
 					if (Conductor.songPosition - lastUpdateTime >= 1.0)
 					{
@@ -5207,13 +5207,16 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 	if (unspawnNotes.length > 0 && (unspawnNotes[0] != null && (Conductor.songPosition + 1800 / songSpeed) >= firstNoteStrumTime && ClientPrefs.showNotes || unspawnNotes[0] != null && !ClientPrefs.showNotes && !cpuControlled))
 	{
-		if (!Math.isNaN(unspawnNotes[0].multSpeed) && unspawnNotes[0].multSpeed != 1) changedSpawnTime = spawnTime / unspawnNotes[0].multSpeed;
+		if (unspawnNotes[0].multSpeed != 1) 
+		{
+			changedSpawnTime = spawnTime / unspawnNotes[0].multSpeed;
+		}
 
 		// Track the count of notes added
 		notesAddedCount = 0;
 
 		for (i in 0...unspawnNotes.length) {
-			if (unspawnNotes[i].strumTime - Conductor.songPosition < (changedSpawnTime != spawnTime ? changedSpawnTime : spawnTime))
+			if (unspawnNotes[i].strumTime - Conductor.songPosition < changedSpawnTime)
 			{
 				if (ClientPrefs.showNotes) {
 					!unspawnNotes[i].isSustainNote ? notes.insert(0, unspawnNotes[i]) : sustainNotes.insert(0, unspawnNotes[i]); //If it's NOT a sustain note, we add it to notes. else, we add it to sustainNotes
@@ -5225,6 +5228,11 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			}
 		}
 
+		if (unspawnNotes[0].multSpeed == 1 && changedSpawnTime == spawnTime / unspawnNotes[0].multSpeed) 
+		{
+			changedSpawnTime = spawnTime;
+		}
+
 		if (notesAddedCount > 0) {
 			unspawnNotes.splice(0, notesAddedCount);
 		}
@@ -5232,7 +5240,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 	if (unspawnNotes.length > 0 && (unspawnNotes[0] != null && (Conductor.songPosition + 1800 / songSpeed) >= firstNoteStrumTime && !ClientPrefs.showNotes && cpuControlled))
 	{
-		spawnTime /= unspawnNotes[0].multSpeed;
+		if (!Math.isNaN(unspawnNotes[0].multSpeed) && unspawnNotes[0].multSpeed != 1) spawnTime /= unspawnNotes[0].multSpeed;
 
 		// Track the count of notes added
 		notesAddedCount = 0;
