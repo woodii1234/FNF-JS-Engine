@@ -715,19 +715,24 @@ class PlayState extends MusicBeatState
 		detailsPausedText = "BRB! - " + detailsText;
 		#end
 
-		if (ClientPrefs.hudType == 'Tails Gets Trolled V4') 
+		if (ClientPrefs.ratingType == 'Tails Gets Trolled V4') 
 		{
 			fcStrings = ['No Play', 'KFC', 'AFC', 'CFC', 'SDC', 'FC', 'SDCB', 'Clear', 'TDCB', 'QDCB'];
 			hitStrings = ['Killer!!!', 'Awesome!!', 'Cool!', 'Gay.', 'Retarded.', 'Fail..'];
 		}
 		if (ClientPrefs.longFCName) fcStrings = ['No Play', 'Perfect Full Combo', 'Sick Full Combo', 'Great Full Combo', 'Bad Full Combo', 'Full Combo', 'Single Digit Misses', 'Clear', 'TDCB', 'QDCB'];
-		if (ClientPrefs.longFCName && ClientPrefs.hudType == 'Tails Gets Trolled V4') 
+		if (ClientPrefs.longFCName && ClientPrefs.ratingType == 'Tails Gets Trolled V4') 
 		{
 			fcStrings = ['No Play', 'Killer Full Combo', 'Awesome Full Combo', 'Cool Full Combo', 'Gay Full Combo', 'Full Combo', 'Single Digit Misses', 'Clear', 'TDCB', 'QDCB'];
 			hitStrings = ['Killer!!!', 'Awesome!!', 'Cool!', 'Gay.', 'Retarded.', 'Fail..'];
 		}
 
-		if (ClientPrefs.hudType == 'Doki Doki+') 
+		if (ClientPrefs.ratingType == 'Doki Doki+') 
+		{
+			hitStrings = ['Very Doki!!!', 'Doki!!', 'Good!', 'OK.', 'No.', 'Miss..'];
+		}
+
+		if (ClientPrefs.ratingType == 'VS Impostor') 
 		{
 			hitStrings = ['Very Doki!!!', 'Doki!!', 'Good!', 'OK.', 'No.', 'Miss..'];
 		}
@@ -1523,7 +1528,8 @@ class PlayState extends MusicBeatState
 			timeTxt.borderSize = 1;
 
 		case "Mic'd Up":
-			timeTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			timeTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorder
+.OUTLINE, FlxColor.BLACK);
 			timeTxt.screenCenter(X);
 			timeTxt.borderSize = 2;
 
@@ -6737,6 +6743,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			case 'Doki Doki+': pixelShitPart1 = 'dokistuff/';
 			case 'Tails Gets Trolled V4': pixelShitPart1 = 'tgtstuff/';
 			case 'Kade Engine': pixelShitPart1 = 'kadethings/';
+			case 'VS Impostor': pixelShitPart1 = 'impostorratings/';
 			case 'Base FNF': pixelShitPart1 = '';
 			default: pixelShitPart1 = ClientPrefs.ratingType + '/';
 		}
@@ -6985,6 +6992,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					case 'Doki Doki+': pixelShitPart1 = 'dokistuff/';
 					case 'Tails Gets Trolled V4': pixelShitPart1 = 'tgtstuff/';
 					case 'Kade Engine': pixelShitPart1 = 'kadethings/';
+					case 'VS Impostor': pixelShitPart1 = 'impostorratings/';
 					case 'Base FNF': pixelShitPart1 = '';
 					default: pixelShitPart1 = ClientPrefs.ratingType + '/';
 				}
