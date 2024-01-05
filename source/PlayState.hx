@@ -1546,7 +1546,6 @@ class PlayState extends MusicBeatState
 		updateTime = showTime;
 
 
-		// Create the time bar background and time bar objects with common properties
 		timeBarBG = new AttachedSprite('timeBar');
 		timeBarBG.x = timeTxt.x;
 		timeBarBG.y = timeTxt.y + (timeTxt.height / 4);  // Adjust y position if needed for specific hudTypes
@@ -1564,7 +1563,6 @@ class PlayState extends MusicBeatState
 		timeBar.alpha = 0;
 		timeBar.visible = showTime && !ClientPrefs.timeBarType.contains('(No Bar)');
 		if (ClientPrefs.hudType != 'Dave and Bambi') add(timeBar);
-		add(timeTxt);
 		timeBarBG.sprTracker = timeBar;
 
 		switch (ClientPrefs.hudType) {
@@ -1580,29 +1578,109 @@ class PlayState extends MusicBeatState
 				timeBarBG.color = FlxColor.BLACK;
 
 			case 'Leather Engine':
-				timeBarBG.loadGraphic(Paths.image("editorHealthBar"));
-				timeBar.createFilledBar(FlxColor.BLACK, FlxColor.WHITE);
-				timeBar.numDivisions = 400;
+				timeBarBG.destroy;
+				timeBar.destroy;
+				timeBarBG = new AttachedSprite('editorHealthBar');
+				timeBarBG.x = timeTxt.x;
+				timeBarBG.y = timeTxt.y + (timeTxt.height / 8);
+				timeBarBG.scrollFactor.set();
+				timeBarBG.alpha = 0;
+				timeBarBG.visible = showTime;
 				timeBarBG.color = FlxColor.BLACK;
+				timeBarBG.xAdd = -4;
+				timeBarBG.yAdd = -4;
+				timeBarBG.screenCenter(X);
+				add(timeBarBG);
 
+				timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
+				'songPercent', 0, 1);
+				timeBar.scrollFactor.set();
+				timeBar.createFilledBar(FlxColor.BLACK, FlxColor.WHITE);
+				timeBar.numDivisions = 400; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
+				timeBar.alpha = 0;
+				timeBar.visible = showTime;
+				add(timeBar);
+				timeBarBG.sprTracker = timeBar;
 			case 'Box Funkin':
-				timeBarBG.loadGraphic(Paths.image("WITimeBar"));
-				timeBarBG.y = !ClientPrefs.downScroll ? 695 : 3;
+				timeBarBG.destroy;
+				timeBar.destroy;
+				timeTxt.destroy;
+				timeBarBG = new AttachedSprite('WITimeBar');
+				timeBarBG.y = 695;
+				if (ClientPrefs.downScroll) timeBarBG.y = 3;
+				timeBarBG.scrollFactor.set();
 				timeBarBG.updateHitbox();
 				timeBarBG.screenCenter(X);
+				timeBarBG.alpha = 0;
+				add(timeBarBG);
 				timeBarBG.xAdd = -12;
-				timeBar.createFilledBar(FlxColor.BLACK, FlxColor.WHITE);
+				timeBarBG.yAdd = -4;
+				timeBarBG.screenCenter(X);
 				timeBarBG.color = FlxColor.BLACK;
+
+				timeTxt = new FlxText(0, (ClientPrefs.downScroll ? timeBarBG.y + 32 : timeBarBG.y - 32), 400, "", 20);
+				timeTxt.setFormat(Paths.font("MilkyNice.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				timeTxt.alpha = 0;
+				timeTxt.borderSize = 3;
+				timeTxt.screenCenter(X);
+				timeTxt.antialiasing = ClientPrefs.globalAntialiasing;
+				updateTime = true;
+				timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 5, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 24), Std.int(timeBarBG.height - 8), this, 'songPercent', 0, 1);
+				timeBar.scrollFactor.set();
+				timeBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
+				timeBar.numDivisions = 800; // How much lag this causes?? Should i tone it down to idk, 400 or 200?
+				timeBar.alpha = 0;
+				timeBarBG.xAdd = -12;
+				timeBar.screenCenter(X);
+				add(timeBar);
+				timeBarBG.sprTracker = timeBar;
 
 			case 'Kade Engine', "Mic'd Up":
-				timeBarBG.loadGraphic(Paths.image("editorHealthBar"));
-				timeBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
+				timeBarBG.destroy;
+				timeBar.destroy;
+				timeBarBG = new AttachedSprite('editorHealthBar');
+				timeBarBG.x = timeTxt.x;
+				timeBarBG.y = timeTxt.y + (timeTxt.height / 8);
+				timeBarBG.scrollFactor.set();
+				timeBarBG.alpha = 0;
+				timeBarBG.visible = showTime;
 				timeBarBG.color = FlxColor.BLACK;
+				timeBarBG.xAdd = -4;
+				timeBarBG.yAdd = -4;
+				timeBarBG.screenCenter(X);
+				add(timeBarBG);
+
+				timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
+				'songPercent', 0, 1);
+				timeBar.scrollFactor.set();
+				timeBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
+				timeBar.numDivisions = 800; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
+				timeBar.alpha = 0;
+				timeBar.visible = showTime;
+				add(timeBar);
+				timeBarBG.sprTracker = timeBar;
 
 			case 'Dave and Bambi':
-				timeBarBG.loadGraphic(Paths.image("DnBTimeBar"));
+				timeBar.destroy;
+				timeBarBG.destroy;
+				timeBarBG = new AttachedSprite('DnBTimeBar');
 				timeBarBG.screenCenter(X);
-				timeBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
+				timeBarBG.y = timeTxt.y + (timeTxt.height / 4);
+				timeBarBG.antialiasing = true;
+				timeBarBG.scrollFactor.set();
+				timeBarBG.visible = showTime;
+				timeBarBG.xAdd = -4;
+				timeBarBG.yAdd = -4;
+				add(timeBarBG);
+			
+				timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
+				'songPercent', 0, 1);
+				timeBar.scrollFactor.set();
+				timeBar.numDivisions = 800; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
+				timeBar.alpha = 0;
+				timeBar.visible = showTime;
+				timeBarBG.sprTracker = timeBar;
+				timeBar.createFilledBar(FlxColor.GRAY, FlxColor.fromRGB(57, 255, 20));
 				insert(members.indexOf(timeBarBG), timeBar);
 
 			case 'Doki Doki+':
@@ -1611,12 +1689,32 @@ class PlayState extends MusicBeatState
 				timeBar.createGradientBar([FlxColor.TRANSPARENT], [FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2])]);
 			
 			case 'JS Engine':
-				timeBarBG.loadGraphic(Paths.image("editorHealthBar"));
+				timeBarBG.destroy;
+				timeBar.destroy;
+				timeBarBG = new AttachedSprite('healthBar');
 				timeBarBG.screenCenter(X);
-				timeBar.createGradientBar([FlxColor.TRANSPARENT], [FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]), FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2])]);
-				timeBar.numDivisions = 1000;
+				timeBarBG.x = timeTxt.x;
+				timeBarBG.y = timeTxt.y + (timeTxt.height / 8);
+				timeBarBG.scrollFactor.set();
+				timeBarBG.alpha = 0;
+				timeBarBG.visible = showTime;
 				timeBarBG.color = FlxColor.BLACK;
+				timeBarBG.xAdd = -4;
+				timeBarBG.yAdd = -4;
+				timeBarBG.screenCenter(X);
+				add(timeBarBG);
+
+				timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
+				'songPercent', 0, 1);
+				timeBar.scrollFactor.set();
+				timeBar.numDivisions = 1000; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
+				timeBar.alpha = 0;
+				timeBar.visible = showTime;
+				timeBarBG.sprTracker = timeBar;
+				timeBar.createGradientBar([FlxColor.TRANSPARENT], [FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]), FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2])]);
+			add(timeBar);
 		}
+			add(timeTxt);
 
 		sustainNotes = new FlxTypedGroup<Note>();
 		add(sustainNotes);
