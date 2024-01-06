@@ -2285,6 +2285,11 @@ class PlayState extends MusicBeatState
 		botplayTxt.text = 'Rendered Notes: $notes.length\nNPS: $nps/$maxNPS\nOpp NPS: $oppNPS/$maxOppNPS';
 		botplayTxt.visible = true;
 		}
+		if (ClientPrefs.showcaseMode && !ClientPrefs.showNotes) {
+		botplayTxt.y += (!ClientPrefs.downScroll ? 60 : -60);
+		botplayTxt.text = 'NPS: $nps/$maxNPS\nOpp NPS: $oppNPS/$maxOppNPS';
+		botplayTxt.visible = true;
+		}
 
 		if (ClientPrefs.communityGameBot && botplayTxt != null) botplayTxt.destroy();
 
@@ -4635,6 +4640,10 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.showcaseMode && ClientPrefs.showNotes)
 		{
 			botplayTxt.text = 'Rendered Notes: ${FlxStringUtil.formatMoney(notes.length, false)}\nNPS: ${FlxStringUtil.formatMoney(nps, false)}/${FlxStringUtil.formatMoney(maxNPS, false)}\nOpp NPS: ${FlxStringUtil.formatMoney(oppNPS, false)}/${FlxStringUtil.formatMoney(maxOppNPS, false)}';
+		}
+		if (ClientPrefs.showcaseMode && !ClientPrefs.showNotes)
+		{
+			botplayTxt.text = 'NPS: ${FlxStringUtil.formatMoney(nps, false)}/${FlxStringUtil.formatMoney(maxNPS, false)}\nOpp NPS: ${FlxStringUtil.formatMoney(oppNPS, false)}/${FlxStringUtil.formatMoney(maxOppNPS, false)}';
 		}
 
 		callOnLuas('onUpdate', [elapsed]);
