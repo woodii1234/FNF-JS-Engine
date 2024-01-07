@@ -5437,18 +5437,19 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 							if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) opponentNoteHit(daNote);
 								if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
 								{
-								if (!daNote.isSustainNote) {
-									enemyHits += 1 * polyphony;
-								if (ClientPrefs.showNPS) {
-									oppNotesHitArray.push(1 * polyphony);
-									oppNotesHitDateArray.push(Date.now());
+									if (!daNote.isSustainNote) {
+										enemyHits += 1 * polyphony;
+										if (ClientPrefs.showNPS) {
+											oppNotesHitArray.push(1 * polyphony);
+											oppNotesHitDateArray.push(Date.now());
+										}
 									}
-								}
-								if (!daNote.isSustainNote) {
-									if (shouldKillNotes)
-									{
-										daNote.destroy();
-									}
+									if (!daNote.isSustainNote) {
+										if (shouldKillNotes)
+										{
+											notes.remove(daNote, true);
+											daNote.destroy();
+										}
 									}
 								}
 						}
@@ -5464,8 +5465,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 								notesHitArray.push(1 * polyphony);
 								notesHitDateArray.push(Date.now());
 								}
-								if (shouldKillNotes)
+									if (shouldKillNotes)
 								{
+									notes.remove(daNote, true);
 									daNote.destroy();
 								}
 								}
