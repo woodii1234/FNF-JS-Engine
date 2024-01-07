@@ -291,7 +291,7 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			'hitsoundType',
 			'string',
 			'osu!mania',
-			['osu!mania', 'Dave And Bambi', 'Indie Cross', 'Snap', 'Clap', 'Generic Click', 'Keyboard Click', 'vine boom', 'ADOFAI', 'Discord Ping', "i'm spongebob!"]);
+			['osu!mania', 'Dave And Bambi', 'Indie Cross', 'Snap', 'Clap', 'Generic Click', 'Keyboard Click', 'vine boom', 'ADOFAI', 'Discord Ping', "i'm spongebob!", 'FIRE IN THE HOLE']);
 		addOption(option);
 
 		var option:Option = new Option('Rating Offset',

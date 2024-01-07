@@ -539,6 +539,7 @@ class PlayState extends MusicBeatState
 		var npsString:String;
 		var accuracy:String;
 		var fcString:String;
+	var hitsound:FlxSound;
 
 		var botText:String;
 
@@ -674,7 +675,6 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.showcaseMode)
 			cpuControlled = true;
 
-
 		// var gameCam:FlxCamera = FlxG.camera;
 		camGame = new FlxCamera();
 		camHUD = new FlxCamera();
@@ -734,7 +734,11 @@ class PlayState extends MusicBeatState
 
 		if (ClientPrefs.ratingType == 'VS Impostor') 
 		{
-			hitStrings = ['Very Doki!!!', 'Doki!!', 'Good!', 'OK.', 'No.', 'Miss..'];
+			hitStrings = ['VERY SUSSY!!!', 'Sussy!!', 'Sus!', 'Sad.', 'ASS!', 'Miss..'];
+		}
+		if (ClientPrefs.ratingType == 'FIRE IN THE HOLE') 
+		{
+			hitStrings = ['Easy :D', 'Normal!!', 'Hard!', 'Harder.', 'INSANE!', 'FIRE IN THE HOLE!'];
 		}
 
 		GameOverSubstate.resetVariables();
@@ -6851,7 +6855,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			case 'Kade Engine': pixelShitPart1 = 'kadethings/';
 			case 'VS Impostor': pixelShitPart1 = 'impostorratings/';
 			case 'Base FNF': pixelShitPart1 = '';
-			default: pixelShitPart1 = ClientPrefs.ratingType + '/';
+			default: pixelShitPart1 = ClientPrefs.ratingType.toLowerCase().replace(' ', '').trim() + '/';
 		}
 		if (allSicks) { //cache gold rating sprites
 		Paths.image('goldstuff/' + "perfect" + pixelShitPart2);
@@ -7100,7 +7104,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					case 'Kade Engine': pixelShitPart1 = 'kadethings/';
 					case 'VS Impostor': pixelShitPart1 = 'impostorratings/';
 					case 'Base FNF': pixelShitPart1 = '';
-					default: pixelShitPart1 = ClientPrefs.ratingType + '/';
+					default: pixelShitPart1 = ClientPrefs.ratingType.toLowerCase().replace(' ', '').trim() + '/';
 				}
 				if (allSicks && ClientPrefs.marvRateColor == 'Golden' && noteDiff < ClientPrefs.sickWindow && ClientPrefs.ratingType != 'Tails Gets Trolled V4' && ClientPrefs.ratingType != 'Doki Doki+' && !ClientPrefs.noMarvJudge)
 				{
@@ -7753,8 +7757,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		callOnLuas('noteMissPress', [direction]);
 		if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 	}
-
-	var hitsound:FlxSound;
 
 	function goodNoteHit(note:Note):Void
 	{
