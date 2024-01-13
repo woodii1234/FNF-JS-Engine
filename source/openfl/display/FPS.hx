@@ -91,6 +91,7 @@ class FPS extends TextField
 		var currentCount = times.length;
 		currentFPS = Math.round((currentCount + cacheCount) / 2);
 		if (currentFPS > ClientPrefs.framerate) currentFPS = ClientPrefs.framerate;
+		if (FlxG.state != null && Type.getClassName(Type.getClass(FlxG.state)) == 'PlayState' && PlayState.instance.playbackRate != 1) currentFPS /= PlayState.instance.playbackRate;
 
 			text = (ClientPrefs.showFPS ? "FPS: " + currentFPS : "");
 			
