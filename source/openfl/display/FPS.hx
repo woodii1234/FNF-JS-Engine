@@ -5,6 +5,7 @@ import openfl.events.Event;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
 import flixel.math.FlxMath;
+import flixel.util.FlxStringUtil;
 #if gl_stats
 import openfl.display._internal.stats.Context3DStats;
 import openfl.display._internal.stats.DrawCallContext;
@@ -93,7 +94,7 @@ class FPS extends TextField
 		if (currentFPS > ClientPrefs.framerate) currentFPS = ClientPrefs.framerate;
 		if (FlxG.state != null && Type.getClassName(Type.getClass(FlxG.state)) == 'PlayState' && PlayState.instance.playbackRate != 1) currentFPS /= PlayState.instance.playbackRate;
 
-			text = (ClientPrefs.showFPS ? "FPS: " + currentFPS : "");
+			text = (ClientPrefs.showFPS ? "FPS: " + FlxStringUtil.formatMoney(currentFPS, false) : "");
 			
 			if (ClientPrefs.showRamUsage) text += "\nMemory: " + CoolUtil.formatBytes(Memory.getCurrentUsage(), false, 2) + (ClientPrefs.showMaxRamUsage ? " / " + CoolUtil.formatBytes(Memory.getPeakUsage(), false, 2) : "");
 
