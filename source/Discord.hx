@@ -3,7 +3,7 @@ package;
 #if sys
 import Sys.sleep;
 #end
-#if desktop
+#if DISCORD_ALLOWED
 import discord_rpc.DiscordRpc;
 #end
 
@@ -18,7 +18,7 @@ class DiscordClient {
 	public static var isInitialized:Bool = false;
 
 	public function new() {
-		#if desktop
+		#if DISCORD_ALLOWED
 		trace("Discord Client is starting...");
 		DiscordRpc.start({
 			clientID: "1192736165472784445", //yo tysm miksel :3
@@ -43,14 +43,14 @@ class DiscordClient {
 	
 	public static function shutdown()
 	{
-		#if desktop
+		#if DISCORD_ALLOWED
 		DiscordRpc.shutdown();
 		#end
 	}
 	
 	static function onReady()
 	{
-		#if desktop
+		#if DISCORD_ALLOWED
 		DiscordRpc.presence({
 			details: "In the Menus",
 			state: null,
@@ -88,7 +88,7 @@ class DiscordClient {
 		{
 			endTimestamp = startTimestamp + endTimestamp;
 		}
-		#if desktop
+		#if DISCORD_ALLOWED
 		DiscordRpc.presence({
 			details: details,
 			state: state,

@@ -15,7 +15,7 @@ import haxe.CallStack;
 import haxe.io.Path;
 import sys.FileSystem;
 import sys.io.File;
-import flash.system.System;
+import openfl.system.System;
 
 /**
  * ...
@@ -99,7 +99,7 @@ class SUtil
 
 	public static function saveClipboard(fileData:String = 'you forgot something to add in your code')
 	{
-		openfl.system.System.setClipboard(fileData);
+		System.setClipboard(fileData);
 		SUtil.applicationAlert('Done!', 'Data Saved to Clipboard Successfully!');
 	}
 

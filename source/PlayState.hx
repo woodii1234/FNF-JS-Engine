@@ -1,7 +1,7 @@
 package;
 
 import flixel.graphics.FlxGraphic;
-#if desktop
+#if DISCORD_ALLOWED
 import Discord.DiscordClient;
 #end
 import Section.SwagSection;
@@ -321,7 +321,14 @@ class PlayState extends MusicBeatState
 	public var hpDrainLevel:Float = 1;
 	public var instakillOnMiss:Bool = false;
 	public var sickOnly:Bool = false;
-	public var cpuControlled:Bool = false;
+	public var cpuControlled(default, set):Bool = false;
+	inline function set_cpuControlled(value:Bool){
+		cpuControlled = value;
+		if (botplayTxt != null && !ClientPrefs.showcaseMode) // this assures it'll always show up
+			botplayTxt.visible = (!ClientPrefs.hideHud) ? cpuControlled : false;
+
+		return cpuControlled;
+	}
 	public var practiceMode:Bool = false;
 	public var opponentDrain:Bool = false;
 	public static var opponentChart:Bool = false;
@@ -2184,121 +2191,138 @@ class PlayState extends MusicBeatState
 		pauseWarnText.y -= 25;
 		pauseWarnText.alpha = 0;
 
-		if (ClientPrefs.hudType == 'Psych Engine')
-		{
-			botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
-			botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			botplayTxt.scrollFactor.set();
-			botplayTxt.borderSize = 1.25;
-			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-			add(botplayTxt);
-			if (ClientPrefs.downScroll) 
-				botplayTxt.y = timeBarBG.y - 78;
-		}
-		if (ClientPrefs.hudType == 'JS Engine')
-		{
-			botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "Botplay Mode", 30);
-			botplayTxt.setFormat(Paths.font("vcr.ttf"), 30, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			botplayTxt.scrollFactor.set();
-			botplayTxt.borderSize = 1.5;
-			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-			add(botplayTxt);
-			if (ClientPrefs.downScroll) 
-				botplayTxt.y = timeBarBG.y - 78;
-		}
-		if (ClientPrefs.hudType == 'Box Funkin')
-		{
-			botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
-			botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			botplayTxt.scrollFactor.set();
-			botplayTxt.borderSize = 1.25;
-			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-			add(botplayTxt);
-			if (ClientPrefs.downScroll) 
-				botplayTxt.y = timeBarBG.y - 78;
-		}
-		if (ClientPrefs.hudType == "Mic'd Up")
-		{
-			botplayTxt = new FlxText((healthBarBG.width / 2), healthBar.y, 0, "AutoPlayCPU", 20);
-			botplayTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			botplayTxt.scrollFactor.set();
-			botplayTxt.screenCenter(X);
-			botplayTxt.borderSize = 3;
-			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-			add(botplayTxt);
-			if (ClientPrefs.downScroll) 
-				botplayTxt.y = timeBarBG.y - 78;
-		}
-		if (ClientPrefs.hudType == 'Kade Engine')
-		{
-			botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
-			botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			botplayTxt.scrollFactor.set();
-			botplayTxt.borderSize = 1.25;
-			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-			add(botplayTxt);
-			if (ClientPrefs.downScroll) 
-				botplayTxt.y = timeBarBG.y - 78;
-		}
-		if (ClientPrefs.hudType == 'Doki Doki+')
-		{
-			botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
-			botplayTxt.setFormat(Paths.font("Aller_rg.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			botplayTxt.scrollFactor.set();
-			botplayTxt.borderSize = 1.25;
-			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-			add(botplayTxt);
-			if (ClientPrefs.downScroll) 
-				botplayTxt.y = timeBarBG.y - 78;
-		}
-		if (ClientPrefs.hudType == 'Tails Gets Trolled V4')
-		{
-			botplayTxt = new FlxText(400, timeBarBG.y + (ClientPrefs.downScroll ? -78 : 55), FlxG.width - 800, "[BUTTPLUG]", 32);
-			botplayTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			botplayTxt.scrollFactor.set();
-			botplayTxt.borderSize = 1.25;
-			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-			add(botplayTxt);
-			if (ClientPrefs.downScroll) 
-				botplayTxt.y = timeBarBG.y - 78;
-		}
-		if (ClientPrefs.hudType == 'Dave and Bambi')
-		{
-			botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
-			botplayTxt.setFormat(Paths.font("comic.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			botplayTxt.scrollFactor.set();
-			botplayTxt.borderSize = 1.25;
-			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-			add(botplayTxt);
-			if (ClientPrefs.downScroll) 
-				botplayTxt.y = timeBarBG.y - 78;
-		}
-		if (ClientPrefs.hudType == 'VS Impostor')
-		{
-			botplayTxt = new FlxText(400, healthBarBG.y - 55, FlxG.width - 800, "BOTPLAY", 32);
-			botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			botplayTxt.scrollFactor.set();
-			botplayTxt.borderSize = 1.25;
-			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-			add(botplayTxt);
-			if (ClientPrefs.downScroll)
+		// just because, people keep making issues about it
+		try{
+			if (ClientPrefs.hudType == 'Psych Engine')
 			{
-				botplayTxt.y = timeBarBG.y - 78;
+				botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
+				botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				botplayTxt.scrollFactor.set();
+				botplayTxt.borderSize = 1.25;
+				botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+				add(botplayTxt);
+				if (ClientPrefs.downScroll) 
+					botplayTxt.y = timeBarBG.y - 78;
+			}
+			if (ClientPrefs.hudType == 'JS Engine')
+			{
+				botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "Botplay Mode", 30);
+				botplayTxt.setFormat(Paths.font("vcr.ttf"), 30, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				botplayTxt.scrollFactor.set();
+				botplayTxt.borderSize = 1.5;
+				botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+				add(botplayTxt);
+				if (ClientPrefs.downScroll) 
+					botplayTxt.y = timeBarBG.y - 78;
+			}
+			if (ClientPrefs.hudType == 'Box Funkin')
+			{
+				botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
+				botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				botplayTxt.scrollFactor.set();
+				botplayTxt.borderSize = 1.25;
+				botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+				add(botplayTxt);
+				if (ClientPrefs.downScroll) 
+					botplayTxt.y = timeBarBG.y - 78;
+			}
+			if (ClientPrefs.hudType == "Mic'd Up")
+			{
+				botplayTxt = new FlxText((healthBarBG.width / 2), healthBar.y, 0, "AutoPlayCPU", 20);
+				botplayTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				botplayTxt.scrollFactor.set();
+				botplayTxt.screenCenter(X);
+				botplayTxt.borderSize = 3;
+				botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+				add(botplayTxt);
+				if (ClientPrefs.downScroll) 
+					botplayTxt.y = timeBarBG.y - 78;
+			}
+			if (ClientPrefs.hudType == 'Kade Engine')
+			{
+				botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
+				botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				botplayTxt.scrollFactor.set();
+				botplayTxt.borderSize = 1.25;
+				botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+				add(botplayTxt);
+				if (ClientPrefs.downScroll) 
+					botplayTxt.y = timeBarBG.y - 78;
+			}
+			if (ClientPrefs.hudType == 'Doki Doki+')
+			{
+				botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
+				botplayTxt.setFormat(Paths.font("Aller_rg.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				botplayTxt.scrollFactor.set();
+				botplayTxt.borderSize = 1.25;
+				botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+				add(botplayTxt);
+				if (ClientPrefs.downScroll) 
+					botplayTxt.y = timeBarBG.y - 78;
+			}
+			if (ClientPrefs.hudType == 'Tails Gets Trolled V4')
+			{
+				botplayTxt = new FlxText(400, timeBarBG.y + (ClientPrefs.downScroll ? -78 : 55), FlxG.width - 800, "[BUTTPLUG]", 32);
+				botplayTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				botplayTxt.scrollFactor.set();
+				botplayTxt.borderSize = 1.25;
+				botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+				add(botplayTxt);
+				if (ClientPrefs.downScroll) 
+					botplayTxt.y = timeBarBG.y - 78;
+			}
+			if (ClientPrefs.hudType == 'Dave and Bambi')
+			{
+				botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
+				botplayTxt.setFormat(Paths.font("comic.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				botplayTxt.scrollFactor.set();
+				botplayTxt.borderSize = 1.25;
+				botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+				add(botplayTxt);
+				if (ClientPrefs.downScroll) 
+					botplayTxt.y = timeBarBG.y - 78;
+			}
+			if (ClientPrefs.hudType == 'VS Impostor')
+			{
+				botplayTxt = new FlxText(400, healthBarBG.y - 55, FlxG.width - 800, "BOTPLAY", 32);
+				botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				botplayTxt.scrollFactor.set();
+				botplayTxt.borderSize = 1.25;
+				botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+				add(botplayTxt);
+				if (ClientPrefs.downScroll)
+				{
+					botplayTxt.y = timeBarBG.y - 78;
+				}
 			}
 		}
-		if (!cpuControlled && practiceMode) {
-		botplayTxt.text = 'Practice Mode';
-		botplayTxt.visible = true;
+		catch(e){
+			trace("Failed to display/create botplayTxt " + e);
+			// just in case, we default it to the regular psych botplayTxt
+			botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
+			botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			botplayTxt.scrollFactor.set();
+			botplayTxt.borderSize = 1.25;
+			botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
+			add(botplayTxt);
+			if (ClientPrefs.downScroll) 
+				botplayTxt.y = timeBarBG.y - 78;
 		}
-		if (ClientPrefs.showcaseMode && ClientPrefs.showNotes) {
-		botplayTxt.y += (!ClientPrefs.downScroll ? 60 : -60);
-		botplayTxt.text = 'Rendered Notes: $notes.length\nNPS: $nps/$maxNPS\nOpp NPS: $oppNPS/$maxOppNPS';
-		botplayTxt.visible = true;
-		}
-		if (ClientPrefs.showcaseMode && !ClientPrefs.showNotes) {
-		botplayTxt.y += (!ClientPrefs.downScroll ? 60 : -60);
-		botplayTxt.text = 'NPS: $nps/$maxNPS\nOpp NPS: $oppNPS/$maxOppNPS';
-		botplayTxt.visible = true;
+		if (botplayTxt != null){
+			if (!cpuControlled && practiceMode) {
+			botplayTxt.text = 'Practice Mode';
+			botplayTxt.visible = true;
+			}
+			if (ClientPrefs.showcaseMode && ClientPrefs.showNotes) {
+			botplayTxt.y += (!ClientPrefs.downScroll ? 60 : -60);
+			botplayTxt.text = 'Rendered Notes: $notes.length\nNPS: $nps/$maxNPS\nOpp NPS: $oppNPS/$maxOppNPS';
+			botplayTxt.visible = true;
+			}
+			if (ClientPrefs.showcaseMode && !ClientPrefs.showNotes) {
+			botplayTxt.y += (!ClientPrefs.downScroll ? 60 : -60);
+			botplayTxt.text = 'NPS: $nps/$maxNPS\nOpp NPS: $oppNPS/$maxOppNPS';
+			botplayTxt.visible = true;
+			}
 		}
 
 		if (ClientPrefs.communityGameBot && botplayTxt != null) botplayTxt.destroy();
@@ -2483,7 +2507,7 @@ class PlayState extends MusicBeatState
 
 		precacheList.set('alphabet', 'image');
 	
-		#if desktop
+		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence.
 		DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
 		#end
@@ -3981,7 +4005,7 @@ class PlayState extends MusicBeatState
 				});
 		}
 
-		#if desktop
+		#if DISCORD_ALLOWED
 		if (cpuControlled) detailsText = detailsText + ' (using a bot)';
 		// Updating Discord Rich Presence (with Time Left)
 		DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength);
@@ -4292,6 +4316,8 @@ class PlayState extends MusicBeatState
 			}
 
 			case 'Dadbattle Spotlight':
+				if (curStage != 'stage') return;
+
 				dadbattleBlack = new BGSprite(null, -800, -400, 0, 0);
 				dadbattleBlack.makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.BLACK);
 				dadbattleBlack.alpha = 0.25;
@@ -4326,6 +4352,8 @@ class PlayState extends MusicBeatState
 
 
 			case 'Philly Glow':
+				if (curStage != 'philly') return;
+
 				blammedLightsBlack = new FlxSprite(FlxG.width * -0.5, FlxG.height * -0.5).makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.BLACK);
 				blammedLightsBlack.visible = false;
 				insert(members.indexOf(phillyStreet), blammedLightsBlack);
@@ -4502,7 +4530,7 @@ class PlayState extends MusicBeatState
 			paused = false;
 			callOnLuas('onResume', []);
 
-			#if desktop
+			#if DISCORD_ALLOWED
 			if (startTimer != null && startTimer.finished)
 			{
 				DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength - Conductor.songPosition - ClientPrefs.noteOffset);
@@ -4519,7 +4547,7 @@ class PlayState extends MusicBeatState
 
 	override public function onFocus():Void
 	{
-		#if desktop
+		#if DISCORD_ALLOWED
 		if (health > 0 && !paused)
 		{
 			if (Conductor.songPosition > 0.0)
@@ -4538,7 +4566,7 @@ class PlayState extends MusicBeatState
 
 	override public function onFocusLost():Void
 	{
-		#if desktop
+		#if DISCORD_ALLOWED
 		if (health > 0 && !paused)
 		{
 			DiscordClient.changePresence(detailsPausedText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
@@ -4949,6 +4977,10 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		setOnLuas('curDecBeat', curDecBeat);
 
 		if(botplayTxt != null && ClientPrefs.hudType != "Mic'd Up" && ClientPrefs.hudType != 'Kade Engine' && ClientPrefs.botTxtFade) {
+			if (!botplayTxt.visible){
+				super.update(elapsed);
+				return;
+			}
 			botplaySine += 180 * elapsed;
 			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180 * playbackRate);
 		}
@@ -5553,7 +5585,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		if (ClientPrefs.charsAndBG) openSubState(new PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 		//}
 
-		#if desktop
+		#if DISCORD_ALLOWED
 		DiscordClient.changePresence(detailsPausedText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
 		#end
 	}
@@ -5565,7 +5597,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		cancelMusicFadeTween();
 		MusicBeatState.switchState(new ChartingState());
 		chartingMode = true;
-		#if desktop
+		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("Chart Editor", null, null, true);
 		#end
 	}
@@ -5602,7 +5634,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 				// MusicBeatState.switchState(new GameOverState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 
-				#if desktop
+				#if DISCORD_ALLOWED
 				// Game Over doesn't get his own variable because it's only used here
 				DiscordClient.changePresence("Game Over - " + detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
 				#end
@@ -5642,6 +5674,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 	public function triggerEventNote(eventName:String, value1:String, value2:String) {
 		switch(eventName) {
 			case 'Dadbattle Spotlight':
+				if (curStage != 'stage') return;
+
 				var val:Null<Int> = Std.parseInt(value1);
 				if(val == null) val = 0;
 
@@ -5717,6 +5751,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				gfSpeed = value;
 
 			case 'Philly Glow':
+				if (curStage != 'philly') return;
+
 				var lightId:Int = Std.parseInt(value1);
 				if(Math.isNaN(lightId)) lightId = 0;
 
