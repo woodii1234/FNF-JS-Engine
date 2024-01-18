@@ -367,9 +367,6 @@ class PlayState extends MusicBeatState
 	var secretsong:FlxSprite;
 	var SPUNCHBOB:FlxSprite;
 
-	public var scoreTxtUpdateFrame:Int = 0;
-	public var judgeCountUpdateFrame:Int = 0;
-	public var compactUpdateFrame:Int = 0;
 	public var popUpsFrame:Int = 0;
 	public var missRecalcsPerFrame:Int = 0;
 	public var charAnimsFrame:Int = 0;
@@ -1595,8 +1592,10 @@ class PlayState extends MusicBeatState
 				timeBarBG.color = FlxColor.BLACK;
 
 			case 'Leather Engine':
-				timeBarBG.destroy;
-				timeBar.destroy;
+				if (timeBarBG != null && timeBar != null){
+					timeBarBG.destroy();
+					timeBar.destroy();
+				}
 				timeBarBG = new AttachedSprite('editorHealthBar');
 				timeBarBG.x = timeTxt.x;
 				timeBarBG.y = timeTxt.y + (timeTxt.height / 8);
@@ -1619,9 +1618,11 @@ class PlayState extends MusicBeatState
 				add(timeBar);
 				timeBarBG.sprTracker = timeBar;
 			case 'Box Funkin':
-				timeBarBG.destroy;
-				timeBar.destroy;
-				timeTxt.destroy;
+				if (timeBarBG != null && timeBar != null && timeTxt != null){
+					timeBarBG.destroy();
+					timeBar.destroy();
+					timeTxt.destroy();
+				}
 				timeBarBG = new AttachedSprite('WITimeBar');
 				timeBarBG.y = 695;
 				if (ClientPrefs.downScroll) timeBarBG.y = 3;
@@ -1653,8 +1654,10 @@ class PlayState extends MusicBeatState
 				timeBarBG.sprTracker = timeBar;
 
 			case 'Kade Engine', "Mic'd Up":
-				timeBarBG.destroy;
-				timeBar.destroy;
+				if (timeBarBG != null && timeBar != null){
+					timeBarBG.destroy();
+					timeBar.destroy();
+				}
 				timeBarBG = new AttachedSprite('editorHealthBar');
 				timeBarBG.x = timeTxt.x;
 				timeBarBG.y = timeTxt.y + (timeTxt.height / 8);
@@ -1678,8 +1681,10 @@ class PlayState extends MusicBeatState
 				timeBarBG.sprTracker = timeBar;
 
 			case 'Dave and Bambi':
-				timeBar.destroy;
-				timeBarBG.destroy;
+				if (timeBarBG != null && timeBar != null){
+					timeBarBG.destroy();
+					timeBar.destroy();
+				}
 				timeBarBG = new AttachedSprite('DnBTimeBar');
 				timeBarBG.screenCenter(X);
 				timeBarBG.y = timeTxt.y + (timeTxt.height / 4);
@@ -1706,8 +1711,10 @@ class PlayState extends MusicBeatState
 				timeBar.createGradientBar([FlxColor.TRANSPARENT], [FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2])]);
 			
 			case 'JS Engine':
-				timeBarBG.destroy;
-				timeBar.destroy;
+				if (timeBarBG != null && timeBar != null){
+					timeBarBG.destroy();
+					timeBar.destroy();
+				}
 				timeBarBG = new AttachedSprite('healthBar');
 				timeBarBG.screenCenter(X);
 				timeBarBG.x = timeTxt.x;
@@ -3462,7 +3469,6 @@ class PlayState extends MusicBeatState
 
     private function updateCompactNumbers():Void
     {
-		compactUpdateFrame++;
         	compactCombo = formatCompactNumber(combo);
         	compactMaxCombo = formatCompactNumber(maxCombo);
 		compactScore = formatCompactNumber(songScore);
@@ -3907,7 +3913,6 @@ class PlayState extends MusicBeatState
 			if (ClientPrefs.healthDisplay && !cpuControlled) scoreTxt.text += ' | Health: ' + FlxMath.roundDecimal(health * 50, 2) + '%';
 
 			callOnLuas('onUpdateScore', [miss]);
-			scoreTxtUpdateFrame++;
 	}
 
 	public function setSongTime(time:Float)
@@ -4859,9 +4864,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
     if (notesToRemoveCount > 0) {
         notesHitDateArray.splice(0, notesToRemoveCount);
         notesHitArray.splice(0, notesToRemoveCount);
-		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4 && judgementCounter != null) updateRatingCounter();
-		if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
-           	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
     }
 
 	nps = 0;
@@ -4882,8 +4884,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
     if (oppNotesToRemoveCount > 0) {
         oppNotesHitDateArray.splice(0, oppNotesToRemoveCount);
         oppNotesHitArray.splice(0, oppNotesToRemoveCount);
-		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4 && judgementCounter != null) updateRatingCounter();
-           	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
     }
 
     // Calculate sum of NPS values for the opponent
@@ -4912,9 +4912,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		oppNpsDecreased = true;
 
 	if (npsIncreased || npsDecreased || oppNpsIncreased || oppNpsDecreased) {
-		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 8 && judgementCounter != null) updateRatingCounter();
-		if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 8 && scoreTxt != null) updateScore();
-           	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 8) updateCompactNumbers();
 		if (npsIncreased) npsIncreased = false;
 		if (npsDecreased) npsDecreased = false;
 		if (oppNpsIncreased) oppNpsIncreased = false;
@@ -4934,9 +4931,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 
 		super.update(elapsed);
-		if (judgeCountUpdateFrame > 0) judgeCountUpdateFrame = 0;
-		if (compactUpdateFrame > 0) compactUpdateFrame = 0;
-		if (scoreTxtUpdateFrame > 0) scoreTxtUpdateFrame = 0;
 		if (iconBopsThisFrame > 0) iconBopsThisFrame = 0;
 		if (popUpsFrame > 0) popUpsFrame = 0;
 		if (missRecalcsPerFrame > 0) missRecalcsPerFrame = 0;
@@ -4951,8 +4945,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			shownScore = songScore;
 			lerpingScore = false;
 		}
-
-		if (lerpingScore) updateScore();
 
 		if (ClientPrefs.smoothHealth && ClientPrefs.smoothHealthType == 'Indie Cross' && healthBar.visible)
 		{
@@ -7023,7 +7015,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		if (!miss) vocals.volume = 1;
 
 		final offset = FlxG.width * 0.35;
-		if(ClientPrefs.scoreZoom && !ClientPrefs.hideScore && !cpuControlled)
+		if(ClientPrefs.scoreZoom && !ClientPrefs.hideScore && !cpuControlled && !miss)
 		{
 			if(scoreTxtTween != null) {
 				scoreTxtTween.cancel();
@@ -7753,9 +7745,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		daNote.tooLate = true;
 
 		callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote]);
-		if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
-		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
-           	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 		if (ClientPrefs.missRating) popUpScore(daNote, true);
 	}
 
@@ -7799,7 +7788,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			vocals.volume = 0;
 		}
 		callOnLuas('noteMissPress', [direction]);
-		if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 	}
 
 	function goodNoteHit(note:Note):Void
@@ -8190,9 +8178,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					note.destroy();
 				}
 			}
-			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
-			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
-           		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 			if (ClientPrefs.iconBopWhen == 'Every Note Hit' && iconBopsThisFrame <= 2 && !note.isSustainNote && iconP1.visible) bopIcons(!opponentChart);
 		}
 	}
@@ -8346,8 +8331,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 			callOnLuas('opponentNoteHit', [notes.members.indexOf(daNote), Math.abs(daNote.noteData), daNote.noteType, daNote.isSustainNote]);
 			callOnLuas((opponentChart ? 'goodNoteHitFix' : 'opponentNoteHitFix'), [notes.members.indexOf(daNote), Math.abs(daNote.noteData), daNote.noteType, daNote.isSustainNote]);
-			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
-           		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 
 			if (!daNote.isSustainNote)
 			{
@@ -8364,11 +8347,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			}
 			if (opponentDrain && health > 0.1 && !practiceMode || opponentDrain && practiceMode) {
 			health -= daNote.hitHealth * hpDrainLevel * polyphony;
-			if (ClientPrefs.healthDisplay && !ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 			}
 			if (ClientPrefs.denpaDrainBug) displayedHealth -= daNote.hitHealth * hpDrainLevel * polyphony;
-			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
-           		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 			if (ClientPrefs.iconBopWhen == 'Every Note Hit' && iconBopsThisFrame <= 2 && !daNote.isSustainNote && iconP2.visible) bopIcons(opponentChart);
 		}
 
@@ -9235,7 +9215,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 	}
 
 	public function updateRatingCounter() {
-		judgeCountUpdateFrame++;
 		if (!judgementCounter.visible) return;
 
 		formattedSongMisses = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(songMisses, false) : compactMisses;
@@ -9329,6 +9308,14 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			if (ratingPercent*100 >= 99.970) ratingCool = " AAAA.";
 			if (ratingPercent*100 >= 99.980) ratingCool = " AAAA:";
 			if (ratingPercent*100 >= 99.9935) ratingCool = " AAAAA";
+
+			// basically same stuff, doesn't update every frame but it also means no memory leaks during botplay
+			if (ClientPrefs.ratingCounter && judgementCounter != null) 
+				updateRatingCounter();
+			if (!ClientPrefs.hideScore && scoreTxt != null) 
+				updateScore(badHit);
+			if (ClientPrefs.compactNumbers) 
+				updateCompactNumbers();
 		}
 
 		setOnLuas('rating', ratingPercent);
