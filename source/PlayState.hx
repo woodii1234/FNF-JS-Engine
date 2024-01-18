@@ -1547,9 +1547,12 @@ class PlayState extends MusicBeatState
 			timeTxt.borderSize = 2;
 
 		case 'Box Funkin':
-			timeTxt = new FlxText(0, (ClientPrefs.downScroll ? timeBarBG.y + 32 : timeBarBG.y - 32), 400, "", 20);
-			timeTxt.setFormat(Paths.font("MilkyNice.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			timeTxt.borderSize = 2;
+			try{
+				timeTxt = new FlxText(0, (ClientPrefs.downScroll ? timeBarBG.y + 32 : timeBarBG.y - 32), 400, "", 20);
+				timeTxt.setFormat(Paths.font("MilkyNice.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				timeTxt.borderSize = 2;
+			}
+			catch(e){}
 		}
 
 
@@ -1780,7 +1783,7 @@ class PlayState extends MusicBeatState
 
 		if (unspawnNotes[0] != null) firstNoteStrumTime = unspawnNotes[0].strumTime;
 
-		camFollow = new FlxPoint();
+		camFollow = FlxPoint.get();
 		camFollowPos = new FlxObject(0, 0, 1, 1);
 
 		snapCamFollowToPos(camPos.x, camPos.y);
@@ -4968,11 +4971,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		setOnLuas('curDecStep', curDecStep);
 		setOnLuas('curDecBeat', curDecBeat);
 
-		if(botplayTxt != null && ClientPrefs.hudType != "Mic'd Up" && ClientPrefs.hudType != 'Kade Engine' && ClientPrefs.botTxtFade) {
-			if (!botplayTxt.visible){
-				super.update(elapsed);
-				return;
-			}
+		if(botplayTxt != null && botplayTxt.visible && ClientPrefs.hudType != "Mic'd Up" && ClientPrefs.hudType != 'Kade Engine' && ClientPrefs.botTxtFade) {
 			botplaySine += 180 * elapsed;
 			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180 * playbackRate);
 		}
@@ -8576,6 +8575,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			lua.stop();
 		}
 		luaArray = [];
+
+		camFollow.put();
 
 		#if hscript
 		if(FunkinLua.hscript != null) FunkinLua.hscript = null;

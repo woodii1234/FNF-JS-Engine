@@ -51,6 +51,13 @@ class HealthIcon extends FlxSprite
 			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
 			var file:Dynamic = Paths.image(name);
 
+			if (file == null)
+				file == Paths.image('icons/icon-face');
+			else if (!Paths.fileExists('images/icons/icon-face.png', IMAGE)){
+				// throw "Don't delete the placeholder icon";
+				trace("Warning: could not find the placeholder icon, expect crashes!");
+			}
+
 			loadGraphic(file); //Load stupidly first for getting the file size
 			var width2 = width;
 			if (width == 450) {

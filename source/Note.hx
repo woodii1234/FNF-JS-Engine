@@ -137,7 +137,7 @@ class Note extends FlxSprite
 
 	function quantCheck():Void 
 	{
-		if (ClientPrefs.noteColorStyle == 'Quant-Based' && !isSustainNote && (ClientPrefs.showNotes && ClientPrefs.enableColorShader))
+		if (colorSwap != null && ClientPrefs.noteColorStyle == 'Quant-Based' && !isSustainNote && (ClientPrefs.showNotes && ClientPrefs.enableColorShader))
 			{
 				var time = strumTime;
 				var theCurBPM = Conductor.bpm;
