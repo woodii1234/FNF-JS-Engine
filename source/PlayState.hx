@@ -2172,11 +2172,11 @@ class PlayState extends MusicBeatState
 		}
 		if (ClientPrefs.hideHud) {
 			scoreTxt.destroy();
-			botplayTxt.visible = false;
-			healthBarBG.visible = false;
-			healthBar.visible = false;
-			overhealthBar.visible = false;
-			iconP2.visible = iconP1.visible = false;
+			final daArray:Array<Dynamic> = [botplayTxt, healthBarBG, healthBar, overhealthBar, iconP2, iconP1];
+                        for (i in daArray){
+				if (i != null)
+					i.visible = false;
+			}
 		}
 		if (!ClientPrefs.charsAndBG) {
 			remove(dadGroup);
