@@ -1907,13 +1907,19 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.smoothHealth && ClientPrefs.smoothHealthType == 'Golden Apple 1.5') healthBar.numDivisions = 10000;
 
 		if (SONG.player1 == 'bf' || SONG.player1 == 'boyfriend') {
-			if (ClientPrefs.bfIconStyle == 'VS Nonsense V2') iconP1.changeIcon('bfnonsense'); 
-			if (ClientPrefs.bfIconStyle == 'Doki Doki+') iconP1.changeIcon('bfdoki'); 
-			if (ClientPrefs.bfIconStyle == 'Leather Engine') iconP1.changeIcon('bfleather'); 
-			if (ClientPrefs.bfIconStyle == "Mic'd Up") iconP1.changeIcon('bfmup'); 
-			if (ClientPrefs.bfIconStyle == "FPS Plus") iconP1.changeIcon('bffps'); 
-			if (ClientPrefs.bfIconStyle == "SB Engine") iconP1.changeIcon('bfsb'); 
-			if (ClientPrefs.bfIconStyle == "OS 'Engine'") iconP1.changeIcon('bfos'); 
+			final iconToChange:String = switch (ClientPrefs.bfIconStyle){
+				case 'VS Nonsense V2': 'bfnonsense';
+				case 'Doki Doki+': 'bfdoki';
+				case 'Leather Engine': 'bfleather';
+				case "Mic'd Up": 'bfmup';
+				case "FPS Plus": 'bffps';
+				case "SB Engine": 'bfsb';
+				case "OS 'Engine'": 'bfos';
+				default:
+					'bf';
+			}
+			if (iconToChange != 'bf')
+				iconP1.changeIcon(iconToChange);
 		}
 
 		if (ClientPrefs.timeBarType == 'Disabled') {
