@@ -367,6 +367,10 @@ class PlayState extends MusicBeatState
 	var secretsong:FlxSprite;
 	var SPUNCHBOB:FlxSprite;
 
+	//ok moxie this doesn't cause memory leaks
+	public var scoreTxtUpdateFrame:Int = 0;
+	public var judgeCountUpdateFrame:Int = 0;
+	public var compactUpdateFrame:Int = 0;
 	public var popUpsFrame:Int = 0;
 	public var missRecalcsPerFrame:Int = 0;
 	public var charAnimsFrame:Int = 0;
@@ -2947,15 +2951,10 @@ class PlayState extends MusicBeatState
 		var video:MP4Handler = new MP4Handler();
 		#if (hxCodec < "3.0.0")
 		video.playVideo(filepath);
-		if (callback != null)
-			video.finishCallback = callback;
-		else{
-			video.finishCallback = function()
-		        {
-			        startAndEnd();
-			        if (heyStopTrying) openfl.system.System.exit(0);
-			        return;
-		        }
+		video.finishCallback = function()
+		{
+			startAndEnd();
+			return;
 		}
 		#else
 		video.play(filepath);
@@ -3493,6 +3492,7 @@ class PlayState extends MusicBeatState
 
     private function updateCompactNumbers():Void
     {
+		compactUpdateFrame++;
         	compactCombo = formatCompactNumber(combo);
         	compactMaxCombo = formatCompactNumber(maxCombo);
 		compactScore = formatCompactNumber(songScore);
@@ -3879,6 +3879,7 @@ class PlayState extends MusicBeatState
 
 	public function updateScore(miss:Bool = false)
 	{
+		scoreTxtUpdateFrame++;
 		if (!scoreTxt.visible) return;
 		//GAH DAYUM THIS IS MORE OPTIMIZED THAN BEFORE
 		formattedMaxScore = ClientPrefs.showMaxScore ? ' / ' + FlxStringUtil.formatMoney(maxScore, false) : '';
@@ -4888,6 +4889,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
     if (notesToRemoveCount > 0) {
         notesHitDateArray.splice(0, notesToRemoveCount);
         notesHitArray.splice(0, notesToRemoveCount);
+		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4 && judgementCounter != null) updateRatingCounter();
+		if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
+           	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
     }
 
 	nps = 0;
@@ -4908,6 +4912,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
     if (oppNotesToRemoveCount > 0) {
         oppNotesHitDateArray.splice(0, oppNotesToRemoveCount);
         oppNotesHitArray.splice(0, oppNotesToRemoveCount);
+		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4 && judgementCounter != null) updateRatingCounter();
+           	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
     }
 
     // Calculate sum of NPS values for the opponent
@@ -4936,6 +4942,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		oppNpsDecreased = true;
 
 	if (npsIncreased || npsDecreased || oppNpsIncreased || oppNpsDecreased) {
+		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 8 && judgementCounter != null) updateRatingCounter();
+		if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 8 && scoreTxt != null) updateScore();
+           	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 8) updateCompactNumbers();
 		if (npsIncreased) npsIncreased = false;
 		if (npsDecreased) npsDecreased = false;
 		if (oppNpsIncreased) oppNpsIncreased = false;
@@ -4955,6 +4964,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 
 		super.update(elapsed);
+		if (judgeCountUpdateFrame > 0) judgeCountUpdateFrame = 0;
+		if (compactUpdateFrame > 0) compactUpdateFrame = 0;
+		if (scoreTxtUpdateFrame > 0) scoreTxtUpdateFrame = 0;
 		if (iconBopsThisFrame > 0) iconBopsThisFrame = 0;
 		if (popUpsFrame > 0) popUpsFrame = 0;
 		if (missRecalcsPerFrame > 0) missRecalcsPerFrame = 0;
@@ -4962,6 +4974,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		if (oppAnimsFrame > 0) oppAnimsFrame = 0;
 		if (strumAnimsPerFrame[0] > 0 || strumAnimsPerFrame[1] > 0) strumAnimsPerFrame = [0, 0];
 
+		if (lerpingScore) updateScore(); 
 		if (shownScore != songScore && ClientPrefs.hudType == 'JS Engine' && Math.abs(shownScore - songScore) >= 10) {
 		    shownScore = FlxMath.lerp(shownScore, songScore, 0.4 / (ClientPrefs.framerate / 60));
     			lerpingScore = true; // Indicate that lerping is in progress
@@ -7761,6 +7774,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			var animToPlay:String = singAnimations[Std.int(Math.abs(daNote.noteData))] + 'miss' + daNote.animSuffix;
 			char.playAnim(animToPlay, true);
 		}
+		if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
+		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
+           	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 
 		daNote.tooLate = true;
 
@@ -7807,6 +7823,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			}
 			vocals.volume = 0;
 		}
+		if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
+		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
+           	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 		callOnLuas('noteMissPress', [direction]);
 	}
 
@@ -8198,6 +8217,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					note.destroy();
 				}
 			}
+			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
+			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
+           		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 			if (ClientPrefs.iconBopWhen == 'Every Note Hit' && iconBopsThisFrame <= 2 && !note.isSustainNote && iconP1.visible) bopIcons(!opponentChart);
 		}
 	}
@@ -8365,10 +8387,17 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					daNote.destroy();
 				}
 			}
+			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
+			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
+           		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 			if (opponentDrain && health > 0.1 && !practiceMode || opponentDrain && practiceMode) {
 			health -= daNote.hitHealth * hpDrainLevel * polyphony;
+			if (ClientPrefs.healthDisplay && !ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 			}
+
 			if (ClientPrefs.denpaDrainBug) displayedHealth -= daNote.hitHealth * hpDrainLevel * polyphony;
+			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
+           		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 			if (ClientPrefs.iconBopWhen == 'Every Note Hit' && iconBopsThisFrame <= 2 && !daNote.isSustainNote && iconP2.visible) bopIcons(opponentChart);
 		}
 
@@ -9237,6 +9266,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 	}
 
 	public function updateRatingCounter() {
+		judgeCountUpdateFrame++;
 		if (!judgementCounter.visible) return;
 
 		formattedSongMisses = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(songMisses, false) : compactMisses;
