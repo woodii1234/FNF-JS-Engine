@@ -2951,10 +2951,15 @@ class PlayState extends MusicBeatState
 		var video:MP4Handler = new MP4Handler();
 		#if (hxCodec < "3.0.0")
 		video.playVideo(filepath);
-		video.finishCallback = function()
-		{
-			startAndEnd();
-			return;
+		if (callback != null)
+			video.finishCallback = callback;
+		else{
+			video.finishCallback = function()
+		        {
+			        startAndEnd();
+			        if (heyStopTrying) openfl.system.System.exit(0);
+			        return;
+		        }
 		}
 		#else
 		video.play(filepath);
