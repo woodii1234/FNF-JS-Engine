@@ -2924,7 +2924,7 @@ class PlayState extends MusicBeatState
 		char.y += char.positionArray[1];
 	}
 
-	public function startVideo(name:String)
+	public function startVideo(name:String, ?callback:Void->Void = null)
 	{
 		#if VIDEOS_ALLOWED
 		inCutscene = true;
@@ -2937,30 +2937,45 @@ class PlayState extends MusicBeatState
 		#end
 		{
 			FlxG.log.warn('Couldnt find video file: ' + name);
-			startAndEnd();
+			if (callback != null)
+				callback();
+			else
+		                startAndEnd();
 			return;
 		}
 
 		var video:MP4Handler = new MP4Handler();
 		#if (hxCodec < "3.0.0")
 		video.playVideo(filepath);
-		video.finishCallback = function()
-		{
-			startAndEnd();
-			return;
+		if (callback != null)
+			video.finishCallback = callback;
+		else{
+			video.finishCallback = function()
+		        {
+			        startAndEnd();
+			        if (heyStopTrying) openfl.system.System.exit(0);
+			        return;
+		        }
 		}
 		#else
 		video.play(filepath);
-		video.onEndReached.add(function(){
-			video.dispose();
-			startAndEnd();
-			if (heyStopTrying) openfl.system.System.exit(0);
-			return;
-		});
+		if (callback != null)
+			video.onEndReached.add(callback);
+		else{
+			video.onEndReached.add(function(){
+			        video.dispose();
+			        startAndEnd();
+			        if (heyStopTrying) openfl.system.System.exit(0);
+			        return;
+		        });
+		}
 		#end
 		#else
 		FlxG.log.warn('Platform not supported!');
-		startAndEnd();
+		if (callback != null)
+			callback();
+		else
+		        startAndEnd();
 		return;
 		#end
 	}
