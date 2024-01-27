@@ -797,7 +797,7 @@ class FreeplayState extends MusicBeatState
 		super.beatHit();
 
 		if (curPlaying)
-			grpIcons.members[instPlaying].bounce();
+			if (grpIcons.members[instPlaying].canBounce) grpIcons.members[instPlaying].bounce();
 	}
 	var _drawDistance:Int = 4;
 	var _lastVisibles:Array<Int> = [];
