@@ -265,6 +265,12 @@ class PlayState extends MusicBeatState
 	var camBopInterval:Int = 4;
 	var camBopIntensity:Float = 1;
 
+	var twistShit:Float = 1;
+	var twistAmount:Float = 1;
+	var camTwistIntensity:Float = 0;
+	var camTwistIntensity2:Float = 3;
+	var camTwist:Bool = false;
+
 	private var healthBarBG:AttachedSprite; //The image used for the health bar.
 	public var healthBar:FlxBar;
 	public var overhealthBar:FlxBar; //The health bar that's used when you exceed the normal max health.
@@ -5916,6 +5922,23 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 				camBopIntensity = _intensity;
 				camBopInterval = _interval;
+
+			case 'Camera Twist':
+				camTwist = true;
+				var _intensity:Float = Std.parseFloat(value1);
+				if (Math.isNaN(_intensity))
+					_intensity = 0;
+				var _intensity2:Float = Std.parseFloat(value2);
+				if (Math.isNaN(_intensity2))
+					_intensity2 = 0;
+				camTwistIntensity = _intensity;
+				camTwistIntensity2 = _intensity2;
+				if (_intensity2 == 0)
+				{
+					camTwist = false;
+					FlxTween.tween(camHUD, {angle: 0}, 1, {ease: FlxEase.sineInOut});
+					FlxTween.tween(camGame, {angle: 0}, 1, {ease: FlxEase.sineInOut});
+				}
 			case 'Change Note Multiplier':
 				var noteMultiplier:Float = Std.parseFloat(value1);
 				if (Math.isNaN(noteMultiplier))
@@ -8759,16 +8782,31 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		final gamerValue = 20 * playbackRate;
 		if (!ClientPrefs.noSyncing && ClientPrefs.songLoading && playbackRate < 256) //much better resync code, doesn't just resync every step!!
 		{
-		if (FlxG.sound.music.time > Conductor.songPosition + gamerValue
-			|| FlxG.sound.music.time < Conductor.songPosition - gamerValue
-			|| FlxG.sound.music.time < 500 && ClientPrefs.startingSync)
-		{
-			resyncVocals();
-		}
+			if (FlxG.sound.music.time > Conductor.songPosition + gamerValue
+				|| FlxG.sound.music.time < Conductor.songPosition - gamerValue
+				|| FlxG.sound.music.time < 500 && ClientPrefs.startingSync)
+			{
+				resyncVocals();
+			}
 		}
 
 		if(curStep == lastStepHit) {
 			return;
+		}
+
+		if (camTwist)
+		{
+			if (curStep % (gfSpeed * 4) == 0)
+			{
+				FlxTween.tween(camHUD, {y: -6 * camTwistIntensity2}, Conductor.stepCrochet * 0.002, {ease: FlxEase.circOut});
+				FlxTween.tween(camGame.scroll, {y: 12}, Conductor.stepCrochet * 0.002, {ease: FlxEase.sineIn});
+			}
+
+			if (curStep % (gfSpeed * 4) == 2)
+			{
+				FlxTween.tween(camHUD, {y: 0}, Conductor.stepCrochet * 0.002, {ease: FlxEase.sineIn});
+				FlxTween.tween(camGame.scroll, {y: 0}, Conductor.stepCrochet * 0.002, {ease: FlxEase.sineIn});
+			}
 		}
 
 		lastStepHit = curStep;
@@ -8809,6 +8847,24 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			FlxG.camera.zoom += 0.015 * camBopIntensity;
 			camHUD.zoom += 0.03 * camBopIntensity;
 		} /// WOOO YOU CAN NOW MAKE IT AWESOME
+
+		if (camTwist)
+		{
+			if (curBeat % (gfSpeed * 2) == 0)
+			{
+				twistShit = twistAmount;
+			}
+			if (curBeat % (gfSpeed * 2) == 2)
+			{
+				twistShit = -twistAmount;
+			}
+			camHUD.angle = twistShit * camTwistIntensity2;
+			camGame.angle = twistShit * camTwistIntensity2;
+			FlxTween.tween(camHUD, {angle: twistShit * camTwistIntensity}, Conductor.stepCrochet * 0.002, {ease: FlxEase.circOut});
+			FlxTween.tween(camHUD, {x: -twistShit * camTwistIntensity}, Conductor.crochet * 0.001, {ease: FlxEase.linear});
+			FlxTween.tween(camGame, {angle: twistShit * camTwistIntensity}, Conductor.stepCrochet * 0.002, {ease: FlxEase.circOut});
+			FlxTween.tween(camGame, {x: -twistShit * camTwistIntensity}, Conductor.crochet * 0.001, {ease: FlxEase.linear});
+		}
 
 		if (generatedMusic)
 		{
