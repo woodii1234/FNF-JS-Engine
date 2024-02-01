@@ -2,7 +2,6 @@ name: Bug report
 description: Report bugs with the engine here
 labels: [bug]
 body:
-  Please check for duplicates or similar issues before submitting an issue.
   - type: textarea
     id: description
     attributes:
@@ -21,7 +20,7 @@ body:
   - type: textarea
     id: reproduce
     attributes:
-      label: "Command Prompt/Terminal logs (if existing)"
+      label: "Have you identified any steps to reproduce the bug? If so, please describe them below in as much detail as possible. Use images if possible."
       render: bash
     validations:
       required: false
@@ -62,6 +61,16 @@ body:
     id: oclt
     attributes:
       label: "If you use 1.12.0 or earlier, did you have Optimized Chart Loading turned on?"
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: false
+        - type: dropdown
+        
+  id: duplicatecheck
+    attributes:
+      label: "Did you check if there aren't any similar issues to what you're reporting? Check, then come back here."
       options:
         - "Yes"
         - "No"
