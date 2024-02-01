@@ -2,15 +2,24 @@ name: Bug report
 description: Report bugs with the engine here
 labels: [bug]
 body:
+  Please check for duplicates or similar issues before submitting an issue.
   - type: textarea
     id: description
     attributes:
-      label: "Describe your bug here. Mind you, if you are modding, please try testing your bug in a clean version of the engine instead, this ensures the bug is actually caused by the engine itself."
+      label: "Describe your bug here. Mind you, if you are modding, please try testing your bug in a clean version of the engine instead, this ensures the bug is actually caused by the engine itself. Also, if you're using an older version of JSE, please try the latest action build in the Actions tab or the latest release build. The issue has probably been fixed since that version."
     validations:
       required: true
 
   - type: textarea
     id: terminal
+    attributes:
+      label: "Command Prompt/Terminal logs (if existing)"
+      render: bash
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduce
     attributes:
       label: "Command Prompt/Terminal logs (if existing)"
       render: bash
