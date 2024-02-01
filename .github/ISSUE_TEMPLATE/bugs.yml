@@ -66,3 +66,13 @@ body:
         - "No"
     validations:
       required: false
+      
+  - type: dropdown
+    id: duplicatecheck
+    attributes:
+      label: "Did you check for any similar issues to what you're reporting? Check, then come back here."
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: true
