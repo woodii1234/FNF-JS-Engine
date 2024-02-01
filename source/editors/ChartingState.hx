@@ -2326,7 +2326,16 @@ class ChartingState extends MusicBeatState
 						&& FlxG.mouse.y > gridBG.y
 						&& FlxG.mouse.y < gridBG.y + gridBG.height)
 							if (!FlxG.keys.pressed.CONTROL) //stop crashing
+							{
 								addNote(); //allows you to draw notes by holding C
+								var addCount:Float = 0;
+								if (check_stackActive.checked) {
+									addCount = stepperStackNum.value * stepperStackOffset.value - 1;
+								}
+								for(i in 0...Std.int(addCount)) {
+									addNote(curSelectedNote[0] + (15000/Conductor.bpm)/stepperStackOffset.value, curSelectedNote[1] + Math.floor(stepperStackSideOffset.value), currentType);
+								}
+							}
 			if (FlxG.keys.pressed.C && FlxG.keys.pressed.CONTROL)
 				if (FlxG.mouse.overlaps(curRenderedNotes))
 					if (FlxG.mouse.x > gridBG.x
