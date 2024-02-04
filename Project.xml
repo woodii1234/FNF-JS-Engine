@@ -51,7 +51,7 @@
 	<define name="PSYCH_WATERMARKS"/> <!-- DELETE THIS TO REMOVE WATERMARKS/DEV NAMES ON TITLE SCREEN -->
 	<define name="TITLE_SCREEN_EASTER_EGG" if="officialBuild"/> <!-- DELETE THE if="officialBuild" for enabling this on an unofficial build -->
 	<define name="CRASH_HANDLER" if="desktop release || android" />
-	<define name="DISCORD_ALLOWED" if="desktop" />
+	<define name="DISCORD_ALLOWED" />
 
 	<assets path="assets/android" if="android"/> <!-- to not have the android assets in another builds -saw -->
 
@@ -138,7 +138,7 @@
 	<haxelib name="flixel-ui" />
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
-	<haxelib name="discord_rpc" if="DISCORD_ALLOWED" />
+	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED" />
 
 	<!-- Enables a terminal log prompt on debug builds -->
 	<haxelib name="hxcpp-debug-server" if="debug"/>
@@ -182,6 +182,7 @@
 	<haxedef name="HXCPP_GC_BIG_BLOCKS" if="cpp"/>
 	<!--also fixes like any "Memory Exhausted" issues you might get when compiling-->
 	<!--UPDATE: turns out that HxCPP 5.2.2 isnt required for this to work, nvm-->
+	<!-- bruh hxcpp 5.2.2 doesn't even exist :sob:-->
 	
 	<!-- Show debug traces for hxCodec -->
 	<haxedef name="HXC_DEBUG_TRACE" if="debug" />
@@ -198,6 +199,10 @@
 
 	<!-- Javascript breaks with inline for reasons unknown -->
 	<haxedef name="no-inline" if="html5"/>
+
+	<!-- Disable Discord IO Thread -->
+	<haxedef name="DISCORD_DISABLE_IO_THREAD" if="hxdiscord_rpc" />
+	<haxedef name="NO_PRECOMPILED_HEADERS" if="linux" />
 
 	<!--This fixes compiling with macros according to official PE source code-->
 	<haxeflag name="--macro" value="allowPackage('flash')" />
