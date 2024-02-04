@@ -107,6 +107,7 @@ class ChartingState extends MusicBeatState
 		['Credits Popup', "Makes some credits pop up. \n\nValue 1: The title. \nValue 2: The composer(s)"],
 		['Screen Shake', "Value 1: Camera shake\nValue 2: HUD shake\n\nEvery value works as the following example: \"1, 0.05\".\nThe first number (1) is the duration.\nThe second number (0.05) is the intensity."],
 		['Camera Bopping', "Makes the camera do funny bopping\n\nValue 1: Bopping Speed (how many beats you want before it bops)\nValue 2: Bopping Intensity (how hard you want it to bop, default is 1)\n\nTo reset camera bopping, place a new event and put both values as '4' and '1' respectively."],
+		['Camera Twist', "Makes the camera spin!! or twist ig\nValue 1: Twist intensity\nValue 2: Twist intensity 2"],
 		['Change Note Multiplier', "Changes the amount of notes played every time you hit a note.\n\nValue 1: Note Multiplier that you want."],
 		['Fake Song Length', "Shows a fake song length on the time bar.\n\nValue 1: The fake length (in seconds)\nValue 2: Should it tween? (true = yes, anything else = no)\nTo reset the song length to normal, make Value 1 null."],
 		['Change Character', "Value 1: Character to change (Dad, BF, GF)\nValue 2: New character's name"],
@@ -2325,7 +2326,16 @@ class ChartingState extends MusicBeatState
 						&& FlxG.mouse.y > gridBG.y
 						&& FlxG.mouse.y < gridBG.y + gridBG.height)
 							if (!FlxG.keys.pressed.CONTROL) //stop crashing
+							{
 								addNote(); //allows you to draw notes by holding C
+								var addCount:Float = 0;
+								if (check_stackActive.checked) {
+									addCount = stepperStackNum.value * stepperStackOffset.value - 1;
+								}
+								for(i in 0...Std.int(addCount)) {
+									addNote(curSelectedNote[0] + (15000/Conductor.bpm)/stepperStackOffset.value, curSelectedNote[1] + Math.floor(stepperStackSideOffset.value), currentType);
+								}
+							}
 			if (FlxG.keys.pressed.C && FlxG.keys.pressed.CONTROL)
 				if (FlxG.mouse.overlaps(curRenderedNotes))
 					if (FlxG.mouse.x > gridBG.x

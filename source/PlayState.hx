@@ -265,6 +265,12 @@ class PlayState extends MusicBeatState
 	var camBopInterval:Int = 4;
 	var camBopIntensity:Float = 1;
 
+	var twistShit:Float = 1;
+	var twistAmount:Float = 1;
+	var camTwistIntensity:Float = 0;
+	var camTwistIntensity2:Float = 3;
+	var camTwist:Bool = false;
+
 	private var healthBarBG:AttachedSprite; //The image used for the health bar.
 	public var healthBar:FlxBar;
 	public var overhealthBar:FlxBar; //The health bar that's used when you exceed the normal max health.
@@ -367,6 +373,10 @@ class PlayState extends MusicBeatState
 	var secretsong:FlxSprite;
 	var SPUNCHBOB:FlxSprite;
 
+	//ok moxie this doesn't cause memory leaks
+	public var scoreTxtUpdateFrame:Int = 0;
+	public var judgeCountUpdateFrame:Int = 0;
+	public var compactUpdateFrame:Int = 0;
 	public var popUpsFrame:Int = 0;
 	public var missRecalcsPerFrame:Int = 0;
 	public var charAnimsFrame:Int = 0;
@@ -2172,11 +2182,11 @@ class PlayState extends MusicBeatState
 		}
 		if (ClientPrefs.hideHud) {
 			scoreTxt.destroy();
-			botplayTxt.visible = false;
-			healthBarBG.visible = false;
-			healthBar.visible = false;
-			overhealthBar.visible = false;
-			iconP2.visible = iconP1.visible = false;
+			final daArray:Array<Dynamic> = [botplayTxt, healthBarBG, healthBar, overhealthBar, iconP2, iconP1];
+                        for (i in daArray){
+				if (i != null)
+					i.visible = false;
+			}
 		}
 		if (!ClientPrefs.charsAndBG) {
 			remove(dadGroup);
@@ -2924,7 +2934,7 @@ class PlayState extends MusicBeatState
 		char.y += char.positionArray[1];
 	}
 
-	public function startVideo(name:String)
+	public function startVideo(name:String, ?callback:Void->Void = null)
 	{
 		#if VIDEOS_ALLOWED
 		inCutscene = true;
@@ -2937,30 +2947,45 @@ class PlayState extends MusicBeatState
 		#end
 		{
 			FlxG.log.warn('Couldnt find video file: ' + name);
-			startAndEnd();
+			if (callback != null)
+				callback();
+			else
+		                startAndEnd();
 			return;
 		}
 
 		var video:MP4Handler = new MP4Handler();
 		#if (hxCodec < "3.0.0")
 		video.playVideo(filepath);
-		video.finishCallback = function()
-		{
-			startAndEnd();
-			return;
+		if (callback != null)
+			video.finishCallback = callback;
+		else{
+			video.finishCallback = function()
+		        {
+			        startAndEnd();
+			        if (heyStopTrying) openfl.system.System.exit(0);
+			        return;
+		        }
 		}
 		#else
 		video.play(filepath);
-		video.onEndReached.add(function(){
-			video.dispose();
-			startAndEnd();
-			if (heyStopTrying) openfl.system.System.exit(0);
-			return;
-		});
+		if (callback != null)
+			video.onEndReached.add(callback);
+		else{
+			video.onEndReached.add(function(){
+			        video.dispose();
+			        startAndEnd();
+			        if (heyStopTrying) openfl.system.System.exit(0);
+			        return;
+		        });
+		}
 		#end
 		#else
 		FlxG.log.warn('Platform not supported!');
-		startAndEnd();
+		if (callback != null)
+			callback();
+		else
+		        startAndEnd();
 		return;
 		#end
 	}
@@ -3478,6 +3503,7 @@ class PlayState extends MusicBeatState
 
     private function updateCompactNumbers():Void
     {
+		compactUpdateFrame++;
         	compactCombo = formatCompactNumber(combo);
         	compactMaxCombo = formatCompactNumber(maxCombo);
 		compactScore = formatCompactNumber(songScore);
@@ -3864,6 +3890,7 @@ class PlayState extends MusicBeatState
 
 	public function updateScore(miss:Bool = false)
 	{
+		scoreTxtUpdateFrame++;
 		if (!scoreTxt.visible) return;
 		//GAH DAYUM THIS IS MORE OPTIMIZED THAN BEFORE
 		formattedMaxScore = ClientPrefs.showMaxScore ? ' / ' + FlxStringUtil.formatMoney(maxScore, false) : '';
@@ -4873,6 +4900,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
     if (notesToRemoveCount > 0) {
         notesHitDateArray.splice(0, notesToRemoveCount);
         notesHitArray.splice(0, notesToRemoveCount);
+		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4 && judgementCounter != null) updateRatingCounter();
+		if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
+           	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
     }
 
 	nps = 0;
@@ -4893,6 +4923,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
     if (oppNotesToRemoveCount > 0) {
         oppNotesHitDateArray.splice(0, oppNotesToRemoveCount);
         oppNotesHitArray.splice(0, oppNotesToRemoveCount);
+		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4 && judgementCounter != null) updateRatingCounter();
+           	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
     }
 
     // Calculate sum of NPS values for the opponent
@@ -4921,6 +4953,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		oppNpsDecreased = true;
 
 	if (npsIncreased || npsDecreased || oppNpsIncreased || oppNpsDecreased) {
+		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 8 && judgementCounter != null) updateRatingCounter();
+		if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 8 && scoreTxt != null) updateScore();
+           	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 8) updateCompactNumbers();
 		if (npsIncreased) npsIncreased = false;
 		if (npsDecreased) npsDecreased = false;
 		if (oppNpsIncreased) oppNpsIncreased = false;
@@ -4940,6 +4975,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 
 		super.update(elapsed);
+		if (judgeCountUpdateFrame > 0) judgeCountUpdateFrame = 0;
+		if (compactUpdateFrame > 0) compactUpdateFrame = 0;
+		if (scoreTxtUpdateFrame > 0) scoreTxtUpdateFrame = 0;
 		if (iconBopsThisFrame > 0) iconBopsThisFrame = 0;
 		if (popUpsFrame > 0) popUpsFrame = 0;
 		if (missRecalcsPerFrame > 0) missRecalcsPerFrame = 0;
@@ -4947,6 +4985,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		if (oppAnimsFrame > 0) oppAnimsFrame = 0;
 		if (strumAnimsPerFrame[0] > 0 || strumAnimsPerFrame[1] > 0) strumAnimsPerFrame = [0, 0];
 
+		if (lerpingScore) updateScore(); 
 		if (shownScore != songScore && ClientPrefs.hudType == 'JS Engine' && Math.abs(shownScore - songScore) >= 10) {
 		    shownScore = FlxMath.lerp(shownScore, songScore, 0.4 / (ClientPrefs.framerate / 60));
     			lerpingScore = true; // Indicate that lerping is in progress
@@ -5883,6 +5922,23 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 				camBopIntensity = _intensity;
 				camBopInterval = _interval;
+
+			case 'Camera Twist':
+				camTwist = true;
+				var _intensity:Float = Std.parseFloat(value1);
+				if (Math.isNaN(_intensity))
+					_intensity = 0;
+				var _intensity2:Float = Std.parseFloat(value2);
+				if (Math.isNaN(_intensity2))
+					_intensity2 = 0;
+				camTwistIntensity = _intensity;
+				camTwistIntensity2 = _intensity2;
+				if (_intensity2 == 0)
+				{
+					camTwist = false;
+					FlxTween.tween(camHUD, {angle: 0}, 1, {ease: FlxEase.sineInOut});
+					FlxTween.tween(camGame, {angle: 0}, 1, {ease: FlxEase.sineInOut});
+				}
 			case 'Change Note Multiplier':
 				var noteMultiplier:Float = Std.parseFloat(value1);
 				if (Math.isNaN(noteMultiplier))
@@ -7746,6 +7802,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			var animToPlay:String = singAnimations[Std.int(Math.abs(daNote.noteData))] + 'miss' + daNote.animSuffix;
 			char.playAnim(animToPlay, true);
 		}
+		if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
+		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
+           	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 
 		daNote.tooLate = true;
 
@@ -7792,6 +7851,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			}
 			vocals.volume = 0;
 		}
+		if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
+		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
+           	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 		callOnLuas('noteMissPress', [direction]);
 	}
 
@@ -8183,6 +8245,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					note.destroy();
 				}
 			}
+			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
+			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
+           		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 			if (ClientPrefs.iconBopWhen == 'Every Note Hit' && iconBopsThisFrame <= 2 && !note.isSustainNote && iconP1.visible) bopIcons(!opponentChart);
 		}
 	}
@@ -8350,10 +8415,17 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					daNote.destroy();
 				}
 			}
+			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
+			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
+           		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 			if (opponentDrain && health > 0.1 && !practiceMode || opponentDrain && practiceMode) {
 			health -= daNote.hitHealth * hpDrainLevel * polyphony;
+			if (ClientPrefs.healthDisplay && !ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 			}
+
 			if (ClientPrefs.denpaDrainBug) displayedHealth -= daNote.hitHealth * hpDrainLevel * polyphony;
+			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
+           		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 			if (ClientPrefs.iconBopWhen == 'Every Note Hit' && iconBopsThisFrame <= 2 && !daNote.isSustainNote && iconP2.visible) bopIcons(opponentChart);
 		}
 
@@ -8710,16 +8782,31 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		final gamerValue = 20 * playbackRate;
 		if (!ClientPrefs.noSyncing && ClientPrefs.songLoading && playbackRate < 256) //much better resync code, doesn't just resync every step!!
 		{
-		if (FlxG.sound.music.time > Conductor.songPosition + gamerValue
-			|| FlxG.sound.music.time < Conductor.songPosition - gamerValue
-			|| FlxG.sound.music.time < 500 && ClientPrefs.startingSync)
-		{
-			resyncVocals();
-		}
+			if (FlxG.sound.music.time > Conductor.songPosition + gamerValue
+				|| FlxG.sound.music.time < Conductor.songPosition - gamerValue
+				|| FlxG.sound.music.time < 500 && ClientPrefs.startingSync)
+			{
+				resyncVocals();
+			}
 		}
 
 		if(curStep == lastStepHit) {
 			return;
+		}
+
+		if (camTwist)
+		{
+			if (curStep % (gfSpeed * 4) == 0)
+			{
+				FlxTween.tween(camHUD, {y: -6 * camTwistIntensity2}, Conductor.stepCrochet * 0.002, {ease: FlxEase.circOut});
+				FlxTween.tween(camGame.scroll, {y: 12}, Conductor.stepCrochet * 0.002, {ease: FlxEase.sineIn});
+			}
+
+			if (curStep % (gfSpeed * 4) == 2)
+			{
+				FlxTween.tween(camHUD, {y: 0}, Conductor.stepCrochet * 0.002, {ease: FlxEase.sineIn});
+				FlxTween.tween(camGame.scroll, {y: 0}, Conductor.stepCrochet * 0.002, {ease: FlxEase.sineIn});
+			}
 		}
 
 		lastStepHit = curStep;
@@ -8760,6 +8847,24 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			FlxG.camera.zoom += 0.015 * camBopIntensity;
 			camHUD.zoom += 0.03 * camBopIntensity;
 		} /// WOOO YOU CAN NOW MAKE IT AWESOME
+
+		if (camTwist)
+		{
+			if (curBeat % (gfSpeed * 2) == 0)
+			{
+				twistShit = twistAmount;
+			}
+			if (curBeat % (gfSpeed * 2) == 2)
+			{
+				twistShit = -twistAmount;
+			}
+			camHUD.angle = twistShit * camTwistIntensity2;
+			camGame.angle = twistShit * camTwistIntensity2;
+			FlxTween.tween(camHUD, {angle: twistShit * camTwistIntensity}, Conductor.stepCrochet * (0.002 * gfSpeed), {ease: FlxEase.circOut});
+			FlxTween.tween(camHUD, {x: -twistShit * camTwistIntensity}, Conductor.crochet * (0.001 * gfSpeed), {ease: FlxEase.linear});
+			FlxTween.tween(camGame, {angle: twistShit * camTwistIntensity}, Conductor.stepCrochet * 0.002, {ease: FlxEase.circOut});
+			FlxTween.tween(camGame, {x: -twistShit * camTwistIntensity}, Conductor.crochet * (0.001 * gfSpeed), {ease: FlxEase.linear});
+		}
 
 		if (generatedMusic)
 		{
@@ -9222,6 +9327,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 	}
 
 	public function updateRatingCounter() {
+		judgeCountUpdateFrame++;
 		if (!judgementCounter.visible) return;
 
 		formattedSongMisses = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(songMisses, false) : compactMisses;
