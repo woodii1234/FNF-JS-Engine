@@ -2,7 +2,7 @@ package;
 
 import openfl.display.Tile;
 #if desktop
-import Discord.DiscordClient;
+import DiscordClient;
 #end
 import editors.ChartingState;
 import flash.text.TextField;

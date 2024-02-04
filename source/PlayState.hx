@@ -2,7 +2,7 @@ package;
 
 import flixel.graphics.FlxGraphic;
 #if DISCORD_ALLOWED
-import Discord.DiscordClient;
+import DiscordClient;
 #end
 import Section.SwagSection;
 import Song.SwagSong;
@@ -3768,6 +3768,24 @@ class PlayState extends MusicBeatState
 							}
 						});
 						FlxG.sound.play(Paths.sound('introGo' + introSoundsSuffix), 0.6);
+						final charsToHey = [dad, boyfriend, gf];
+						for (char in charsToHey) 
+						{
+							if(char != null) 
+							{
+								if (char.animOffsets.exists('hey') || char.animOffsets.exists('cheer'))
+								{
+									char.playAnim(char.animOffsets.exists('hey') ? 'hey' : 'cheer', true);
+									char.specialAnim = true;
+									char.heyTimer = 0.6;
+								} else if (char.animOffsets.exists('singUP') && (!char.animOffsets.exists('hey') || !char.animOffsets.exists('cheer')))
+								{
+									char.playAnim(char.animOffsets.exists('hey') ? 'hey' : 'cheer', true);
+									char.specialAnim = true;
+									char.heyTimer = 0.6;
+								}
+							}
+						}
 					case 4:
 					if (SONG.songCredit != null && SONG.songCredit.length > 0)
 					{

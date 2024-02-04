@@ -55,7 +55,7 @@ import hscript.Expr;
 #end
 
 #if desktop
-import Discord;
+import DiscordClient;
 #end
 
 using StringTools;

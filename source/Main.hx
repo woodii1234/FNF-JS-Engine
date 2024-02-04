@@ -13,7 +13,7 @@ import openfl.events.Event;
 import openfl.display.StageScaleMode;
 import lime.app.Application;
 #if desktop
-import Discord.DiscordClient;
+import DiscordClient;
 import cpp.vm.Gc;
 #end
 // crash handler stuff
@@ -171,10 +171,10 @@ class Main extends Sprite {
 		#end
 
 		#if desktop
-		if (!DiscordClient.isInitialized) {
+		if (!DiscordClient.initialized) {
 			DiscordClient.initialize();
 			Application.current.window.onClose.add(function() {
-				DiscordClient.shutdown();
+				DiscordClient.close();
 			});
 		}
 		#end
@@ -221,7 +221,7 @@ class Main extends Sprite {
 
 		Application.current.window.alert(errorMessage, "Error! JS Engine v" + MainMenuState.psychEngineJSVersion + " (" + Main.__superCoolErrorMessagesArray[FlxG.random.int(0, Main.__superCoolErrorMessagesArray.length)] + ")");
 		#if desktop
-		DiscordClient.shutdown();
+		DiscordClient.close();
 		#end
 		Sys.exit(1);
 	}
