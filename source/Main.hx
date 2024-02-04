@@ -32,7 +32,7 @@ class Main extends Sprite {
 	var game = {
 		width: 1280,
 		height: 720,
-		initialState: TitleState,
+		initialState: TitleState.new,
 		zoom: -1.0,
 		framerate: 60,
 		skipSplash: false,
@@ -147,7 +147,7 @@ class Main extends Sprite {
 		ClientPrefs.loadDefaultKeys();
 		// This is gonna make your FPS counter to be outside from game screen and fix full screen issue because of latest OpenFL library version. -- MaysLastPlay says 
 		#if android
-		addChild(new FlxGame(1280, 720, TitleState, 60, 60, true, false));
+		addChild(new FlxGame(1280, 720, TitleState.new, 60, 60, true, false));
 		#else
 		addChild(new FlxGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 		#end

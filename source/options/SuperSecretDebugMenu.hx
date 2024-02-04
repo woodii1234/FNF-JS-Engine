@@ -191,7 +191,7 @@ class SuperSecretDebugMenu extends BaseOptionsMenu
 			http.request();
 		}
     
-    MusicBeatState.switchState(new OutdatedState());
+    		FlxG.switchState(OutdatedState.new);
 	}
 
 	function onChangeRainbowFPS()

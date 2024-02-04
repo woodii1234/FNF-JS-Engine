@@ -395,7 +395,7 @@ class DialogueEditorState extends MusicBeatState
 				reloadText(false);
 			}
 			if(#if !android FlxG.keys.justPressed.ESCAPE #else virtualPad.buttonC.justPressed #end) {
-				MusicBeatState.switchState(new editors.MasterEditorMenu());
+				FlxG.switchState(editors.MasterEditorMenu.new);
 				FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic), 1);
 				transitioning = true;
 			}

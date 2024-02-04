@@ -95,7 +95,7 @@ class OutdatedState extends MusicBeatState
 		if(!leftState) {
 			if (FlxG.keys.justPressed.ENTER) {
 				leftState = true;
-				#if windows MusicBeatState.switchState(new UpdateState());
+				#if windows FlxG.switchState(UpdateState.new);
 				#else
 				CoolUtil.browserLoad("https://github.com/JordanSantiagoYT/FNF-PsychEngine-NoBotplayLag/releases/latest");
 				#end
@@ -112,27 +112,27 @@ class OutdatedState extends MusicBeatState
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				FlxTween.tween(warnText, {alpha: 0}, 1, {
 					onComplete: function (twn:FlxTween) {
-						MusicBeatState.switchState(new MainMenuState());
+						FlxG.switchState(MainMenuState.new);
 					}
 				});
 				FlxTween.tween(changelog, {alpha: 0}, 1, {
 					onComplete: function (twn:FlxTween) {
-						MusicBeatState.switchState(new MainMenuState());
+						FlxG.switchState(MainMenuState.new);
 					}
 				});
 				FlxTween.tween(updateText, {alpha: 0}, 1, {
 					onComplete: function (twn:FlxTween) {
-						MusicBeatState.switchState(new MainMenuState());
+						FlxG.switchState(MainMenuState.new);
 					}
 				});
 				FlxTween.tween(checker, {alpha: 0}, 1, {
 					onComplete: function (twn:FlxTween) {
-						MusicBeatState.switchState(new MainMenuState());
+						FlxG.switchState(MainMenuState.new);
 					}
 				});
 				FlxTween.tween(bg, {alpha: 0}, 1, {
 					onComplete: function (twn:FlxTween) {
-						MusicBeatState.switchState(new MainMenuState());
+						FlxG.switchState(MainMenuState.new);
 					}
 				});
 			}

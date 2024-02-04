@@ -157,7 +157,7 @@ class ResultsScreenSubState extends MusicBeatSubstate {
 
 		if (controls.ACCEPT #if android || touchedScreen #end) {
 			if (PlayState.isStoryMode)
-				MusicBeatState.switchState(new StoryMenuState());
+				FlxG.switchState(StoryMenuState.new);
 			else
 				PlayState.instance.endSong();
 		}

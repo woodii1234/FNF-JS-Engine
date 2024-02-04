@@ -550,12 +550,6 @@ class CharacterEditorState extends MusicBeatState
 				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperG, null);
 				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperB, null);
 			});
-		/*
-		var changeCharArrowColor:FlxButton = new FlxButton(reloadImage.x - 30, reloadImage.y + 30, "Change Character's Arrow Colors", function()
-			{
-				LoadingState.loadAndSwitchState(new charArrowColorState());
-			});
-		*/
 
 		healthIconInputText = new FlxUIInputText(15, imageInputText.y + 35, 75, leHealthIcon.getCharacter(), 8);
 		healthIconInputText.focusGained = () -> FlxG.stage.window.textInputEnabled = true;
@@ -1152,9 +1146,9 @@ class CharacterEditorState extends MusicBeatState
 		if(!charDropDown.dropPanel.visible) {
 			if (FlxG.keys.justPressed.ESCAPE #if android || FlxG.android.justReleased.BACK #end) {
 				if(goToPlayState) {
-					MusicBeatState.switchState(new PlayState());
+					FlxG.switchState(PlayState.new);
 				} else {
-					MusicBeatState.switchState(new editors.MasterEditorMenu());
+					FlxG.switchState(editors.MasterEditorMenu.new);
 					FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
 				}
 				FlxG.mouse.visible = false;

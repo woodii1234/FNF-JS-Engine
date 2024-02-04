@@ -294,7 +294,7 @@ class MainMenuState extends MusicBeatState
 			{
 				selectedSomethin = true;
 				FlxG.sound.play(Paths.sound('cancelMenu'));
-				MusicBeatState.switchState(new TitleState());
+				FlxG.switchState(TitleState.new);
 			}
 
 			if (controls.ACCEPT)
@@ -331,19 +331,19 @@ class MainMenuState extends MusicBeatState
 								switch (daChoice)
 								{
 									case 'story_mode':
-										MusicBeatState.switchState(new StoryMenuState());
+										FlxG.switchState(StoryMenuState.new);
 									case 'freeplay':
-										MusicBeatState.switchState(new FreeplayState());
+										FlxG.switchState(FreeplayState.new);
 									#if MODS_ALLOWED
 									case 'mods':
-										MusicBeatState.switchState(new ModsMenuState());
+										FlxG.switchState(ModsMenuState.new);
 									#end
 									case 'awards':
-										MusicBeatState.switchState(new AchievementsMenuState());
+										FlxG.switchState(AchievementsMenuState.new);
 									case 'credits':
-										MusicBeatState.switchState(new CreditsState());
+										FlxG.switchState(CreditsState.new);
 									case 'options':
-										LoadingState.loadAndSwitchState(new options.OptionsState());
+										LoadingState.loadAndSwitchState(options.OptionsState.new);
 								}
 							});
 						}
@@ -352,7 +352,7 @@ class MainMenuState extends MusicBeatState
 			}
 		#if (desktop || android)
 		else if (FlxG.keys.anyJustPressed(debugKeys) #if android || virtualPad.buttonC.justPressed #end) {
-			MusicBeatState.switchState(new MasterEditorMenu());
+			FlxG.switchState(MasterEditorMenu.new);
 		}
 		#end
 		}

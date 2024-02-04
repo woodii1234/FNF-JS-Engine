@@ -82,7 +82,7 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 			#if android
 			removeVirtualPad();
 			#end
-				LoadingState.loadAndSwitchState(new options.NoteOffsetState());
+				LoadingState.loadAndSwitchState(() -> new options.NoteOffsetState());
 			case 'Misc':
 			#if android
 			removeVirtualPad();
@@ -200,10 +200,10 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 			{
 				PauseSubState.inPause = false;
 				StageData.loadDirectory(PlayState.SONG);
-				LoadingState.loadAndSwitchState(new PlayState());
+				LoadingState.loadAndSwitchState(PlayState.new);
 				FlxG.sound.music.volume = 0;
 			}
-			else MusicBeatState.switchState(new MainMenuState());
+			else FlxG.switchState(MainMenuState.new);
 		}
 		if (controls.ACCEPT && !isEnteringKonamiCode) {
 			if (isEnteringKonamiCode) return;
