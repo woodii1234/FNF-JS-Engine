@@ -5311,30 +5311,30 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			hitsGiveHealth = true;
 		}
 
-		if ((opponentChart ? iconP2 : iconP1).animation.frames == 3) {
+		if (iconP1.animation.frames == 3) {
 			if (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20))
-				(opponentChart ? iconP2 : iconP1).animation.curAnim.curFrame = 1;
+				iconP1.animation.curAnim.curFrame = 1;
 			else if (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80))
-				(opponentChart ? iconP2 : iconP1).animation.curAnim.curFrame = 2;
+				iconP1.animation.curAnim.curFrame = 2;
 			else
-				(opponentChart ? iconP2 : iconP1).animation.curAnim.curFrame = 0;
+				iconP1.animation.curAnim.curFrame = 0;
 		} 
 		else {
 			if (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20))
-				(opponentChart ? iconP2 : iconP1).animation.curAnim.curFrame = 1;
+				iconP1.animation.curAnim.curFrame = 1;
 		}
-		if ((opponentChart ? iconP1 : iconP2).animation.frames == 3) {
+		if (iconP2.animation.frames == 3) {
 			if (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80))
-				(opponentChart ? iconP1 : iconP2).animation.curAnim.curFrame = 1;
+				iconP2.animation.curAnim.curFrame = 1;
 			else if (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20))
-				(opponentChart ? iconP1 : iconP2).animation.curAnim.curFrame = 2;
+				iconP2.animation.curAnim.curFrame = 2;
 			else 
-				(opponentChart ? iconP1 : iconP2).animation.curAnim.curFrame = 0;
+				iconP2.animation.curAnim.curFrame = 0;
 		} else {
 			if (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80))
-				(opponentChart ? iconP1 : iconP2).animation.curAnim.curFrame = 1;
+				iconP2.animation.curAnim.curFrame = 1;
 			else 
-				(opponentChart ? iconP1 : iconP2).animation.curAnim.curFrame = 0;
+				iconP2.animation.curAnim.curFrame = 0;
 		}
 
 		if (FlxG.keys.anyJustPressed(debugKeysCharacter) && !endingSong && !inCutscene && !softlocked) {
