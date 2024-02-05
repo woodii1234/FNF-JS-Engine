@@ -1,3 +1,4 @@
+1.19.0;
 Removed Android builds (#169)
 Discord RPC issues fixed along with a new icon by mixedopinions19!!
 Added a search bar in Freeplay - Now you can search for a song instead of scrolling through 100 different songs!
