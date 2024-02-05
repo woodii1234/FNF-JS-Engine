@@ -3753,21 +3753,24 @@ class PlayState extends MusicBeatState
 							}
 						});
 						FlxG.sound.play(Paths.sound('introGo' + introSoundsSuffix), 0.6);
-						final charsToHey = [dad, boyfriend, gf];
-						for (char in charsToHey) 
+						if (ClientPrefs.tauntOnGo)
 						{
-							if(char != null) 
+							final charsToHey = [dad, boyfriend, gf];
+							for (char in charsToHey) 
 							{
-								if (char.animOffsets.exists('hey') || char.animOffsets.exists('cheer'))
+								if(char != null) 
 								{
-									char.playAnim(char.animOffsets.exists('hey') ? 'hey' : 'cheer', true);
-									char.specialAnim = true;
-									char.heyTimer = 0.6;
-								} else if (char.animOffsets.exists('singUP') && (!char.animOffsets.exists('hey') || !char.animOffsets.exists('cheer')))
-								{
-									char.playAnim('singUP', true);
-									char.specialAnim = true;
-									char.heyTimer = 0.6;
+									if (char.animOffsets.exists('hey') || char.animOffsets.exists('cheer'))
+									{
+										char.playAnim(char.animOffsets.exists('hey') ? 'hey' : 'cheer', true);
+										char.specialAnim = true;
+										char.heyTimer = 0.6;
+									} else if (char.animOffsets.exists('singUP') && (!char.animOffsets.exists('hey') || !char.animOffsets.exists('cheer')))
+									{
+										char.playAnim('singUP', true);
+										char.specialAnim = true;
+										char.heyTimer = 0.6;
+									}
 								}
 							}
 						}

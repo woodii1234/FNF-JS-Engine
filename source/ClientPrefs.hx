@@ -43,7 +43,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var showMaxScore:Bool = true;
 	public static var longHPBar:Bool = false;
 	public static var moreMaxHP:Bool = false;
-	public static var songPercentage:Bool = true;
+	public static var tauntOnGo:Bool = true;
 	public static var autosaveInterval:Float = 5.0;
 	public static var noteMotionBlur:Bool = false;
 	public static var noteColorStyle:String = 'Normal';
@@ -363,7 +363,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.ghostTapping = ghostTapping;
 		FlxG.save.data.communityGameMode = communityGameMode;
 		FlxG.save.data.lessBotLag = lessBotLag;
-		FlxG.save.data.songPercentage = songPercentage;
+		FlxG.save.data.tauntOnGo = tauntOnGo;
 		FlxG.save.data.coolGameplay = coolGameplay;
 		FlxG.save.data.timeBarType = timeBarType;
 		FlxG.save.data.marvRateColor = marvRateColor;
@@ -700,8 +700,8 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		if(FlxG.save.data.percentDecimals != null) {
 			percentDecimals = FlxG.save.data.percentDecimals;
 		}
-		if(FlxG.save.data.songPercentage != null) {
-			songPercentage = FlxG.save.data.songPercentage;
+		if(FlxG.save.data.tauntOnGo != null) {
+			tauntOnGo = FlxG.save.data.tauntOnGo;
 		}
 		if(FlxG.save.data.antiCheatEnable != null) {
 			antiCheatEnable = FlxG.save.data.antiCheatEnable;
