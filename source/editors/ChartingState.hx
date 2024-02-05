@@ -1399,11 +1399,42 @@ class ChartingState extends MusicBeatState
 		stepperStackNum.name = 'stack_count';
 		blockPressWhileTypingOnStepper.push(stepperStackNum);
 
-		stepperStackOffset = new FlxUINumericStepper(10, 50, 1, 1, 0, 8192, 4);
+		var doubleSpamNum:FlxButton = new FlxButton(stepperStackNum.x, stepperStackNum.y + 20, 'x2 Amount', function()
+		{
+			stepperStackNum.value *= 2;
+		});
+		doubleSpamNum.setGraphicSize(Std.int(doubleSpamNum.width), Std.int(doubleSpamNum.height));
+		doubleSpamNum.color = FlxColor.GREEN;
+		doubleSpamNum.label.color = FlxColor.WHITE;
+
+		var halfSpamNum:FlxButton = new FlxButton(doubleSpamNum.x + doubleSpamNum.width + 20, doubleSpamNum.y, 'x0.5 Amount', function()
+		{
+			stepperStackNum.value /= 2;
+		});
+		halfSpamNum.setGraphicSize(Std.int(halfSpamNum.width), Std.int(halfSpamNum.height));
+		halfSpamNum.color = FlxColor.RED;
+		halfSpamNum.label.color = FlxColor.WHITE;
+
+		stepperStackOffset = new FlxUINumericStepper(10, 80, 1, 1, 0, 8192, 4);
 		stepperStackOffset.name = 'stack_offset';
 		blockPressWhileTypingOnStepper.push(stepperStackOffset);
 
-		stepperStackSideOffset = new FlxUINumericStepper(10, 70, 1, 0, -9999, 9999);
+		var doubleSpamMult:FlxButton = new FlxButton(stepperStackOffset.x, stepperStackOffset.y + 20, 'x2 SM', function()
+		{
+			stepperStackOffset.value *= 2;
+		});
+		doubleSpamMult.color = FlxColor.GREEN;
+		doubleSpamMult.label.color = FlxColor.WHITE;
+
+		var halfSpamMult:FlxButton = new FlxButton(doubleSpamMult.x + doubleSpamMult.width + 20, doubleSpamMult.y, 'x0.5 SM', function()
+		{
+			stepperStackOffset.value /= 2;
+		});
+		halfSpamMult.setGraphicSize(Std.int(halfSpamMult.width), Std.int(halfSpamMult.height));
+		halfSpamMult.color = FlxColor.RED;
+		halfSpamMult.label.color = FlxColor.WHITE;
+
+		stepperStackSideOffset = new FlxUINumericStepper(10, 140, 1, 0, -9999, 9999);
 		stepperStackSideOffset.name = 'stack_sideways';
 		blockPressWhileTypingOnStepper.push(stepperStackSideOffset);
 
@@ -1411,10 +1442,14 @@ class ChartingState extends MusicBeatState
 		tab_group_stacking.add(stepperStackNum);
 		tab_group_stacking.add(stepperStackOffset);
 		tab_group_stacking.add(stepperStackSideOffset);
+		tab_group_stacking.add(doubleSpamNum);
+		tab_group_stacking.add(halfSpamNum);
+		tab_group_stacking.add(doubleSpamMult);
+		tab_group_stacking.add(halfSpamMult);
 		
 		tab_group_stacking.add(new FlxText(100, 30, 0, "Spam Count"));
-		tab_group_stacking.add(new FlxText(100, 50, 0, "Spam Multiplier"));
-		tab_group_stacking.add(new FlxText(100, 70, 0, "Spam Scroll Amount"));
+		tab_group_stacking.add(new FlxText(100, 80, 0, "Spam Multiplier"));
+		tab_group_stacking.add(new FlxText(100, 140, 0, "Spam Scroll Amount"));
 
 		UI_box.addGroup(tab_group_stacking);
 	}

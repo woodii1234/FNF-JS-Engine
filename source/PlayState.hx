@@ -173,6 +173,8 @@ class PlayState extends MusicBeatState
 	public var tries:Int = 0;
 	public var notesLoadedRN:Int = 0;
 	public var firstNoteStrumTime:Float = 0;
+	var winning:Bool = false;
+	var losing:Bool = false;
 
 	var curTime:Float = 0;
 	var songCalc:Float = 0;
@@ -1887,14 +1889,14 @@ class PlayState extends MusicBeatState
 		add(healthBarBG);
 		if(ClientPrefs.downScroll) healthBarBG.y = 0.11 * FlxG.height;
 
-		healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, (opponentChart ? LEFT_TO_RIGHT : RIGHT_TO_LEFT), Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this,
+		healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this,
 			'displayedHealth', 0, maxHealth);
 		healthBar.scrollFactor.set();
 		healthBar.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 		healthBar.alpha = ClientPrefs.healthBarAlpha;
 		insert(members.indexOf(healthBarBG), healthBar);
 
-		overhealthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, (opponentChart ? LEFT_TO_RIGHT : RIGHT_TO_LEFT), Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this, 'health', maxHealth, maxHealth * 2);
+		overhealthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this, 'health', maxHealth, maxHealth * 2);
 		overhealthBar.scrollFactor.set();
 		overhealthBar.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 		overhealthBar.alpha = ClientPrefs.healthBarAlpha;
@@ -1912,7 +1914,7 @@ class PlayState extends MusicBeatState
 		iconP2.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 		iconP2.alpha = ClientPrefs.healthBarAlpha;
 		add(iconP2);
-		reloadHealthBarColors();
+		reloadHealthBarColors(dad.healthColorArray, boyfriend.healthColorArray);
 
 		if (ClientPrefs.smoothHealth && ClientPrefs.smoothHealthType == 'Golden Apple 1.5') healthBar.numDivisions = 10000;
 
@@ -2713,31 +2715,14 @@ class PlayState extends MusicBeatState
 		#end
 	}
 
-	public function reloadHealthBarColors() {
+	public function reloadHealthBarColors(leftColorArray:Array<Int>, rightColorArray:Array<Int>) {
 		if (!ClientPrefs.ogHPColor) {
-			if (!opponentChart) 
-			{
-				healthBar.createFilledBar(FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]),
-				FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]));
-				overhealthBar.createFilledBar(0x00000000, FlxColor.fromRGB(boyfriend.healthColorArray[0] + 30, boyfriend.healthColorArray[1] + 50, boyfriend.healthColorArray[2] + 30));
-			}
-			else 
-			{
-				healthBar.createFilledBar(FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]),
-				FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]));
-				overhealthBar.createFilledBar(0x00000000, FlxColor.fromRGB(dad.healthColorArray[0] + 30, dad.healthColorArray[1] + 50, dad.healthColorArray[2] + 30));
-			}
+				healthBar.createFilledBar(FlxColor.fromRGB(leftColorArray[0], leftColorArray[1], leftColorArray[2]),
+				FlxColor.fromRGB(rightColorArray[0], rightColorArray[1], rightColorArray[2]));
+				!opponentChart ? overhealthBar.createFilledBar(0x00000000, FlxColor.fromRGB(boyfriend.healthColorArray[0] + 30, boyfriend.healthColorArray[1] + 50, boyfriend.healthColorArray[2] + 30)) : overhealthBar.createFilledBar(0x00000000, FlxColor.fromRGB(dad.healthColorArray[0] + 30, dad.healthColorArray[1] + 50, dad.healthColorArray[2] + 30));
 		} else if (ClientPrefs.ogHPColor) {
-			if (!opponentChart) 
-			{
 				healthBar.createFilledBar(0xFFFF0000, 0xFF66FF33);
-				overhealthBar.createFilledBar(0x00000000, 0xFFFFFF00);
-			}
-			else 
-			{
-				healthBar.createFilledBar(0xFF66FF33, 0xFFFF0000);
-				overhealthBar.createFilledBar(0x00000000, 0xFF8B0000);
-			}
+				!opponentChart ? overhealthBar.createFilledBar(0x00000000, 0xFFFFFF00) : overhealthBar.createFilledBar(0x00000000, 0xFF8B0000);
 		}
 
 		healthBar.updateBar();
@@ -3780,7 +3765,7 @@ class PlayState extends MusicBeatState
 									char.heyTimer = 0.6;
 								} else if (char.animOffsets.exists('singUP') && (!char.animOffsets.exists('hey') || !char.animOffsets.exists('cheer')))
 								{
-									char.playAnim(char.animOffsets.exists('hey') ? 'hey' : 'cheer', true);
+									char.playAnim('singUP', true);
 									char.specialAnim = true;
 									char.heyTimer = 0.6;
 								}
@@ -4754,6 +4739,22 @@ class PlayState extends MusicBeatState
 		{
 			camGame.zoom = 0.8;
 		}
+		if (healthBar.percent >= 80 && !winning)
+		{
+			winning = true;
+			reloadHealthBarColors(dad.losingColorArray, boyfriend.winningColorArray);
+		}
+		if (healthBar.percent <= 20 && !losing)
+		{
+			losing = true;
+			reloadHealthBarColors(dad.winningColorArray, boyfriend.losingColorArray);
+		}
+		if (healthBar.percent >= 20 && losing || healthBar.percent <= 80 && winning)
+		{
+			losing = false;
+			winning = false;
+			reloadHealthBarColors(dad.healthColorArray, boyfriend.healthColorArray);
+		}
 
 		if (ClientPrefs.charsAndBG && curStage != 'stage') switch (curStage)
 		{
@@ -5016,19 +5017,19 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		{
 		if (ClientPrefs.framerate > 60)
 		{
-		displayedHealth = FlxMath.lerp(displayedHealth, health, .1);
+		displayedHealth = FlxMath.lerp(displayedHealth, !opponentChart ? health : maxHealth - health, .1);
 		} else if (ClientPrefs.framerate == 60) 
 		{
-		displayedHealth = FlxMath.lerp(displayedHealth, health, .4);
+		displayedHealth = FlxMath.lerp(displayedHealth, !opponentChart ? health : maxHealth - health, .4);
 		}
 		}
 		if (ClientPrefs.smoothHealth && ClientPrefs.smoothHealthType == 'Golden Apple 1.5' && healthBar.visible)
 		{
-		displayedHealth = FlxMath.lerp(displayedHealth, health, CoolUtil.boundTo(elapsed * 20, 0, 1));
+		displayedHealth = FlxMath.lerp(displayedHealth, !opponentChart ? health : maxHealth - health, CoolUtil.boundTo(elapsed * 20, 0, 1));
 		}
 		if (!ClientPrefs.smoothHealth && healthBar.visible) //so basically don't make the health smooth if you have that off
 		{
-		displayedHealth = health;
+		displayedHealth = !opponentChart ? health : maxHealth - health;
 		}
 
 		setOnLuas('curDecStep', curDecStep);
@@ -6156,7 +6157,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 							setOnLuas('gfName', gf.curCharacter);
 						}
 				}
-				if (!ClientPrefs.ogHPColor) reloadHealthBarColors();
+				if (!ClientPrefs.ogHPColor) reloadHealthBarColors(dad.healthColorArray, boyfriend.healthColorArray);
 				var noteSkinExists:Bool = false;
 				if (unspawnNotes[0] != null) noteSkinExists = FileSystem.exists('assets/images/' + "noteskins/" + (!unspawnNotes[0].mustPress ? dad.noteskin : boyfriend.noteskin));
 				if (ClientPrefs.showNotes && noteSkinExists)

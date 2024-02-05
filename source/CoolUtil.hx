@@ -304,9 +304,10 @@ public static function updateTheEngine():Void {
 	}
 	public static function dominantColor(sprite:flixel.FlxSprite):Int{
 		var countByColor:Map<Int, Int> = [];
+		sprite.useFramePixels = true;
 		for(col in 0...sprite.frameWidth){
 			for(row in 0...sprite.frameHeight){
-			  var colorOfThisPixel:Int = sprite.pixels.getPixel32(col, row);
+			  var colorOfThisPixel:Int = sprite.framePixels.getPixel32(col, row);
 			  if(colorOfThisPixel != 0){
 				  if(countByColor.exists(colorOfThisPixel)){
 				    countByColor[colorOfThisPixel] =  countByColor[colorOfThisPixel] + 1;
@@ -325,6 +326,7 @@ public static function updateTheEngine():Void {
 				maxKey = key;
 			}
 		}
+		sprite.useFramePixels = false;
 		return maxKey;
 	}
 

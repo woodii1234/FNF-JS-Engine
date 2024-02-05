@@ -129,7 +129,7 @@ class DiscordClient
 
         close();
 
-        initialize();
+        if (ClientPrefs.discordRPC) initialize();
 
         return value;
     }

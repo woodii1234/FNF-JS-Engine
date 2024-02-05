@@ -286,6 +286,7 @@ class FreeplayState extends MusicBeatState
 	function regenerateSongs(?start:String = '') {
 		for (funnyIcon in grpIcons.members)
 			funnyIcon.canBounce = false;
+		curPlaying = false;
 
 		songs = [];
 		for (i in 0...WeekData.weeksList.length) {

@@ -52,6 +52,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var minCGBMS:Int = 5;
 	public static var maxCGBMS:Int = 5;
 	public static var autosaveCharts:Bool = true;
+	public static var discordRPC:Bool = true;
 	public static var tipTexts:Bool = true;
 	public static var antiCheatEnable:Bool = false;
 	public static var showRamUsage:Bool = true;
@@ -263,6 +264,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.showMaxScore = showMaxScore;
 		FlxG.save.data.autosaveInterval = autosaveInterval;
 		FlxG.save.data.autosaveCharts = autosaveCharts;
+		FlxG.save.data.discordRPC = discordRPC;
 		FlxG.save.data.rateNameStuff = rateNameStuff;
 		FlxG.save.data.longFCName = longFCName;
 		FlxG.save.data.botTxtFade = botTxtFade;
@@ -622,6 +624,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.autosaveCharts != null) {
 			autosaveCharts = FlxG.save.data.autosaveCharts;
+		}
+		if(FlxG.save.data.discordRPC != null) {
+			discordRPC = FlxG.save.data.discordRPC;
 		}
 		if(FlxG.save.data.holdNoteHits != null) {
 			holdNoteHits = FlxG.save.data.holdNoteHits;
