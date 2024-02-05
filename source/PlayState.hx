@@ -5248,14 +5248,14 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		
 		if (ClientPrefs.smoothHealth && ClientPrefs.smoothHealthType != 'Golden Apple 1.5' || !ClientPrefs.smoothHealth) //checks if you're using smooth health. if you are, but are not using the indie cross one then you know what that means
 		{
-			iconP1.x = (opponentChart ? (!ClientPrefs.longHPBar ? -593 : -889.5) : 0) + healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, (opponentChart ? -100 : 100), 100, 0) * 0.01)) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
-			iconP2.x = (opponentChart ? (!ClientPrefs.longHPBar ? -593 : -889.5) : 0) + healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, (opponentChart ? -100 : 100), 100, 0) * 0.01)) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
+			iconP1.x = 0 + healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
+			iconP2.x = 0 + healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
 		}
 		if (ClientPrefs.smoothHealth && ClientPrefs.smoothHealthType == 'Golden Apple 1.5') //really makes it feel like the gapple 1.5 build's health tween
 		{
-			final percent:Float = 1 - (opponentChart ? FlxMath.bound(displayedHealth, 0, maxHealth) / maxHealth * -1 : FlxMath.bound(displayedHealth, 0, maxHealth) / maxHealth); //checks if you're playing as the opponent. if so, uses the negative percent, otherwise uses the normal one
-			iconP1.x = (opponentChart ? (!ClientPrefs.longHPBar ? -593 : -889.5) : 0) + healthBar.x + (healthBar.width * percent) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
-			iconP2.x = (opponentChart ? (!ClientPrefs.longHPBar ? -593 : -889.5) : 0) + healthBar.x + (healthBar.width * percent) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
+			final percent:Float = 1 - FlxMath.bound(displayedHealth, 0, maxHealth) / maxHealth; //checks if you're playing as the opponent. if so, uses the negative percent, otherwise uses the normal one
+			iconP1.x = 0 + healthBar.x + (healthBar.width * percent) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
+			iconP2.x = 0 + healthBar.x + (healthBar.width * percent) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
 		}
 
 		if (generatedMusic) {
