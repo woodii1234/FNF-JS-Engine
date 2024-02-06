@@ -5460,7 +5460,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		if (notesAddedCount > unspawnNotes.length)
 			notesAddedCount -= (notesAddedCount - unspawnNotes.length);
 
-		if (unspawnNotes.length > 0 && unspawnNotes[notesAddedCount] != null) {
+		while (unspawnNotes.length > 0 && unspawnNotes[notesAddedCount] != null) {
 			if(unspawnNotes[notesAddedCount].mustPress && cpuControlled) {
 				if (unspawnNotes[notesAddedCount].strumTime + (ClientPrefs.communityGameBot ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition) 
 				{
