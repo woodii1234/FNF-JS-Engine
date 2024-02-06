@@ -145,17 +145,7 @@ class ResultsScreenSubState extends MusicBeatSubstate {
 		checker.x += 0.45 / (ClientPrefs.framerate / 60);
 		checker.y += (0.16 / (ClientPrefs.framerate / 60));
 
-		#if android
-		var touchedScreen:Bool = false;
-
-		for (touch in FlxG.touches.list) {
-			if (touch.justPressed) {
-				touchedScreen = true;
-			}
-		}
-		#end
-
-		if (controls.ACCEPT #if android || touchedScreen #end) {
+		if (controls.ACCEPT) {
 			if (PlayState.isStoryMode)
 				FlxG.switchState(StoryMenuState.new);
 			else

@@ -92,10 +92,6 @@ class TitleState extends MusicBeatState
 
 		MusicBeatState.windowNameSuffix = " - Title Screen";
 
-		#if android
-		FlxG.android.preventDefaultKeys = [BACK];
-		#end
-
 		MusicBeatState.windowNameSuffix = "";
 
 		#if LUA_ALLOWED
@@ -140,7 +136,7 @@ class TitleState extends MusicBeatState
 
 		ClientPrefs.loadPrefs();
 
-		#if (CHECK_FOR_UPDATES && !android)
+		#if (CHECK_FOR_UPDATESd)
 		if(ClientPrefs.checkForUpdates && !closedState) {
 			trace('checking for update');
 			var http = new haxe.Http("https://raw.githubusercontent.com/JordanSantiagoYT/FNF-PsychEngine-NoBotplayLag/main/THECHANGELOG.md");
@@ -353,15 +349,15 @@ class TitleState extends MusicBeatState
 		logoBl.shader = swagShader.shader;
 
 		titleText = new FlxSprite(titleJSON.startx, titleJSON.starty);
-		#if (desktop || android && MODS_ALLOWED)
-		var path = SUtil.getPath() + "mods/" + Paths.currentModDirectory + "/images/titleEnter.png";
+		#if (desktop && MODS_ALLOWED)
+		var path = "mods/" + Paths.currentModDirectory + "/images/titleEnter.png";
 		//trace(path, FileSystem.exists(path));
 		if (!FileSystem.exists(path)){
-			path = SUtil.getPath() + "mods/images/titleEnter.png";
+			path = "mods/images/titleEnter.png";
 		}
 		//trace(path, FileSystem.exists(path));
 		if (!FileSystem.exists(path)){
-			path = SUtil.getPath() + "assets/images/titleEnter.png";
+			path = "assets/images/titleEnter.png";
 		}
 		//trace(path, FileSystem.exists(path));
 		titleText.frames = FlxAtlasFrames.fromSparrow(BitmapData.fromFile(path),File.getContent(StringTools.replace(path,".png",".xml")));
@@ -462,14 +458,6 @@ class TitleState extends MusicBeatState
 		// FlxG.watch.addQuick('amp', FlxG.sound.music.amplitude);
 
 		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER || controls.ACCEPT;
-		
-		#if android
-		for (touch in FlxG.touches.list) {
-			if (touch.justPressed) {
-				pressedEnter = true;
-			}
-		}
-		#end
 
 		var gamepad:FlxGamepad = FlxG.gamepads.lastActive;
 

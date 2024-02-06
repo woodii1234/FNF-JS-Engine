@@ -49,19 +49,6 @@ class OutdatedState extends MusicBeatState
 		checker.alpha = 0.2;
 		checker.updateHitbox();
 
-		#if android
-		warnText = new FlxText(0, 0, FlxG.width,
-			"Your version of JS Engine is outdated!\nYou are on "
-			+ MainMenuState.psychEngineJSVersion
-			+ "\nwhile the most recent version is "
-			+ TitleState.updateVersion
-			+ "."
-			+ "\n\nHere's what's new:\n\n"
-			+ currChanges
-			+ "\n& more changes and bugfixes in the full changelog"
-			+ "\n\nPress A button to view the full changelog and update\nor B button to ignore this",
-			32);
-		#else
 		warnText = new FlxText(0, 10, FlxG.width,
 			"HEY! Your JS Engine is outdated!\n"
 			+ 'v' + MainMenuState.psychEngineJSVersion + ' < v' + TitleState.updateVersion + '\n'
@@ -73,7 +60,6 @@ class OutdatedState extends MusicBeatState
 		changelog = new FlxText(100, warnText.y + warnText.height + 20, 1080, currChanges, 16);
 		changelog.setFormat(Paths.font("vcr.ttf"), Std.int(16), FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(changelog);
-		#end
 
 		updateText = new FlxText(0, 10, FlxG.width,
 			"Press SPACE to view the full changelog, ENTER to update or ESCAPE to ignore this!"
@@ -82,10 +68,6 @@ class OutdatedState extends MusicBeatState
 			updateText.y = 710 - updateText.height;
 			updateText.x = 10;
 		add(updateText);
-
-		#if android
-        addVirtualPad(NONE, A_B);
-        #end
 	}
 
 	override function update(elapsed:Float)

@@ -192,10 +192,6 @@ class MainMenuState extends MusicBeatState
 		changeItem();
 		tipTextStartScrolling();
 
-		#if android
-		addVirtualPad(UP_DOWN, A_B_C);
-		#end
-
 		super.create();
 	}
 
@@ -227,7 +223,7 @@ class MainMenuState extends MusicBeatState
 
 	function changeTipText() {
 		var selectedText:String = '';
-		var textArray:Array<String> = CoolUtil.coolTextFile(SUtil.getPath() + Paths.txt('funnyTips'));
+		var textArray:Array<String> = CoolUtil.coolTextFile(Paths.txt('funnyTips'));
 
 		tipText.alpha = 1;
 		isTweening = true;
@@ -350,8 +346,8 @@ class MainMenuState extends MusicBeatState
 					});
 				}
 			}
-		#if (desktop || android)
-		else if (FlxG.keys.anyJustPressed(debugKeys) #if android || virtualPad.buttonC.justPressed #end) {
+		#if (desktop)
+		else if (FlxG.keys.anyJustPressed(debugKeys)) {
 			FlxG.switchState(MasterEditorMenu.new);
 		}
 		#end
