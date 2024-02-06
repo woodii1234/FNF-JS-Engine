@@ -5506,7 +5506,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 				if(startedCountdown)
 				{
-					for (group in [notes, sustainNotes]) group.forEachAlive(function(daNote:Note) //inspired by denpa, but not directly denpa code
+					for (group in [notes, sustainNotes]) group.forEachAlive(function(daNote:Note) 
 					{
 						if (ClientPrefs.showNotes)
 						{
@@ -5540,13 +5540,13 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 						}
 
 						if(daNote.mustPress && cpuControlled) {
-							if(daNote.strumTime + (ClientPrefs.communityGameBot ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition || daNote.isSustainNote && daNote.strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * daNote.earlyHitMult /2)) {
+							if(daNote.strumTime + (ClientPrefs.communityGameBot ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition) {
 								if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) goodNoteHit(daNote);
 								if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
 								{
 								if (!daNote.isSustainNote) {
 								totalNotesPlayed += 1 * polyphony;
-								if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
+								if (ClientPrefs.showNPS) {
 								notesHitArray.push(1 * polyphony);
 								notesHitDateArray.push(Date.now());
 								}
