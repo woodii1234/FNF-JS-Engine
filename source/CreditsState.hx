@@ -88,7 +88,7 @@ class CreditsState extends MusicBeatState
 		var pisspoop:Array<Array<String>> = [ //Name - Icon name - Description - Link - BG Color
 			['JS Engine People'],
 			['Jordan Santiago',			'jor',				'Coded everything into JS Engine',								'https://twitter.com/JordansTweetsYT',			'FF9300'],
-			['Stefan2008',			'stef',				"Granted permission to use the Results Screen code, and helped\nwith the Android version's development",								'https://www.youtube.com/channel/UC9Nwf21GbaEm_h0Ka9gxZjQ', '800080'],
+			['Stefan2008',			'stef',				"Granted permission to use the Results Screen code",								'https://www.youtube.com/channel/UC9Nwf21GbaEm_h0Ka9gxZjQ', '800080'],
 			[''],
 			['Special Engine Thanks'],
 			['Denpa Engine',			'denpeak',				'The crossfade code used for this engine',								'https://github.com/UmbratheUmbreon/PublicDenpaEngine',			'FF9300'],
@@ -169,10 +169,6 @@ class CreditsState extends MusicBeatState
 		bg.color = getCurrentBGColor();
 		intendedColor = bg.color;
 		changeSelection();
-
-		#if android
-		addVirtualPad(UP_DOWN, A_B);
-		#end
 
 		super.create();
 	}

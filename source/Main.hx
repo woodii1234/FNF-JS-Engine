@@ -140,17 +140,11 @@ class Main extends Sprite {
 			game.width = Math.ceil(stageWidth / game.zoom);
 			game.height = Math.ceil(stageHeight / game.zoom);
 			game.skipSplash = true; // if the default flixel splash screen should be skipped
-		}
-
-		SUtil.doTheCheck();
+		};
 
 		ClientPrefs.loadDefaultKeys();
-		// This is gonna make your FPS counter to be outside from game screen and fix full screen issue because of latest OpenFL library version. -- MaysLastPlay says 
-		#if android
-		addChild(new FlxGame(1280, 720, TitleState.new, 60, 60, true, false));
-		#else
+
 		addChild(new FlxGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
-		#end
 
 		fpsVar = new FPS(10, 3, 0xFFFFFF);
 		addChild(fpsVar);
@@ -196,7 +190,7 @@ class Main extends Sprite {
 		dateNow = dateNow.replace(" ", "_");
 		dateNow = dateNow.replace(":", "'");
 
-		path = SUtil.getPath() + "crash/" + "JSEngine_" + dateNow + ".log";
+		path = "crash/" + "JSEngine_" + dateNow + ".log";
 
 		for (stackItem in callStack) {
 			switch (stackItem) {
@@ -211,8 +205,8 @@ class Main extends Sprite {
 				+ e.error 
 				+ "\nPlease report this error to the GitHub page: https://github.com/JordanSantiagoYT/FNF-PsychEngine-NoBotplayLag\n\n> Crash Handler written by: sqirra-rng";
 
-		if (!FileSystem.exists(SUtil.getPath() + "crash/"))
-			FileSystem.createDirectory(SUtil.getPath() + "crash/");
+		if (!FileSystem.exists("crash/"))
+			FileSystem.createDirectory("crash/");
 
 		File.saveContent(path, errorMessage + "\n");
 
