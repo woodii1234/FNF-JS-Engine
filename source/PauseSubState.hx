@@ -22,7 +22,7 @@ class PauseSubState extends MusicBeatSubstate
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 
 	var menuItems:Array<String> = [];
-	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Change Gameplay Settings', 'Change Difficulty', 'Chart Editor', 'Options', 'Exit'];
+	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Change Gameplay Settings', 'Change Difficulty', 'Options', 'Exit'];
 	var menuItemsExit:Array<String> = [(PlayState.isStoryMode ? 'Exit to Story Menu' : 'Exit to Freeplay'), 'Exit to Main Menu', 'Exit Game', 'Back'];
 	var difficultyChoices = [];
 	var curSelected:Int = 0;
