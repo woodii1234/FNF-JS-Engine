@@ -7776,25 +7776,10 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
     		comboMultiplier = 1; // Reset to 1 on a miss
 		if (health > 0)
 		{
-			if (ClientPrefs.healthGainType == 'Psych Engine') {
+			if (ClientPrefs.healthGainType != 'VS Impostor') {
 				health -= daNote.missHealth * healthLoss;
 			}
-			if (ClientPrefs.healthGainType == 'Kade (1.2)') {
-				health -= daNote.missHealth * healthLoss;
-			}
-			if (ClientPrefs.healthGainType == 'Leather Engine') {
-				health -= 0.07 * healthLoss;
-			}
-			if (ClientPrefs.healthGainType == 'Kade (1.4.2 to 1.6)') {
-				health -= 0.075 * healthLoss;
-			}
-			if (ClientPrefs.healthGainType == 'Kade (1.6+)') {
-				health -= 0.1 * healthLoss;
-			}
-			if (ClientPrefs.healthGainType == 'Doki Doki+') {
-				health -= 0.04 * healthLoss;
-			}
-			if (ClientPrefs.healthGainType == 'VS Impostor') {
+			else {
 				missCombo += 1;
 				health -= daNote.missHealth * missCombo;
 			}

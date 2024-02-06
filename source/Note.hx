@@ -408,6 +408,18 @@ class Note extends FlxSprite
 		if(prevNote!=null)
 			prevNote.nextNote = this;
 
+		switch (ClientPrefs.healthGainType)
+		{
+			case 'Leather Engine':
+				missHealth = 0.07;
+			case 'Kade (1.4.2 to 1.6)':
+				missHealth = 0.075;
+			case 'Kade (1.6+)':
+				missHealth = 0.075;
+			case 'Doki Doki+':
+				missHealth = 0.04;
+		}
+
 		if (isSustainNote && prevNote != null)
 		{
 			alpha = 0.6;
