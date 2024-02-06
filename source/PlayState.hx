@@ -5427,18 +5427,19 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		// Track the count of notes added
 		notesAddedCount = 0;
 
-		for (i in 0...unspawnNotes.length) {
-			if (unspawnNotes[i].strumTime - Conductor.songPosition < changedSpawnTime)
+		if (notesAddedCount > unspawnNotes.length)
+			notesAddedCount -= (notesAddedCount - unspawnNotes.length);
+
+		while (unspawnNotes.length > 0 && unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < changedSpawnTime) 
 			{
 				if (ClientPrefs.showNotes) {
-					!unspawnNotes[i].isSustainNote ? notes.insert(0, unspawnNotes[i]) : sustainNotes.insert(0, unspawnNotes[i]); //If it's NOT a sustain note, we add it to notes. else, we add it to sustainNotes
+					!unspawnNotes[notesAddedCount].isSustainNote ? notes.insert(0, unspawnNotes[notesAddedCount]) : sustainNotes.insert(0, unspawnNotes[notesAddedCount]); //If it's NOT a sustain note, we add it to notes. else, we add it to sustainNotes
 				} else {
-					!unspawnNotes[i].isSustainNote ? notes.add(unspawnNotes[i]) : sustainNotes.add(unspawnNotes[i]);
+					!unspawnNotes[notesAddedCount].isSustainNote ? notes.add(unspawnNotes[notesAddedCount]) : sustainNotes.add(unspawnNotes[notesAddedCount]);
 				}
-				unspawnNotes[i].spawned = true;
+				unspawnNotes[notesAddedCount].spawned = true;
 				notesAddedCount++;
 			}
-		}
 
 		if (unspawnNotes[0].multSpeed == 1 && changedSpawnTime == spawnTime / unspawnNotes[0].multSpeed) 
 		{
@@ -5456,15 +5457,17 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 		// Track the count of notes added
 		notesAddedCount = 0;
+		if (notesAddedCount > unspawnNotes.length)
+			notesAddedCount -= (notesAddedCount - unspawnNotes.length);
 
-		for (i in 0...unspawnNotes.length) {
-			if(unspawnNotes[i].mustPress && cpuControlled) {
-				if (unspawnNotes[i].strumTime + (ClientPrefs.communityGameBot ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition || unspawnNotes[i].isSustainNote && unspawnNotes[i].strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * unspawnNotes[i].earlyHitMult /2)) 
+		if (unspawnNotes.length > 0 && unspawnNotes[notesAddedCount] != null) {
+			if(unspawnNotes[notesAddedCount].mustPress && cpuControlled) {
+				if (unspawnNotes[notesAddedCount].strumTime + (ClientPrefs.communityGameBot ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition) 
 				{
-					if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) goodNoteHit(unspawnNotes[i]);
-					if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG && !unspawnNotes[i].wasGoodHit)
+					if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) goodNoteHit(unspawnNotes[notesAddedCount]);
+					if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG && !unspawnNotes[notesAddedCount].wasGoodHit)
 					{
-						if (!unspawnNotes[i].isSustainNote) {
+						if (!unspawnNotes[notesAddedCount].isSustainNote) {
 							totalNotesPlayed += 1 * polyphony;
 							if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
 								notesHitArray.push(1 * polyphony);
@@ -5472,15 +5475,15 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 							}
 						}
 					}
-					unspawnNotes[i].wasGoodHit = true;
+					unspawnNotes[notesAddedCount].wasGoodHit = true;
 				}
 			}
-			else if (!unspawnNotes[i].mustPress && unspawnNotes[i].strumTime <= Conductor.songPosition && !unspawnNotes[i].hitByOpponent)
+			else if (!unspawnNotes[notesAddedCount].mustPress && unspawnNotes[notesAddedCount].strumTime <= Conductor.songPosition && !unspawnNotes[notesAddedCount].hitByOpponent)
 			{
-				if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) opponentNoteHit(unspawnNotes[i]);
+				if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) opponentNoteHit(unspawnNotes[notesAddedCount]);
 				if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
 				{
-					if (!unspawnNotes[i].isSustainNote) 
+					if (!unspawnNotes[notesAddedCount].isSustainNote) 
 					{
 						enemyHits += 1 * polyphony;
 						if (ClientPrefs.showNPS) {
@@ -5488,16 +5491,17 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 							oppNotesHitDateArray.push(Date.now());
 						}
 					}
-					unspawnNotes[i].hitByOpponent = true;
+					unspawnNotes[notesAddedCount].hitByOpponent = true;
 				}
 			}
-			if (unspawnNotes[i].strumTime <= Conductor.songPosition - 1000) notesAddedCount++; //we remove the notes 1s later so that it doesnt cause unnecessary note removals at high nps's
+			if (unspawnNotes[notesAddedCount].strumTime <= Conductor.songPosition - 1000) notesAddedCount++; //we remove the notes 1s later so that it doesnt cause unnecessary note removals at high nps's
 		}
 
 		if (notesAddedCount > 0) {
 			unspawnNotes.splice(0, notesAddedCount);
 		}
 	}
+
 		if (generatedMusic)
 		{
 			if(!inCutscene)
