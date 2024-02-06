@@ -5457,17 +5457,14 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 		// Track the count of notes added
 		notesAddedCount = 0;
-		if (notesAddedCount > unspawnNotes.length)
-			notesAddedCount -= (notesAddedCount - unspawnNotes.length);
-
-		while (unspawnNotes.length > 0 && unspawnNotes[notesAddedCount] != null) {
-			if(unspawnNotes[notesAddedCount].mustPress && cpuControlled) {
-				if (unspawnNotes[notesAddedCount].strumTime + (ClientPrefs.communityGameBot ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition) 
+		for (i in 0...unspawnNotes.length) {
+			if(unspawnNotes[i].mustPress && cpuControlled) {
+				if (unspawnNotes[i].strumTime + (ClientPrefs.communityGameBot ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition || unspawnNotes[i].isSustainNote && unspawnNotes[i].strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * unspawnNotes[i].earlyHitMult /2)) 
 				{
-					if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) goodNoteHit(unspawnNotes[notesAddedCount]);
-					if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG && !unspawnNotes[notesAddedCount].wasGoodHit)
+					if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) goodNoteHit(unspawnNotes[i]);
+					if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG && !unspawnNotes[i].wasGoodHit)
 					{
-						if (!unspawnNotes[notesAddedCount].isSustainNote) {
+						if (!unspawnNotes[i].isSustainNote) {
 							totalNotesPlayed += 1 * polyphony;
 							if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
 								notesHitArray.push(1 * polyphony);
@@ -5475,15 +5472,15 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 							}
 						}
 					}
-					unspawnNotes[notesAddedCount].wasGoodHit = true;
+					unspawnNotes[i].wasGoodHit = true;
 				}
 			}
-			else if (!unspawnNotes[notesAddedCount].mustPress && unspawnNotes[notesAddedCount].strumTime <= Conductor.songPosition && !unspawnNotes[notesAddedCount].hitByOpponent)
+			else if (!unspawnNotes[i].mustPress && unspawnNotes[i].strumTime <= Conductor.songPosition && !unspawnNotes[i].hitByOpponent)
 			{
-				if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) opponentNoteHit(unspawnNotes[notesAddedCount]);
+				if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) opponentNoteHit(unspawnNotes[i]);
 				if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
 				{
-					if (!unspawnNotes[notesAddedCount].isSustainNote) 
+					if (!unspawnNotes[i].isSustainNote) 
 					{
 						enemyHits += 1 * polyphony;
 						if (ClientPrefs.showNPS) {
@@ -5491,10 +5488,10 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 							oppNotesHitDateArray.push(Date.now());
 						}
 					}
-					unspawnNotes[notesAddedCount].hitByOpponent = true;
+					unspawnNotes[i].hitByOpponent = true;
 				}
 			}
-			if (unspawnNotes[notesAddedCount].strumTime <= Conductor.songPosition - 1000) notesAddedCount++; //we remove the notes 1s later so that it doesnt cause unnecessary note removals at high nps's
+			if (unspawnNotes[i].strumTime <= Conductor.songPosition - 1000) notesAddedCount++; //we remove the notes 1s later so that it doesnt cause unnecessary note removals at high nps's
 		}
 
 		if (notesAddedCount > 0) {
