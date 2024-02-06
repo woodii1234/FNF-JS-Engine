@@ -92,6 +92,7 @@ class CreditsState extends MusicBeatState
 			[''],
 			['Special Engine Thanks'],
 			['Denpa Engine',			'denpeak',				'The crossfade code used for this engine',								'https://github.com/UmbratheUmbreon/PublicDenpaEngine',			'FF9300'],
+			['Betopia', 'nothing', 'Freeplay Search bar creator', 'https://www.youtube.com/channel/UCfjyz9xRhZiRbLMteQloVeg', 'FFFFFF'],
 			['Psych Engine Team'],
 			['Shadow Mario',		'shadowmario',		'Main Programmer of Psych Engine',								'https://twitter.com/Shadow_Mario_',	'444444'],
 			['RiverOaken',			'river',			'Main Artist/Animator of Psych Engine',							'https://twitter.com/RiverOaken',		'B42F71'],
@@ -115,7 +116,6 @@ class CreditsState extends MusicBeatState
 			['PhantomArcade',		'phantomarcade',	"Animator of Friday Night Funkin'",								'https://twitter.com/PhantomArcade3K',	'FADC45'],
 			['evilsk8r',			'evilsk8r',			"Artist of Friday Night Funkin'",								'https://twitter.com/evilsk8r',			'5ABD4B'],
 			['kawaisprite',			'kawaisprite',		"Composer of Friday Night Funkin'",								'https://twitter.com/kawaisprite',		'378FC7']
-			['Betopia', 'nothing', 'Freeplay Search bar creator', 'https://www.youtube.com/channel/UCfjyz9xRhZiRbLMteQloVeg', 'FFFFFF'],
 		];
 		
 		for(i in pisspoop){
