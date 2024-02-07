@@ -6,7 +6,7 @@ import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
 import lime.utils.AssetLibrary;
 import lime.utils.AssetManifest;
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxTween;
 import flixel.math.FlxMath;
@@ -88,7 +88,7 @@ class CoolUtil
 
 public static function updateTheEngine():Void {
     // Get the directory of the executable
-    var exePath = Sys.executablePath();
+    var exePath = Sys.programPath();
     var exeDir = haxe.io.Path.directory(exePath);
 
     // Construct the source directory path based on the executable location
@@ -304,9 +304,10 @@ public static function updateTheEngine():Void {
 	}
 	public static function dominantColor(sprite:flixel.FlxSprite):Int{
 		var countByColor:Map<Int, Int> = [];
+		sprite.useFramePixels = true;
 		for(col in 0...sprite.frameWidth){
 			for(row in 0...sprite.frameHeight){
-			  var colorOfThisPixel:Int = sprite.pixels.getPixel32(col, row);
+			  var colorOfThisPixel:Int = sprite.framePixels.getPixel32(col, row);
 			  if(colorOfThisPixel != 0){
 				  if(countByColor.exists(colorOfThisPixel)){
 				    countByColor[colorOfThisPixel] =  countByColor[colorOfThisPixel] + 1;
@@ -325,6 +326,7 @@ public static function updateTheEngine():Void {
 				maxKey = key;
 			}
 		}
+		sprite.useFramePixels = false;
 		return maxKey;
 	}
 

@@ -7,7 +7,7 @@ import flixel.FlxSubState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.keyboard.FlxKey;
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -22,7 +22,7 @@ class PauseSubState extends MusicBeatSubstate
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 
 	var menuItems:Array<String> = [];
-	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Change Gameplay Settings', 'Change Difficulty', #if android 'Chart Editor', #end 'Options', 'Exit'];
+	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Change Gameplay Settings', 'Change Difficulty', 'Options', 'Exit'];
 	var menuItemsExit:Array<String> = [(PlayState.isStoryMode ? 'Exit to Story Menu' : 'Exit to Freeplay'), 'Exit to Main Menu', 'Exit Game', 'Back'];
 	var difficultyChoices = [];
 	var curSelected:Int = 0;
@@ -43,9 +43,7 @@ class PauseSubState extends MusicBeatSubstate
 	{
 		super();
 		if(CoolUtil.difficulties.length < 2) menuItemsOG.remove('Change Difficulty'); //No need to change difficulty if there is only one!
-		#if android
-		menuItemsOG.remove('Change Gameplay Settings');
-		#end
+
 		if(botplayLockout) menuItemsOG.remove('Toggle Botplay'); //you cant toggle it on MWAHAHAHAHAHA
 
 		if(PlayState.chartingMode)
@@ -143,11 +141,6 @@ class PauseSubState extends MusicBeatSubstate
 
 		regenMenu();
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-
-		#if android
-		PlayState.chartingMode ? addVirtualPad(LEFT_FULL, A) : addVirtualPad(UP_DOWN, A);
-		addPadCamera();
-		#end
 	}
 
 	var holdTime:Float = 0;
@@ -227,7 +220,7 @@ class PauseSubState extends MusicBeatSubstate
 					var poop = Highscore.formatSong(name, curSelected);
 					PlayState.SONG = Song.loadFromJson(poop, name);
 					PlayState.storyDifficulty = curSelected;
-					MusicBeatState.resetState();
+					FlxG.resetState();
 					FlxG.sound.music.volume = 0;
 					PlayState.changedDifficulty = true;
 					PlayState.chartingMode = false;
@@ -244,7 +237,7 @@ class PauseSubState extends MusicBeatSubstate
 					var poop = Highscore.formatSong(name, curSelected);
 					PlayState.SONG = Song.loadFromJson(poop, name);
 					PlayState.storyDifficulty = curSelected;
-					MusicBeatState.resetState();
+					FlxG.resetState();
 					FlxG.sound.music.volume = 0;
 					PlayState.changedDifficulty = true;
 					PlayState.chartingMode = false;
@@ -292,7 +285,7 @@ class PauseSubState extends MusicBeatSubstate
 					close();
 					PlayState.instance.finishSong(true);
 				case 'Chart Editor':
-					MusicBeatState.switchState(new editors.ChartingState());
+					FlxG.switchState(editors.ChartingState.new);
 					MusicBeatState.windowNameSuffix = " - Chart Editor";
 					PlayState.chartingMode = true;
 				case "Change Gameplay Settings":
@@ -309,7 +302,7 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.instance.botplaySine = 0;
 					}
 				case "Options":
-					MusicBeatState.switchState(new OptionsState());
+					FlxG.switchState(OptionsState.new);
 					inPause = true;
 					if(ClientPrefs.pauseMusic != 'None')
 					{
@@ -331,9 +324,9 @@ class PauseSubState extends MusicBeatSubstate
 
 					WeekData.loadTheFirstEnabledMod();
 					if(PlayState.isStoryMode) {
-						MusicBeatState.switchState(new StoryMenuState());
+						FlxG.switchState(StoryMenuState.new);
 					} else if (!PlayState.isStoryMode) {
-						MusicBeatState.switchState(new FreeplayState());
+						FlxG.switchState(FreeplayState.new);
 					}
 					PlayState.cancelMusicFadeTween();
 					FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
@@ -344,7 +337,7 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.seenCutscene = false;
 
 					WeekData.loadTheFirstEnabledMod();
-						MusicBeatState.switchState(new MainMenuState());
+						FlxG.switchState(MainMenuState.new);
 					PlayState.cancelMusicFadeTween();
 					FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
 					PlayState.changedDifficulty = false;
@@ -389,7 +382,7 @@ class PauseSubState extends MusicBeatSubstate
 		}
 		else
 		{
-			MusicBeatState.resetState();
+			FlxG.resetState();
 		}
 	}
 

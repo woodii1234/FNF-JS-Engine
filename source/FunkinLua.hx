@@ -17,7 +17,7 @@ import flixel.tweens.FlxEase;
 import flixel.text.FlxText;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 import flixel.util.FlxTimer;
 import flixel.FlxSprite;
 import flixel.FlxCamera;
@@ -55,7 +55,7 @@ import hscript.Expr;
 #end
 
 #if desktop
-import Discord;
+import DiscordClient;
 #end
 
 using StringTools;
@@ -277,15 +277,9 @@ class FunkinLua {
 			else return false;
 		});
 
-    #if !android
 		// shader shit
 		Lua_helper.add_callback(lua, "initLuaShader", function(name:String, glslVersion:Int = 120) {
 			if(!ClientPrefs.shaders) return false;
-			#else
-		// shader shit
-		Lua_helper.add_callback(lua, "initLuaShader", function(name:String, glslVersion:Int = 100) {
-			if(!ClientPrefs.shaders) return false;
-		#end
 
 			#if (!flash && MODS_ALLOWED && sys)
 			return initLuaShader(name, glslVersion);
@@ -553,7 +547,7 @@ class FunkinLua {
 				doPush = true;
 			}
 			else {
-				cervix = SUtil.getPath() + Paths.getPreloadPath(cervix);
+				cervix = Paths.getPreloadPath(cervix);
 				if(FileSystem.exists(cervix)) {
 					doPush = true;
 				}
@@ -606,7 +600,7 @@ class FunkinLua {
 				doPush = true;
 			}
 			else {
-				cervix = SUtil.getPath() + Paths.getPreloadPath(cervix);
+				cervix = Paths.getPreloadPath(cervix);
 				if(FileSystem.exists(cervix)) {
 					doPush = true;
 				}
@@ -663,7 +657,7 @@ class FunkinLua {
 				doPush = true;
 			}
 			else {
-				cervix = SUtil.getPath() + Paths.getPreloadPath(cervix);
+				cervix = Paths.getPreloadPath(cervix);
 				if(FileSystem.exists(cervix)) {
 					doPush = true;
 				}
@@ -701,7 +695,7 @@ class FunkinLua {
 				doPush = true;
 			}
 			else {
-				cervix = SUtil.getPath() + Paths.getPreloadPath(cervix);
+				cervix = Paths.getPreloadPath(cervix);
 				if(FileSystem.exists(cervix)) {
 					doPush = true;
 				}
@@ -783,7 +777,7 @@ class FunkinLua {
 				doPush = true;
 			}
 			else {
-				cervix = SUtil.getPath() + Paths.getPreloadPath(cervix);
+				cervix = Paths.getPreloadPath(cervix);
 				if(FileSystem.exists(cervix)) {
 					doPush = true;
 				}
@@ -823,7 +817,7 @@ class FunkinLua {
 				doPush = true;
 			}
 			else {
-				cervix = SUtil.getPath() + Paths.getPreloadPath(cervix);
+				cervix = Paths.getPreloadPath(cervix);
 				if(FileSystem.exists(cervix)) {
 					doPush = true;
 				}
@@ -868,7 +862,7 @@ class FunkinLua {
 				doPush = true;
 			}
 			else {
-				cervix = SUtil.getPath() + Paths.getPreloadPath(cervix);
+				cervix = Paths.getPreloadPath(cervix);
 				if(FileSystem.exists(cervix)) {
 					doPush = true;
 				}
@@ -930,7 +924,7 @@ class FunkinLua {
 				hscript.variables.set(libName, Type.resolveClass(str + libName));
 			}
 			catch (e:Dynamic) {
-				luaTrace(scriptName.replace(SUtil.getPath(), "") + ":" + lastCalledFunction + " - " + e, false, false, FlxColor.RED);
+				luaTrace(scriptName + ":" + lastCalledFunction + " - " + e, false, false, FlxColor.RED);
 			}
 			#end
 		});
@@ -945,7 +939,7 @@ class FunkinLua {
 			PlayState.SONG = Song.loadFromJson(poop, name);
 			PlayState.storyDifficulty = difficultyNum;
 			PlayState.instance.persistentUpdate = false;
-			LoadingState.loadAndSwitchState(new PlayState());
+			LoadingState.loadAndSwitchState(PlayState.new);
 
 			FlxG.sound.music.pause();
 			FlxG.sound.music.volume = 0;
@@ -1611,9 +1605,9 @@ class FunkinLua {
 				CustomFadeTransition.nextCamera = null;
 
 			if(PlayState.isStoryMode)
-				MusicBeatState.switchState(new StoryMenuState());
+				FlxG.switchState(StoryMenuState.new);
 			else
-				MusicBeatState.switchState(new FreeplayState());
+				FlxG.switchState(FreeplayState.new);
 
 			FlxG.sound.playMusic(Paths.music('freakyMenu'));
 			PlayState.changedDifficulty = false;
@@ -2203,7 +2197,7 @@ class FunkinLua {
 			path = Paths.modsJson(Paths.formatToSongPath(PlayState.SONG.song) + '/' + dialogueFile);
 			if(!FileSystem.exists(path))
 			#end
-				path = SUtil.getPath() + Paths.json(Paths.formatToSongPath(PlayState.SONG.song) + '/' + dialogueFile);
+				path = Paths.json(Paths.formatToSongPath(PlayState.SONG.song) + '/' + dialogueFile);
 
 			luaTrace('startDialogue: Trying to load dialogue: ' + path);
 
@@ -2815,7 +2809,7 @@ class FunkinLua {
 		
 		Lua_helper.add_callback(lua, "clearShadersFromCamera", function(cameraName)
 		{
-			cameraFromString(cameraName).setFilters([]);
+			cameraFromString(cameraName).filters = [];
 		});	
 					
 		Lua_helper.add_callback(lua, "addGlitchEffect", function(camera:String,waveSpeed:Float = 0.1,waveFrq:Float = 0.1,waveAmp:Float = 0.1) {
@@ -3012,12 +3006,8 @@ class FunkinLua {
 		return null;
 	}
 	#end
-
-  #if !android
+	
 	function initLuaShader(name:String, ?glslVersion:Int = 120)
-	#else
-	function initLuaShader(name:String, ?glslVersion:Int = 100)
-	#end
 	{
 		if(!ClientPrefs.shaders) return false;
 

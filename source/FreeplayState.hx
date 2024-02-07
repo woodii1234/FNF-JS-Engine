@@ -2,7 +2,7 @@ package;
 
 import openfl.display.Tile;
 #if desktop
-import Discord.DiscordClient;
+import DiscordClient;
 #end
 import editors.ChartingState;
 import flash.text.TextField;
@@ -16,7 +16,7 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxTween;
 import lime.utils.Assets;
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import openfl.utils.Assets as OpenFlAssets;
@@ -215,13 +215,8 @@ class FreeplayState extends MusicBeatState
 		add(textBG);
 
 		#if PRELOAD_ALL
-		#if android
-		var leText:String = "Press X to listen to the Song / Press C to open the Gameplay Changers Menu / Press Y to Reset your Score and Accuracy.";
-		var size:Int = 16;
-		#else
 		var leText:String = "Press SPACE to listen to the Song / Press CTRL to open the Gameplay Changers Menu / Press RESET to Reset your Score and Accuracy.";
 		var size:Int = 16;
-		#end
 		#else
 		var leText:String = "Press C to open the Gameplay Changers Menu / Press Y to Reset your Score and Accuracy.";
 		var size:Int = 18;
@@ -249,10 +244,6 @@ class FreeplayState extends MusicBeatState
 		add(searchText);
 
 		FlxG.mouse.visible = true;
-
-		#if android
-		addVirtualPad(LEFT_FULL, A_B_C_X_Y_Z);
-		#end
 
 		super.create();
 	}
@@ -282,6 +273,7 @@ class FreeplayState extends MusicBeatState
 	function regenerateSongs(?start:String = '') {
 		for (funnyIcon in grpIcons.members)
 			funnyIcon.canBounce = false;
+		curPlaying = false;
 
 		songs = [];
 		for (i in 0...WeekData.weeksList.length) {
@@ -414,11 +406,11 @@ class FreeplayState extends MusicBeatState
 		var upP = controls.UI_UP_P;
 		var downP = controls.UI_DOWN_P;
 		var accepted = controls.ACCEPT;
-		var space = FlxG.keys.justPressed.SPACE #if android || virtualPad.buttonX.justPressed #end;
-		var ctrl = FlxG.keys.justPressed.CONTROL #if android || virtualPad.buttonC.justPressed #end;
+		var space = FlxG.keys.justPressed.SPACE;
+		var ctrl = FlxG.keys.justPressed.CONTROL;
 
 		var shiftMult:Int = 1;
-		if (FlxG.keys.pressed.SHIFT #if android || virtualPad.buttonZ.pressed #end) shiftMult = 3;
+		if (FlxG.keys.pressed.SHIFT) shiftMult = 3;
 
 		if (!iconInputText.hasFocus)
 		{
@@ -469,14 +461,11 @@ class FreeplayState extends MusicBeatState
 				colorTween.cancel();
 			}
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			MusicBeatState.switchState(new MainMenuState());
+			FlxG.switchState(MainMenuState.new);
 		}
 
 		if(ctrl)
 		{
-			#if android
-			removeVirtualPad();
-			#end
 			persistentUpdate = false;
 			openSubState(new GameplayChangersSubstate());
 		}
@@ -516,7 +505,7 @@ class FreeplayState extends MusicBeatState
 				curPlaying = true;
 				#end
 
-				if (FlxG.keys.pressed.SHIFT #if android || virtualPad.buttonZ.pressed #end) {
+				if (FlxG.keys.pressed.SHIFT) {
 					for (section in PlayState.SONG.notes) {
 					noteCount += section.sectionNotes.length;
 					requiredRamLoad += 72872 * section.sectionNotes.length;
@@ -548,7 +537,7 @@ class FreeplayState extends MusicBeatState
 			#if MODS_ALLOWED
 			if(instPlaying != curSelected)
 			{
-				if(sys.FileSystem.exists(Paths.inst(songLowercase + '/'  + poop)) || sys.FileSystem.exists(Paths.json(songLowercase + '/' + poop)) || sys.FileSystem.exists(Paths.modsJson(songLowercase + '/' + poop)))
+				if(sys.FileSystem.exists(Paths.inst(songLowercase)) || sys.FileSystem.exists(Paths.json(songLowercase + '/' + poop)) || sys.FileSystem.exists(Paths.modsJson(songLowercase + '/' + poop)))
 					playSong();
 				else
 					songJsonPopup();
@@ -598,10 +587,10 @@ class FreeplayState extends MusicBeatState
 
 			curPlaying = false;
 			
-			if (FlxG.keys.pressed.SHIFT #if android || virtualPad.buttonZ.pressed #end) {
-				LoadingState.loadAndSwitchState(new ChartingState());
+			if (FlxG.keys.pressed.SHIFT) {
+				LoadingState.loadAndSwitchState(ChartingState.new);
 			}else{
-				LoadingState.loadAndSwitchState(new PlayState());
+				LoadingState.loadAndSwitchState(PlayState.new);
 			}
 
 			FlxG.sound.music.volume = 0;
@@ -609,19 +598,16 @@ class FreeplayState extends MusicBeatState
 			destroyFreeplayVocals();
 
 					} else {
-					if(sys.FileSystem.exists(Paths.inst(poop + '/'  + poop)) && !sys.FileSystem.exists(Paths.json(poop + '/' + poop))) { //the json doesn't exist, but the song files do, or you put a typo in the name
+					if(sys.FileSystem.exists(Paths.inst(songLowercase)) && !sys.FileSystem.exists(Paths.json(poop + '/' + poop))) { //the json doesn't exist, but the song files do, or you put a typo in the name
 							CoolUtil.coolError("The JSON's name does not match with  " + poop + "!\nTry making them match.", "JS Engine Anti-Crash Tool");
-					} else if(sys.FileSystem.exists(Paths.json(poop + '/' + poop)) && !sys.FileSystem.exists(Paths.inst(poop + '/'  + poop)))  {//the json exists, but the song files don't
+					} else if(sys.FileSystem.exists(Paths.json(poop + '/' + poop)) && !sys.FileSystem.exists(Paths.inst(songLowercase)))  {//the json exists, but the song files don't
 							CoolUtil.coolError("Your song seems to not have an Inst.ogg, check the folder name in 'songs'!", "JS Engine Anti-Crash Tool");
-				} else if(!sys.FileSystem.exists(Paths.json(poop + '/' + poop)) && !sys.FileSystem.exists(Paths.inst(poop + '/'  + poop))) { //neither the json nor the song files actually exist
+				} else if(!sys.FileSystem.exists(Paths.json(poop + '/' + poop)) && !sys.FileSystem.exists(Paths.inst(songLowercase))) { //neither the json nor the song files actually exist
 					CoolUtil.coolError("It appears that " + poop + " doesn't actually have a JSON, nor does it actually have voices/instrumental files!\nMaybe try fixing its name in weeks/" + WeekData.getWeekFileName() + "?", "JS Engine Anti-Crash Tool");
 				}
 			}
 		}
-		else if (controls.RESET #if android || virtualPad.buttonY.justPressed #end) {
-			#if android
-			removeVirtualPad();
-			#end
+		else if (controls.RESET) {
 			persistentUpdate = false;
 			openSubState(new ResetScoreSubState(songs[curSelected].songName, curDifficulty, songs[curSelected].songCharacter));
 			FlxG.sound.play(Paths.sound('scrollMenu'));

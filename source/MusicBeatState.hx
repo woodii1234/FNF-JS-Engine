@@ -1,11 +1,5 @@
 package;
 
-#if android
-import android.AndroidControls;
-import android.flixel.FlxVirtualPad;
-import flixel.input.actions.FlxActionInput;
-import flixel.util.FlxDestroyUtil;
-#end
 import Conductor.BPMChangeEvent;
 import flixel.FlxG;
 import flixel.addons.ui.FlxUIState;
@@ -40,107 +34,6 @@ class MusicBeatState extends FlxUIState
 
 	inline function get_controls():Controls
 		return PlayerSettings.player1.controls;
-
-	#if android
-	var virtualPad:FlxVirtualPad;
-	var androidControls:AndroidControls;
-	var trackedinputsUI:Array<FlxActionInput> = [];
-	var trackedinputsNOTES:Array<FlxActionInput> = [];
-
-	public function addVirtualPad(DPad:FlxDPadMode, Action:FlxActionMode)
-	{
-		virtualPad = new FlxVirtualPad(DPad, Action);
-		add(virtualPad);
-
-		controls.setVirtualPadUI(virtualPad, DPad, Action);
-		trackedinputsUI = controls.trackedinputsUI;
-		controls.trackedinputsUI = [];
-	}
-
-	public function removeVirtualPad()
-	{
-		if (trackedinputsUI != [])
-			controls.removeFlxInput(trackedinputsUI);
-
-		if (virtualPad != null)
-			remove(virtualPad);
-	}
-
-	public function addAndroidControls()
-	{
-		androidControls = new AndroidControls();
-
-		switch (AndroidControls.getMode())
-		{
-			case 0 | 1 | 2: // RIGHT_FULL | LEFT_FULL | CUSTOM
-				controls.setVirtualPadNOTES(androidControls.virtualPad, RIGHT_FULL, NONE);
-			case 3: // BOTH_FULL
-				controls.setVirtualPadNOTES(androidControls.virtualPad, BOTH_FULL, NONE);
-			case 4: // HITBOX
-				if (ClientPrefs.hitboxSelection != 'New') controls.setHitBox(androidControls.hitbox, null);
-				if (ClientPrefs.hitboxSelection == 'New') controls.setHitBox(null, androidControls.newHitbox);
-			case 5: // KEYBOARD
-		}
-
-		trackedinputsNOTES = controls.trackedinputsNOTES;
-		controls.trackedinputsNOTES = [];
-
-		var camControls = new flixel.FlxCamera();
-		FlxG.cameras.add(camControls, false);
-		camControls.bgColor.alpha = 0;
-
-		androidControls.cameras = [camControls];
-		androidControls.visible = false;
-		add(androidControls);
-	}
-
-	public function removeAndroidControls()
-	{
-		if (trackedinputsNOTES != [])
-			controls.removeFlxInput(trackedinputsNOTES);
-
-		if (androidControls != null)
-			remove(androidControls);
-	}
-
-	public function addPadCamera()
-	{
-		if (virtualPad != null)
-		{
-			var camControls = new flixel.FlxCamera();
-			FlxG.cameras.add(camControls, false);
-			camControls.bgColor.alpha = 0;
-			virtualPad.cameras = [camControls];
-		}
-	}
-	#end
-
-	override function destroy()
-	{
-		#if android
-		if (trackedinputsNOTES != [])
-			controls.removeFlxInput(trackedinputsNOTES);
-
-		if (trackedinputsUI != [])
-			controls.removeFlxInput(trackedinputsUI);
-		#end
-
-		super.destroy();
-
-		#if android
-		if (virtualPad != null)
-		{
-			virtualPad = FlxDestroyUtil.destroy(virtualPad);
-			virtualPad = null;
-		}
-
-		if (androidControls != null)
-		{
-			androidControls = FlxDestroyUtil.destroy(androidControls);
-			androidControls = null;
-		}
-		#end
-	}
 
 	public static var windowNameSuffix:String = "";
 	public static var windowNameSuffix2:String = ""; //changes to "Outdated!" if the version of the engine is outdated
@@ -241,37 +134,20 @@ class MusicBeatState extends FlxUIState
 		updateBeat();
 	}
 
-	public static function switchState(nextState:FlxState) {
-		// Custom made Trans in
-		final curState:Dynamic = FlxG.state;
-		final leState:MusicBeatState = curState;
-		if(!FlxTransitionableState.skipNextTransIn) {
-			leState.openSubState(new CustomFadeTransition(0.6, false));
-			if(nextState == FlxG.state) {
-				CustomFadeTransition.finishCallback = function() {
-					FlxG.resetState();
-				};
-				//trace('resetted');
-			} else {
-				CustomFadeTransition.finishCallback = function() {
-					FlxG.switchState(nextState);
-				};
-				//trace('changed state');
-			}
+	override function startOutro(onOutroComplete:()->Void):Void
+	{
+		if (!FlxTransitionableState.skipNextTransIn)
+		{
+			openSubState(new CustomFadeTransition(0.6, false));
+
+			CustomFadeTransition.finishCallback = onOutroComplete;
+
 			return;
 		}
+
 		FlxTransitionableState.skipNextTransIn = false;
-		FlxG.switchState(nextState);
-	}
 
-	public static function resetState() {
-		MusicBeatState.switchState(FlxG.state);
-	}
-
-	public static function getState():MusicBeatState {
-		var curState:Dynamic = FlxG.state;
-		var leState:MusicBeatState = curState;
-		return leState;
+		onOutroComplete();
 	}
 
 	//runs whenever the game hits a step

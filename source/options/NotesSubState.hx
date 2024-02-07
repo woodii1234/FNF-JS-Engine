@@ -1,15 +1,12 @@
 package options;
 
 #if desktop
-import Discord.DiscordClient;
+import DiscordClient;
 #end
 import flash.text.TextField;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.addons.display.FlxGridOverlay;
-#if android
-import flixel.addons.transition.FlxTransitionableState;
-#end
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
 import flixel.text.FlxText;
@@ -94,10 +91,6 @@ class NotesSubState extends MusicBeatSubstate
 		changeSelection();
 
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length-1]];
-
-		#if android
-		addVirtualPad(LEFT_FULL, A_B_C);
-		#end
 	}
 
 	var changingNote:Bool = false;
@@ -110,7 +103,7 @@ class NotesSubState extends MusicBeatSubstate
 				} else if(controls.UI_RIGHT_P) {
 					updateValue(1);
 					FlxG.sound.play(Paths.sound('scrollMenu'));
-				} else if(controls.RESET #if android || virtualPad.buttonC.justPressed #end) {
+				} else if(controls.RESET) {
 					resetValue(curSelected, typeSelected);
 					FlxG.sound.play(Paths.sound('scrollMenu'));
 				}
@@ -151,7 +144,7 @@ class NotesSubState extends MusicBeatSubstate
 				changeType(1);
 				FlxG.sound.play(Paths.sound('scrollMenu'));
 			}
-			if(controls.RESET #if android || virtualPad.buttonC.justPressed #end) {
+			if(controls.RESET) {
 				for (i in 0...3) {
 					resetValue(curSelected, i);
 				}
@@ -182,12 +175,7 @@ class NotesSubState extends MusicBeatSubstate
 
 		if (controls.BACK || (changingNote && controls.ACCEPT)) {
 			if(!changingNote) {
-				#if android
-				FlxTransitionableState.skipNextTransOut = true;
-				FlxG.resetState();
-				#else
 				close();
-				#end
 			} else {
 				changeSelection();
 			}

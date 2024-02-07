@@ -67,9 +67,9 @@ class Paths
 
 	public static var dumpExclusions:Array<String> =
 	[
-		SUtil.getPath() + 'assets/music/freakyMenu.$SOUND_EXT',
-		SUtil.getPath() + 'assets/shared/music/breakfast.$SOUND_EXT',
-		SUtil.getPath() + 'assets/shared/music/tea-time.$SOUND_EXT',
+		'assets/music/freakyMenu.$SOUND_EXT',
+		'assets/shared/music/breakfast.$SOUND_EXT',
+		'assets/shared/music/tea-time.$SOUND_EXT',
 	];
 
 	@:noCompletion private inline static function _gc(major:Bool) {
@@ -235,7 +235,7 @@ class Paths
 			return file;
 		}
 		#end
-		return SUtil.getPath() + 'assets/videos/$key.$VIDEO_EXT';
+		return 'assets/videos/$key.$VIDEO_EXT';
 	}
 	//Sound loading.
 	static public function sound(key:String, ?library:String):Sound
@@ -367,19 +367,19 @@ class Paths
 			return File.getContent(modFolders(key));
 		#end
 
-		if (FileSystem.exists(SUtil.getPath() + getPreloadPath(key)))
-			return File.getContent(SUtil.getPath() + getPreloadPath(key));
+		if (FileSystem.exists(getPreloadPath(key)))
+			return File.getContent(getPreloadPath(key));
 
 		if (currentLevel != null)
 		{
 			var levelPath:String = '';
 			if(currentLevel != 'shared') {
-				levelPath = SUtil.getPath() + getLibraryPathForce(key, currentLevel);
+				levelPath = getLibraryPathForce(key, currentLevel);
 				if (FileSystem.exists(levelPath))
 					return File.getContent(levelPath);
 			}
 
-			levelPath = SUtil.getPath() + getLibraryPathForce(key, 'shared');
+			levelPath = getLibraryPathForce(key, 'shared');
 			if (FileSystem.exists(levelPath))
 				return File.getContent(levelPath);
 		}
@@ -395,7 +395,7 @@ class Paths
 			return file;
 		}
 		#end
-		return SUtil.getPath() + 'assets/fonts/$key';
+		return 'assets/fonts/$key';
 	}
 
 	public static function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?library:String)
@@ -520,17 +520,18 @@ class Paths
 		var gottenPath:String = getPath('$path/$key.$SOUND_EXT', SOUND, library);
 		gottenPath = gottenPath.substring(gottenPath.indexOf(':') + 1, gottenPath.length);
 		// trace(gottenPath);
-		if(!currentTrackedSounds.exists(gottenPath))
-		#if MODS_ALLOWED
-			currentTrackedSounds.set(gottenPath, Sound.fromFile('./' + gottenPath));
-		#else
-		{
-			var folder:String = '';
-			if(path == 'songs') folder = 'songs:';
+		if (FileSystem.exists(gottenPath))
+			if(!currentTrackedSounds.exists(gottenPath))
+			#if MODS_ALLOWED
+				currentTrackedSounds.set(gottenPath, Sound.fromFile('./' + gottenPath));
+			#else
+			{
+				var folder:String = '';
+				if(path == 'songs') folder = 'songs:';
 
-			currentTrackedSounds.set(gottenPath, OpenFlAssets.getSound(folder + getPath('$path/$key.$SOUND_EXT', SOUND, library)));
-		}
-		#end
+				currentTrackedSounds.set(gottenPath, OpenFlAssets.getSound(folder + getPath('$path/$key.$SOUND_EXT', SOUND, library)));
+			}
+			#end
 		localTrackedAssets.push(gottenPath);
 		return currentTrackedSounds.get(gottenPath);
 	}
@@ -538,7 +539,7 @@ class Paths
 	#if MODS_ALLOWED
 	//Loads mods.
 	inline static public function mods(key:String = '') {
-		return SUtil.getPath() + 'mods/' + key;
+		return 'mods/' + key;
 	}
 	//Loads fonts in mods/fonts.
 	inline static public function modsFont(key:String) {
@@ -597,7 +598,7 @@ class Paths
 				return fileToCheck;
 
 		}
-		return SUtil.getPath() + 'mods/' + key;
+		return 'mods/' + key;
 	}
 
 	public static var globalMods:Array<String> = [];
@@ -608,7 +609,7 @@ class Paths
 	static public function pushGlobalMods() // prob a better way to do this but idc
 	{
 		globalMods = [];
-		var path:String = SUtil.getPath() + 'modsList.txt';
+		var path:String = 'modsList.txt';
 		if(FileSystem.exists(path))
 		{
 			var list:Array<String> = CoolUtil.coolTextFile(path);

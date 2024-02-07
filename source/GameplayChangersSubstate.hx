@@ -1,15 +1,12 @@
 package;
 
 #if desktop
-import Discord.DiscordClient;
+import DiscordClient;
 #end
 import flash.text.TextField;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.addons.display.FlxGridOverlay;
-#if android
-import flixel.addons.transition.FlxTransitionableState;
-#end
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
 import flixel.text.FlxText;
@@ -232,11 +229,6 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		changeSelection();
 		reloadCheckboxes();
 
-		#if android
-		addVirtualPad(LEFT_FULL, A_B_C);
-		addPadCamera();
-		#end
-
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 	}
 
@@ -263,12 +255,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		}
 
 		if (controls.BACK) {
-			#if android
-			FlxTransitionableState.skipNextTransOut = true;
-			FlxG.resetState();
-			#else
 			close();
-			#end
 			ClientPrefs.saveSettings();
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 		}
@@ -380,7 +367,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 					clearHold();
 				}
 			}
-			if(controls.RESET && FlxG.keys.pressed.SHIFT #if android || virtualPad != null && virtualPad.buttonC.justPressed #end)
+			if(controls.RESET && FlxG.keys.pressed.SHIFT)
 			{
 				for (i in 0...optionsArray.length)
 				{

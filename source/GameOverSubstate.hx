@@ -69,11 +69,6 @@ class GameOverSubstate extends MusicBeatSubstate
 		camFollowPos = new FlxObject(0, 0, 1, 1);
 		camFollowPos.setPosition(FlxG.camera.scroll.x + (FlxG.camera.width / 2), FlxG.camera.scroll.y + (FlxG.camera.height / 2));
 		add(camFollowPos);
-
-		#if android
-		addVirtualPad(NONE, A_B);
-		addPadCamera();
-		#end
 	}
 
 	var isFollowingAlready:Bool = false;
@@ -101,9 +96,9 @@ class GameOverSubstate extends MusicBeatSubstate
 
 			WeekData.loadTheFirstEnabledMod();
 			if (PlayState.isStoryMode)
-				MusicBeatState.switchState(new StoryMenuState());
+				FlxG.switchState(StoryMenuState.new);
 			else
-				MusicBeatState.switchState(new FreeplayState());
+				FlxG.switchState(FreeplayState.new);
 
 			FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
 			PlayState.instance.callOnLuas('onGameOverConfirm', [false]);
@@ -176,7 +171,7 @@ class GameOverSubstate extends MusicBeatSubstate
 			{
 				FlxG.camera.fade(FlxColor.BLACK, 2, false, function()
 				{
-					MusicBeatState.resetState();
+					FlxG.resetState();
 				});
 			});
 			PlayState.instance.callOnLuas('onGameOverConfirm', [true]);

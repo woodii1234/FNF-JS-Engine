@@ -1,7 +1,7 @@
 package editors;
 
 #if desktop
-import Discord.DiscordClient;
+import DiscordClient;
 #end
 import animateatlas.AtlasFrameMaker;
 import flixel.FlxG;
@@ -23,11 +23,7 @@ import flixel.addons.ui.FlxUIInputText;
 import flixel.addons.ui.FlxUINumericStepper;
 import flixel.addons.ui.FlxUITabMenu;
 import flixel.addons.ui.FlxUITooltip.FlxUITooltipStyle;
-#if android
-import android.flixel.FlxButton;
-#else
 import flixel.ui.FlxButton;
-#end
 import flixel.ui.FlxSpriteButton;
 import openfl.net.FileReference;
 import openfl.events.Event;
@@ -157,7 +153,7 @@ class CharacterEditorState extends MusicBeatState
 
 		for (i in 0...tipTextArray.length-1)
 		{
-			var tipText:FlxText = new FlxText(FlxG.width - 320, FlxG.height - 10 - 14 * (tipTextArray.length - i), 300, tipTextArray[i], 12);
+			var tipText:FlxText = new FlxText(FlxG.width - 320, FlxG.height - 10 - 13 * (tipTextArray.length - i), 300, tipTextArray[i], 12);
 			tipText.cameras = [camHUD];
 			tipText.setFormat(null, 12, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
 			tipText.scrollFactor.set();
@@ -168,14 +164,13 @@ class CharacterEditorState extends MusicBeatState
 		FlxG.camera.follow(camFollow);
 
 		var tabs = [
-			//{name: 'Offsets', label: 'Offsets'},
 			{name: 'Settings', label: 'Settings'},
 		];
 
 		UI_box = new FlxUITabMenu(null, tabs, true);
 		UI_box.cameras = [camMenu];
 
-		UI_box.resize(250, 160);
+		UI_box.resize(250, 100);
 		UI_box.x = FlxG.width - 275;
 		UI_box.y = 25;
 		UI_box.scrollFactor.set();
@@ -187,7 +182,7 @@ class CharacterEditorState extends MusicBeatState
 		UI_characterbox = new FlxUITabMenu(null, tabs, true);
 		UI_characterbox.cameras = [camMenu];
 
-		UI_characterbox.resize(350, 290);
+		UI_characterbox.resize(350, 360);
 		UI_characterbox.x = UI_box.x - 100;
 		UI_characterbox.y = UI_box.y + UI_box.height;
 		UI_characterbox.scrollFactor.set();
@@ -205,14 +200,10 @@ class CharacterEditorState extends MusicBeatState
 		FlxG.mouse.visible = true;
 		reloadCharacterOptions();
 
-		#if android
-		addVirtualPad(LEFT_FULL, A_B_C_D_V_X_Y_Z);
-		addPadCamera();
-		#end
-
 		super.create();
 	}
 
+	var barToUse:Int = 1;
 	var onPixelBG:Bool = false;
 	var OFFSET_X:Float = 300;
 	function reloadBGs() {
@@ -501,6 +492,8 @@ class CharacterEditorState extends MusicBeatState
 		UI_box.addGroup(tab_group);
 	}
 
+	var changeBar:Bool = false;
+
 	var imageInputText:FlxUIInputText;
 	var noteskinText:FlxUIInputText;
 	var healthIconInputText:FlxUIInputText;
@@ -518,6 +511,16 @@ class CharacterEditorState extends MusicBeatState
 	var healthColorStepperR:FlxUINumericStepper;
 	var healthColorStepperG:FlxUINumericStepper;
 	var healthColorStepperB:FlxUINumericStepper;
+
+	var winningColorStepperR:FlxUINumericStepper;
+	var winningColorStepperG:FlxUINumericStepper;
+	var winningColorStepperB:FlxUINumericStepper;
+
+	var losingColorStepperR:FlxUINumericStepper;
+	var losingColorStepperG:FlxUINumericStepper;
+	var losingColorStepperB:FlxUINumericStepper;
+
+	var barShowDropDown:FlxUIDropDownMenuCustom;
 
 	function addCharacterUI() {
 		var tab_group = new FlxUI(null, UI_box);
@@ -543,19 +546,37 @@ class CharacterEditorState extends MusicBeatState
 		var decideIconColor:FlxButton = new FlxButton(reloadImage.x, reloadImage.y + 30, "Get Icon Color", function()
 			{
 				var coolColor = FlxColor.fromInt(CoolUtil.dominantColor(leHealthIcon));
-				healthColorStepperR.value = coolColor.red;
-				healthColorStepperG.value = coolColor.green;
-				healthColorStepperB.value = coolColor.blue;
-				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperR, null);
-				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperG, null);
-				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperB, null);
+				switch(barToUse)
+				{
+					case 1:
+					{
+						healthColorStepperR.value = coolColor.red;
+						healthColorStepperG.value = coolColor.green;
+						healthColorStepperB.value = coolColor.blue;
+						getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperR, null);
+						getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperG, null);
+						getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperB, null);
+					}
+					case 2:
+					{
+						losingColorStepperR.value = coolColor.red;
+						losingColorStepperG.value = coolColor.green;
+						losingColorStepperB.value = coolColor.blue;
+						getEvent(FlxUINumericStepper.CHANGE_EVENT, losingColorStepperR, null);
+						getEvent(FlxUINumericStepper.CHANGE_EVENT, losingColorStepperG, null);
+						getEvent(FlxUINumericStepper.CHANGE_EVENT, losingColorStepperB, null);
+					}
+					case 3:
+					{
+						winningColorStepperR.value = coolColor.red;
+						winningColorStepperG.value = coolColor.green;
+						winningColorStepperB.value = coolColor.blue;
+						getEvent(FlxUINumericStepper.CHANGE_EVENT, winningColorStepperR, null);
+						getEvent(FlxUINumericStepper.CHANGE_EVENT, winningColorStepperG, null);
+						getEvent(FlxUINumericStepper.CHANGE_EVENT, winningColorStepperB, null);
+					}
+				}
 			});
-		/*
-		var changeCharArrowColor:FlxButton = new FlxButton(reloadImage.x - 30, reloadImage.y + 30, "Change Character's Arrow Colors", function()
-			{
-				LoadingState.loadAndSwitchState(new charArrowColorState());
-			});
-		*/
 
 		healthIconInputText = new FlxUIInputText(15, imageInputText.y + 35, 75, leHealthIcon.getCharacter(), 8);
 		healthIconInputText.focusGained = () -> FlxG.stage.window.textInputEnabled = true;
@@ -600,11 +621,35 @@ class CharacterEditorState extends MusicBeatState
 		healthColorStepperG = new FlxUINumericStepper(singDurationStepper.x + 65, saveCharacterButton.y, 20, char.healthColorArray[1], 0, 255, 0);
 		healthColorStepperB = new FlxUINumericStepper(singDurationStepper.x + 130, saveCharacterButton.y, 20, char.healthColorArray[2], 0, 255, 0);
 
-		tab_group.add(new FlxText(15, saveCharacterButton.y + 20, 0, 'Noteskin:'));
-		noteskinText = new FlxUIInputText(15, saveCharacterButton.y + 48, 200, '', 8);
+		winningColorStepperR = new FlxUINumericStepper(singDurationStepper.x, saveCharacterButton.y + 40, 20, char.winningColorArray[0], 0, 255, 0);
+		winningColorStepperG = new FlxUINumericStepper(singDurationStepper.x + 65, winningColorStepperR.y, 20, char.winningColorArray[1], 0, 255, 0);
+		winningColorStepperB = new FlxUINumericStepper(singDurationStepper.x + 130, winningColorStepperR.y, 20, char.winningColorArray[2], 0, 255, 0);
+
+		losingColorStepperR = new FlxUINumericStepper(singDurationStepper.x, winningColorStepperR.y + 40, 20, char.losingColorArray[0], 0, 255, 0);
+		losingColorStepperG = new FlxUINumericStepper(singDurationStepper.x + 65, losingColorStepperR.y, 20, char.losingColorArray[1], 0, 255, 0);
+		losingColorStepperB = new FlxUINumericStepper(singDurationStepper.x + 130, losingColorStepperR.y, 20, char.losingColorArray[2], 0, 255, 0);
+
+		barShowDropDown = new FlxUIDropDownMenuCustom(winningColorStepperB.x + 80, winningColorStepperB.y + 20, FlxUIDropDownMenuCustom.makeStrIdLabelArray(['Normal', 'Losing', 'Winning'], true), function(buttonChosen:String)
+		{
+			barToUse = Std.parseInt(buttonChosen) + 1;
+			if (barToUse == 1) leHealthIcon.animation.curAnim.curFrame = 0;
+			if (barToUse == 2 && leHealthIcon.animation.numFrames > 1) leHealthIcon.animation.curAnim.curFrame = 1;
+			if (barToUse == 3 && leHealthIcon.animation.numFrames > 2) leHealthIcon.animation.curAnim.curFrame = 2;
+
+			if (barToUse == 1) healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
+			if (barToUse == 2) healthBarBG.color = FlxColor.fromRGB(char.losingColorArray[0], char.losingColorArray[1], char.losingColorArray[2]);
+			if (barToUse == 3) healthBarBG.color = FlxColor.fromRGB(char.winningColorArray[0], char.winningColorArray[1], char.winningColorArray[2]);
+		});
+		barShowDropDown.selectedLabel = 'Normal';
+
+		tab_group.add(new FlxText(15, saveCharacterButton.y + 110, 0, 'Noteskin:'));
+		noteskinText = new FlxUIInputText(15, saveCharacterButton.y + 128, 200, '', 8);
 		noteskinText.focusGained = () -> FlxG.stage.window.textInputEnabled = true;
 		tab_group.add(noteskinText);
 
+		tab_group.add(barShowDropDown);
+
+		tab_group.add(new FlxText(barShowDropDown.x, barShowDropDown.y - 18, 0, 'Bar to show:'));
 		tab_group.add(new FlxText(15, imageInputText.y - 18, 0, 'Image file name:'));
 		tab_group.add(new FlxText(15, healthIconInputText.y - 18, 0, 'Health icon name:'));
 		tab_group.add(new FlxText(15, singDurationStepper.y - 18, 0, 'Sing Animation length:'));
@@ -612,6 +657,8 @@ class CharacterEditorState extends MusicBeatState
 		tab_group.add(new FlxText(positionXStepper.x, positionXStepper.y - 18, 0, 'Character X/Y:'));
 		tab_group.add(new FlxText(positionCameraXStepper.x, positionCameraXStepper.y - 18, 0, 'Camera X/Y:'));
 		tab_group.add(new FlxText(healthColorStepperR.x, healthColorStepperR.y - 18, 0, 'Health bar R/G/B:'));
+		tab_group.add(new FlxText(healthColorStepperR.x, healthColorStepperR.y + 20, 0, 'Winning bar R/G/B:'));
+		tab_group.add(new FlxText(healthColorStepperR.x, healthColorStepperR.y + 60, 0, 'Losing bar R/G/B:'));
 		tab_group.add(imageInputText);
 		tab_group.add(reloadImage);
 		tab_group.add(decideIconColor);
@@ -627,6 +674,12 @@ class CharacterEditorState extends MusicBeatState
 		tab_group.add(healthColorStepperR);
 		tab_group.add(healthColorStepperG);
 		tab_group.add(healthColorStepperB);
+		tab_group.add(winningColorStepperR);
+		tab_group.add(winningColorStepperG);
+		tab_group.add(winningColorStepperB);
+		tab_group.add(losingColorStepperR);
+		tab_group.add(losingColorStepperG);
+		tab_group.add(losingColorStepperB);
 		tab_group.add(saveCharacterButton);
 		UI_characterbox.addGroup(tab_group);
 	}
@@ -846,17 +899,47 @@ class CharacterEditorState extends MusicBeatState
 			else if(sender == healthColorStepperR)
 			{
 				char.healthColorArray[0] = Math.round(healthColorStepperR.value);
-				healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
+				if (barToUse == 1) healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
 			}
 			else if(sender == healthColorStepperG)
 			{
 				char.healthColorArray[1] = Math.round(healthColorStepperG.value);
-				healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
+				if (barToUse == 1) healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
 			}
 			else if(sender == healthColorStepperB)
 			{
 				char.healthColorArray[2] = Math.round(healthColorStepperB.value);
-				healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
+				if (barToUse == 1) healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
+			}
+			else if(sender == winningColorStepperR)
+			{
+				char.winningColorArray[0] = Math.round(winningColorStepperR.value);
+				if (barToUse == 3) healthBarBG.color = FlxColor.fromRGB(char.winningColorArray[0], char.winningColorArray[1], char.winningColorArray[2]);
+			}
+			else if(sender == winningColorStepperG)
+			{
+				char.winningColorArray[1] = Math.round(winningColorStepperG.value);
+				if (barToUse == 3) healthBarBG.color = FlxColor.fromRGB(char.winningColorArray[0], char.winningColorArray[1], char.winningColorArray[2]);
+			}
+			else if(sender == winningColorStepperB)
+			{
+				char.winningColorArray[2] = Math.round(winningColorStepperB.value);
+				if (barToUse == 3) healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
+			}
+			else if(sender == losingColorStepperR)
+			{
+				char.losingColorArray[0] = Math.round(losingColorStepperR.value);
+				if (barToUse == 2) healthBarBG.color = FlxColor.fromRGB(char.losingColorArray[0], char.losingColorArray[1], char.losingColorArray[2]);
+			}
+			else if(sender == losingColorStepperG)
+			{
+				char.losingColorArray[1] = Math.round(losingColorStepperG.value);
+				if (barToUse == 2) healthBarBG.color = FlxColor.fromRGB(char.losingColorArray[0], char.losingColorArray[1], char.losingColorArray[2]);
+			}
+			else if(sender == losingColorStepperB)
+			{
+				char.losingColorArray[2] = Math.round(losingColorStepperB.value);
+				if (barToUse == 2) healthBarBG.color = FlxColor.fromRGB(char.losingColorArray[0], char.losingColorArray[1], char.losingColorArray[2]);
 			}
 		}
 	}
@@ -1081,7 +1164,7 @@ class CharacterEditorState extends MusicBeatState
 
 		#if MODS_ALLOWED
 		characterList = [];
-		var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Paths.currentModDirectory + '/characters/'), SUtil.getPath() + Paths.getPreloadPath('characters/')];
+		var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Paths.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
 		for(mod in Paths.getGlobalMods())
 			directories.push(Paths.mods(mod + '/characters/'));
 		for (i in 0...directories.length) {
@@ -1111,6 +1194,33 @@ class CharacterEditorState extends MusicBeatState
 		healthColorStepperR.value = char.healthColorArray[0];
 		healthColorStepperG.value = char.healthColorArray[1];
 		healthColorStepperB.value = char.healthColorArray[2];
+
+		if (char.winningColorArray != null && char.winningColorArray.length > 2)
+		{
+			winningColorStepperR.value = char.winningColorArray[0];
+			winningColorStepperG.value = char.winningColorArray[1];
+			winningColorStepperB.value = char.winningColorArray[2];
+		} 
+		else
+		{
+			winningColorStepperR.value = char.healthColorArray[0];
+			winningColorStepperG.value = char.healthColorArray[1];
+			winningColorStepperB.value = char.healthColorArray[2];
+		}
+
+		if (char.losingColorArray != null && char.losingColorArray.length > 2)
+		{
+			losingColorStepperR.value = char.losingColorArray[0];
+			losingColorStepperG.value = char.losingColorArray[1];
+			losingColorStepperB.value = char.losingColorArray[2];
+		}
+		else
+		{
+			losingColorStepperR.value = char.healthColorArray[0];
+			losingColorStepperG.value = char.healthColorArray[1];
+			losingColorStepperB.value = char.healthColorArray[2];
+		}
+		barToUse == 1;
 		healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
 	}
 
@@ -1135,6 +1245,14 @@ class CharacterEditorState extends MusicBeatState
 			textAnim.text = '';
 		}
 
+		while (changeBar = false)
+		{
+			changeBar = true;
+			if (barToUse == 1) healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
+			if (barToUse == 2) healthBarBG.color = FlxColor.fromRGB(char.losingColorArray[0], char.losingColorArray[1], char.losingColorArray[2]);
+			if (barToUse == 3) healthBarBG.color = FlxColor.fromRGB(char.winningColorArray[0], char.winningColorArray[1], char.winningColorArray[2]);
+		}
+
 		var inputTexts:Array<FlxUIInputText> = [animationInputText, imageInputText, healthIconInputText, animationNameInputText, animationIndicesInputText, noteskinText];
 		for (i in 0...inputTexts.length) {
 			if(inputTexts[i].hasFocus) {
@@ -1150,26 +1268,26 @@ class CharacterEditorState extends MusicBeatState
 		FlxG.sound.volumeUpKeys = TitleState.volumeUpKeys;
 
 		if(!charDropDown.dropPanel.visible) {
-			if (FlxG.keys.justPressed.ESCAPE #if android || FlxG.android.justReleased.BACK #end) {
+			if (FlxG.keys.justPressed.ESCAPE) {
 				if(goToPlayState) {
-					MusicBeatState.switchState(new PlayState());
+					FlxG.switchState(PlayState.new);
 				} else {
-					MusicBeatState.switchState(new editors.MasterEditorMenu());
+					FlxG.switchState(editors.MasterEditorMenu.new);
 					FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
 				}
 				FlxG.mouse.visible = false;
 				return;
 			}
 
-			if (FlxG.keys.justPressed.R #if android || virtualPad.buttonZ.justPressed #end) {
+			if (FlxG.keys.justPressed.R) {
 				FlxG.camera.zoom = 1;
 			}
 
-			if (FlxG.keys.pressed.E #if android || virtualPad.buttonX.pressed #end && FlxG.camera.zoom < 3) {
+			if (FlxG.keys.pressed.E && FlxG.camera.zoom < 3) {
 				FlxG.camera.zoom += elapsed * FlxG.camera.zoom;
 				if(FlxG.camera.zoom > 3) FlxG.camera.zoom = 3;
 			}
-			if (FlxG.keys.pressed.Q #if android || virtualPad.buttonY.pressed #end && FlxG.camera.zoom > 0.1) {
+			if (FlxG.keys.pressed.Q && FlxG.camera.zoom > 0.1) {
 				FlxG.camera.zoom -= elapsed * FlxG.camera.zoom;
 				if(FlxG.camera.zoom < 0.1) FlxG.camera.zoom = 0.1;
 			}
@@ -1192,12 +1310,12 @@ class CharacterEditorState extends MusicBeatState
 			}
 
 			if(char.animationsArray.length > 0) {
-				if (FlxG.keys.justPressed.W #if android || virtualPad.buttonV.justPressed #end)
+				if (FlxG.keys.justPressed.W)
 				{
 					curAnim -= 1;
 				}
 
-				if (FlxG.keys.justPressed.S #if android || virtualPad.buttonD.justPressed #end)
+				if (FlxG.keys.justPressed.S)
 				{
 					curAnim += 1;
 				}
@@ -1208,12 +1326,12 @@ class CharacterEditorState extends MusicBeatState
 				if (curAnim >= char.animationsArray.length)
 					curAnim = 0;
 
-				if (FlxG.keys.justPressed.S #if android || virtualPad.buttonD.justPressed #end || FlxG.keys.justPressed.W || #if android virtualPad.buttonV.justPressed || #end FlxG.keys.justPressed.SPACE)
+				if (FlxG.keys.justPressed.S || FlxG.keys.justPressed.W || FlxG.keys.justPressed.SPACE)
 				{
 					char.playAnim(char.animationsArray[curAnim].anim, true);
 					genBoyOffsets();
 				}
-				if (FlxG.keys.justPressed.T #if android || virtualPad.buttonA.justPressed #end)
+				if (FlxG.keys.justPressed.T)
 				{
 					char.animationsArray[curAnim].offsets = [0, 0];
 
@@ -1222,21 +1340,11 @@ class CharacterEditorState extends MusicBeatState
 					genBoyOffsets();
 				}
 
-				#if android
-				var controlArray:Array<Bool> = [virtualPad.buttonLeft.justPressed, virtualPad.buttonRight.justPressed, virtualPad.buttonUp.justPressed, virtualPad.buttonDown.justPressed];
-				#else
 				var controlArray:Array<Bool> = [FlxG.keys.justPressed.LEFT, FlxG.keys.justPressed.RIGHT, FlxG.keys.justPressed.UP, FlxG.keys.justPressed.DOWN];
-				#end //hopefully this fixes a weird issue where pressing any of the keys moves the character to the left by 1 pixel
-
-
 
 				for (i in 0...controlArray.length) {
 					if(controlArray[i]) {
-						#if android
-						var holdShift = virtualPad.buttonB.pressed;
-						#else
 						var holdShift = FlxG.keys.pressed.SHIFT;
-						#end
 						var multiplier = 1;
 						if (holdShift)
 							multiplier = 10;
@@ -1329,22 +1437,20 @@ class CharacterEditorState extends MusicBeatState
 
 			"flip_x": char.originalFlipX,
 			"no_antialiasing": char.noAntialiasing,
-			"healthbar_colors": char.healthColorArray
+			"healthbar_colors": char.healthColorArray,
+			"winning_colors": char.winningColorArray,
+			"losing_colors": char.losingColorArray
 		};
 
 		var data:String = Json.stringify(json, "\t");
 
 		if (data.length > 0)
 		{
-			#if android
-			SUtil.saveContent(daAnim, ".json", data);
-			#else
 			_file = new FileReference();
 			_file.addEventListener(Event.COMPLETE, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data, daAnim + ".json");
-			#end
 		}
 	}
 

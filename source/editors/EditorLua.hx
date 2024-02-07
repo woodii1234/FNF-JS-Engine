@@ -13,7 +13,7 @@ import flixel.tweens.FlxEase;
 import flixel.text.FlxText;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 import flixel.util.FlxTimer;
 import flixel.FlxSprite;
 import flixel.FlxCamera;
@@ -28,7 +28,7 @@ import Controls;
 import DialogueBoxPsych;
 
 #if desktop
-import Discord;
+import DiscordClient;
 #end
 
 using StringTools;
@@ -180,7 +180,7 @@ class EditorLua {
 			}
 		});
 
-		Discord.DiscordClient.addLuaCallbacks(lua);
+		DiscordClient.addLuaCallbacks(lua);
 
 		call('onCreate', []);
 		#end

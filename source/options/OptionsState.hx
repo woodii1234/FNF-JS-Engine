@@ -1,7 +1,7 @@
 package options;
 
 #if desktop
-import Discord.DiscordClient;
+import DiscordClient;
 #end
 import flash.text.TextField;
 import flixel.FlxG;
@@ -49,52 +49,26 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 	function openSelectedSubstate(label:String) {
 		switch(label) {
 			case 'Note Colors':
-			#if android
-			removeVirtualPad();
-			#end
 				openSubState(new options.NotesSubState());
 			case 'Controls':
-			#if android
-			removeVirtualPad();
-			#end
 				openSubState(new options.ControlsSubState());
 			case 'Graphics':
-			#if android
-			removeVirtualPad();
-			#end
 				openSubState(new options.GraphicsSettingsSubState());
 			case 'Visuals and UI':
-			#if android
-			removeVirtualPad();
-			#end
 				openSubState(new options.VisualsUISubState());
 			case 'Gameplay':
-			#if android
-			removeVirtualPad();
-			#end
 				openSubState(new options.GameplaySettingsSubState());
 			case 'Optimization':
-			#if android
-			removeVirtualPad();
-			#end
 				openSubState(new options.OptimizationSubState());
 			case 'Adjust Delay and Combo':
-			#if android
-			removeVirtualPad();
-			#end
-				LoadingState.loadAndSwitchState(new options.NoteOffsetState());
+				LoadingState.loadAndSwitchState(() -> new options.NoteOffsetState());
 			case 'Misc':
-			#if android
-			removeVirtualPad();
-			#end
 				openSubState(new options.MiscSettingsSubState());
 		}
 	}
 
 	var selectorLeft:Alphabet;
 	var selectorRight:Alphabet;
-	var customizeAndroidControlsTipText:FlxText;
-	var androidControlsStyleTipText:FlxText;
 	var camFollow:FlxObject;
 	var camFollowPos:FlxObject;
 
@@ -154,25 +128,6 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 		changeSelection();
 		ClientPrefs.saveSettings();
 
-		#if android
-		addVirtualPad(LEFT_FULL, A_B_X_Y);
-		virtualPad.y = -44;
-		#end
-
-		#if android
-		androidControlsStyleTipText = new FlxText(10, FlxG.height - 44, 0, 'Press Y to customize your opacity for hitbox, virtual pads and hitbox style!', 16);
-		customizeAndroidControlsTipText = new FlxText(10, FlxG.height - 24, 0, 'Press X to customize your android controls!', 16);
-			androidControlsStyleTipText.setFormat("VCR OSD Mono", 17, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			customizeAndroidControlsTipText.setFormat("VCR OSD Mono", 17, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-
-		androidControlsStyleTipText.borderSize = 1.25;
-		androidControlsStyleTipText.scrollFactor.set();
-		customizeAndroidControlsTipText.borderSize = 1.25;
-		customizeAndroidControlsTipText.scrollFactor.set();
-		add(androidControlsStyleTipText);
-		add(customizeAndroidControlsTipText);
-		#end
-
 		super.create();
 	}
 
@@ -200,36 +155,22 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 			{
 				PauseSubState.inPause = false;
 				StageData.loadDirectory(PlayState.SONG);
-				LoadingState.loadAndSwitchState(new PlayState());
+				LoadingState.loadAndSwitchState(PlayState.new);
 				FlxG.sound.music.volume = 0;
 			}
-			else MusicBeatState.switchState(new MainMenuState());
+			else FlxG.switchState(MainMenuState.new);
 		}
 		if (controls.ACCEPT && !isEnteringKonamiCode) {
 			if (isEnteringKonamiCode) return;
 			openSelectedSubstate(options[curSelected]);
 		}
-		#if android
-		if (virtualPad.buttonX.justPressed) {
-			#if android
-			removeVirtualPad();
-			#end
-			openSubState(new android.AndroidControlsSubState());
-		}
-		if (virtualPad.buttonY.justPressed) {
-			#if android
-			removeVirtualPad();
-			#end
-			openSubState(new android.AndroidControlsSettingsSubState());
-		}
-		#end
 
-        if (FlxG.keys.justPressed.ANY #if android || virtualPad.buttonUp.justPressed || virtualPad.buttonDown.justPressed || virtualPad.buttonLeft.justPressed || virtualPad.buttonRight.justPressed || virtualPad.buttonB.justPressed || virtualPad.buttonA.justPressed #end) {
+        if (FlxG.keys.justPressed.ANY) {
             var k = keys[kId];
-		#if android konamiCode = [virtualPad.buttonUp, virtualPad.buttonUp, virtualPad.buttonDown, virtualPad.buttonDown, virtualPad.buttonLeft, virtualPad.buttonRight, virtualPad.buttonLeft, virtualPad.buttonRight, virtualPad.buttonB, virtualPad.buttonA]; #end
-            if (FlxG.keys.anyJustPressed([k]) #if android || !enteringDebugMenu && checkKonamiCode() #end) {
+
+            if (FlxG.keys.anyJustPressed([k])) {
                 #if desktop kId++; #end
-                if (kId >= keys.length #if android || konamiIndex >= konamiCode.length #end) {
+                if (kId >= keys.length) {
 			enteringDebugMenu = true;
 			kId = 0;
                     FlxTween.tween(FlxG.camera, {alpha: 0}, 1.5, {startDelay: 1, ease: FlxEase.cubeOut});
@@ -242,15 +183,6 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
                 }
             }
         }
-
-		#if android
-		if (virtualPad.buttonC.justPressed) {
-			#if android
-			removeVirtualPad();
-			#end
-			openSubState(new android.AndroidControlsSubState());
-		}
-		#end
 	}
 	
 	function changeSelection(change:Int = 0) {

@@ -1,7 +1,7 @@
 package editors;
 
 #if desktop
-import Discord.DiscordClient;
+import DiscordClient;
 #end
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -11,7 +11,7 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 import flixel.addons.ui.FlxInputText;
 import flixel.addons.ui.FlxUI9SliceSprite;
 import flixel.addons.ui.FlxUI;
@@ -19,11 +19,7 @@ import flixel.addons.ui.FlxUICheckBox;
 import flixel.addons.ui.FlxUIInputText;
 import flixel.addons.ui.FlxUINumericStepper;
 import flixel.addons.ui.FlxUITabMenu;
-#if android
-import android.flixel.FlxButton;
-#else
 import flixel.ui.FlxButton;
-#end
 import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
@@ -87,19 +83,11 @@ class DialogueEditorState extends MusicBeatState
 		add(box);
 
 		addEditorBox();
-		#if android
-		FlxG.mouse.visible = false;
-		#else
-		FlxG.mouse.visible = true;
-		#end
 
-		#if !android
+		FlxG.mouse.visible = true;
+
 		var addLineText:FlxText = new FlxText(10, 10, FlxG.width - 20,
 			'Press O to remove the current dialogue line, Press P to add another line after the current one.', 8);
-		#else
-		var addLineText:FlxText = new FlxText(10, 10, FlxG.width - 20,
-			'Press A Button to remove the current dialogue line, Press B Button to add another line after the current one.', 8);
-		#end
 		addLineText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		addLineText.scrollFactor.set();
 		add(addLineText);
@@ -119,10 +107,6 @@ class DialogueEditorState extends MusicBeatState
 		daText.scaleY = 0.7;
 		add(daText);
 		changeText();
-
-		#if android
-		addVirtualPad(LEFT_FULL, A_B_C);
-		#end
 
 		super.create();
 	}
@@ -172,21 +156,12 @@ class DialogueEditorState extends MusicBeatState
 		blockPressWhileTypingOn.push(lineInputText);
 		lineInputText.focusGained = () -> FlxG.stage.window.textInputEnabled = true;
 
-		#if !android
 		var loadButton:FlxButton = new FlxButton(20, lineInputText.y + 25, "Load Dialogue", function() {
 			loadDialogue();
 		});
 		var saveButton:FlxButton = new FlxButton(loadButton.x + 120, loadButton.y, "Save Dialogue", function() {
 			saveDialogue();
 		});
-		#else
-		var loadButton:FlxButton = new FlxButton(20, lineInputText.y + 25, "Load Dialogue", function() {
-			loadDialogue();
-		});
-		var saveButton:FlxButton = new FlxButton(loadButton.x + 120, loadButton.y, "Save Dialogue", function() {
-			saveDialogue();
-		});
-		#end
 
 		tab_group.add(new FlxText(10, speedStepper.y - 18, 0, 'Interval/Speed (ms):'));
 		tab_group.add(new FlxText(10, characterInputText.y - 18, 0, 'Character:'));
@@ -256,11 +231,7 @@ class DialogueEditorState extends MusicBeatState
 		characterAnimSpeed();
 
 		if(character.animation.curAnim != null && character.jsonFile.animations != null) {
-			#if !android
 			animText.text = 'Animation: ' + character.jsonFile.animations[curAnim].anim + ' (' + (curAnim + 1) +' / ' + character.jsonFile.animations.length + ') - Press W or S to scroll';
-			#else
-			animText.text = 'Animation: ' + character.jsonFile.animations[curAnim].anim + ' (' + (curAnim + 1) +' / ' + character.jsonFile.animations.length + ') - Press Up or Down Button to scroll';
-			#end
 		} else {
 			animText.text = 'ERROR! NO ANIMATIONS FOUND';
 		}
@@ -308,11 +279,7 @@ class DialogueEditorState extends MusicBeatState
 					curAnim = 0;
 					if(character.jsonFile.animations.length > curAnim && character.jsonFile.animations[curAnim] != null) {
 						character.playAnim(character.jsonFile.animations[curAnim].anim, daText.finishedText);
-						#if !android
 						animText.text = 'Animation: ' + character.jsonFile.animations[curAnim].anim + ' (' + (curAnim + 1) +' / ' + character.jsonFile.animations.length + ') - Press W or S to scroll';
-						#else
-						animText.text = 'Animation: ' + character.jsonFile.animations[curAnim].anim + ' (' + (curAnim + 1) +' / ' + character.jsonFile.animations.length + ') - Press Up or Down Button to scroll';
-					    #end
 					} else {
 						animText.text = 'ERROR! NO ANIMATIONS FOUND';
 					}
@@ -394,16 +361,16 @@ class DialogueEditorState extends MusicBeatState
 			if(FlxG.keys.justPressed.SPACE) {
 				reloadText(false);
 			}
-			if(#if !android FlxG.keys.justPressed.ESCAPE #else virtualPad.buttonC.justPressed #end) {
-				MusicBeatState.switchState(new editors.MasterEditorMenu());
+			if(FlxG.keys.justPressed.ESCAPE) {
+				FlxG.switchState(editors.MasterEditorMenu.new);
 				FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic), 1);
 				transitioning = true;
 			}
 			var negaMult:Array<Int> = [1, -1];
-			var controlAnim:Array<Bool> = [#if !android FlxG.keys.justPressed.W #else virtualPad.buttonUp.justPressed #end,
-				#if !android FlxG.keys.justPressed.S #else virtualPad.buttonDown.justPressed #end];
-			var controlText:Array<Bool> = [#if !android FlxG.keys.justPressed.D #else virtualPad.buttonLeft.justPressed #end,
-				#if !android FlxG.keys.justPressed.A #else virtualPad.buttonRight.justPressed #end];
+			var controlAnim:Array<Bool> = [FlxG.keys.justPressed.W,
+				FlxG.keys.justPressed.S];
+			var controlText:Array<Bool> = [FlxG.keys.justPressed.D,
+				FlxG.keys.justPressed.A];
 			for (i in 0...controlAnim.length) {
 				if(controlAnim[i] && character.jsonFile.animations.length > 0) {
 					curAnim -= negaMult[i];
@@ -415,18 +382,14 @@ class DialogueEditorState extends MusicBeatState
 						character.playAnim(animToPlay, daText.finishedText);
 						dialogueFile.dialogue[curSelected].expression = animToPlay;
 					}
-					#if !android
 					animText.text = 'Animation: ' + animToPlay + ' (' + (curAnim + 1) +' / ' + character.jsonFile.animations.length + ') - Press W or S to scroll';
-					#else
-					animText.text = 'Animation: ' + animToPlay + ' (' + (curAnim + 1) +' / ' + character.jsonFile.animations.length + ') - Press Up or Down to scroll';
-					#end
 				}
 				if(controlText[i]) {
 					changeText(negaMult[i]);
 				}
 			}
 
-			if(FlxG.keys.justPressed.O #if android || virtualPad.buttonA.justPressed #end) {
+			if(FlxG.keys.justPressed.O) {
 				dialogueFile.dialogue.remove(dialogueFile.dialogue[curSelected]);
 				if(dialogueFile.dialogue.length < 1) //You deleted everything, dumbo!
 				{
@@ -435,7 +398,7 @@ class DialogueEditorState extends MusicBeatState
 					];
 				}
 				changeText();
-			} else if(FlxG.keys.justPressed.P #if android || virtualPad.buttonB.justPressed #end) {
+			} else if(FlxG.keys.justPressed.P) {
 				dialogueFile.dialogue.insert(curSelected + 1, copyDefaultLine());
 				changeText(1);
 			}
@@ -477,21 +440,13 @@ class DialogueEditorState extends MusicBeatState
 				}
 			}
 			character.playAnim(character.jsonFile.animations[curAnim].anim, daText.finishedText);
-			#if !android
 			animText.text = 'Animation: ' + character.jsonFile.animations[curAnim].anim + ' (' + (curAnim + 1) +' / ' + leLength + ') - Press W or S to scroll';
-			#else
-			animText.text = 'Animation: ' + character.jsonFile.animations[curAnim].anim + ' (' + (curAnim + 1) +' / ' + leLength + ') - Press Up or Down Button to scroll';
-			#end
 		} else {
 			animText.text = 'ERROR! NO ANIMATIONS FOUND';
 		}
 		characterAnimSpeed();
 
-		#if !android
 		selectedText.text = 'Line: (' + (curSelected + 1) + ' / ' + dialogueFile.dialogue.length + ') - Press A or D to scroll';
-		#else
-		selectedText.text = 'Line: (' + (curSelected + 1) + ' / ' + dialogueFile.dialogue.length + ') - Press Left or Right Button to scroll';
-		#end
 	}
 
 	function characterAnimSpeed() {
@@ -574,15 +529,11 @@ class DialogueEditorState extends MusicBeatState
 		var data:String = Json.stringify(dialogueFile, "\t");
 		if (data.length > 0)
 		{
-			#if android
-			SUtil.saveContent("dialogue", ".json", data);
-			#else
 			_file = new FileReference();
 			_file.addEventListener(Event.COMPLETE, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data, "dialogue.json");
-			#end
 		}
 	}
 
