@@ -20,6 +20,7 @@ import flixel.sound.FlxSound;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import openfl.utils.Assets as OpenFlAssets;
+import flixel.util.FlxTimer;
 import flixel.util.FlxStringUtil; //for formatting the note count
 import WeekData;
 #if MODS_ALLOWED
@@ -251,6 +252,10 @@ class FreeplayState extends MusicBeatState
 	function checkForSongsThatMatch(?start:String = '')
 	{
 		var foundSongs:Int = 0;
+		final txt:FlxText = new FlxText(0, 0, 0, 'No songs found matching your query', 16);
+		txt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		txt.scrollFactor.set();
+		txt.screenCenter(XY);
 		for (i in 0...WeekData.weeksList.length) {
 			if(weekIsLocked(WeekData.weeksList[i])) continue;
 
@@ -264,10 +269,19 @@ class FreeplayState extends MusicBeatState
 				}
 			}
 		}
-		if (foundSongs > 0 || start == '')
+		if (foundSongs > 0 || start == ''){
+			if (txt != null)
+				remove(txt); // don't do destroy/kill on this btw
 			regenerateSongs(start);
-		else if (foundSongs <= 0)
+		}
+		else if (foundSongs <= 0){
+			add(txt);
+			new FlxTimer().start(5, function(timer) {
+				if (txt != null)
+					remove(txt);
+			});
 			return;
+		}
 	}
 
 	function regenerateSongs(?start:String = '') {

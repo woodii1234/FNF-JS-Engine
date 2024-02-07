@@ -25,6 +25,7 @@ class Conductor
 	public static var offset:Float = 0;
 
 	//public static var safeFrames:Int = 10;
+	// credits to duskiewhy for making this
 	public static var safeZoneOffset:Float = (ClientPrefs.safeFrames / 60) * 1000; // is calculated in create(), is safeFrames in milliseconds
 	public static var timeScale:Float = Conductor.safeZoneOffset / 180; //max hit window should be 180 right?
 	public static var ROWS_PER_BEAT = 48; // from Stepmania

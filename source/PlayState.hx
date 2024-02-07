@@ -5302,30 +5302,17 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			hitsGiveHealth = true;
 		}
 
-		if (iconP1.animation.numFrames == 3) {
-			if (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20))
-				iconP1.animation.curAnim.curFrame = 1;
-			else if (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80))
-				iconP1.animation.curAnim.curFrame = 2;
-			else
-				iconP1.animation.curAnim.curFrame = 0;
-		} 
-		else {
-			if (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20))
-				iconP1.animation.curAnim.curFrame = 1;
+		// I got special permission from AT to use this from Denpa engine, since the old code was a mess & buggy
+		// or should I say, dennnnpaaaa
+		iconP1.animation.curAnim.curFrame = switch (iconP1.type) {
+			case SINGLE: 0;
+			case WINNING: (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80) ? 2 : (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20) ? 1 : 0));
+            default: (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20) ? 1 : 0);
 		}
-		if (iconP2.animation.numFrames == 3) {
-			if (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80))
-				iconP2.animation.curAnim.curFrame = 1;
-			else if (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20))
-				iconP2.animation.curAnim.curFrame = 2;
-			else 
-				iconP2.animation.curAnim.curFrame = 0;
-		} else {
-			if (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80))
-				iconP2.animation.curAnim.curFrame = 1;
-			else 
-				iconP2.animation.curAnim.curFrame = 0;
+		iconP2.animation.curAnim.curFrame = switch (iconP2.type) {
+			case SINGLE: 0;
+			case WINNING: (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80) ? 1 : (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20) ? 2 : 0));
+            default: (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80) ? 1 : 0);
 		}
 
 		if (FlxG.keys.anyJustPressed(debugKeysCharacter) && !endingSong && !inCutscene && !softlocked) {
