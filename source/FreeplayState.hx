@@ -266,11 +266,6 @@ class FreeplayState extends MusicBeatState
 			var leWeek:WeekData = WeekData.weeksLoaded.get(WeekData.weeksList[i]);
 			for (song in leWeek.songs)
 			{
-				var colors:Array<Int> = song[2];
-				if(colors == null || colors.length < 3)
-				{
-					colors = [146, 113, 253];
-				}
 				if (start != null && start.length > 0) {
 					var songName = song[0].toLowerCase();
 					var s = start.toLowerCase();
@@ -280,7 +275,8 @@ class FreeplayState extends MusicBeatState
 		}
 		if (foundSongs > 0 || start == '')
 			regenerateSongs(start);
-		else if (foundSongs == 0) CoolUtil.coolError("An error occurred when searching: \nThere were no songs that match your search filter!", "JS Engine Anti-Crash Tool");
+		else if (foundSongs <= 0)
+			return;
 	}
 
 	function regenerateSongs(?start:String = '') {
