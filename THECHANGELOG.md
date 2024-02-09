@@ -1,12 +1,8 @@
-1.19.2;
+1.19.1;
 
-Fixes incorrect updater version
-
-1.19.1
 Fixed incorrectly positioned icons when playing as the opponent
 Added an option to remove the taunt on Go
 
-1.19.0
 Removed Android builds (#169)
 Discord RPC issues fixed along with a new icon by mixedopinions19!!
 Added a search bar in Freeplay - Now you can search for a song instead of scrolling through 100 different songs!
