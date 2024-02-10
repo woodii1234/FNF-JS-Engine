@@ -1944,7 +1944,7 @@ class PlayState extends MusicBeatState
 			EngineWatermark.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
 			EngineWatermark.scrollFactor.set();
 			add(EngineWatermark);
-			EngineWatermark.text = SONG.song + " " + CoolUtil.difficultyString() + " |  " + MainMenuState.psychEngineJSVersion;
+			EngineWatermark.text = SONG.song + " " + CoolUtil.difficultyString() + " | JSE " + MainMenuState.psychEngineJSVersion;
 		}
 		if (ClientPrefs.hudType == 'JS Engine') {
 			EngineWatermark = new FlxText(4,FlxG.height * 0.1 - 70,0,"", 15);
@@ -5518,10 +5518,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 									}
 									if (!daNote.isSustainNote) {
 										if (shouldKillNotes)
-										{
 											notes.remove(daNote, true);
-											daNote.destroy();
-										}
 									}
 								}
 						}
@@ -5538,10 +5535,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 								notesHitDateArray.push(Date.now());
 								}
 									if (shouldKillNotes)
-								{
 									notes.remove(daNote, true);
-									daNote.destroy();
-								}
 								}
 								}
 							}
@@ -5560,10 +5554,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 							daNote.active = false;
 							daNote.visible = false;
 							group.remove(daNote, true);
-						if (shouldKillNotes)
-						{
-							daNote.destroy();
-						}
 						}
 					});
 				}
@@ -8844,12 +8834,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			FlxTween.tween(camHUD, {x: -twistShit * camTwistIntensity}, Conductor.crochet * (0.001 * gfSpeed), {ease: FlxEase.linear});
 			FlxTween.tween(camGame, {angle: twistShit * camTwistIntensity}, Conductor.stepCrochet * 0.002, {ease: FlxEase.circOut});
 			FlxTween.tween(camGame, {x: -twistShit * camTwistIntensity}, Conductor.crochet * (0.001 * gfSpeed), {ease: FlxEase.linear});
-		}
-
-		if (generatedMusic)
-		{
-			if (ClientPrefs.showNotes) notes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
-			if (ClientPrefs.showNotes) sustainNotes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 		}
 
 		if (ClientPrefs.iconBopWhen == 'Every Beat' && (iconP1.visible || iconP2.visible)) bopIcons();
