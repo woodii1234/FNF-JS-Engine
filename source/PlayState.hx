@@ -208,8 +208,8 @@ class PlayState extends MusicBeatState
 	public var isEkSong:Bool = false; //we'll use this so that the game doesn't load all notes twice?
 	public var usingEkFile:Bool = false; //we'll also use this so that the game doesn't load all notes twice?
 
-	public var notes:FlxTypedGroup<Note>;
-	public var sustainNotes:FlxTypedGroup<Note>;
+	public var notes:NoteGroup;
+	public var sustainNotes:NoteGroup;
 	public var unspawnNotes:Array<Note> = [];
 	public var unspawnNotesCopy:Array<Note> = [];
 	public var eventNotes:Array<EventNote> = [];
@@ -1755,11 +1755,16 @@ class PlayState extends MusicBeatState
 		}
 			add(timeTxt);
 
-		sustainNotes = new FlxTypedGroup<Note>();
+		sustainNotes = new NoteGroup();
 		add(sustainNotes);
 
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		add(strumLineNotes);
+
+		notes = new NoteGroup();
+		add(notes);
+		notes.visible = ClientPrefs.showNotes; //that was easier than expected
+
 		add(grpNoteSplashes);
 
 
@@ -1793,7 +1798,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		if (unspawnNotes[0] != null) firstNoteStrumTime = unspawnNotes[0].strumTime;
+		if (notes.members[0] != null) firstNoteStrumTime = notes.members[0].strumTime;
 
 		camFollow = FlxPoint.get();
 		camFollowPos = new FlxObject(0, 0, 1, 1);
@@ -3829,14 +3834,6 @@ class PlayState extends MusicBeatState
 				daNote.active = false;
 				daNote.visible = false;
 				daNote.ignoreNote = true;
-
-				if (shouldKillNotes) {
-				daNote.kill();
-				}
-				//unspawnNotes.remove(daNote);
-				if (shouldKillNotes) {
-				daNote.destroy();
-				}
 			}
 			--i;
 		}
@@ -3849,14 +3846,7 @@ class PlayState extends MusicBeatState
 				daNote.active = false;
 				daNote.visible = false;
 				daNote.ignoreNote = true;
-
-				if (shouldKillNotes) {
-				daNote.kill();
-				}
 				notes.remove(daNote, true);
-				if (shouldKillNotes) {
-				daNote.destroy();
-				}
 			}
 			--i;
 		}
@@ -3869,14 +3859,7 @@ class PlayState extends MusicBeatState
 				daNote.active = false;
 				daNote.visible = false;
 				daNote.ignoreNote = true;
-
-				if (shouldKillNotes) {
-				daNote.kill();
-				}
 				sustainNotes.remove(daNote, true);
-				if (shouldKillNotes) {
-				daNote.destroy();
-				}
 			}
 			--i;
 		}
@@ -4093,10 +4076,6 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.songLoading) vocals.pitch = playbackRate;
 		if (ClientPrefs.songLoading) FlxG.sound.list.add(vocals);
 		if (ClientPrefs.songLoading) FlxG.sound.list.add(new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song)));
-
-		notes = new FlxTypedGroup<Note>();
-		add(notes);
-		notes.visible = ClientPrefs.showNotes; //that was easier than expected
 
 		var noteData:Array<SwagSection> = SONG.notes;
 
@@ -4486,6 +4465,9 @@ class PlayState extends MusicBeatState
 			else if (ClientPrefs.mobileMidScroll) insert(members.indexOf(playerStrums), babyArrow);
 				else playerStrums.add(babyArrow);
 			}
+			for (swagNote in unspawnNotes)
+				if (swagNote.noteData == i) swagNote.strum = (swagNote.mustPress ? playerStrums : opponentStrums).members[swagNote.noteData];
+
 
 			strumLineNotes.add(babyArrow);
 			babyArrow.postAddedToGroup();
@@ -5495,13 +5477,10 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				{
 					for (group in [notes, sustainNotes]) group.forEachAlive(function(daNote:Note) 
 					{
-						if (ClientPrefs.showNotes)
+						if (ClientPrefs.showNotes && daNote.exists)
 						{
-						final strumGroup:FlxTypedGroup<StrumNote> = daNote.mustPress ? playerStrums : opponentStrums;
-
-							final strum:StrumNote = strumGroup.members[daNote.noteData];
-							daNote.followStrumNote(strum, (60 / SONG.bpm) * 1000, songSpeed);
-							if(daNote.isSustainNote && strum.sustainReduce) daNote.clipToStrumNote(strum);
+							daNote.followStrumNote(daNote.strum, (60 / SONG.bpm) * 1000, songSpeed);
+							if(daNote.isSustainNote && daNote.strum.sustainReduce) daNote.clipToStrumNote(daNote.strum);
 						}
 
 						if (!daNote.mustPress && !daNote.hitByOpponent && !daNote.ignoreNote && daNote.strumTime <= Conductor.songPosition)
@@ -5517,43 +5496,40 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 										}
 									}
 									if (!daNote.isSustainNote) {
-										if (shouldKillNotes)
-											notes.remove(daNote, true);
+										notes.remove(daNote, true);
 									}
 								}
 						}
 
-						if(daNote.mustPress && cpuControlled) {
-							if(daNote.strumTime + (ClientPrefs.communityGameBot ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition) {
+						if(daNote.mustPress) {
+							if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
+							{
+								if (daNote.mustPress && (!cpuControlled || cpuControlled && ClientPrefs.communityGameBot) &&!daNote.ignoreNote && !endingSong && !daNote.wasGoodHit) {
+									noteMiss(daNote);
+									if (ClientPrefs.missSoundShit)
+									{
+										FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
+									}
+								}
+
+								daNote.active = false;
+								daNote.visible = false;
+								group.remove(daNote, true);
+							}
+							if(cpuControlled && daNote.strumTime + (ClientPrefs.communityGameBot ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition) {
 								if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) goodNoteHit(daNote);
 								if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
 								{
-								if (!daNote.isSustainNote) {
-								totalNotesPlayed += 1 * polyphony;
-								if (ClientPrefs.showNPS) {
-								notesHitArray.push(1 * polyphony);
-								notesHitDateArray.push(Date.now());
-								}
-									if (shouldKillNotes)
-									notes.remove(daNote, true);
-								}
+									if (!daNote.isSustainNote) {
+										totalNotesPlayed += 1 * polyphony;
+										if (ClientPrefs.showNPS) {
+											notesHitArray.push(1 * polyphony);
+											notesHitDateArray.push(Date.now());
+										}
+										notes.remove(daNote, true);
+									}
 								}
 							}
-						}
-
-						if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
-						{
-							if (daNote.mustPress && (!cpuControlled || cpuControlled && ClientPrefs.communityGameBot) &&!daNote.ignoreNote && !endingSong && !daNote.wasGoodHit) {
-								noteMiss(daNote);
-								if (ClientPrefs.missSoundShit)
-								{
-								FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
-								}
-						}
-
-							daNote.active = false;
-							daNote.visible = false;
-							group.remove(daNote, true);
 						}
 					});
 				}
@@ -6646,32 +6622,25 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 						{
 							if (n.strumTime >= startPoint)
 							{
-							n.active = true;
-							n.visible = true;
-							n.wasGoodHit = false;
-							n.tooLate = false;
-							n.canBeHit = false;
-							n.hitByOpponent = false;
-							n.spawned = false;
-							n.alpha = 1;
-							n.clipRect = null;
-							if (n.mustPress && !n.isSustainNote)
-							{
-							totalNotes += 1;
-							} else if (!n.mustPress && !n.isSustainNote) {
-							opponentNoteTotal += 1;
+								n.active = true;
+								n.visible = true;
+								n.wasGoodHit = false;
+								n.tooLate = false;
+								n.canBeHit = false;
+								n.hitByOpponent = false;
+								n.spawned = false;
+								n.alpha = 1;
+								n.clipRect = null;
+								if (n.mustPress && !n.isSustainNote)
+								{
+									totalNotes += 1;
+								} else if (!n.mustPress && !n.isSustainNote) {
+									opponentNoteTotal += 1;
+								}
+							} else {
+								notes.remove(n);
+								unspawnNotes.remove(n);
 							}
-						} else {
-							n.active = false;
-							n.visible = false;
-							n.wasGoodHit = true;
-							n.tooLate = false;
-							n.canBeHit = false;
-							n.hitByOpponent = true;
-							n.spawned = true;
-							n.alpha = 0;
-							n.clipRect = null;
-						}
 						}
 	}
 
@@ -6888,10 +6857,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			var daNote:Note = notes.members[0];
 			daNote.active = false;
 			daNote.visible = false;
-
-			daNote.kill();
 			notes.remove(daNote, true);
-			daNote.destroy();
 		}
 		unspawnNotes = [];
 		eventNotes = [];
@@ -7515,15 +7481,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					{
 						for (doubleNote in pressNotes) {
 							if (Math.abs(doubleNote.strumTime - epicNote.strumTime) < 1) {
-							if (shouldKillNotes)
-							{
-								doubleNote.kill();
-							}
 								notes.remove(doubleNote, true);
-							if (shouldKillNotes)
-							{
-								doubleNote.destroy();
-							}
 							} else
 								notesStopped = true;
 						}
@@ -7718,20 +7676,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 	}
 
 	function noteMiss(daNote:Note):Void { //You didn't hit the key and let it go offscreen, also used by Hurt Notes
-		//Dupe note remove
-		for (group in [notes, sustainNotes]) group.forEachAlive(function(note:Note) {
-			if (daNote != note && daNote.mustPress && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 1) {
-				if (shouldKillNotes)
-				{
-					note.kill();
-				}
-				group.remove(note, true);
-				if (shouldKillNotes)
-				{
-					note.destroy();
-				}
-			}
-		});
 		if (combo > 0)
 			combo = 0;
 		else combo -= 1;
@@ -7889,10 +7833,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				if (!note.isSustainNote)
 				{
 					if (ClientPrefs.showNotes) notes.remove(note, true);
-					if (shouldKillNotes)
-					{
-						note.destroy();
-					}
 				}
 				return;
 			}
@@ -8209,11 +8149,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 			if (!note.isSustainNote)
 			{
-				notes.remove(note, true);
-				if (shouldKillNotes)
-				{
-					note.destroy();
-				}
+				if (ClientPrefs.showNotes) notes.remove(note, true);
 			}
 			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
 			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
@@ -8380,10 +8316,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					}
 				enemyHits += 1 * polyphony;
 				if (ClientPrefs.showNotes) notes.remove(daNote, true);
-				if (shouldKillNotes)
-				{
-					daNote.destroy();
-				}
 			}
 			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
 			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();

@@ -99,6 +99,8 @@ class Note extends FlxSprite
 	public var ratingMod:Float = 0; //9 = unknown, 0.25 = shit, 0.5 = bad, 0.75 = good, 1 = sick
 	public var ratingDisabled:Bool = false;
 
+	public var strum:StrumNote = null;
+
 	public var loadSprite:Bool = false;
 	public var inEkSong:Bool = false;
 
@@ -667,7 +669,6 @@ class Note extends FlxSprite
 			if (!dumbHitboxThing)
 				updateHitbox();
 
-		final angleDir = strum.direction * Math.PI / 180;
 		if (copyAngle)
 			angle = strum.direction - 90 + strum.angle + offsetAngle;
 
@@ -675,11 +676,11 @@ class Note extends FlxSprite
 			alpha = strum.alpha * multAlpha;
 
 		if(copyX)
-			x = strum.x + offsetX + Math.cos(angleDir) * distance;
+			x = strum.x + offsetX + Math.cos(strum.direction * Math.PI / 180) * distance;
 
 		if(copyY)
 		{
-			y = strum.y + offsetY + correctionOffset + Math.sin(angleDir) * distance;
+			y = strum.y + offsetY + correctionOffset + Math.sin(strum.direction * Math.PI / 180) * distance;
 			if(strum.downScroll && isSustainNote)
 			{
 				if(PlayState.isPixelStage)
