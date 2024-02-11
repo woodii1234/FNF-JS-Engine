@@ -9,6 +9,7 @@ import flash.display.BitmapData;
 import editors.ChartingState;
 import flixel.util.FlxPool;
 import flixel.math.FlxRect;
+import flixel.group.FlxGroup.FlxTypedGroup;
 import openfl.system.System;
 import NoteShader.ColoredNoteShader;
 

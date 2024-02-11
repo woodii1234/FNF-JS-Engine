@@ -4694,7 +4694,7 @@ class PlayState extends MusicBeatState
 
 		if (ClientPrefs.showcaseMode && ClientPrefs.showNotes)
 		{
-			botplayTxt.text = 'Rendered Notes: ${FlxStringUtil.formatMoney(notes.length + sustainNotes.length, false)}\nNPS: ${FlxStringUtil.formatMoney(nps, false)}/${FlxStringUtil.formatMoney(maxNPS, false)}\nOpp NPS: ${FlxStringUtil.formatMoney(oppNPS, false)}/${FlxStringUtil.formatMoney(maxOppNPS, false)}';
+			botplayTxt.text = 'Rendered Notes: ${FlxStringUtil.formatMoney(notes.length, false)}\nNPS: ${FlxStringUtil.formatMoney(nps, false)}/${FlxStringUtil.formatMoney(maxNPS, false)}\nOpp NPS: ${FlxStringUtil.formatMoney(oppNPS, false)}/${FlxStringUtil.formatMoney(maxOppNPS, false)}';
 		}
 		if (ClientPrefs.showcaseMode && !ClientPrefs.showNotes)
 		{
@@ -5862,6 +5862,10 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 			case 'Credits Popup':
 			{
+				var string1:String = value1;
+				if (value1 == '') string1 = SONG.song;
+				var string2:String = value2;
+				if (value2 == '') string2 = SONG.songCredit;
 			var creditsPopup:CreditsPopUp = new CreditsPopUp(FlxG.width, 200, value1, value2);
 				creditsPopup.camera = camHUD;
 				creditsPopup.scrollFactor.set();
@@ -6210,13 +6214,11 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				}
 
 			case 'Change Song Name':
-				if (value1.length > 1)
-					SONG.song = value1;
-				else SONG.song = curSong;
-
 				if(ClientPrefs.timeBarType == 'Song Name' && !ClientPrefs.timebarShowSpeed)
 				{
-					timeTxt.text = SONG.song;
+					if (value1.length > 1)
+						timeTxt.text = value1;
+					else timeTxt.text = curSong;
 				}
 
 			case 'Set Property':
@@ -8147,10 +8149,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			callOnLuas('goodNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
 			callOnLuas((opponentChart ? 'opponentNoteHitFix' : 'goodNoteHitFix'), [notes.members.indexOf(note), leData, leType, isSus]);
 
-			if (!note.isSustainNote)
-			{
 				if (ClientPrefs.showNotes) notes.remove(note, true);
-			}
 			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
 			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
            		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
