@@ -36,6 +36,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var instaRestart:Bool = false;
 	public static var charsAndBG:Bool = true;
 	public static var lowQuality:Bool = false;
+	public static var smoothHPBug:Bool = false;
 	public static var shaders:Bool = true;
 	public static var framerate:Int = 60;
 	public static var cursing:Bool = true;
@@ -246,6 +247,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.debugInfo = debugInfo;
 		FlxG.save.data.scoreTxtSize = scoreTxtSize;
 		FlxG.save.data.lowQuality = lowQuality;
+		FlxG.save.data.smoothHPBug = smoothHPBug;
 		FlxG.save.data.shaders = shaders;
 		FlxG.save.data.ezSpam = ezSpam;
 		FlxG.save.data.evenLessBotLag = evenLessBotLag;
@@ -729,6 +731,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.lowQuality != null) {
 			lowQuality = FlxG.save.data.lowQuality;
+		}
+		if(FlxG.save.data.smoothHPBug != null) {
+			smoothHPBug = FlxG.save.data.smoothHPBug;
 		}
 		if(FlxG.save.data.ratingCounter != null) {
 			ratingCounter = FlxG.save.data.ratingCounter;

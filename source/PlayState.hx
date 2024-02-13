@@ -179,8 +179,6 @@ class PlayState extends MusicBeatState
 	var curTime:Float = 0;
 	var songCalc:Float = 0;
 
-	public static var angelNoteDamage:Array<Float> = [-2, -0.5, 0.5, 1, 1.25]; //the array of healths that the angel note should give when hit from worst to best
-
 	public var spawnTime:Float = 1600; //just enough for the notes to barely inch off the screen
 	public var changedSpawnTime:Float = 1600; //just enough for the notes to barely inch off the screen
 	
@@ -275,7 +273,6 @@ class PlayState extends MusicBeatState
 
 	private var healthBarBG:AttachedSprite; //The image used for the health bar.
 	public var healthBar:FlxBar;
-	public var overhealthBar:FlxBar; //The health bar that's used when you exceed the normal max health.
 	var songPercent:Float = 0;
 	var songPercentThing:Float = 0;
 	var playbackRateDecimal:Float = 0;
@@ -314,8 +311,6 @@ class PlayState extends MusicBeatState
 	public static var changedDifficulty:Bool = false;
 	public static var chartingMode:Bool = false;
 	public static var playerIsCheating:Bool = false; //Whether the player is cheating. Enables if you change BOTPLAY or Practice Mode in the Pause menu
-
-	public static var hitsGiveHealth:Bool = true; //Whether note hits can give health. If you reach the normal max health, this will be disabled.
 
 	public var shownScore:Float = 0;
 
@@ -461,7 +456,7 @@ class PlayState extends MusicBeatState
 	public var oppScore:Float = 0;
 	public var songScore:Float = 0;
 	public var songHits:Int = 0;
-	public var songMisses:Int = 0;
+	public var songMisses:Float = 0;
 	public var scoreTxt:FlxText;
 	var comboTxt:FlxText;
 	var missTxt:FlxText;
@@ -565,7 +560,7 @@ class PlayState extends MusicBeatState
         	var compactCombo:String = formatCompactNumber(combo);
         	var compactMaxCombo:String = formatCompactNumber(maxCombo);
 		var compactScore:String = formatCompactNumber(songScore);
-		var compactMisses:String = formatCompactNumberInt(songMisses);
+		var compactMisses:String = formatCompactNumber(songMisses);
 		var compactNPS:String = formatCompactNumber(nps);
 		var compactTotalPlays:String = formatCompactNumber(totalNotesPlayed);
 		theListBotplay = CoolUtil.coolTextFile(Paths.txt('botplayText'));
@@ -1900,12 +1895,6 @@ class PlayState extends MusicBeatState
 		healthBar.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 		healthBar.alpha = ClientPrefs.healthBarAlpha;
 		insert(members.indexOf(healthBarBG), healthBar);
-
-		overhealthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this, 'health', maxHealth, maxHealth * 2);
-		overhealthBar.scrollFactor.set();
-		overhealthBar.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-		overhealthBar.alpha = ClientPrefs.healthBarAlpha;
-		insert(members.indexOf(healthBarBG), overhealthBar);
 		healthBarBG.sprTracker = healthBar;
 		
 		iconP1 = new HealthIcon(boyfriend.healthIcon, true);
@@ -2184,12 +2173,11 @@ class PlayState extends MusicBeatState
 			scoreTxt.destroy();
 			healthBarBG.visible = false;
 			healthBar.visible = false;
-			overhealthBar.visible = false;
 			iconP2.visible = iconP1.visible = false;
 		}
 		if (ClientPrefs.hideHud) {
 			scoreTxt.destroy();
-			final daArray:Array<Dynamic> = [botplayTxt, healthBarBG, healthBar, overhealthBar, iconP2, iconP1];
+			final daArray:Array<Dynamic> = [botplayTxt, healthBarBG, healthBar, iconP2, iconP1];
                         for (i in daArray){
 				if (i != null)
 					i.visible = false;
@@ -2367,7 +2355,6 @@ class PlayState extends MusicBeatState
 		notes.cameras = [camHUD];
 		sustainNotes.cameras = [camHUD];
 		healthBar.cameras = [camHUD];
-		overhealthBar.cameras = [camHUD];
 		healthBarBG.cameras = [camHUD];
 		iconP1.cameras = [camHUD];
 		iconP2.cameras = [camHUD];
@@ -2715,10 +2702,8 @@ class PlayState extends MusicBeatState
 		if (!ClientPrefs.ogHPColor) {
 				healthBar.createFilledBar(FlxColor.fromRGB(leftColorArray[0], leftColorArray[1], leftColorArray[2]),
 				FlxColor.fromRGB(rightColorArray[0], rightColorArray[1], rightColorArray[2]));
-				!opponentChart ? overhealthBar.createFilledBar(0x00000000, FlxColor.fromRGB(boyfriend.healthColorArray[0] + 30, boyfriend.healthColorArray[1] + 50, boyfriend.healthColorArray[2] + 30)) : overhealthBar.createFilledBar(0x00000000, FlxColor.fromRGB(dad.healthColorArray[0] + 30, dad.healthColorArray[1] + 50, dad.healthColorArray[2] + 30));
 		} else if (ClientPrefs.ogHPColor) {
 				healthBar.createFilledBar(0xFFFF0000, 0xFF66FF33);
-				!opponentChart ? overhealthBar.createFilledBar(0x00000000, 0xFFFFFF00) : overhealthBar.createFilledBar(0x00000000, 0xFF8B0000);
 		}
 
 		healthBar.updateBar();
@@ -3488,7 +3473,7 @@ class PlayState extends MusicBeatState
         	compactCombo = formatCompactNumber(combo);
         	compactMaxCombo = formatCompactNumber(maxCombo);
 		compactScore = formatCompactNumber(songScore);
-		compactMisses = formatCompactNumberInt(songMisses);
+		compactMisses = formatCompactNumber(songMisses);
 		compactNPS = formatCompactNumber(nps);
 		compactTotalPlays = formatCompactNumber(totalNotesPlayed);
     }
@@ -5226,7 +5211,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 		if (ClientPrefs.smoothHealth && ClientPrefs.smoothHealthType == 'Golden Apple 1.5') //really makes it feel like the gapple 1.5 build's health tween
 		{
-			final percent:Float = 1 - FlxMath.bound(displayedHealth, 0, maxHealth) / maxHealth; //checks if you're playing as the opponent. if so, uses the negative percent, otherwise uses the normal one
+			final percent:Float = 1 - (ClientPrefs.smoothHPBug ? (displayedHealth / maxHealth) : (FlxMath.bound(displayedHealth, 0, maxHealth) / maxHealth));
+
 			iconP1.x = 0 + healthBar.x + (healthBar.width * percent) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
 			iconP2.x = 0 + healthBar.x + (healthBar.width * percent) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
 		}
@@ -5269,19 +5255,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					endSong();
 				}
 
-		if (health > maxHealth * 2)
-			health = maxHealth * 2;
-
-
-		if (health > maxHealth && hitsGiveHealth)
+		if (health > maxHealth)
 		{
 			health = maxHealth;
-			hitsGiveHealth = false;
-		}
-
-		if (health < maxHealth && !hitsGiveHealth)
-		{
-			hitsGiveHealth = true;
 		}
 
 		// I got special permission from AT to use this from Denpa engine, since the old code was a mess & buggy
@@ -6681,7 +6657,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				persistentUpdate = false;
 				persistentDraw = true;
 				paused = true;
-				openSubState(new ResultsScreenSubState([perfects, sicks, goods, bads, shits], Std.int(songScore), songMisses, Highscore.floorDecimal(ratingPercent * 100, 2),
+				openSubState(new ResultsScreenSubState([perfects, sicks, goods, bads, shits], Std.int(songScore), Std.int(songMisses), Highscore.floorDecimal(ratingPercent * 100, 2),
 								ratingName + (' [' + ratingFC + '] ')));
 			} else {
 			endedTheSong = true;
@@ -6739,7 +6715,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			if (isStoryMode)
 			{
 				campaignScore += songScore;
-				campaignMisses += songMisses;
+				campaignMisses += Std.int(songMisses);
 
 				storyPlaylist.remove(storyPlaylist[0]);
 
@@ -7079,17 +7055,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		{	
 			noteMiss(note);
 		}
-		if (hitsGiveHealth || note.bypassHPGainLimit)
 			switch (ClientPrefs.healthGainType)
 			{
-				case 'VS Impostor':
-					switch(daRating.name)
-					{
-						case 'perfect', 'sick': health += note.hitHealth * healthGain * polyphony;
-						case 'good': health += note.hitHealth * 0.5 * healthGain * polyphony;
-						case 'bad': health += note.hitHealth * 0.25 * healthGain * polyphony;
-						case 'shit': health += note.hitHealth * 0.1 * healthGain * polyphony;
-					}
 				case 'Leather Engine':
 					switch(daRating.name)
 					{
@@ -7104,7 +7071,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 						case 'perfect', 'sick': health += (ClientPrefs.healthGainType == 'Doki Doki+' ? 0.077 : 0.1) * healthGain * polyphony;
 						case 'good': health += 0.04 * healthGain * polyphony;
 						case 'bad': health -= 0.06 * healthGain * polyphony;
-						case 'shit': health -= (ClientPrefs.healthGainType == 'Doki Doki+' ? 0.1 : 0.2) * healthGain * polyphony;
+						case 'shit': health -= (ClientPrefs.healthGainType == 'Doki Doki+' ? 0.1 : 0.2) * healthLoss * polyphony;
 					}
 				case 'Kade (1.6+)':
 					switch(daRating.name)
@@ -7680,7 +7647,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 	function noteMiss(daNote:Note):Void { //You didn't hit the key and let it go offscreen, also used by Hurt Notes
 		if (combo > 0)
 			combo = 0;
-		else combo -= 1;
+		else combo -= 1 * polyphony;
     		comboMultiplier = 1; // Reset to 1 on a miss
 		if (health > 0)
 		{
@@ -7702,7 +7669,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 		//For testing purposes
 		//trace(daNote.missHealth);
-		songMisses++;
+		songMisses += 1 * polyphony;
 		vocals.volume = 0;
 		if(!practiceMode) songScore -= 10 * Std.int(polyphony);
 
@@ -7953,26 +7920,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			if (combo > maxCombo)
 				maxCombo = combo;
 
-			if (note.noteType == 'Angel Note')
-			{
-				final noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset);
-				final daRating:Rating = Conductor.judgeNote(note, noteDiff / playbackRate);
-				switch(daRating.name)
-					{
-						case 'perfect': health += angelNoteDamage[4] * healthGain * polyphony;
-						case 'sick': health += angelNoteDamage[3] * healthGain * polyphony;
-						case 'good': health += angelNoteDamage[2] * healthGain * polyphony;
-						case 'bad': 
-							!opponentChart ? boyfriend : dad.playAnim('hurt', true);
-							health += angelNoteDamage[1] * healthGain * polyphony;
-						case 'shit': 
-							!opponentChart ? boyfriend : dad.playAnim('hurt', true);
-							health += angelNoteDamage[0] * healthGain * polyphony;
-					}
-			}
-
 			if (ClientPrefs.healthGainType == 'Psych Engine' || ClientPrefs.healthGainType == 'Leather Engine' || ClientPrefs.healthGainType == 'Kade (1.2)' || ClientPrefs.healthGainType == 'Kade (1.6+)' || ClientPrefs.healthGainType == 'Doki Doki+' || ClientPrefs.healthGainType == 'VS Impostor') {
-				if (hitsGiveHealth || note.bypassHPGainLimit) health += note.hitHealth * healthGain * polyphony;
+				health += note.hitHealth * healthGain * polyphony;
 			}
 			if(!note.noAnimation && ClientPrefs.charsAndBG && charAnimsFrame < 4) {
 				charAnimsFrame += 1;

@@ -1430,10 +1430,8 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "changeMaxHealth", function(value:Float = 0) {
 			{
 				var bar = PlayState.instance.healthBar;
-				var bar2 = PlayState.instance.overhealthBar;
 				PlayState.instance.maxHealth = value;
 				bar.setRange(0, value);
-				bar2.setRange(value, value * 2);
 			}
 		});
 		Lua_helper.add_callback(lua, "getMaxHealth", function() {

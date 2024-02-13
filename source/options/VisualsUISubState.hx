@@ -266,6 +266,13 @@ class VisualsUISubState extends BaseOptionsMenu
 			['Golden Apple 1.5', 'Indie Cross']);
 		addOption(option);
 
+		var option:Option = new Option('Smooth Health Bug',
+			'This was too cool to be removed, apparently.\nIf checked the icons will be able to go past the normal boundaries of the health bar.',
+			'smoothHPBug',
+			'bool',
+			false);
+		addOption(option);
+
 		var option:Option = new Option('Denpa Engine Health Bug', //ill remove this at the request of AT - Jordan Santiago
 			'If checked, well.. replicates the health drain bug in Denpa Engine.',
 			'denpaDrainBug',
