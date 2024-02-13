@@ -207,7 +207,7 @@ class PlayState extends MusicBeatState
 	public var usingEkFile:Bool = false; //we'll also use this so that the game doesn't load all notes twice?
 
 	public var notes:NoteGroup;
-	public var sustainNotes:NoteGroup;
+	public var sustainNotes:FlxTypedGroup<Note>;
 	public var unspawnNotes:Array<Note> = [];
 	public var unspawnNotesCopy:Array<Note> = [];
 	public var eventNotes:Array<EventNote> = [];
@@ -1750,7 +1750,7 @@ class PlayState extends MusicBeatState
 		}
 			add(timeTxt);
 
-		sustainNotes = new NoteGroup();
+		sustainNotes = new FlxTypedGroup<Note>();
 		add(sustainNotes);
 
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
@@ -4155,7 +4155,7 @@ class PlayState extends MusicBeatState
 
 				var oldNote:Note = unspawnNotes.length > 0 ? unspawnNotes[Std.int(unspawnNotes.length - 1)] : null;
 
-				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, (gottaHitNote ? boyfriend.noteskin : dad.noteskin), false, false, !isEkSong);
+				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, (gottaHitNote ? bfNoteskin : dadNoteskin), false, false, !isEkSong);
 				if (ClientPrefs.doubleGhost)
 					{
 					swagNote.row = Conductor.secsToRow(daStrumTime);
@@ -4415,7 +4415,7 @@ class PlayState extends MusicBeatState
 				else if(ClientPrefs.middleScroll) targetAlpha = ClientPrefs.oppNoteAlpha;
 			}
 
-			var noteSkinExists:Bool = FileSystem.exists('assets/images/' + "noteskins/" + (player == 0 ? dad.noteskin : boyfriend.noteskin));
+			var noteSkinExists:Bool = FileSystem.exists("assets/shared/images/noteskins/" + (player == 0 ? dadNoteskin : bfNoteskin)) || FileSystem.exists(Paths.modsImages("noteskins/" + (player == 0 ? dadNoteskin : bfNoteskin)));
 
 			var babyArrow:StrumNote = new StrumNote(ClientPrefs.middleScroll || ClientPrefs.mobileMidScroll ? STRUM_X_MIDDLESCROLL : STRUM_X, strumLine.y, i, player);
 			babyArrow.downScroll = ClientPrefs.downScroll;
@@ -6084,24 +6084,24 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				}
 				if (!ClientPrefs.ogHPColor) reloadHealthBarColors(dad.healthColorArray, boyfriend.healthColorArray);
 				var noteSkinExists:Bool = false;
-				if (unspawnNotes[0] != null) noteSkinExists = FileSystem.exists('assets/images/' + "noteskins/" + (!unspawnNotes[0].mustPress ? dad.noteskin : boyfriend.noteskin));
+						noteSkinExists = FileSystem.exists("assets/shared/images/noteskins/" + (charType == 1 ? dadNoteskin : bfNoteskin)) || FileSystem.exists(Paths.modsImages("noteskins/" + (charType == 1 ? dadNoteskin : bfNoteskin)));
 				if (ClientPrefs.showNotes && noteSkinExists)
 				{
 					for (i in 0...unspawnNotes.length)
 					{
-						if (unspawnNotes[i].loadSprite) unspawnNotes[i].updateNoteSkin(unspawnNotes[i].mustPress ? boyfriend.noteskin : dad.noteskin);
+						if (unspawnNotes[i].loadSprite && !unspawnNotes[i].gfNote) unspawnNotes[i].updateNoteSkin(unspawnNotes[i].mustPress ? bfNoteskin : dadNoteskin);
 					}
 				
 					for (n in notes.members)
 					{
-						if (n.loadSprite) n.updateNoteSkin(n.mustPress ? boyfriend.noteskin : dad.noteskin);
+						if (n.loadSprite) n.updateNoteSkin(n.mustPress ? bfNoteskin : dadNoteskin);
 					}
 					for (s in sustainNotes.members)
 					{
-						if (s.loadSprite) s.updateNoteSkin(s.mustPress ? boyfriend.noteskin : dad.noteskin);
+						if (s.loadSprite) s.updateNoteSkin(s.mustPress ? bfNoteskin : dadNoteskin);
 					}
 					for (i in strumLineNotes.members)
-						i.updateNoteSkin(i.player == 0 ? dad.noteskin : boyfriend.noteskin);
+						i.updateNoteSkin(i.player == 0 ? dadNoteskin : bfNoteskin);
 				}
 				if (ClientPrefs.noteColorStyle == 'Char-Based')
 				{

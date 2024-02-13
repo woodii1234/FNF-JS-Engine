@@ -1018,30 +1018,36 @@ class ChartingState extends MusicBeatState
 
 			var daSec = FlxMath.maxInt(curSec, value);
 
-			for (note in _song.notes[daSec - value].sectionNotes)
+			if (check_notesSec.checked)
 			{
-				var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(daSec) * 4 * value);
+				for (note in _song.notes[daSec - value].sectionNotes)
+				{
+					var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(daSec) * 4 * value);
 
-
-				var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
-				_song.notes[daSec].sectionNotes.push(copiedNote);
+	
+					var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
+					_song.notes[daSec].sectionNotes.push(copiedNote);
+				}
 			}
 
-			var startThing:Float = sectionStartTime(-value);
-			var endThing:Float = sectionStartTime(-value + 1);
-			for (event in _song.events)
+			if (check_eventsSec.checked)
 			{
-				var strumTime:Float = event[0];
-				if(endThing > event[0] && event[0] >= startThing)
+				var startThing:Float = sectionStartTime(-value);
+				var endThing:Float = sectionStartTime(-value + 1);
+				for (event in _song.events)
 				{
-					strumTime += Conductor.stepCrochet * (getSectionBeats(daSec) * 4 * value);
-					var copiedEventArray:Array<Dynamic> = [];
-					for (i in 0...event[1].length)
+					var strumTime:Float = event[0];
+					if(endThing > event[0] && event[0] >= startThing)
 					{
-						var eventToPush:Array<Dynamic> = event[1][i];
-						copiedEventArray.push([eventToPush[0], eventToPush[1], eventToPush[2]]);
+						strumTime += Conductor.stepCrochet * (getSectionBeats(daSec) * 4 * value);
+						var copiedEventArray:Array<Dynamic> = [];
+						for (i in 0...event[1].length)
+						{
+							var eventToPush:Array<Dynamic> = event[1][i];
+							copiedEventArray.push([eventToPush[0], eventToPush[1], eventToPush[2]]);
+						}
+						_song.events.push([strumTime, copiedEventArray]);
 					}
-					_song.events.push([strumTime, copiedEventArray]);
 				}
 			}
 			updateGrid(false);
@@ -1172,26 +1178,29 @@ class ChartingState extends MusicBeatState
 			}
 			saveUndo(_song); //I don't even know why.
 
-			for(i in 0...value2) {
-			for (note in _song.notes[daSec - value1].sectionNotes)
+			if (check_notesSec.checked)
 			{
-				var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(daSec - value1) * 4 * value1);
+				for(i in 0...value2) {
+				for (note in _song.notes[daSec - value1].sectionNotes)
+				{
+					var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(daSec - value1) * 4 * value1);
 
 
-				var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
-				_song.notes[daSec].sectionNotes.push(copiedNote);
-			}
-				if (curSection - value1 < 0)
-				{
-				trace ("value1's section is less than 0 LMAO");
-				break;
+					var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
+					_song.notes[daSec].sectionNotes.push(copiedNote);
 				}
-				if (_song.notes[curSec + 1] == null)
-				{
-					addSection(getSectionBeats());
+					if (curSection - value1 < 0)
+					{
+					trace ("value1's section is less than 0 LMAO");
+					break;
+					}
+					if (_song.notes[curSec + 1] == null)
+					{
+						addSection(getSectionBeats());
+					}
+					changeSection(curSec+1);
+					daSec = FlxMath.maxInt(curSec, Std.int(CopyLastSectionCount.value)-1);
 				}
-				changeSection(curSec+1);
-				daSec = FlxMath.maxInt(curSec, Std.int(CopyLastSectionCount.value)-1);
 			}
 			updateGrid(false);
 		});

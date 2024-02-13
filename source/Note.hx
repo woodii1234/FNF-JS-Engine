@@ -308,7 +308,7 @@ class Note extends FlxSprite
 		return value;
 	}
 
-	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?noteskin:String, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?loadSprite:Bool = true)
+	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?noteskinToLoad:String, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?loadSprite:Bool = true)
 	{
 		super();
 
@@ -327,6 +327,7 @@ class Note extends FlxSprite
 		y -= 2000;
 		this.strumTime = strumTime;
 		if(!inEditor) this.strumTime += ClientPrefs.noteOffset;
+		var noteskin:String = noteskinToLoad;
 
 		this.noteData = noteData;
 
