@@ -1,7 +1,7 @@
 package options;
 
 #if desktop
-import Discord.DiscordClient;
+import DiscordClient;
 #end
 import flash.text.TextField;
 import Note;
@@ -99,6 +99,13 @@ class VisualsUISubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
+		var option:Option = new Option("Taunt on 'GO'",
+			"If checked, the characters will taunt on GO when you play.",
+			'tauntOnGo',
+			'bool',
+			true);
+		addOption(option);
+
 		var option:Option = new Option('Showcase Mode',
 			'If checked, hides all the UI elements except for the time bar and notes\nand enables Botplay.',
 			'showcaseMode',
@@ -164,22 +171,6 @@ class VisualsUISubState extends BaseOptionsMenu
 
 		option.minValue = 0;
 		option.maxValue = 100;
-		
-		/* ignore this i was just making a joke about fnf's naughtiness option
-		var option:Option = new Option('Family Friendly Mode',
-			'If checked, makes everything family-friendly. Always remember to watch your Ps and Qs!',
-			'family',
-			'bool',
-			false);
-		addOption(option);
-		// and this is scrapped now
-		var option:Option = new Option('Color Quantization',
-			'If checked, notes are colored based on their quantization.',
-			'colorQuants',
-			'bool',
-			false);
-		addOption(option);
-		*/
 
 		var option:Option = new Option('Note Color Style: ',
 			"How would you like your notes colored?",
@@ -273,6 +264,13 @@ class VisualsUISubState extends BaseOptionsMenu
 			'string',
 			'Golden Apple 1.5',
 			['Golden Apple 1.5', 'Indie Cross']);
+		addOption(option);
+
+		var option:Option = new Option('Smooth Health Bug',
+			'This was too cool to be removed, apparently.\nIf checked the icons will be able to go past the normal boundaries of the health bar.',
+			'smoothHPBug',
+			'bool',
+			false);
 		addOption(option);
 
 		var option:Option = new Option('Denpa Engine Health Bug', //ill remove this at the request of AT - Jordan Santiago
@@ -567,6 +565,15 @@ class VisualsUISubState extends BaseOptionsMenu
 			'bool',
 			true);
 		addOption(option);
+
+		#if DISCORD_ALLOWED
+		var option:Option = new Option('Discord Rich Presence',
+			"Uncheck this to prevent accidental leaks, it will hide the Application from your \"Playing\" box on Discord",
+			'discordRPC',
+			'bool',
+			true);
+		addOption(option);
+		#end
 
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length-1]];
 

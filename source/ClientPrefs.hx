@@ -36,6 +36,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var instaRestart:Bool = false;
 	public static var charsAndBG:Bool = true;
 	public static var lowQuality:Bool = false;
+	public static var smoothHPBug:Bool = false;
 	public static var shaders:Bool = true;
 	public static var framerate:Int = 60;
 	public static var cursing:Bool = true;
@@ -43,7 +44,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var showMaxScore:Bool = true;
 	public static var longHPBar:Bool = false;
 	public static var moreMaxHP:Bool = false;
-	public static var songPercentage:Bool = true;
+	public static var tauntOnGo:Bool = true;
 	public static var autosaveInterval:Float = 5.0;
 	public static var noteMotionBlur:Bool = false;
 	public static var noteColorStyle:String = 'Normal';
@@ -52,6 +53,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var minCGBMS:Int = 5;
 	public static var maxCGBMS:Int = 5;
 	public static var autosaveCharts:Bool = true;
+	public static var discordRPC:Bool = true;
 	public static var tipTexts:Bool = true;
 	public static var antiCheatEnable:Bool = false;
 	public static var showRamUsage:Bool = true;
@@ -152,7 +154,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var healthBarAlpha:Float = 1;
 	public static var laneUnderlayAlpha:Float = 1;
 	public static var laneUnderlay:Bool = false;
-	public static var controllerMode:Bool = #if android true #else false #end;
+	public static var controllerMode:Bool = false;
 	public static var hitsoundVolume:Float = 0;
 	public static var pauseMusic:String = 'Tea Time';
 	public static var checkForUpdates:Bool = true;
@@ -245,6 +247,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.debugInfo = debugInfo;
 		FlxG.save.data.scoreTxtSize = scoreTxtSize;
 		FlxG.save.data.lowQuality = lowQuality;
+		FlxG.save.data.smoothHPBug = smoothHPBug;
 		FlxG.save.data.shaders = shaders;
 		FlxG.save.data.ezSpam = ezSpam;
 		FlxG.save.data.evenLessBotLag = evenLessBotLag;
@@ -263,6 +266,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.showMaxScore = showMaxScore;
 		FlxG.save.data.autosaveInterval = autosaveInterval;
 		FlxG.save.data.autosaveCharts = autosaveCharts;
+		FlxG.save.data.discordRPC = discordRPC;
 		FlxG.save.data.rateNameStuff = rateNameStuff;
 		FlxG.save.data.longFCName = longFCName;
 		FlxG.save.data.botTxtFade = botTxtFade;
@@ -361,7 +365,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.ghostTapping = ghostTapping;
 		FlxG.save.data.communityGameMode = communityGameMode;
 		FlxG.save.data.lessBotLag = lessBotLag;
-		FlxG.save.data.songPercentage = songPercentage;
+		FlxG.save.data.tauntOnGo = tauntOnGo;
 		FlxG.save.data.coolGameplay = coolGameplay;
 		FlxG.save.data.timeBarType = timeBarType;
 		FlxG.save.data.marvRateColor = marvRateColor;
@@ -623,6 +627,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		if(FlxG.save.data.autosaveCharts != null) {
 			autosaveCharts = FlxG.save.data.autosaveCharts;
 		}
+		if(FlxG.save.data.discordRPC != null) {
+			discordRPC = FlxG.save.data.discordRPC;
+		}
 		if(FlxG.save.data.holdNoteHits != null) {
 			holdNoteHits = FlxG.save.data.holdNoteHits;
 		}
@@ -695,8 +702,8 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		if(FlxG.save.data.percentDecimals != null) {
 			percentDecimals = FlxG.save.data.percentDecimals;
 		}
-		if(FlxG.save.data.songPercentage != null) {
-			songPercentage = FlxG.save.data.songPercentage;
+		if(FlxG.save.data.tauntOnGo != null) {
+			tauntOnGo = FlxG.save.data.tauntOnGo;
 		}
 		if(FlxG.save.data.antiCheatEnable != null) {
 			antiCheatEnable = FlxG.save.data.antiCheatEnable;
@@ -724,6 +731,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.lowQuality != null) {
 			lowQuality = FlxG.save.data.lowQuality;
+		}
+		if(FlxG.save.data.smoothHPBug != null) {
+			smoothHPBug = FlxG.save.data.smoothHPBug;
 		}
 		if(FlxG.save.data.ratingCounter != null) {
 			ratingCounter = FlxG.save.data.ratingCounter;

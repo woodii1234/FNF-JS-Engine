@@ -6,7 +6,7 @@ import flixel.FlxSubState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.keyboard.FlxKey;
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -145,19 +145,9 @@ class ResultsScreenSubState extends MusicBeatSubstate {
 		checker.x += 0.45 / (ClientPrefs.framerate / 60);
 		checker.y += (0.16 / (ClientPrefs.framerate / 60));
 
-		#if android
-		var touchedScreen:Bool = false;
-
-		for (touch in FlxG.touches.list) {
-			if (touch.justPressed) {
-				touchedScreen = true;
-			}
-		}
-		#end
-
-		if (controls.ACCEPT #if android || touchedScreen #end) {
+		if (controls.ACCEPT) {
 			if (PlayState.isStoryMode)
-				MusicBeatState.switchState(new StoryMenuState());
+				FlxG.switchState(StoryMenuState.new);
 			else
 				PlayState.instance.endSong();
 		}

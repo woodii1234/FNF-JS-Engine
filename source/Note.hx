@@ -9,6 +9,7 @@ import flash.display.BitmapData;
 import editors.ChartingState;
 import flixel.util.FlxPool;
 import flixel.math.FlxRect;
+import flixel.group.FlxGroup.FlxTypedGroup;
 import openfl.system.System;
 import NoteShader.ColoredNoteShader;
 
@@ -41,8 +42,6 @@ class Note extends FlxSprite
 	public var tail:Array<Note> = []; // for sustains
 	public var parent:Note;
 	public var blockHit:Bool = false; // only works for player
-
-	public var bypassHPGainLimit:Bool = false;
 
 	public var sustainLength:Float = 0;
 	public var isSustainNote:Bool = false;
@@ -98,6 +97,8 @@ class Note extends FlxSprite
 	public var rating:String = 'unknown';
 	public var ratingMod:Float = 0; //9 = unknown, 0.25 = shit, 0.5 = bad, 0.75 = good, 1 = sick
 	public var ratingDisabled:Bool = false;
+
+	public var strum:StrumNote = null;
 
 	public var loadSprite:Bool = false;
 	public var inEkSong:Bool = false;
@@ -284,13 +285,6 @@ class Note extends FlxSprite
 						missHealth = 0.3;
 					}
 					hitCausesMiss = true;
-				case 'Angel Note':
-					ignoreNote = mustPress;
-					reloadNote('ANGEL');
-					noteSplashTexture = 'ANGELnoteSplashes';
-					colorSwap.hue = 0;
-					colorSwap.saturation = 0;
-					colorSwap.brightness = 0;
 				case 'Behind Note':
 					colorSwap.hue = 0;
 					colorSwap.saturation = -50;
@@ -314,7 +308,7 @@ class Note extends FlxSprite
 		return value;
 	}
 
-	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?noteskin:String, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?loadSprite:Bool = true)
+	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?noteskinToLoad:String, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?loadSprite:Bool = true)
 	{
 		super();
 
@@ -333,6 +327,7 @@ class Note extends FlxSprite
 		y -= 2000;
 		this.strumTime = strumTime;
 		if(!inEditor) this.strumTime += ClientPrefs.noteOffset;
+		var noteskin:String = noteskinToLoad;
 
 		this.noteData = noteData;
 
@@ -407,6 +402,20 @@ class Note extends FlxSprite
 
 		if(prevNote!=null)
 			prevNote.nextNote = this;
+
+		switch (ClientPrefs.healthGainType)
+		{
+			case 'Leather Engine':
+				missHealth = 0.07;
+			case 'Kade (1.4.2 to 1.6)':
+				missHealth = 0.075;
+			case 'Kade (1.6+)':
+				missHealth = 0.075;
+			case 'Doki Doki+':
+				missHealth = 0.04;
+			default:
+				missHealth = 0.0475;
+		}
 
 		if (isSustainNote && prevNote != null)
 		{
@@ -655,7 +664,6 @@ class Note extends FlxSprite
 			if (!dumbHitboxThing)
 				updateHitbox();
 
-		final angleDir = strum.direction * Math.PI / 180;
 		if (copyAngle)
 			angle = strum.direction - 90 + strum.angle + offsetAngle;
 
@@ -663,11 +671,11 @@ class Note extends FlxSprite
 			alpha = strum.alpha * multAlpha;
 
 		if(copyX)
-			x = strum.x + offsetX + Math.cos(angleDir) * distance;
+			x = strum.x + offsetX + Math.cos(strum.direction * Math.PI / 180) * distance;
 
 		if(copyY)
 		{
-			y = strum.y + offsetY + correctionOffset + Math.sin(angleDir) * distance;
+			y = strum.y + offsetY + correctionOffset + Math.sin(strum.direction * Math.PI / 180) * distance;
 			if(strum.downScroll && isSustainNote)
 			{
 				if(PlayState.isPixelStage)

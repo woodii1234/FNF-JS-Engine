@@ -21,6 +21,7 @@ class StrumNote extends FlxSprite
 	public var rgbShaderEnabled:Bool = false;
 	
 	public var player:Int;
+	public var ogNoteskin:String = null;
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
@@ -75,6 +76,7 @@ class StrumNote extends FlxSprite
 				skin = 'NOTE_assets_colored';
 			}
 		texture = skin; //Load texture and anims
+		ogNoteskin = skin;
 
 		scrollFactor.set();
 	}
@@ -169,9 +171,12 @@ class StrumNote extends FlxSprite
 		if(resetAnim > 0) {
 			resetAnim -= elapsed;
 			if(resetAnim <= 0) {
-				playAnim('static');
-           			if (ClientPrefs.noteColorStyle != 'Char-Based') resetHue(); // Add this line to reset the hue value
+				playAnim('static');	
+				if (ClientPrefs.enableColorShader)
+				{
+           				if (ClientPrefs.noteColorStyle != 'Char-Based') resetHue(); // Add this line to reset the hue value
 						else disableRGB();
+				}
 				resetAnim = 0;
 			}
 		}
@@ -188,17 +193,17 @@ class StrumNote extends FlxSprite
 		animation.play(anim, force);
 		centerOffsets();
 		centerOrigin();
-		if(animation.curAnim == null || animation.curAnim.name == 'static') {
+		if(animation.curAnim == null || animation.curAnim.name == 'static' && ClientPrefs.enableColorShader) {
 			colorSwap.hue = 0;
 			colorSwap.saturation = 0;
 			colorSwap.brightness = 0;
-			disableRGB();
+			if (ClientPrefs.noteColorStyle == 'Char-Based') disableRGB();
 		} else {
 		if (enableRGBShader && !bfRGB && !rgbShaderEnabled) enableRGB();
 		//stupid workaround but it works
 		if (enableRGBShader && bfRGB && !rgbShaderEnabled) enableRGBBF();
 		if (enableRGBShader && gfRGB) enableRGBGF();
-			if (noteData > -1 && noteData < ClientPrefs.arrowHSV.length)
+			if (noteData > -1 && noteData < ClientPrefs.arrowHSV.length && ClientPrefs.enableColorShader)
 			{
 				if (ClientPrefs.noteColorStyle == 'Normal' || !ClientPrefs.rainbowNotes)
 				{
@@ -248,6 +253,7 @@ class StrumNote extends FlxSprite
 			rgbShaderEnabled = true;
 	}
 	public function updateNoteSkin(noteskin:String) {
+			if (texture == "noteskins/" + noteskin || noteskin == ogNoteskin || texture == noteskin) return; //if the noteskin to change to is the same as before then don't update it
 			if (noteskin != null && noteskin != '') texture = "noteskins/" + noteskin;
 			if(ClientPrefs.noteStyleThing == 'VS Nonsense V2') {
 				texture = 'Nonsense_NOTE_assets';

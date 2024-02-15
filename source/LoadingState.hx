@@ -3,7 +3,7 @@ package;
 import lime.app.Promise;
 import lime.app.Future;
 import flixel.FlxG;
-import flixel.FlxState;
+import flixel.util.typeLimit.NextState;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.util.FlxTimer;
@@ -26,13 +26,13 @@ class LoadingState extends MusicBeatState
 	
 	// TO DO: Make this easier
 	
-	var target:FlxState;
+	var target:NextState;
 	var stopMusic = false;
 	var directory:String;
 	var callbacks:MultiCallback;
 	var targetShit:Float = 0;
 
-	function new(target:FlxState, stopMusic:Bool, directory:String)
+	function new(target:NextState, stopMusic:Bool, directory:String)
 	{
 		super();
 		this.target = target;
@@ -132,7 +132,7 @@ class LoadingState extends MusicBeatState
 		if (stopMusic && FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 		
-		MusicBeatState.switchState(target);
+		FlxG.switchState(target);
 	}
 	
 	static function getSongPath()
@@ -145,12 +145,12 @@ class LoadingState extends MusicBeatState
 		return Paths.voices(PlayState.SONG.song);
 	}
 	
-	inline static public function loadAndSwitchState(target:FlxState, stopMusic = false)
+	inline static public function loadAndSwitchState(target:NextState, stopMusic = false)
 	{
-		MusicBeatState.switchState(getNextState(target, stopMusic));
+		FlxG.switchState(getNextState(target, stopMusic));
 	}
 	
-	static function getNextState(target:FlxState, stopMusic = false):FlxState
+	static function getNextState(target:NextState, stopMusic = false):NextState
 	{
 		var directory:String = 'shared';
 		var weekDir:String = StageData.forceNextDirectory;

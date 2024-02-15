@@ -1,7 +1,7 @@
 package options;
 
 #if desktop
-import Discord.DiscordClient;
+import DiscordClient;
 #end
 import flash.text.TextField;
 import flixel.FlxG;
@@ -191,7 +191,7 @@ class SuperSecretDebugMenu extends BaseOptionsMenu
 			http.request();
 		}
     
-    MusicBeatState.switchState(new OutdatedState());
+    		FlxG.switchState(OutdatedState.new);
 	}
 
 	function onChangeRainbowFPS()

@@ -1,7 +1,7 @@
 package;
 
 #if desktop
-import Discord.DiscordClient;
+import DiscordClient;
 #end
 import flash.text.TextField;
 import flixel.FlxG;
@@ -74,10 +74,6 @@ class AchievementsMenuState extends MusicBeatState
 		add(descText);
 		changeSelection();
 
-		#if android
-		addVirtualPad(UP_DOWN, B);
-		#end
-
 		super.create();
 	}
 
@@ -93,7 +89,7 @@ class AchievementsMenuState extends MusicBeatState
 
 		if (controls.BACK) {
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			MusicBeatState.switchState(new MainMenuState());
+			FlxG.switchState(MainMenuState.new);
 		}
 	}
 

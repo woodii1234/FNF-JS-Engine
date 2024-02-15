@@ -1,7 +1,7 @@
 package;
 
 #if desktop
-import Discord.DiscordClient;
+import DiscordClient;
 #end
 import flixel.FlxG;
 import flixel.FlxObject;
@@ -26,7 +26,7 @@ using StringTools;
 
 class MainMenuState extends MusicBeatState
 {
-	public static var psychEngineJSVersion:String = '1.18.0'; //This is also used for Discord RPC
+	public static var psychEngineJSVersion:String = '1.19.1'; //This is also used for Discord RPC
 	public static var psychEngineVersion:String = '0.6.3'; //This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 
@@ -192,10 +192,6 @@ class MainMenuState extends MusicBeatState
 		changeItem();
 		tipTextStartScrolling();
 
-		#if android
-		addVirtualPad(UP_DOWN, A_B_C);
-		#end
-
 		super.create();
 	}
 
@@ -227,7 +223,7 @@ class MainMenuState extends MusicBeatState
 
 	function changeTipText() {
 		var selectedText:String = '';
-		var textArray:Array<String> = CoolUtil.coolTextFile(SUtil.getPath() + Paths.txt('funnyTips'));
+		var textArray:Array<String> = CoolUtil.coolTextFile(Paths.txt('funnyTips'));
 
 		tipText.alpha = 1;
 		isTweening = true;
@@ -294,7 +290,7 @@ class MainMenuState extends MusicBeatState
 			{
 				selectedSomethin = true;
 				FlxG.sound.play(Paths.sound('cancelMenu'));
-				MusicBeatState.switchState(new TitleState());
+				FlxG.switchState(TitleState.new);
 			}
 
 			if (controls.ACCEPT)
@@ -331,28 +327,28 @@ class MainMenuState extends MusicBeatState
 								switch (daChoice)
 								{
 									case 'story_mode':
-										MusicBeatState.switchState(new StoryMenuState());
+										FlxG.switchState(StoryMenuState.new);
 									case 'freeplay':
-										MusicBeatState.switchState(new FreeplayState());
+										FlxG.switchState(FreeplayState.new);
 									#if MODS_ALLOWED
 									case 'mods':
-										MusicBeatState.switchState(new ModsMenuState());
+										FlxG.switchState(ModsMenuState.new);
 									#end
 									case 'awards':
-										MusicBeatState.switchState(new AchievementsMenuState());
+										FlxG.switchState(AchievementsMenuState.new);
 									case 'credits':
-										MusicBeatState.switchState(new CreditsState());
+										FlxG.switchState(CreditsState.new);
 									case 'options':
-										LoadingState.loadAndSwitchState(new options.OptionsState());
+										LoadingState.loadAndSwitchState(options.OptionsState.new);
 								}
 							});
 						}
 					});
 				}
 			}
-		#if (desktop || android)
-		else if (FlxG.keys.anyJustPressed(debugKeys) #if android || virtualPad.buttonC.justPressed #end) {
-			MusicBeatState.switchState(new MasterEditorMenu());
+		#if (desktop)
+		else if (FlxG.keys.anyJustPressed(debugKeys)) {
+			FlxG.switchState(MasterEditorMenu.new);
 		}
 		#end
 		}
