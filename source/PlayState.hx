@@ -318,6 +318,10 @@ class PlayState extends MusicBeatState
 	public var hitStrings:Array<String> = ['Perfect!!!', 'Sick!!', 'Good!', 'Bad.', 'Shit.', 'Miss..'];
 	public var judgeCountStrings:Array<String> = ['Perfects', 'Sicks', 'Goods', 'Bads', 'Shits', 'Misses'];
 
+	var charChangeTimes:Array<Float> = [];
+	var charChangeNames:Array<String> = [];
+	var charChangeTypes:Array<Int> = [];
+
 	//Gameplay settings
 	public var healthGain:Float = 1;
 	public var healthLoss:Float = 1;
@@ -4035,7 +4039,7 @@ class PlayState extends MusicBeatState
 	private function generateSong(dataPath:String):Void
 	{
        		var startTime = Sys.time();
-		// FlxG.log.add(ChartParser.parse());
+
 		songSpeedType = ClientPrefs.getGameplaySetting('scrolltype','multiplicative');
 
 		switch(songSpeedType)
@@ -4088,7 +4092,21 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
-
+		for (event in SONG.events) //Event Notes
+		{
+			for (i in 0...event[1].length)
+			{
+				var newEventNote:Array<Dynamic> = [event[0], event[1][i][0], event[1][i][1], event[1][i][2]];
+				var subEvent:EventNote = {
+					strumTime: newEventNote[0] + ClientPrefs.noteOffset,
+					event: newEventNote[1],
+					value1: newEventNote[2],
+					value2: newEventNote[3]
+				};
+				eventNotes.push(subEvent);
+				eventPushed(subEvent);
+			}
+		}
 		for (section in noteData)
 		{
 			for (songNotes in section.sectionNotes)
@@ -4152,7 +4170,21 @@ class PlayState extends MusicBeatState
 				{
 					opponentNoteTotal += 1;
 				}
-
+				if (daStrumTime >= charChangeTimes[0])
+				{
+					switch (charChangeTypes[0])
+					{
+						case 0:
+							var boyfriendToGrab:Boyfriend = boyfriendMap.get(charChangeNames[0]);
+							if (boyfriendToGrab != null) bfNoteskin = boyfriendToGrab.noteskin;
+						case 1:
+							var dadToGrab:Character = dadMap.get(charChangeNames[0]);
+							if (dadToGrab != null) dadNoteskin = dadToGrab.noteskin;
+					}
+					charChangeTimes.shift();
+					charChangeNames.shift();
+					charChangeTypes.shift();
+				}
 				var oldNote:Note = unspawnNotes.length > 0 ? unspawnNotes[Std.int(unspawnNotes.length - 1)] : null;
 
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, (gottaHitNote ? bfNoteskin : dadNoteskin), false, false, !isEkSong);
@@ -4178,7 +4210,7 @@ class PlayState extends MusicBeatState
 					{
 						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
-						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote), daNoteData, oldNote, (gottaHitNote ? boyfriend.noteskin : dad.noteskin), true, false, !isEkSong);
+						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote), daNoteData, oldNote, (gottaHitNote ? bfNoteskin : dadNoteskin), true, false, !isEkSong);
 						sustainNote.mustPress = gottaHitNote;
 						sustainNote.gfNote = (section.gfSection && (songNotes[1]<4));
 						sustainNote.noteType = swagNote.noteType;
@@ -4246,24 +4278,11 @@ class PlayState extends MusicBeatState
 			notesLoadedRN += section.sectionNotes.length;
 			trace('loaded section ' + sectionsLoaded + ', notes loaded now: ' + notesLoadedRN);
 		}
-		for (event in SONG.events) //Event Notes
-		{
-			for (i in 0...event[1].length)
-			{
-				var newEventNote:Array<Dynamic> = [event[0], event[1][i][0], event[1][i][1], event[1][i][2]];
-				var subEvent:EventNote = {
-					strumTime: newEventNote[0] + ClientPrefs.noteOffset,
-					event: newEventNote[1],
-					value1: newEventNote[2],
-					value2: newEventNote[3]
-				};
-				eventNotes.push(subEvent);
-				eventPushed(subEvent);
-			}
-		}
 
        		var endTime = Sys.time();
 		eventNotesCopy = eventNotes.copy();
+		bfNoteskin = boyfriend.noteskin;
+		dadNoteskin = dad.noteskin;
 
 		if (ClientPrefs.noteColorStyle == 'Char-Based')
 			{
@@ -4312,6 +4331,10 @@ class PlayState extends MusicBeatState
 
 				var newCharacter:String = event.value2;
 				addCharacterToList(newCharacter, charType);
+
+				charChangeTimes.push(event.strumTime);
+				charChangeNames.push(event.value2);
+				charChangeTypes.push(charType);
 			}
 
 			case 'Dadbattle Spotlight':
@@ -4375,7 +4398,7 @@ class PlayState extends MusicBeatState
 				insert(members.indexOf(phillyGlowGradient) + 1, phillyGlowParticles);
 		}
 
-		if(!eventPushedMap.exists(event.event) && SONG.song.toLowerCase() != 'anti-cheat-song') {
+		if(!eventPushedMap.exists(event.event)) {
 			eventPushedMap.set(event.event, true);
 		}
 	}
@@ -6086,23 +6109,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 						}
 				}
 				if (!ClientPrefs.ogHPColor) reloadHealthBarColors(dad.healthColorArray, boyfriend.healthColorArray);
-				var noteSkinExists:Bool = false;
-						noteSkinExists = FileSystem.exists("assets/shared/images/noteskins/" + (charType == 1 ? dadNoteskin : bfNoteskin)) || FileSystem.exists(Paths.modsImages("noteskins/" + (charType == 1 ? dadNoteskin : bfNoteskin)));
-				if (ClientPrefs.showNotes && noteSkinExists)
+				if (ClientPrefs.showNotes)
 				{
-					for (i in 0...unspawnNotes.length)
-					{
-						if (unspawnNotes[i].loadSprite && !unspawnNotes[i].gfNote) unspawnNotes[i].updateNoteSkin(unspawnNotes[i].mustPress ? bfNoteskin : dadNoteskin);
-					}
-				
-					for (n in notes.members)
-					{
-						if (n.loadSprite) n.updateNoteSkin(n.mustPress ? bfNoteskin : dadNoteskin);
-					}
-					for (s in sustainNotes.members)
-					{
-						if (s.loadSprite) s.updateNoteSkin(s.mustPress ? bfNoteskin : dadNoteskin);
-					}
 					for (i in strumLineNotes.members)
 						i.updateNoteSkin(i.player == 0 ? dadNoteskin : bfNoteskin);
 				}
@@ -7858,6 +7866,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			}
 			if (!note.isSustainNote && cpuControlled && ClientPrefs.lessBotLag && !ClientPrefs.communityGameBot)
 			{
+				combo += 1 * polyphony;
 				if (!ClientPrefs.noMarvJudge)
 				{
 				songScore += 500 * comboMultiplier * polyphony;
@@ -7866,7 +7875,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				{
 				songScore += 350 * comboMultiplier * polyphony;
 				}
-				combo += 1 * polyphony;
 				totalNotesPlayed += 1 * polyphony;
 				if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
 				notesHitArray.push(1 * polyphony);
@@ -9193,7 +9201,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		formattedMaxOppNPS = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(maxOppNPS, false) : formatCompactNumber(maxOppNPS);
 		formattedEnemyHits = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(enemyHits, false) : formatCompactNumber(enemyHits);
 
-		final hittingStuff = 'Combo (Max): $formattedCombo ($formattedMaxCombo)\nHits: ' + (!ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(totalNotesPlayed, false) : compactTotalPlays) + ' / ' + FlxStringUtil.formatMoney(totalNotes, false) + ' (' + FlxMath.roundDecimal((totalNotesPlayed/totalNotes) * 100, 2) + '%)';
+		final hittingStuff = (!ClientPrefs.lessBotLag ? 'Combo (Max): $formattedCombo ($formattedMaxCombo)\n' : '') + 'Hits: ' + (!ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(totalNotesPlayed, false) : compactTotalPlays) + ' / ' + FlxStringUtil.formatMoney(totalNotes, false) + ' (' + FlxMath.roundDecimal((totalNotesPlayed/totalNotes) * 100, 2) + '%)';
 		final ratingCountString = (!cpuControlled || cpuControlled && !ClientPrefs.lessBotLag ? '\n' + (!ClientPrefs.noMarvJudge ? judgeCountStrings[0] + '!!!: $perfects \n' : '') + judgeCountStrings[1] + '!!: $sicks \n' + judgeCountStrings[2] + '!: $goods \n' + judgeCountStrings[3] + ': $bads \n' + judgeCountStrings[4] + ': $shits \n' + judgeCountStrings[5] + ': $formattedSongMisses ' : '');
 		final comboMultString = (ClientPrefs.comboScoreEffect ? '\nScore Multiplier: $(comboMultiplier)x' : '');
 		judgementCounter.text = hittingStuff + ratingCountString + comboMultString;

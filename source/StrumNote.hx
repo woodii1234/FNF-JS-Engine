@@ -21,6 +21,7 @@ class StrumNote extends FlxSprite
 	public var rgbShaderEnabled:Bool = false;
 	
 	public var player:Int;
+	public var ogNoteskin:String = null;
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
@@ -75,6 +76,7 @@ class StrumNote extends FlxSprite
 				skin = 'NOTE_assets_colored';
 			}
 		texture = skin; //Load texture and anims
+		ogNoteskin = skin;
 
 		scrollFactor.set();
 	}
@@ -251,6 +253,7 @@ class StrumNote extends FlxSprite
 			rgbShaderEnabled = true;
 	}
 	public function updateNoteSkin(noteskin:String) {
+			if (texture == "noteskins/" + noteskin || noteskin == ogNoteskin || texture == noteskin) return; //if the noteskin to change to is the same as before then don't update it
 			if (noteskin != null && noteskin != '') texture = "noteskins/" + noteskin;
 			if(ClientPrefs.noteStyleThing == 'VS Nonsense V2') {
 				texture = 'Nonsense_NOTE_assets';
