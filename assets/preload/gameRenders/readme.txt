@@ -1,0 +1,1 @@
+Frames captured by the ingame Renderer will go here. You'll need FFmpeg to convert them into MP4s! Don't worry about organizing the folders by song name too, the engine will do it automatically :)

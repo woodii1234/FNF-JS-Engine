@@ -158,7 +158,18 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var hitsoundVolume:Float = 0;
 	public static var pauseMusic:String = 'Tea Time';
 	public static var checkForUpdates:Bool = true;
+	public static var showRendered:Bool = false;
 	public static var comboStacking = true;
+
+	// Video Renderer
+	public static var ffmpegMode:Bool = false;
+	public static var ffmpegInfo:Bool = false;
+	public static var targetFPS:Float = 60;
+	public static var unlockFPS:Bool = false;
+	public static var lossless:Bool = false;
+	public static var quality:Int = 80;
+	public static var noCapture:Bool = false;
+
 	public static var gameplaySettings:Map<String, Dynamic> = [
 		'scrollspeed' => 1.0,
 		'scrolltype' => 'multiplicative', 
@@ -395,7 +406,17 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.hitsoundVolume = hitsoundVolume;
 		FlxG.save.data.pauseMusic = pauseMusic;
 		FlxG.save.data.checkForUpdates = checkForUpdates;
+		FlxG.save.data.showRendered = showRendered;
 		FlxG.save.data.comboStacking = comboStacking;
+
+		//RENDERING SETTINGS
+		FlxG.save.data.ffmpegMode = ffmpegMode;
+		FlxG.save.data.ffmpegInfo = ffmpegInfo;
+		FlxG.save.data.targetFPS = targetFPS;
+		FlxG.save.data.unlockFPS = unlockFPS;
+		FlxG.save.data.lossless = lossless;
+		FlxG.save.data.quality = quality;
+		FlxG.save.data.noCapture = noCapture;
 	
 		FlxG.save.flush();
 
@@ -560,15 +581,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.rainbowFPS != null) {
 			rainbowFPS = FlxG.save.data.rainbowFPS;
-		}
-		if(FlxG.save.data.widescreenSweep != null) {
-			widescreenSweep = FlxG.save.data.widescreenSweep;
-		}
-		if(FlxG.save.data.noteMotionBlur != null) {
-			noteMotionBlur = FlxG.save.data.noteMotionBlur;
-		}
-		if(FlxG.save.data.noteMBMult != null) {
-			noteMBMult = FlxG.save.data.noteMBMult;
 		}
 		if(FlxG.save.data.comboMultLimit != null) {
 			comboMultLimit = FlxG.save.data.comboMultLimit;
@@ -927,8 +939,34 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		{
 			checkForUpdates = FlxG.save.data.checkForUpdates;
 		}
+		if(FlxG.save.data.showRendered != null) {
+			showRendered = FlxG.save.data.showRendered;
+		}
 		if (FlxG.save.data.comboStacking != null)
 			comboStacking = FlxG.save.data.comboStacking;
+
+		//rendering stuff
+		if(FlxG.save.data.ffmpegMode != null) {
+			ffmpegMode = FlxG.save.data.ffmpegMode;
+		}
+		if(FlxG.save.data.ffmpegInfo != null) {
+			ffmpegInfo = FlxG.save.data.ffmpegInfo;
+		}
+		if(FlxG.save.data.targetFPS != null) {
+			targetFPS = FlxG.save.data.targetFPS;
+		}
+		if(FlxG.save.data.unlockFPS != null) {
+			unlockFPS = FlxG.save.data.unlockFPS;
+		}
+		if(FlxG.save.data.lossless != null) {
+			lossless = FlxG.save.data.lossless;
+		}
+		if(FlxG.save.data.quality != null) {
+			quality = FlxG.save.data.quality;
+		}
+		if(FlxG.save.data.noCapture != null) {
+			noCapture = FlxG.save.data.noCapture;
+		}
 
 		var save:FlxSave = new FlxSave();
 		save.bind('controls_v2', CoolUtil.getSavePath());
