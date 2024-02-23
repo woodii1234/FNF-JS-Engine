@@ -108,10 +108,10 @@ class FPS extends TextField
 				text += "\nSystem: " + '${lime.system.System.platformLabel} ${lime.system.System.platformVersion}';
 			}
 
-				if (ClientPrefs.ffmpegMode)
+				if (!ClientPrefs.ffmpegMode)
 				{
-    				if (ClientPrefs.rainbowFPS)
-    				{
+    					if (ClientPrefs.rainbowFPS)
+    					{
 		 				colorInterp += deltaTime / 330; // Division so that it doesn't give you a seizure on 60 FPS
 						var colorIndex1:Int = Math.floor(colorInterp);
 						var colorIndex2:Int = (colorIndex1 + 1) % rainbowColors.length;
@@ -131,7 +131,7 @@ class FPS extends TextField
 						textColor = rainbowColors[0];
 						colorInterp = 0;
 						}
-    				}
+    					}
 					else
 					{
 						textColor = 0xFFFFFFFF;
