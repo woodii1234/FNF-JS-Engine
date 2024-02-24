@@ -590,8 +590,7 @@ class PlayState extends MusicBeatState
 		randomBotplayText = theListBotplay[FlxG.random.int(0, theListBotplay.length - 1)];
 		//trace('Playback Rate: ' + playbackRate);
 
-			if (!ffmpegMode) cpp.vm.Gc.enable(false); //lagspike prevention
-			if (ffmpegMode) cpp.vm.Gc.enable(true); //There's no harm in enabling GC in video rendering mode.. right?
+			cpp.vm.Gc.enable(ClientPrefs.enableGC || ffmpegMode); //lagspike prevention
 			Paths.clearStoredMemory();
 
 			#if sys
@@ -4070,7 +4069,7 @@ class PlayState extends MusicBeatState
 	private var eventPushedMap:Map<String, Bool> = new Map<String, Bool>();
 	private function generateSong(dataPath:String, ?startingPoint:Float = 0):Void
 	{
-       		var startTime = Sys.time();
+       		final startTime = Sys.time();
 
 		songSpeedType = ClientPrefs.getGameplaySetting('scrolltype','multiplicative');
 
@@ -4098,10 +4097,10 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.songLoading) FlxG.sound.list.add(vocals);
 		if (ClientPrefs.songLoading) FlxG.sound.list.add(new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song)));
 
-		var noteData:Array<SwagSection> = SONG.notes;
+		final noteData:Array<SwagSection> = SONG.notes;
 
-		var songName:String = Paths.formatToSongPath(SONG.song);
-		var file:String = Paths.json(songName + '/events');
+		final songName:String = Paths.formatToSongPath(SONG.song);
+		final file:String = Paths.json(songName + '/events');
 		#if MODS_ALLOWED
 		if (FileSystem.exists(Paths.modsJson(songName + '/events')) || FileSystem.exists(file)) {
 		#else
@@ -4156,7 +4155,7 @@ class PlayState extends MusicBeatState
 				}
 				if (songNotes[0] >= startingPoint - 350)
 				{
-					var daStrumTime:Float = songNotes[0];
+					final daStrumTime:Float = songNotes[0];
 					var daNoteData:Int = 0;
 					if (!randomMode && !flip && !stairs && !waves)
 					{
@@ -4216,7 +4215,7 @@ class PlayState extends MusicBeatState
 					}
 					var oldNote:Note = unspawnNotes.length > 0 ? unspawnNotes[Std.int(unspawnNotes.length - 1)] : null;
 
-					var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, (gottaHitNote ? bfNoteskin : dadNoteskin), false, false, !isEkSong);
+					final swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, (gottaHitNote ? bfNoteskin : dadNoteskin), false, false, !isEkSong);
 					if (ClientPrefs.doubleGhost)
 						{
 						swagNote.row = Conductor.secsToRow(daStrumTime);
@@ -4239,7 +4238,7 @@ class PlayState extends MusicBeatState
 						{
 							oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
-							var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote), daNoteData, oldNote, (gottaHitNote ? bfNoteskin : dadNoteskin), true, false, !isEkSong);
+							final sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote), daNoteData, oldNote, (gottaHitNote ? bfNoteskin : dadNoteskin), true, false, !isEkSong);
 							sustainNote.mustPress = gottaHitNote;
 							sustainNote.gfNote = (section.gfSection && (songNotes[1]<4));
 							sustainNote.noteType = swagNote.noteType;
@@ -4264,13 +4263,12 @@ class PlayState extends MusicBeatState
 					if(!noteTypeMap.exists(swagNote.noteType)) {
 						noteTypeMap.set(swagNote.noteType, true);
 					}
-					var jackNote:Note;
 
 					if (jackingtime > 0)
 					{
 						for (i in 0...Std.int(jackingtime))
 						{
-							jackNote = new Note(swagNote.strumTime + (15000/SONG.bpm) * (i + 1), swagNote.noteData, oldNote, (gottaHitNote ? boyfriend.noteskin : dad.noteskin), false, false, !isEkSong);
+							final jackNote:Note = new Note(swagNote.strumTime + (15000/SONG.bpm) * (i + 1), swagNote.noteData, oldNote, (gottaHitNote ? boyfriend.noteskin : dad.noteskin), false, false, !isEkSong);
 							jackNote.scrollFactor.set();
 
 					jackNote.sustainLength = swagNote.sustainLength;

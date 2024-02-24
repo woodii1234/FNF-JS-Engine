@@ -87,7 +87,7 @@ class Screenshot {
 
         byteData = image.encode(isLossless ? PNG : JPEG, 85);
         var f:FileOutput = sys.io.File.write(path, true);
-        if(byteData != null) {
+        if(byteData != null && f != null) {
             f.write(byteData);
             f.close();
             return true;
