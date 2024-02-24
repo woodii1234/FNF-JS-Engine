@@ -2,7 +2,7 @@
   <br>
   <a href="https://github.com/JordanSantiagoYT/FNF-PsychEngine-NoBotplayLag"><img src="assets/exclude/images/jslol.png" alt="JSengine" width="200"></a>
   <br>
-  <b>JS ENGINE</b>
+  <b>JS Engine</b>
   <br>
 </h1>
 
