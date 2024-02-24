@@ -1,7 +1,24 @@
+<h1 align="center">
+  <br>
+  <a href="https://github.com/JordanSantiagoYT/FNF-PsychEngine-NoBotplayLag"><img src="assets/exclude/images/jslol.png" alt="JSengine" width="200"></a>
+  <br>
+  <b>JS ENGINE</b>
+  <br>
+</h1>
+
 **WARNING: SET HXCODEC TO 2.5.1 TO FIX CRASHES WITH EXTRA KEYS WITH LUA SCRIPTS**
 
 # Friday Night Funkin' - JS Engine
 An engine I made for Bambi spamtracks. Used to be called "Psych Engine: No Botplay Lag"
+
+# FEATRUES IN JS ENGINE:
+This fork of psych engine 0.6.3 has lots of features, even more than OS ENGINE!
+The engine:
+- Can load notes more than 100k instead of closing the window
+- Can load longer than 20m30s songs
+- Has lots of optimization
+- Can chart bambi songs EASIER
+- Has basic shader support (such as `addGlitchEffect`, `addChromaticAbberationEffect`, and more!)
 
 ## Installation:
 You must have [the most up-to-date version of Haxe](https://haxe.org/download/), seriously, stop using 4.1.5, it misses some stuff.
