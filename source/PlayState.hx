@@ -181,6 +181,9 @@ class PlayState extends MusicBeatState
 	var curTime:Float = 0;
 	var songCalc:Float = 0;
 
+	public var healthDrainAmount:Float = 0.023;
+	public var healthDrainFloor:Float = 0.1;
+
 	public var spawnTime:Float = 1600; //just enough for the notes to barely inch off the screen
 	public var changedSpawnTime:Float = 1600; //just enough for the notes to barely inch off the screen
 	
@@ -482,6 +485,8 @@ class PlayState extends MusicBeatState
 	public static var campaignMisses:Int = 0;
 	public static var seenCutscene:Bool = false;
 	public static var deathCounter:Int = 0;
+
+	public static var shouldDrainHealth:Bool = false;
 
 	public var defaultCamZoom:Float = 1.05;
 	
@@ -1462,6 +1467,10 @@ class PlayState extends MusicBeatState
 		}
 		}
 
+		shouldDrainHealth = (opponentDrain || (opponentChart ? boyfriend.healthDrain : dad.healthDrain));
+		if (!opponentDrain && !Math.isNaN((opponentChart ? boyfriend : dad).drainAmount)) healthDrainAmount = opponentChart ? boyfriend.drainAmount : dad.drainAmount;
+		if (!opponentDrain && !Math.isNaN((opponentChart ? boyfriend : dad).drainFloor)) healthDrainFloor = opponentChart ? boyfriend.drainFloor : dad.drainFloor;
+
 		var camPos:FlxPoint = new FlxPoint(girlfriendCameraOffset[0], girlfriendCameraOffset[1]);
 		if(gf != null)
 		{
@@ -2372,7 +2381,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 			if (ClientPrefs.showRendered)
-			renderedTxt.text = 'Rendered Notes: ' + FlxStringUtil.formatMoney(notes.length + sustainNotes.length, false);
+			renderedTxt.text = 'Rendered Notes: ' + FlxStringUtil.formatMoney(notes.length, false);
 
 		if (ClientPrefs.communityGameBot && botplayTxt != null) botplayTxt.destroy();
 
@@ -3060,6 +3069,10 @@ class PlayState extends MusicBeatState
 			case "constant":
 				songSpeed = ClientPrefs.getGameplaySetting('scrollspeed', 1);
 		}
+
+		shouldDrainHealth = (opponentDrain || (opponentChart ? boyfriend.healthDrain : dad.healthDrain));
+		if (!opponentDrain && !Math.isNaN((opponentChart ? boyfriend : dad).drainAmount)) healthDrainAmount = opponentChart ? boyfriend.drainAmount : dad.drainAmount;
+		if (!opponentDrain && !Math.isNaN((opponentChart ? boyfriend : dad).drainFloor)) healthDrainFloor = opponentChart ? boyfriend.drainFloor : dad.drainFloor;
 	}
 
 	function schoolIntro(?dialogueBox:DialogueBox):Void
@@ -4754,7 +4767,7 @@ class PlayState extends MusicBeatState
 		}
 
 			if (ClientPrefs.showRendered)
-			renderedTxt.text = 'Rendered Notes: ' + FlxStringUtil.formatMoney(notes.length + sustainNotes.length, false);
+			renderedTxt.text = 'Rendered Notes: ' + FlxStringUtil.formatMoney(notes.length, false);
 
 		callOnLuas('onUpdate', [elapsed]);
 
@@ -5576,8 +5589,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 								}
 							}
 						}
-						if (daNote.isSustainNote && (daNote.wasGoodHit || daNote.hitByOpponent) && daNote.strumTime + (daNote.sustainLength + 5) <= Conductor.songPosition) //5 ms later so we remove the note when it's actually behind the strum
-							sustainNotes.remove(daNote, true);
 					});
 				}
 				else
@@ -6168,6 +6179,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 							setOnLuas('gfName', gf.curCharacter);
 						}
 				}
+				shouldDrainHealth = (opponentDrain || (opponentChart ? boyfriend.healthDrain : dad.healthDrain));
+				if (!opponentDrain && !Math.isNaN((opponentChart ? boyfriend : dad).drainAmount)) healthDrainAmount = opponentChart ? boyfriend.drainAmount : dad.drainAmount;
+				if (!opponentDrain && !Math.isNaN((opponentChart ? boyfriend : dad).drainFloor)) healthDrainFloor = opponentChart ? boyfriend.drainFloor : dad.drainFloor;
 				if (!ClientPrefs.ogHPColor) reloadHealthBarColors(dad.healthColorArray, boyfriend.healthColorArray);
 				if (ClientPrefs.showNotes)
 				{
@@ -8338,8 +8352,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
 			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
            		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
-			if (opponentDrain && health > 0.1 && !practiceMode || opponentDrain && practiceMode) {
-			health -= daNote.hitHealth * hpDrainLevel * polyphony;
+			if (shouldDrainHealth && health > healthDrainFloor && !practiceMode || opponentDrain && practiceMode) {
+			health -= (opponentDrain ? daNote.hitHealth : healthDrainAmount) * hpDrainLevel * polyphony;
 			if (ClientPrefs.healthDisplay && !ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 			}
 

@@ -37,6 +37,10 @@ typedef CharacterFile = {
 	var winning_colors:Array<Int>;
 	var losing_colors:Array<Int>;
 	var noteskin:String;
+
+	var health_drain:Bool;
+	var drain_amount:Float;
+	var drain_floor:Float;
 }
 
 typedef AnimArray = {
@@ -81,6 +85,10 @@ class Character extends FlxSprite
 	public var hasMissAnimations:Bool = false;
 
 	public var isDeathCharacter:Bool = false;
+
+	public var healthDrain:Bool = false;
+	public var drainAmount:Float = 0;
+	public var drainFloor:Float = 0;
 
 	//Used on Character Editor
 	public var imageFile:String = '';
@@ -197,6 +205,19 @@ class Character extends FlxSprite
 				if(json.no_antialiasing) {
 					antialiasing = false;
 					noAntialiasing = true;
+				}
+
+				if(Std.string(json.health_drain).length > 0) {
+					healthDrain = json.health_drain;
+				} else healthDrain = false;
+
+				if(healthDrain) {
+					drainAmount = json.drain_amount;
+					drainFloor = json.drain_floor;
+				}
+				else {
+					drainAmount = 0.01;
+					drainFloor = 0.1;
 				}
 
 				if(json.healthbar_colors != null && json.healthbar_colors.length > 2)

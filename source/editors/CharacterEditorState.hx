@@ -178,6 +178,7 @@ class CharacterEditorState extends MusicBeatState
 		var tabs = [
 			{name: 'Character', label: 'Character'},
 			{name: 'Animations', label: 'Animations'},
+			{name: 'Misc', label: 'Misc'},
 		];
 		UI_characterbox = new FlxUITabMenu(null, tabs, true);
 		UI_characterbox.cameras = [camMenu];
@@ -195,6 +196,7 @@ class CharacterEditorState extends MusicBeatState
 
 		addCharacterUI();
 		addAnimationsUI();
+		addMiscUI();
 		UI_characterbox.selected_tab_id = 'Character';
 
 		FlxG.mouse.visible = true;
@@ -684,6 +686,35 @@ class CharacterEditorState extends MusicBeatState
 		UI_characterbox.addGroup(tab_group);
 	}
 
+	var minimumHealthStepper:FlxUINumericStepper;
+	var drainAmountStepper:FlxUINumericStepper;
+	var healthDrainCheckBox:FlxUICheckBox;
+	function addMiscUI() {
+		var tab_group = new FlxUI(null, UI_box);
+		tab_group.name = "Misc";
+
+		healthDrainCheckBox = new FlxUICheckBox(15, 30, null, null, "Health Drain", 50);
+		healthDrainCheckBox.checked = char.healthDrain;
+		healthDrainCheckBox.callback = function() {
+			char.healthDrain = healthDrainCheckBox.checked;
+			ghostChar.healthDrain = healthDrainCheckBox.checked;
+		};
+
+		minimumHealthStepper = new FlxUINumericStepper(healthDrainCheckBox.x + 80, healthDrainCheckBox.y, 0.05, char.drainFloor, -1, 2, 3);
+		minimumHealthStepper.name = 'minimumHealthStepper';
+
+		drainAmountStepper = new FlxUINumericStepper(minimumHealthStepper.x + 90, healthDrainCheckBox.y, 0.05, char.drainAmount, 0, 2, 3);
+		drainAmountStepper.name = 'drainAmountStepper';
+
+		tab_group.add(healthDrainCheckBox);
+		tab_group.add(minimumHealthStepper);
+		tab_group.add(drainAmountStepper);
+		tab_group.add(new FlxText(minimumHealthStepper.x, minimumHealthStepper.y - 18, 0, 'Minimum Health:'));
+		tab_group.add(new FlxText(drainAmountStepper.x, drainAmountStepper.y - 18, 0, 'Drain Amount:'));
+
+		UI_characterbox.addGroup(tab_group);
+	}
+
 	var ghostDropDown:FlxUIDropDownMenuCustom;
 	var animationDropDown:FlxUIDropDownMenuCustom;
 	var animationInputText:FlxUIInputText;
@@ -895,6 +926,14 @@ class CharacterEditorState extends MusicBeatState
 			{
 				char.cameraPosition[1] = positionCameraYStepper.value;
 				updatePointerPos();
+			}
+			else if(sender == drainAmountStepper)
+			{
+				char.drainAmount = drainAmountStepper.value;
+			}
+			else if(sender == minimumHealthStepper)
+			{
+				char.drainFloor = minimumHealthStepper.value;
 			}
 			else if(sender == healthColorStepperR)
 			{
@@ -1439,7 +1478,11 @@ class CharacterEditorState extends MusicBeatState
 			"no_antialiasing": char.noAntialiasing,
 			"healthbar_colors": char.healthColorArray,
 			"winning_colors": char.winningColorArray,
-			"losing_colors": char.losingColorArray
+			"losing_colors": char.losingColorArray,
+
+			"health_drain": char.healthDrain,
+			"drain_amount": char.drainAmount,
+			"drain_floor": char.drainFloor
 		};
 
 		var data:String = Json.stringify(json, "\t");
