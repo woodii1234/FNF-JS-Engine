@@ -26,6 +26,10 @@ import sys.io.File;
 import sys.io.Process;
 #end
 
+#if linux
+import lime.graphics.Image;
+#end
+
 using StringTools;
 
 class Main extends Sprite {
