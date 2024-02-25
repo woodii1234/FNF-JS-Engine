@@ -156,6 +156,11 @@ class Main extends Sprite {
 
 		FlxG.autoPause = false;
 
+		#if linux
+		var icon = Image.fromFile("icon.png");
+		Lib.current.stage.window.setIcon(icon);
+		#end
+
 		#if html5
 		FlxG.mouse.visible = false;
 		#end

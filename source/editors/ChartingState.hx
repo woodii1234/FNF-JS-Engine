@@ -2231,7 +2231,6 @@ class ChartingState extends MusicBeatState
 					if (check_stackActive.checked) {
 						addCount = stepperStackNum.value * stepperStackOffset.value - 1;
 					}
-					// var funnySnap:Float = ((GRID_SIZE * getSectionBeats() * 4 * zoomList[curZoom]) + Conductor.stepCrochet / stepperStackOffset.value);
 					for(i in 0...Std.int(addCount)) {
 						addNote(curSelectedNote[0] + (15000/Conductor.bpm)/stepperStackOffset.value, curSelectedNote[1] + Math.floor(stepperStackSideOffset.value), currentType);
 					}
