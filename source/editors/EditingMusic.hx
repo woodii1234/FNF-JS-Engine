@@ -44,7 +44,8 @@ class EditingMusic
 	    }
         public function destroy()
         {
-            music.destroy();
+		if (startTimer != null) startTimer.cancel();
+            if (music != null) music.destroy();
             reset();
         }
         public function playMusic(time:Float = 0)
