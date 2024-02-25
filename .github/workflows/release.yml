@@ -37,7 +37,7 @@ jobs:
   release-windows:
     name: Release windowsBuild
     needs: build
-    runs-on: windows-latest
+    runs-on: ubunty-latest
     steps:
     - name: Download Windows artifact
       uses: actions/download-artifact@v3
@@ -60,7 +60,7 @@ jobs:
   release-mac:
     name: Release macBuild
     needs: build
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
     - name: Download Mac artifact
       uses: actions/download-artifact@v3
