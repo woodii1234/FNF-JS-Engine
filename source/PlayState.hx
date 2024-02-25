@@ -2228,6 +2228,7 @@ class PlayState extends MusicBeatState
 		renderedTxt.setFormat(Paths.font("vcr.ttf"), 40, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		renderedTxt.scrollFactor.set();
 		renderedTxt.borderSize = 1.25;
+		renderedTxt.cameras = [camHUD];
 		renderedTxt.visible = ClientPrefs.showRendered;
 
 		if (ClientPrefs.downScroll) renderedTxt.y = healthBar.y + 50;

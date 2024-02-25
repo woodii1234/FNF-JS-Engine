@@ -45,6 +45,7 @@ using StringTools;
  */
 class CharacterEditorState extends MusicBeatState
 {
+	var music:EditingMusic;
 	var char:Character;
 	var ghostChar:Character;
 	var textAnim:FlxText;
@@ -79,8 +80,8 @@ class CharacterEditorState extends MusicBeatState
 	var healthBarBG:FlxSprite;
 
 	override function create()
-	{
-		//FlxG.sound.playMusic(Paths.music('breakfast'), 0.5);
+	{	
+		music = new EditingMusic();
 
 		camEditor = new FlxCamera();
 		camHUD = new FlxCamera();
@@ -1272,6 +1273,7 @@ class CharacterEditorState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
+		if (FlxG.mouse.justPressed) FlxG.sound.play(Paths.sound('click'));
 		MusicBeatState.camBeat = FlxG.camera;
 		if(char.animationsArray[curAnim] != null) {
 			textAnim.text = char.animationsArray[curAnim].anim;
@@ -1315,6 +1317,7 @@ class CharacterEditorState extends MusicBeatState
 					FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
 				}
 				FlxG.mouse.visible = false;
+				music.destroy();
 				return;
 			}
 
@@ -1506,4 +1509,17 @@ class CharacterEditorState extends MusicBeatState
 		var text:String = prefix + Clipboard.text.replace('\n', '');
 		return text;
 	}
+
+	override public function onFocusLost():Void
+	    {
+		    music.pauseMusic();
+
+		    super.onFocusLost();
+	    }
+	override public function onFocus():Void
+	    {
+		    music.unpauseMusic();
+
+		    super.onFocus();
+	    }
 }
