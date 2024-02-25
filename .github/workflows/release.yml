@@ -37,7 +37,7 @@ jobs:
   release-windows:
     name: Release windowsBuild
     needs: build
-    runs-on: ubunty-latest
+    runs-on: ubuntu-latest
     steps:
     - name: Download Windows artifact
       uses: actions/download-artifact@v3
