@@ -5631,7 +5631,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		if(ffmpegMode && !noCapture)
 		{
 			var filename = CoolUtil.zeroFill(frameCaptured, 7);
-			capture.save(Paths.formatToSongPath(SONG.song) + Screenshot.slash, filename);
+			capture.save(Paths.formatToSongPath(SONG.song) + #if linux '/' #else '\\' #end, filename);
 		}
 		frameCaptured++;
 
