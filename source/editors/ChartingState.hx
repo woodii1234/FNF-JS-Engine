@@ -171,8 +171,6 @@ class ChartingState extends MusicBeatState
 
 	var vocals:FlxSound = null;
 
-	var idleMusic:EditingMusic;
-
 	var leftIcon:HealthIcon;
 	var rightIcon:HealthIcon;
 
@@ -280,7 +278,6 @@ class ChartingState extends MusicBeatState
 		}
 		hitsound = FlxG.sound.load(Paths.sound("hitsounds/" + 'osu!mania'));
 		hitsound.volume = 1;
-		idleMusic = new EditingMusic();
 
 		// Paths.clearMemory();
 
@@ -2288,7 +2285,6 @@ class ChartingState extends MusicBeatState
 			{
 				autosaveSong();
 				LoadingState.loadAndSwitchState(() -> new editors.EditorPlayState(sectionStartTime()));
-				idleMusic.destroy();
 			}
 			if (FlxG.keys.justPressed.ENTER)
 			{
@@ -2304,7 +2300,6 @@ class ChartingState extends MusicBeatState
 				//if(_song.stage == null) _song.stage = stageDropDown.selectedLabel;
 				StageData.loadDirectory(_song);
 				LoadingState.loadAndSwitchState(PlayState.new);
-				idleMusic.destroy();
 			}
 
 			if(curSelectedNote != null && curSelectedNote[1] > -1) {
@@ -2333,7 +2328,6 @@ class ChartingState extends MusicBeatState
 				FlxG.switchState(editors.MasterEditorMenu.new);
 				FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
 				FlxG.mouse.visible = false;
-				idleMusic.destroy();
 				return;
 			}
 
@@ -2407,7 +2401,6 @@ class ChartingState extends MusicBeatState
 					if(vocals != null) vocals.pause();
 					lilBf.animation.play("idle");
 					lilOpp.animation.play("idle");
-					idleMusic.unpauseMusic(1.5);
 				}
 				else
 				{
@@ -2418,7 +2411,6 @@ class ChartingState extends MusicBeatState
 						vocals.play();
 					}
 					FlxG.sound.music.play();
-					idleMusic.pauseMusic();
 					lilBf.animation.play("idle");
 					lilOpp.animation.play("idle");
 				}
@@ -3985,18 +3977,6 @@ class ChartingState extends MusicBeatState
 		if(_song.notes[section] != null) val = _song.notes[section].sectionBeats;
 		return val != null ? val : 4;
 	}
-	override public function onFocusLost():Void
-	    {
-		    idleMusic.pauseMusic();
-
-		    super.onFocusLost();
-	    }
-	override public function onFocus():Void
-	    {
-		    idleMusic.unpauseMusic();
-
-		    super.onFocus();
-	    }
 }
 
 class AttachedFlxText extends FlxText

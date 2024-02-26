@@ -84,9 +84,9 @@ class Screenshot {
             path = "scr-" + DateTools.format(Date.now(), "%Y-%m-%d_%H-%M-%S-") + millis;
         }
 
-        path = target +"\\"+ fixFilename(path + name, isLossless);
+        path = target + slash + fixFilename(path + name, isLossless);
 
-        byteData = image.encode(isLossless ? PNG : JPEG, 85);
+        byteData = image.encode(isLossless ? PNG : JPEG, quality);
         var f:FileOutput = sys.io.File.write(path, true);
         if(byteData != null && f != null) {
             f.write(byteData);

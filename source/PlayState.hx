@@ -576,6 +576,26 @@ class PlayState extends MusicBeatState
 
 	override public function create()
 	{
+		//Stops playing on a height that isn't divisible by 2
+		if (ClientPrefs.ffmpegMode && ClientPrefs.resolution != null) {
+    			var resolutionValue = cast(ClientPrefs.resolution, String);
+
+    			if (resolutionValue != null) {
+        			var parts = resolutionValue.split('x');
+        
+        			if (parts.length == 2) {
+            				var width = Std.parseInt(parts[0]);
+            				var height = Std.parseInt(parts[1]);
+            	
+            				if (width != null && height != null) {
+						CoolUtil.resetResScale(width, height);
+                				FlxG.resizeGame(width, height);
+						lime.app.Application.current.window.width = width;
+						lime.app.Application.current.window.height = height;
+            				}
+        			}
+    			}
+		}
 		if (ffmpegMode) {
 			FlxG.fixedTimestep = true;
 			FlxG.animationTimeScale = ClientPrefs.framerate / targetFPS;
@@ -7082,7 +7102,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		final noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset) / playbackRate;
 		final wife:Float = EtternaFunctions.wife3(noteDiff, Conductor.timeScale) / playbackRate;
 
-		if (!miss) vocals.volume = 1;
+		if (!miss && !ffmpegMode) vocals.volume = 1;
 
 		final offset = FlxG.width * 0.35;
 		if(ClientPrefs.scoreZoom && !ClientPrefs.hideScore && !cpuControlled && !miss)
@@ -8173,7 +8193,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				}
 			}
 			note.wasGoodHit = true;
-			if (ClientPrefs.songLoading) vocals.volume = 1;
+			if (ClientPrefs.songLoading && !ffmpegMode) vocals.volume = 1;
 
 			final isSus:Bool = note.isSustainNote; //GET OUT OF MY HEAD, GET OUT OF MY HEAD, GET OUT OF MY HEAD
 			final leData:Int = Math.round(Math.abs(note.noteData));
@@ -8309,7 +8329,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				spawnNoteSplashOnNote(true, daNote, daNote.gfNote);
 			}
 
-			if (SONG.needsVoices)
+			if (SONG.needsVoices && !ffmpegMode)
 				vocals.volume = 1;
 
 				if (polyphony > 1 && !daNote.isSustainNote) opponentNoteTotal += polyphony - 1;
