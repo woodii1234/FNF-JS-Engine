@@ -147,7 +147,7 @@ class WeekEditorState extends MusicBeatState
 		
 		var freeplayButton:FlxButton = new FlxButton(0, 650, "Freeplay", function() {
 			FlxG.switchState(() -> new WeekEditorFreeplayState(weekFile));
-			music.destroy();
+			if (music != null && music.music != null) music.destroy();
 			
 		});
 		freeplayButton.screenCenter(X);
@@ -461,7 +461,7 @@ class WeekEditorState extends MusicBeatState
 			if(FlxG.keys.justPressed.ESCAPE) {
 				FlxG.switchState(editors.MasterEditorMenu.new);
 				FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
-				music.destroy();
+				if (music != null && music.music != null) music.destroy();
 			}
 		}
 
@@ -592,13 +592,13 @@ class WeekEditorState extends MusicBeatState
 	}
 	override public function onFocusLost():Void
 	    {
-		    music.pauseMusic();
+		    if (music != null && music.music != null) music.pauseMusic();
 
 		    super.onFocusLost();
 	    }
 	override public function onFocus():Void
 	    {
-		    music.unpauseMusic();
+		    if (music != null && music.music != null) music.unpauseMusic();
 
 		    super.onFocus();
 	    }
@@ -687,7 +687,7 @@ class WeekEditorFreeplayState extends MusicBeatState
 		
 		var storyModeButton:FlxButton = new FlxButton(0, 685, "Story Mode", function() {
 			FlxG.switchState(() -> new WeekEditorState(weekFile));
-			music.destroy();
+			if (music != null && music.music != null) music.destroy();
 		});
 		storyModeButton.screenCenter(X);
 		add(storyModeButton);
@@ -824,7 +824,7 @@ class WeekEditorFreeplayState extends MusicBeatState
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
 			FlxG.switchState(() -> new WeekEditorFreeplayState(WeekEditorState.loadedWeek));
-			music.destroy();
+			if (music != null && music.music != null) music.destroy();
 			WeekEditorState.loadedWeek = null;
 			return;
 		}
@@ -843,7 +843,7 @@ class WeekEditorFreeplayState extends MusicBeatState
 			if(FlxG.keys.justPressed.ESCAPE) {
 				FlxG.switchState(editors.MasterEditorMenu.new);
 				FlxG.sound.playMusic(Paths.music('freakyMenu'));
-				music.destroy();
+				if (music != null && music.music != null) music.destroy();
 			}
 
 			if(controls.UI_UP_P) changeSelection(-1);
@@ -853,13 +853,13 @@ class WeekEditorFreeplayState extends MusicBeatState
 	}
 	override public function onFocusLost():Void
 	    {
-		    music.pauseMusic();
+		    if (music != null && music.music != null) music.pauseMusic();
 
 		    super.onFocusLost();
 	    }
 	override public function onFocus():Void
 	    {
-		    music.unpauseMusic();
+		    if (music != null && music.music != null) music.unpauseMusic();
 
 		    super.onFocus();
 	    }

@@ -1317,7 +1317,7 @@ class CharacterEditorState extends MusicBeatState
 					FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
 				}
 				FlxG.mouse.visible = false;
-				music.destroy();
+				if (music != null && music.music != null) music.destroy();
 				return;
 			}
 
@@ -1512,13 +1512,13 @@ class CharacterEditorState extends MusicBeatState
 
 	override public function onFocusLost():Void
 	    {
-		    music.pauseMusic();
+		    if (music != null && music.music != null) music.pauseMusic();
 
 		    super.onFocusLost();
 	    }
 	override public function onFocus():Void
 	    {
-		    music.unpauseMusic();
+		    if (music != null && music.music != null) music.unpauseMusic();
 
 		    super.onFocus();
 	    }

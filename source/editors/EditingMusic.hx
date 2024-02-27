@@ -7,8 +7,8 @@ import flixel.util.FlxTimer;
 
 class EditingMusic
 {
-    var music:FlxSound = new FlxSound();
-	var startTimer:FlxTimer = null;
+    public var music:FlxSound = new FlxSound();
+	public var startTimer:FlxTimer = null;
 
     public function new() {
         playMusic(1);
@@ -23,13 +23,15 @@ class EditingMusic
         public function pauseMusic() {
             music.pause();
 		if (startTimer != null) startTimer.cancel();
+		startTimer = null;
         }
         public function unpauseMusic(time:Float = 0) {
             if (time > 0)
 		{
                 startTimer = new FlxTimer().start(time, function(tmr:FlxTimer)
 					{
-                        music.fadeIn(1, 0, 0.5);
+                       				music.fadeIn(1, 0, 0.5);
+						startTimer = null;
 					});
 		}
             else music.play();
@@ -44,8 +46,10 @@ class EditingMusic
 	    }
         public function destroy()
         {
+                if (music.fadeTween != null)
+		music.fadeTween.cancel(); //cancel the fade tween so it doesnt NULL OBJECT REFERENCE
 		if (startTimer != null) startTimer.cancel();
-            if (music != null) music.destroy();
+           	if (music != null) music.destroy();
             reset();
         }
         public function playMusic(time:Float = 0)
@@ -56,6 +60,7 @@ class EditingMusic
                 startTimer = new FlxTimer().start(time, function(tmr:FlxTimer)
 					{
 						shuffle();
+						startTimer = null;
 					});
 		}
             else shuffle();
