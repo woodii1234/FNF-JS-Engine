@@ -211,6 +211,8 @@ class PlayState extends MusicBeatState
 	public var isEkSong:Bool = false; //we'll use this so that the game doesn't load all notes twice?
 	public var usingEkFile:Bool = false; //we'll also use this so that the game doesn't load all notes twice?
 
+	public var memoryOver6GB:Bool = false; //For Rendering Mode
+
 	public var notes:NoteGroup;
 	public var sustainNotes:FlxTypedGroup<Note>;
 	public var unspawnNotes:Array<Note> = [];
@@ -576,6 +578,7 @@ class PlayState extends MusicBeatState
 
 	override public function create()
 	{
+		if (Main.getMemoryAmount() > Math.pow(2, 32) * 1.5) memoryOver6GB = true;
 		//Stops playing on a height that isn't divisible by 2
 		if (ClientPrefs.ffmpegMode && ClientPrefs.resolution != null) {
     			var resolutionValue = cast(ClientPrefs.resolution, String);
@@ -5364,17 +5367,30 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			health = maxHealth;
 		}
 
-		// I got special permission from AT to use this from Denpa engine, since the old code was a mess & buggy
-		// or should I say, dennnnpaaaa
-		iconP1.animation.curAnim.curFrame = switch (iconP1.type) {
-			case SINGLE: 0;
-			case WINNING: (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80) ? 2 : (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20) ? 1 : 0));
-            default: (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20) ? 1 : 0);
+		if (iconP1.animation.numFrames == 3) {
+			if (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20))
+				iconP1.animation.curAnim.curFrame = 1;
+			else if (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80))
+				iconP1.animation.curAnim.curFrame = 2;
+			else
+				iconP1.animation.curAnim.curFrame = 0;
+		} 
+		else {
+			if (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20))
+				iconP1.animation.curAnim.curFrame = 1;
 		}
-		iconP2.animation.curAnim.curFrame = switch (iconP2.type) {
-			case SINGLE: 0;
-			case WINNING: (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80) ? 1 : (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20) ? 2 : 0));
-            default: (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80) ? 1 : 0);
+		if (iconP2.animation.numFrames == 3) {
+			if (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80))
+				iconP2.animation.curAnim.curFrame = 1;
+			else if (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20))
+				iconP2.animation.curAnim.curFrame = 2;
+			else 
+				iconP2.animation.curAnim.curFrame = 0;
+		} else {
+			if (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80))
+				iconP2.animation.curAnim.curFrame = 1;
+			else 
+				iconP2.animation.curAnim.curFrame = 0;
 		}
 
 		if (FlxG.keys.anyJustPressed(debugKeysCharacter) && !endingSong && !inCutscene) {
@@ -5652,6 +5668,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		{
 			var filename = CoolUtil.zeroFill(frameCaptured, 7);
 			capture.save(Paths.formatToSongPath(SONG.song) + #if linux '/' #else '\\' #end, filename);
+			#if windows //linux and mac should have good pcs iirc
+				if (!memoryOver6GB) openfl.system.System.gc();
+			#end
 		}
 		frameCaptured++;
 
