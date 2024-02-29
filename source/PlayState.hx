@@ -220,7 +220,7 @@ class PlayState extends MusicBeatState
 	public var eventNotes:Array<EventNote> = [];
 	public var eventNotesCopy:Array<EventNote> = [];
 
-	private var strumLine:FlxSprite;
+	private var strumLine:FlxPoint;
 
 	//Handles the new epic mega sexy cam code that i've done
 	public var camFollow:FlxPoint;
@@ -1555,9 +1555,7 @@ class PlayState extends MusicBeatState
 			add(laneunderlay);
 		}
 
-		strumLine = new FlxSprite(ClientPrefs.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X, 50).makeGraphic(FlxG.width, 10);
-		if(ClientPrefs.downScroll) strumLine.y = FlxG.height - 150;
-		strumLine.scrollFactor.set();
+		strumLine = FlxPoint.get(ClientPrefs.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X, (ClientPrefs.downScroll) ? FlxG.height - 150 : 50);
 
 		var showTime:Bool = (ClientPrefs.timeBarType != 'Disabled');
 		
@@ -8629,6 +8627,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		luaArray = [];
 
 		camFollow.put();
+		strumLine.put();
 
 		#if hscript
 		if(FunkinLua.hscript != null) FunkinLua.hscript = null;
