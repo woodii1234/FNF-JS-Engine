@@ -100,6 +100,8 @@ class Note extends FlxSprite
 
 	public var strum:StrumNote = null;
 
+	public var instance:Note = null;
+
 	public var loadSprite:Bool = false;
 	public var inEkSong:Bool = false;
 
@@ -136,7 +138,7 @@ class Note extends FlxSprite
 		return value;
 	}
 
-	function quantCheck():Void 
+	public function quantCheck():Void 
 	{
 		if (colorSwap != null && ClientPrefs.noteColorStyle == 'Quant-Based' && !isSustainNote && (ClientPrefs.showNotes && ClientPrefs.enableColorShader))
 			{
@@ -311,6 +313,8 @@ class Note extends FlxSprite
 	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?noteskinToLoad:String, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?loadSprite:Bool = true)
 	{
 		super();
+
+		instance = this;
 
 		if (prevNote == null)
 			prevNote = this;

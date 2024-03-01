@@ -387,7 +387,6 @@ class PlayState extends MusicBeatState
 
 	public var botplaySine:Float = 0;
 	public var botplayTxt:FlxText;
-	public var pauseWarnText:FlxText;
 	public var renderedTxt:FlxText;
 
 	public var iconP1:HealthIcon;
@@ -467,6 +466,8 @@ class PlayState extends MusicBeatState
 	var wiggleShit:WiggleEffect = new WiggleEffect();
 	var bgGhouls:BGSprite;
 	public var singDurMult:Int = 1;
+
+	public var disableCoolHealthTween:Bool = false;
 
 	var tankWatchtower:BGSprite;
 	var tankGround:BGSprite;
@@ -1609,21 +1610,9 @@ class PlayState extends MusicBeatState
 			timeTxt.borderSize = 2;
 
 		case 'VS Impostor':
+			timeTxt.x = STRUM_X + (FlxG.width / 2) - 585;
 			timeTxt.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			timeTxt.borderSize = 1;
-
-		case "Mic'd Up":
-			timeTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			timeTxt.screenCenter(X);
-			timeTxt.borderSize = 2;
-
-		case 'Box Funkin':
-			try{
-				timeTxt = new FlxText(0, (ClientPrefs.downScroll ? timeBarBG.y + 32 : timeBarBG.y - 32), 400, "", 20);
-				timeTxt.setFormat(Paths.font("MilkyNice.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-				timeTxt.borderSize = 2;
-			}
-			catch(e){}
 		}
 
 
@@ -1691,43 +1680,8 @@ class PlayState extends MusicBeatState
 				timeBar.visible = showTime;
 				add(timeBar);
 				timeBarBG.sprTracker = timeBar;
-			case 'Box Funkin':
-				if (timeBarBG != null && timeBar != null && timeTxt != null){
-					timeBarBG.destroy();
-					timeBar.destroy();
-					timeTxt.destroy();
-				}
-				timeBarBG = new AttachedSprite('WITimeBar');
-				timeBarBG.y = 695;
-				if (ClientPrefs.downScroll) timeBarBG.y = 3;
-				timeBarBG.scrollFactor.set();
-				timeBarBG.updateHitbox();
-				timeBarBG.screenCenter(X);
-				timeBarBG.alpha = 0;
-				add(timeBarBG);
-				timeBarBG.xAdd = -12;
-				timeBarBG.yAdd = -4;
-				timeBarBG.screenCenter(X);
-				timeBarBG.color = FlxColor.BLACK;
 
-				timeTxt = new FlxText(0, (ClientPrefs.downScroll ? timeBarBG.y + 32 : timeBarBG.y - 32), 400, "", 20);
-				timeTxt.setFormat(Paths.font("MilkyNice.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-				timeTxt.alpha = 0;
-				timeTxt.borderSize = 3;
-				timeTxt.screenCenter(X);
-				timeTxt.antialiasing = ClientPrefs.globalAntialiasing;
-				updateTime = true;
-				timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 5, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 24), Std.int(timeBarBG.height - 8), this, 'songPercent', 0, 1);
-				timeBar.scrollFactor.set();
-				timeBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
-				timeBar.numDivisions = 800; // How much lag this causes?? Should i tone it down to idk, 400 or 200?
-				timeBar.alpha = 0;
-				timeBarBG.xAdd = -12;
-				timeBar.screenCenter(X);
-				add(timeBar);
-				timeBarBG.sprTracker = timeBar;
-
-			case 'Kade Engine', "Mic'd Up":
+			case 'Kade Engine':
 				if (timeBarBG != null && timeBar != null){
 					timeBarBG.destroy();
 					timeBar.destroy();
@@ -1944,14 +1898,14 @@ class PlayState extends MusicBeatState
 				healthBarBG = new AttachedSprite('healthBar');
 			}
 		}
-		healthBarBG.y = FlxG.height * 0.89;
+		healthBarBG.y = (disableCoolHealthTween ? FlxG.height * 0.89 : FlxG.height * 1.13);
 		healthBarBG.screenCenter(X);
 		healthBarBG.scrollFactor.set();
 		healthBarBG.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 		healthBarBG.xAdd = -4;
 		healthBarBG.yAdd = -4;
 		add(healthBarBG);
-		if(ClientPrefs.downScroll) healthBarBG.y = 0.11 * FlxG.height;
+		if(ClientPrefs.downScroll) healthBarBG.y = (disableCoolHealthTween ? 0.11 * FlxG.height : -0.13 * FlxG.height);
 
 		healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this,
 			'displayedHealth', 0, maxHealth);
@@ -2018,34 +1972,6 @@ class PlayState extends MusicBeatState
 			EngineWatermark.scrollFactor.set();
 			add(EngineWatermark);
 			EngineWatermark.text = SONG.song;
-		}
-		if (ClientPrefs.hudType == 'Doki Doki+') {
-			EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
-			add(EngineWatermark);
-		}
-		if (ClientPrefs.hudType == 'Leather Engine') {
-			EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
-			add(EngineWatermark);
-		}
-		if (ClientPrefs.hudType == 'VS Impostor') { //unfortunately i have to do this because otherwise enginewatermark calls a null object reference
-			EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
-			add(EngineWatermark);
-		}
-		if (ClientPrefs.hudType == 'Psych Engine') { //unfortunately i have to do this because otherwise enginewatermark calls a null object reference
-		EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
-		add(EngineWatermark);
-		}
-		if (ClientPrefs.hudType == 'Tails Gets Trolled V4') { //unfortunately i have to do this because otherwise enginewatermark calls a null object reference
-			EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
-			add(EngineWatermark);
-		}
-		if (ClientPrefs.hudType == "Mic'd Up") { //unfortunately i have to do this because otherwise enginewatermark calls a null object reference
-			EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
-			add(EngineWatermark);
-		}
-		if (ClientPrefs.hudType == 'Box Funkin') { //unfortunately i have to do this because otherwise enginewatermark calls a null object reference
-			EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
-			add(EngineWatermark);
 		}
 
 		if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG) {
@@ -2266,26 +2192,16 @@ class PlayState extends MusicBeatState
 		renderedTxt.visible = ClientPrefs.showRendered;
 
 		if (ClientPrefs.downScroll) renderedTxt.y = healthBar.y + 50;
-		if (ClientPrefs.hudType != 'VS Impostor') renderedTxt.y = healthBar.y + (ClientPrefs.downScroll ? 100 : -100);
+		if (ClientPrefs.hudType == 'VS Impostor') renderedTxt.y = healthBar.y + (ClientPrefs.downScroll ? 100 : -100);
 		add(renderedTxt);
 
-		judgementCounter = new FlxText(0, FlxG.height / 2 - (ClientPrefs.hudType != 'Box Funkin' || ClientPrefs.hudType != "Mic'd Up" ? 80 : 350), 0, "", 20);
+		judgementCounter = new FlxText(0, FlxG.height / 2 - 80, 0, "", 20);
 		judgementCounter.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		if (ClientPrefs.hudType == 'Box Funkin') judgementCounter.setFormat(Paths.font("MilkyNice.ttf"), 21, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		judgementCounter.borderSize = 2;
 		judgementCounter.scrollFactor.set();
 		judgementCounter.visible = ClientPrefs.ratingCounter && !ClientPrefs.showcaseMode;
 		add(judgementCounter);
 		if (ClientPrefs.ratingCounter) updateRatingCounter();
-
-		pauseWarnText = new FlxText(400,  FlxG.height / 2 - 20, 0, "Pausing is disabled! Turn it back on in Settings -> Gameplay -> 'Force Disable Pausing'", 16);
-		pauseWarnText.cameras = [camHUD];
-		pauseWarnText.scrollFactor.set();
-		pauseWarnText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		pauseWarnText.borderSize = 1.25;
-		pauseWarnText.x += 20;
-		pauseWarnText.y -= 25;
-		pauseWarnText.alpha = 0;
 
 		// just because, people keep making issues about it
 		try{
@@ -2430,16 +2346,9 @@ class PlayState extends MusicBeatState
 		healthBarBG.cameras = [camHUD];
 		iconP1.cameras = [camHUD];
 		iconP2.cameras = [camHUD];
-		EngineWatermark.cameras = [camHUD];
+		if (EngineWatermark != null) EngineWatermark.cameras = [camHUD];
 		judgementCounter.cameras = [camHUD];
 		scoreTxt.cameras = [camHUD];
-		if(ClientPrefs.hudType == "Mic'd Up" || ClientPrefs.hudType == 'Box Funkin')
-		{
-			missTxt.cameras = [camHUD];
-			accuracyTxt.cameras = [camHUD];
-			npsTxt.cameras = [camHUD];
-			comboTxt.cameras = [camHUD];
-		}
 		if (botplayTxt != null) botplayTxt.cameras = [camHUD];
 		timeBar.cameras = [camHUD];
 		timeBarBG.cameras = [camHUD];
@@ -3608,7 +3517,6 @@ class PlayState extends MusicBeatState
 	}
 	}
 
-
 	public function startCountdown():Void
 	{
 		if(startedCountdown) {
@@ -3670,6 +3578,8 @@ class PlayState extends MusicBeatState
 			setOnLuas('startedCountdown', true);
 			callOnLuas('onCountdownStarted', []);
 
+			curBeat = -5;
+
 			var swagCounter:Int = 0;
 
 			if(startOnTime < 0) startOnTime = 0;
@@ -3727,67 +3637,13 @@ class PlayState extends MusicBeatState
 					case 0:
 						FlxG.sound.play(Paths.sound('intro3' + introSoundsSuffix), 0.6);
 					case 1:
-						countdownReady = new FlxSprite().loadGraphic(Paths.image(introAlts[0]));
-						countdownReady.cameras = [camHUD];
-						countdownReady.scrollFactor.set();
-						countdownReady.updateHitbox();
-
-						if (PlayState.isPixelStage)
-							countdownReady.setGraphicSize(Std.int(countdownReady.width * daPixelZoom));
-
-						countdownReady.screenCenter();
-						countdownReady.antialiasing = antialias;
-						insert(members.indexOf(notes), countdownReady);
-						FlxTween.tween(countdownReady, {alpha: 0}, Conductor.crochet / 1000 / playbackRate, {
-							ease: FlxEase.cubeInOut,
-							onComplete: function(twn:FlxTween)
-							{
-								remove(countdownReady);
-								countdownReady.destroy();
-							}
-						});
+						countdownReady = createCountdownSprite(introAlts[0], antialias);
 						FlxG.sound.play(Paths.sound('intro2' + introSoundsSuffix), 0.6);
 					case 2:
-						countdownSet = new FlxSprite().loadGraphic(Paths.image(introAlts[1]));
-						countdownSet.cameras = [camHUD];
-						countdownSet.scrollFactor.set();
-
-						if (PlayState.isPixelStage)
-							countdownSet.setGraphicSize(Std.int(countdownSet.width * daPixelZoom));
-
-						countdownSet.screenCenter();
-						countdownSet.antialiasing = antialias;
-						insert(members.indexOf(notes), countdownSet);
-						FlxTween.tween(countdownSet, {alpha: 0}, Conductor.crochet / 1000 / playbackRate, {
-							ease: FlxEase.cubeInOut,
-							onComplete: function(twn:FlxTween)
-							{
-								remove(countdownSet);
-								countdownSet.destroy();
-							}
-						});
+						countdownSet = createCountdownSprite(introAlts[1], antialias);
 						FlxG.sound.play(Paths.sound('intro1' + introSoundsSuffix), 0.6);
 					case 3:
-						countdownGo = new FlxSprite().loadGraphic(Paths.image(introAlts[2]));
-						countdownGo.cameras = [camHUD];
-						countdownGo.scrollFactor.set();
-
-						if (PlayState.isPixelStage)
-							countdownGo.setGraphicSize(Std.int(countdownGo.width * daPixelZoom));
-
-						countdownGo.updateHitbox();
-
-						countdownGo.screenCenter();
-						countdownGo.antialiasing = antialias;
-						insert(members.indexOf(notes), countdownGo);
-						FlxTween.tween(countdownGo, {alpha: 0}, Conductor.crochet / 1000 / playbackRate, {
-							ease: FlxEase.cubeInOut,
-							onComplete: function(twn:FlxTween)
-							{
-								remove(countdownGo);
-								countdownGo.destroy();
-							}
-						});
+						countdownGo = createCountdownSprite(introAlts[2], antialias);
 						FlxG.sound.play(Paths.sound('introGo' + introSoundsSuffix), 0.6);
 						if (ClientPrefs.tauntOnGo && ClientPrefs.charsAndBG)
 						{
@@ -3854,6 +3710,30 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	inline private function createCountdownSprite(image:String, antialias:Bool):FlxSprite
+	{
+		var spr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(image));
+		spr.cameras = [camHUD];
+		spr.scrollFactor.set();
+		spr.updateHitbox();
+
+		if (PlayState.isPixelStage)
+			spr.setGraphicSize(Std.int(spr.width * daPixelZoom));
+
+		spr.screenCenter();
+		spr.antialiasing = antialias;
+		insert(members.indexOf(notes), spr);
+		FlxTween.tween(spr, {"scale.x": 0, "scale.y": 0, alpha: 0}, Conductor.crochet / 1000 / playbackRate, {
+			ease: FlxEase.cubeInOut,
+			onComplete: function(twn:FlxTween)
+			{
+				remove(spr);
+				spr.destroy();
+			}
+		});
+		return spr;
+	}
+
 	public function addBehindGF(obj:FlxObject)
 	{
 		insert(members.indexOf(gfGroup), obj);
@@ -3916,28 +3796,13 @@ class PlayState extends MusicBeatState
 
 		if (cpuControlled && !ClientPrefs.communityGameBot)
 		{
-			if (ClientPrefs.hudType != "Mic'd Up" && ClientPrefs.hudType != 'Box Funkin')
-			{
 			tempScore = 'Bot Score: ' + formattedScore + ' | Bot Combo: ' + formattedCombo + npsString + botText;
 			if (ClientPrefs.healthDisplay) scoreTxt.text += ' | Health: ' + FlxMath.roundDecimal(health * 50, 2) + '%';
-			} else {
-				tempScore = "Bot Score: " + formattedScore;
-				missTxt.text = "Bot Combo: " + formattedCombo;
-				accuracyTxt.text = npsString;
-				npsTxt.text = "Botplay Mode";
-			}
 		}
 		else switch (ClientPrefs.hudType)
 			{
 				case 'Kade Engine':
 					tempScore = 'Score: ' + formattedScore + ' | Misses: ' + formattedSongMisses  + ' | Combo: ' + formattedCombo + npsString + ' | Accuracy: ' + accuracy + ' | (' + fcString + ') ' + ratingCool;
-
-				case "Mic'd Up", 'Box Funkin':
-					comboTxt.text = "Combo: " + formattedCombo;
-					tempScore = 'Score: ' + formattedScore;
-					missTxt.text = "Misses: " + formattedSongMisses;
-					accuracyTxt.text = 'Accuracy: ' + accuracy + ' | ' + fcString + ' |' + ratingCool;
-					npsTxt.text = npsString;
 
 				case "Doki Doki+":
 					tempScore = 'Score: ' + formattedScore + ' | Breaks: ' + formattedSongMisses + ' | Combo: ' + formattedCombo + npsString + ' | Accuracy: ' + accuracy + ' | (' + fcString + ') ' + ratingCool;
@@ -4031,8 +3896,8 @@ class PlayState extends MusicBeatState
 			//trace('Oopsie doopsie! Paused sound');
 			if (ClientPrefs.songLoading)
 			{
-			FlxG.sound.music.pause();
-			vocals.pause();
+				FlxG.sound.music.pause();
+				vocals.pause();
 			}
 		}
 		curTime = Conductor.songPosition - ClientPrefs.noteOffset;
@@ -4050,7 +3915,28 @@ class PlayState extends MusicBeatState
 		FlxTween.tween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 		}
 
-
+		if (!disableCoolHealthTween && !ClientPrefs.hideHud && !ClientPrefs.showcaseMode)
+		{
+			var renderedTxtY = -70;
+			if (ClientPrefs.downScroll) renderedTxtY = 70;
+			if (ClientPrefs.hudType == 'VS Impostor') renderedTxtY = (ClientPrefs.downScroll ? 70 : -100);
+			var scoreTxtY = 50;
+			switch (ClientPrefs.hudType)
+			{
+				case 'Dave and Bambi': scoreTxtY = 40;
+				case 'Psych Engine', 'VS Impostor': scoreTxtY = 36;
+				case 'Tails Gets Trolled V4', 'Doki Doki+': scoreTxtY = 48;
+			}
+			var healthBarElements:Array<Dynamic> = [healthBarBG, healthBar, scoreTxt, iconP1, iconP2, renderedTxt, botplayTxt];
+			var yTweens:Array<Dynamic> = [0, 4, scoreTxtY, -75, -75, renderedTxtY];
+			if (ClientPrefs.hudType == 'VS Impostor')
+			{
+				if (ClientPrefs.downScroll) healthBarElements = [healthBarBG, healthBar, scoreTxt, iconP1, iconP2, renderedTxt];
+				yTweens = [0, 4, scoreTxtY, -75, -75, renderedTxtY, -55];	
+			}
+			for (i in 0...healthBarElements.length)
+				if (healthBarElements[i] != null && i < yTweens.length) FlxTween.tween(healthBarElements[i], {y: (FlxG.height * (ClientPrefs.downScroll ? 0.11 : 0.89)) + yTweens[i]}, 1, {ease: FlxEase.expoOut});
+		}
 
 		switch(curStage)
 		{
@@ -5015,7 +4901,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		setOnLuas('curDecStep', curDecStep);
 		setOnLuas('curDecBeat', curDecBeat);
 
-		if(botplayTxt != null && botplayTxt.visible && ClientPrefs.hudType != "Mic'd Up" && ClientPrefs.hudType != 'Kade Engine' && ClientPrefs.botTxtFade) {
+		if(botplayTxt != null && botplayTxt.visible && ClientPrefs.hudType != 'Kade Engine' && ClientPrefs.botTxtFade) {
 			botplaySine += 180 * elapsed;
 			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180 * playbackRate);
 		}
@@ -6038,10 +5924,10 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 							iconP2.changeIcon(dad.healthIcon);
 							if (ClientPrefs.hudType == 'VS Impostor') {
 								if (botplayTxt != null) FlxTween.color(botplayTxt, 1, botplayTxt.color, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]));
-
-								if (!ClientPrefs.hideScore && scoreTxt != null) FlxTween.color(scoreTxt, 1, scoreTxt.color, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]));
+								
+								if (!ClientPrefs.hideScore && scoreTxt != null && !ClientPrefs.hideHud) FlxTween.color(scoreTxt, 1, scoreTxt.color, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]));
 							}
-							if (ClientPrefs.hudType == 'JS Engine') {
+							if (ClientPrefs.hudType == 'JS Engine' && !ClientPrefs.hideHud) {
 								if (!ClientPrefs.hideScore && scoreTxt != null) FlxTween.color(scoreTxt, 1, scoreTxt.color, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]));
 							}
 						}
