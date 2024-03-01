@@ -5237,11 +5237,11 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 		while (Conductor.songPosition > unspawnNotes[unspawnNotes.length-1].strumTime - NOTE_SPAWN_TIME) {
 			trace('Note spawned at ${unspawnNotes[unspawnNotes.length-1].strumTime}');
-			var dunceNote = new Note(unspawnNotes[unspawnNotes.length-1].strumTime, unspawnNotes[unspawnNotes.length-1].noteData, unspawnNotes[unspawnNotes.length-1].prevNote, null, unspawnNotes[unspawnNotes.length-1].isSustainNote);
+			var dunceNote = new Note(unspawnNotes[unspawnNotes.length-1].strumTime, unspawnNotes[unspawnNotes.length-1].noteData, notes.members[notes.members.length-1], null, unspawnNotes[unspawnNotes.length-1].isSustainNote);
 			dunceNote.mustPress = unspawnNotes[unspawnNotes.length-1].mustPress;
 			dunceNote.noteType = unspawnNotes[unspawnNotes.length-1].noteType;
 			dunceNote.gfNote = unspawnNotes[unspawnNotes.length-1].gfNote;
-			dunceNote.prevNote = notes.members[notes.members.length-1]; // Do this before adding the note onto ``notes``
+			//dunceNote.prevNote = notes.members[notes.members.length-1]; // Do this before adding the note onto ``notes``
 			if (dunceNote.isSustainNote) {
 				dunceNote.parent = unspawnNotes[unspawnNotes.length-1].parent;
 				if (unspawnNotes[unspawnNotes.length-1].isSustainEnd) { // Generate hold end
