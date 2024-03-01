@@ -5250,7 +5250,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			if (dunceNote.isSustainNote) {
 				dunceNote.parent = unspawnNotes[unspawnNotes.length-1].parent;
 				if (unspawnNotes[unspawnNotes.length-1].isSustainEnd) { // Generate hold end
-					dunceNote.animation.play(@:privateAccess dunceNote.colArray[dunceNote.noteData] + 'holdend');
+					dunceNote.animation.play(Note.colArray[dunceNote.noteData] + 'holdend');
 					dunceNote.scale.set(0.7, 1.0);
 					dunceNote.updateHitbox();
 				}
@@ -6151,7 +6151,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		} else {
 			// Reset the song's time
 			FlxG.sound.music.time = 0;
-			if (SONG.needsVoices && voices != null) voices.time = 0;
+			if (SONG.needsVoices && vocals != null) vocals.time = 0;
 
 			// And now it's time for the actual troll mode stuff
 			var TROLL_MAX_SPEED:Float = 2048; // Default is medium max speed
