@@ -198,7 +198,6 @@ class PlayState extends MusicBeatState
 	public static var storyPlaylist:Array<String> = [];
 	public static var storyDifficulty:Int = 1;
 	public var tries:Int = 0;
-	public var notesLoadedRN:Int = 0;
 	public var firstNoteStrumTime:Float = 0;
 	var winning:Bool = false;
 	var losing:Bool = false;
@@ -515,7 +514,6 @@ class PlayState extends MusicBeatState
 
 	// how big to stretch the pixel art assets
 	public static var daPixelZoom:Float = 6;
-	public static var sectionsLoaded:Int = 0;
 
 	public var inCutscene:Bool = false;
 	public var skipCountdown:Bool = false;
@@ -4163,9 +4161,6 @@ class PlayState extends MusicBeatState
 					}
 				}
 			}
-			sectionsLoaded += 1;
-			notesLoadedRN += section.sectionNotes.length;
-			trace('loaded section ' + sectionsLoaded + ', notes loaded now: ' + notesLoadedRN);
 		}
 
 		bfNoteskin = boyfriend.noteskin;
@@ -5241,12 +5236,12 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		doDeathCheck();
 
 		while (Conductor.songPosition > unspawnNotes[unspawnNotes.length-1].strumTime - NOTE_SPAWN_TIME) {
-			var dunceNote = new Note(unspawnNotes[unspawnNotes.length-1].strumTime, unspawnNotes[unspawnNotes.length-1].noteData, unspawnNotes[unspawnNotes.length-1].prevNote, unspawnNotes[unspawnNotes.length-1].isSustainNote);
+			trace('Note spawned at ${unspawnNotes[unspawnNotes.length-1].strumTime}');
+			var dunceNote = new Note(unspawnNotes[unspawnNotes.length-1].strumTime, unspawnNotes[unspawnNotes.length-1].noteData, unspawnNotes[unspawnNotes.length-1].prevNote, null, unspawnNotes[unspawnNotes.length-1].isSustainNote);
 			dunceNote.mustPress = unspawnNotes[unspawnNotes.length-1].mustPress;
 			dunceNote.noteType = unspawnNotes[unspawnNotes.length-1].noteType;
 			dunceNote.gfNote = unspawnNotes[unspawnNotes.length-1].gfNote;
 			dunceNote.prevNote = notes.members[notes.members.length-1]; // Do this before adding the note onto ``notes``
-			dunceNote.strum = (dunceNote.mustPress ? playerStrums : opponentStrums).members[dunceNote.noteData];
 			if (dunceNote.isSustainNote) {
 				dunceNote.parent = unspawnNotes[unspawnNotes.length-1].parent;
 				if (unspawnNotes[unspawnNotes.length-1].isSustainEnd) { // Generate hold end
@@ -5255,6 +5250,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					dunceNote.updateHitbox();
 				}
 			}
+			dunceNote.strum = (dunceNote.mustPress ? playerStrums : opponentStrums).members[dunceNote.noteData];
 
 			if (ClientPrefs.useWrongNoteSorting) {
 				(dunceNote.isSustainNote ? sustainNotes : notes).insert(0, dunceNote);
@@ -5347,8 +5343,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				{
 					for (group in [notes, sustainNotes]) group.forEachAlive(function(daNote:Note)
 					{
-						daNote.canBeHit = false;
-						daNote.wasGoodHit = false;
+						group.remove(daNote, true);
 					});
 				}
 			}
@@ -6185,6 +6180,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			}
 
 			readyToTriggerTrollMode = false;
+
+			songWasLooped = true;
 
 			startSong(); // Now that the troll mode trigger process is complete, let's play the song again.
 
