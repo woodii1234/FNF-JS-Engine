@@ -25,6 +25,7 @@ import openfl.display3D.textures.RectangleTexture;
 import lime.media.vorbis.VorbisFile;
 import lime.media.AudioBuffer;
 
+import haxe.io.Path;
 #if cpp
 import cpp.vm.Gc;
 #elseif hl
@@ -344,8 +345,10 @@ class Paths
 				var texture:RectangleTexture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
 				texture.uploadFromBitmapData(bitmap);
 				bitmap.image.data = null;
+				/*
 				bitmap.dispose();
 				bitmap.disposeImage();
+				*/
 				bitmap = BitmapData.fromTexture(texture);
 			}
 			var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file);
