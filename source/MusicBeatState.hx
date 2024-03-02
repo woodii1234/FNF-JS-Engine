@@ -48,6 +48,8 @@ class MusicBeatState extends FlxUIState
 		var skip:Bool = FlxTransitionableState.skipNextTransOut;
 		super.create();
 
+		Application.current.window.title = windowNamePrefix + windowNameSuffix + windowNameSuffix2; // Actually change the window title
+
 		if(!skip) {
 			openSubState(new CustomFadeTransition(0.7, true));
 		}
@@ -82,7 +84,6 @@ class MusicBeatState extends FlxUIState
 		FlxG.autoPause = ClientPrefs.autoPause;
 
 		super.update(elapsed);
-		Application.current.window.title = windowNamePrefix + windowNameSuffix + windowNameSuffix2;
 	}
 
 	private function updateSection():Void
