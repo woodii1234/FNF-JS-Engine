@@ -75,16 +75,8 @@ import sys.FileSystem;
 import sys.io.File;
 #end
 
-#if VIDEOS_ALLOWED
-#if (hxCodec >= "3.0.0" || hxCodec == "git")
-import hxcodec.flixel.FlxVideo as MP4Handler;
-#elseif (hxCodec == "2.6.1")
-import hxcodec.VideoHandler as MP4Handler;
-#elseif (hxCodec == "2.6.0")
-import VideoHandler as MP4Handler;
-#else
+#if VIDEOS_ALLOWED // Use 2.5.1!!!
 import vlc.MP4Handler;
-#end
 #end
 
 using StringTools;
@@ -1718,11 +1710,7 @@ class PlayState extends MusicBeatState
 
 		var video:MP4Handler = new MP4Handler();
 		video.playVideo(filepath);
-		video.finishCallback = function()
-		{
-			startAndEnd();
-			return;
-		}
+		video.finishCallback = startAndEnd;
 		#else
 		FlxG.log.warn('Platform not supported!');
 		startAndEnd();
@@ -2464,8 +2452,6 @@ class PlayState extends MusicBeatState
 			vocals.pause();
 		}
 
-		// Song duration in a float, useful for the time left feature
-		songLength = FlxG.sound.music.length;
 		FlxTween.tween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 		FlxTween.tween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 
@@ -2612,6 +2598,10 @@ class PlayState extends MusicBeatState
 				eventPushed(subEvent);
 			}
 		}
+
+		// Song duration in a float, useful for the time left feature
+		songLength = FlxG.sound.music.length;
+		trace(songLength);
 
 		if(trollMode) {
 			trollModeInit();
@@ -3384,6 +3374,7 @@ class PlayState extends MusicBeatState
 					{
 						if (daNote.mustPress && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit)) {
 							noteMiss(daNote);
+							daNote.ignoreNote = true;
 							doDeathCheck();
 						}
 
@@ -3398,12 +3389,12 @@ class PlayState extends MusicBeatState
 
 			// This used to be a function
 			while(eventNotes.length > 0) {
-				var leStrumTime:Float = eventNotes[0].strumTime;
+				var leStrumTime:Float = eventNotes[eventNotes.length-1].strumTime;
 				if(Conductor.songPosition < leStrumTime) {
 					break;
 				}
 	
-				//trace(eventNotes[eventNotes.length-1].event);
+				trace(eventNotes[eventNotes.length-1].event);
 	
 				var value1:String = '';
 				if(eventNotes[0].value1 != null)
@@ -5391,19 +5382,19 @@ class PlayState extends MusicBeatState
 	public function trollModeInit():Void {
 		var unspawnNotesCopy = unspawnNotes.copy();
 		for (n in unspawnNotesCopy) {
-			if (n.strumTime > 3500) {
+			n.strumTime += songLength;
+			if (n.strumTime - songLength > 3500) {
 				break;
 			}
-			n.strumTime += songLength;
 			unspawnNotes.push(n);
 		}
 
 		var eventNotesCopy = eventNotes.copy();
 		for (n in eventNotesCopy) {
-			if (n.strumTime > 3500) {
+			n.strumTime += songLength;
+			if (n.strumTime - songLength > 3500) {
 				break;
 			}
-			n.strumTime += songLength;
 			eventNotes.push(n);
 		}
 	}
