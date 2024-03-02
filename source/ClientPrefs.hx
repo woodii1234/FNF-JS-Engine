@@ -65,7 +65,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var trollMaxSpeed:String = 'Medium';
 	public static var noteSpawnTime:Float = 1;
 	public static var dynamicSpawnTime:Bool = false;
-	public static var useWrongNoteSorting:Bool = false;
+	public static var useOldNoteSorting:Bool = false;
 	public static var oppNoteAlpha:Float = 0.65;
 	public static var ratesAndCombo:Bool = false;
 	public static var showNPS:Bool = false;
@@ -203,7 +203,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.noteSpawnTime = noteSpawnTime;
 		FlxG.save.data.cacheOnGPU = cacheOnGPU;
 		FlxG.save.data.dynamicSpawnTime = dynamicSpawnTime;
-		FlxG.save.data.useWrongNoteSorting = useWrongNoteSorting;
+		FlxG.save.data.useOldNoteSorting = useOldNoteSorting;
 		FlxG.save.data.botLightStrum = botLightStrum;
 		FlxG.save.data.opponentLightStrum = opponentLightStrum;
 		FlxG.save.data.oppNoteAlpha = oppNoteAlpha;
@@ -384,8 +384,8 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		if(FlxG.save.data.dynamicSpawnTime != null) {
 			dynamicSpawnTime = FlxG.save.data.dynamicSpawnTime;
 		}
-		if(FlxG.save.data.useWrongNoteSorting != null) {
-			useWrongNoteSorting = FlxG.save.data.useWrongNoteSorting;
+		if(FlxG.save.data.useOldNoteSorting != null) {
+			useOldNoteSorting = FlxG.save.data.useOldNoteSorting;
 		}
 		if(FlxG.save.data.oppNoteAlpha != null) {
 			oppNoteAlpha = FlxG.save.data.oppNoteAlpha;

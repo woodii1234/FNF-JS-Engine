@@ -93,7 +93,7 @@ class MusicBeatState extends FlxUIState
 			stepsToDo += Math.round(beats * 4);
 			//sectionHit(); Don't uncomment this
 		}
-		trace(curSection);
+		//trace(curSection); NO GOD WHY
 	}
 
 	private function updateBeat():Void

@@ -168,10 +168,10 @@ class VisualsUISubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
-		var option:Option = new Option('Use Wrong Note Sorting',
+		var option:Option = new Option('Use Old Note Sorting',
 			'Basically, the notes are added at the beginning of the note groups\' members like vanilla' +
 			'\npsych engine instead of adding them at the end.\nIf you prefer psych\'s note sorting like on older versions of JS Engine, enable this.',
-			'useWrongNoteSorting',
+			'useOldNoteSorting',
 			'bool',
 			false);
 		addOption(option);

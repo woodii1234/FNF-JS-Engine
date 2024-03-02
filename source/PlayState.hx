@@ -175,7 +175,9 @@ class PlayState extends MusicBeatState
 	public var notes:FlxTypedGroup<Note>;
 	public var sustains:FlxTypedGroup<Note>;
 	public var unspawnNotes:Array<PreloadedChartNote> = [];
+	public var unspawnNotesCopy:Array<PreloadedChartNote> = [];
 	public var eventNotes:Array<EventNote> = [];
+	public var eventNotesCopy:Array<EventNote> = [];
 
 	private var strumLine:FlxSprite;
 
@@ -388,8 +390,6 @@ class PlayState extends MusicBeatState
 
 	public var framesCaptured(default, null):Int = 0;
 
-	// For troll mode
-	public var trollModeTriggerCount(default, null):Float = 0;
 	public var notesAdded(default, null):Int = 0;
 	public var eventsAdded(default, null):Int = 0;
 
@@ -2538,7 +2538,7 @@ class PlayState extends MusicBeatState
 
 		for (section in SONG.notes) {
 			for (songNotes in section.sectionNotes) {
-				var daStrumTime:Float = songNotes[0] + songLength;
+				var daStrumTime:Float = songNotes[0]; //Why + songLength??
 				var daNoteData:Int = Std.int(songNotes[1] % 4);
 
 				var gottaHitNote:Bool = section.mustHitSection;
@@ -2610,6 +2610,9 @@ class PlayState extends MusicBeatState
 
 		unspawnNotes.sort((b, a) -> Std.int(a.strumTime - b.strumTime));
 		eventNotes.sort((b, a) -> Std.int(a.strumTime - b.strumTime));
+
+		unspawnNotesCopy = unspawnNotes.copy();
+		eventNotesCopy = eventNotes.copy();
 
 		openfl.system.System.gc();
 
@@ -3235,7 +3238,7 @@ class PlayState extends MusicBeatState
 				}
 			}
 
-			if (ClientPrefs.useWrongNoteSorting) (dunceNote.isSustainNote ? sustains : notes).insert(0, dunceNote);
+			if (ClientPrefs.useOldNoteSorting) (dunceNote.isSustainNote ? sustains : notes).insert(0, dunceNote);
 			else (dunceNote.isSustainNote ? sustains : notes).add(dunceNote);
 			callOnLuas('onSpawnNote', [notes.members.indexOf(dunceNote), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);
 			notesAdded++;
@@ -3413,6 +3416,19 @@ class PlayState extends MusicBeatState
 			}
 		}
 		#end
+
+		if (trollMode && startedCountdown && canPause && !endingSong) {
+			if (FlxG.sound.music.length - Conductor.songPosition <= 20) {
+				KillNotes(); //Kill any existing notes
+				FlxG.sound.music.time = 0;
+				if (SONG.needsVoices && vocals != null) vocals.time = 0;
+				Conductor.songPosition = 0;
+
+				unspawnNotes = unspawnNotesCopy.copy();
+				eventNotes = eventNotesCopy.copy();
+				trollModeTrigger(ClientPrefs.voiidTrollMode);
+			}
+		}
 
 		if (ClientPrefs.enableGC && ClientPrefs.ffmpegMode) openfl.system.System.gc();
 
@@ -3953,9 +3969,7 @@ class PlayState extends MusicBeatState
 
 	public function finishSong(?ignoreNoteOffset:Bool = false):Void
 	{
-		if (trollMode) {
-			trollModeTrigger(ClientPrefs.voiidTrollMode);
-		} else {
+		if (!trollMode) {
 			var finishCallback:Void->Void = endSong; //In case you want to change it in a specific song.
 
 			updateTime = false;
@@ -3976,6 +3990,36 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	public function trollModeTrigger(?voiid:Bool = false)
+	{
+			var TROLL_MAX_SPEED:Float = 2048; // Default is medium max speed
+			switch(ClientPrefs.trollMaxSpeed) {
+				case 'Lowest':
+					TROLL_MAX_SPEED = 256;
+				case 'Lower':
+					TROLL_MAX_SPEED = 512;
+				case 'Low':
+					TROLL_MAX_SPEED = 1024;
+				case 'Medium':
+					TROLL_MAX_SPEED = 2048;
+				case 'High':
+					TROLL_MAX_SPEED = 5120;
+				case 'Highest':
+					TROLL_MAX_SPEED = 10000;
+				default:
+					TROLL_MAX_SPEED = 1.79e+308; //no limit (until you eventually suffer the fate of crashing :trollface:)
+			}
+
+			if (voiid) {
+				playbackRate *= 1.05;
+			} else {
+				playbackRate += calculateTrollModeStuff(playbackRate);
+			}
+
+			if (playbackRate >= TROLL_MAX_SPEED && ClientPrefs.trollMaxSpeed != 'Disabled') { // Limit playback rate to the troll mode max speed
+				playbackRate = TROLL_MAX_SPEED;
+			}
+	}
 
 	public var transitioning = false;
 	public function endSong():Void
@@ -5366,73 +5410,6 @@ class PlayState extends MusicBeatState
 	function set_curSong(value:String):String {
 		if (creditTxt != null) creditTxt.text = creditTextStuff(value);
 		return curSong = value;
-	}
-
-	/*public function trollModeInit():Void {
-		var unspawnNotesCopy = unspawnNotes.copy();
-		for (n in unspawnNotesCopy) {
-			if (n.strumTime > 3500) {
-				break;
-			}
-			n.strumTime += songLength;
-			unspawnNotes.push(n);
-		}
-
-		var eventNotesCopy = eventNotes.copy();
-		for (n in eventNotesCopy) {
-			if (n.strumTime > 3500) {
-				break;
-			}
-			n.strumTime += songLength;
-			eventNotes.push(n);
-		}
-	}*/
-
-	public function trollModeTrigger(voiid:Bool = false):Void {
-		// Now it's time for the actual troll mode stuff
-		var TROLL_MAX_SPEED:Float = 2048; // Default is medium max speed
-		switch(ClientPrefs.trollMaxSpeed) {
-			case 'Lowest':
-				TROLL_MAX_SPEED = 256;
-			case 'Lower':
-				TROLL_MAX_SPEED = 512;
-			case 'Low':
-				TROLL_MAX_SPEED = 1024;
-			case 'Medium':
-				TROLL_MAX_SPEED = 2048;
-			case 'High':
-				TROLL_MAX_SPEED = 5120;
-			case 'Highest':
-				TROLL_MAX_SPEED = 10000;
-			default:
-
-		}
-
-		// Just for convenience
-		stepsToDo = /* You need stepsToDo to change, otherwise the sections break. */ curStep = curBeat = curSection = 0; // Wow.
-		oldStep = lastStepHit = lastBeatHit = -1;
-		stepHit();
-		beatHit();
-		sectionHit();
-
-		// Reset the song's time
-		FlxG.sound.music.time = 0;
-		if (SONG.needsVoices && vocals != null) vocals.time = 0;
-		Conductor.songPosition = 0;
-
-		if (voiid) {
-			playbackRate *= 1.05;
-		} else {
-			playbackRate += calculateTrollModeStuff(playbackRate);
-		}
-
-		if (playbackRate >= TROLL_MAX_SPEED && ClientPrefs.trollMaxSpeed != 'Disabled') { // Limit playback rate to the troll mode max speed
-			playbackRate = TROLL_MAX_SPEED;
-		}
-
-		notesAdded = eventsAdded = 0;
-
-		resyncVocals(); // Please don't remove this!
 	}
 
 	function calculateTrollModeStuff(pb:Float):Float {
