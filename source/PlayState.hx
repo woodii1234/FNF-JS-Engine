@@ -91,8 +91,7 @@ typedef PreloadedChartNote = {
 	isSustainEnd:Bool,
 	sustainLength:Float,
 	parent:Note,
-	prevNote:Note,
-	strum:StrumNote
+	prevNote:Note
 }
 
 class PlayState extends MusicBeatState
@@ -2762,10 +2761,6 @@ class PlayState extends MusicBeatState
 				}
 				opponentStrums.add(babyArrow);
 			}
-
-			for (swagNote in unspawnNotes)
-				if (swagNote.noteData == i) swagNote.strum = (swagNote.mustPress ? playerStrums : opponentStrums).members[swagNote.noteData];
-
 
 			strumLineNotes.add(babyArrow);
 			babyArrow.postAddedToGroup();
@@ -5449,10 +5444,6 @@ class PlayState extends MusicBeatState
 		if (playbackRate >= TROLL_MAX_SPEED && ClientPrefs.trollMaxSpeed != 'Disabled') { // Limit playback rate to the troll mode max speed
 			playbackRate = TROLL_MAX_SPEED;
 		}
-
-		unspawnNotes = [];
-		eventNotes = [];
-		generateChart();
 
 		startSong();
 	}
