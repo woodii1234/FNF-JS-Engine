@@ -99,7 +99,8 @@ typedef PreloadedChartNote = {
 	isSustainEnd:Bool,
 	sustainLength:Float,
 	parent:Note,
-	prevNote:Note
+	prevNote:Note,
+	strum:StrumNote
 }
 
 class PlayState extends MusicBeatState
@@ -2766,6 +2767,10 @@ class PlayState extends MusicBeatState
 				opponentStrums.add(babyArrow);
 			}
 
+			for (swagNote in unspawnNotes)
+				if (swagNote.noteData == i) swagNote.strum = (swagNote.mustPress ? playerStrums : opponentStrums).members[swagNote.noteData];
+
+
 			strumLineNotes.add(babyArrow);
 			babyArrow.postAddedToGroup();
 		}
@@ -3246,7 +3251,6 @@ class PlayState extends MusicBeatState
 			if (ClientPrefs.useWrongNoteSorting) (dunceNote.isSustainNote ? sustains : notes).insert(0, dunceNote);
 			else (dunceNote.isSustainNote ? sustains : notes).add(dunceNote);
 			callOnLuas('onSpawnNote', [notes.members.indexOf(dunceNote), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);
-
 			unspawnNotes.pop();
 		}
 
@@ -3394,7 +3398,7 @@ class PlayState extends MusicBeatState
 
 			// This used to be a function
 			while(eventNotes.length > 0) {
-				var leStrumTime:Float = eventNotes[eventNotes.length-1].strumTime;
+				var leStrumTime:Float = eventNotes[0].strumTime;
 				if(Conductor.songPosition < leStrumTime) {
 					break;
 				}
@@ -3402,12 +3406,12 @@ class PlayState extends MusicBeatState
 				//trace(eventNotes[eventNotes.length-1].event);
 	
 				var value1:String = '';
-				if(eventNotes[eventNotes.length-1].value1 != null)
-					value1 = eventNotes[eventNotes.length-1].value1;
+				if(eventNotes[0].value1 != null)
+					value1 = eventNotes[0].value1;
 	
 				var value2:String = '';
-				if(eventNotes[eventNotes.length-1].value2 != null)
-					value2 = eventNotes[eventNotes.length-1].value2;
+				if(eventNotes[0].value2 != null)
+					value2 = eventNotes[0].value2;
 	
 				triggerEventNote(eventNotes.pop().event, value1, value2);
 			}
