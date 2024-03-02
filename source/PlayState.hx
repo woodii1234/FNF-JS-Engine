@@ -364,18 +364,19 @@ class PlayState extends MusicBeatState
 		"9 + 10?",
 		"...",
 		"Look at you, you look like\na dave and bambi fan",
-		"Criminal\nCriminal\nCriminal\nCriminal\nCriminal\nCriminal",
+		"Criminal. Criminal. Criminal. Criminal. Criminal. Criminal. Criminal. Criminal. Criminal. Criminal. Criminal. Criminal.",
 		"HEY GUYS I HAVE 69 MILLION SUBS AND I WANT\nTO CELEBRATE IT WITH THIS SONG!!!1!11",
 		"Skill issue",
 		"Whoops, I broke my keyboard so I downloaded\nthe android build and enabled botplay",
 		"Come on.",
 		"You're pretty lame you know",
-		"I can't wait to play this bambi spamtrack on botplay!!!",
+		"I can't wait to play this\nbambi spamtrack on botplay!!!",
 		"Ermmm",
 		"?",
 		"What in the world?",
 		"We're doomed.",
-		"You suck"
+		"You suck",
+		"DUDE JUST PLAY THE SONG NORMALLY"
 	];
 
 	public var NPSShit(default, null):Array<Array<Float>> = [[], []];
@@ -2489,18 +2490,25 @@ class PlayState extends MusicBeatState
 				songSpeed = ClientPrefs.getGameplaySetting('scrollspeed', 1);
 		}
 
-		var songData = SONG;
-		Conductor.changeBPM(songData.bpm);
+		Conductor.changeBPM(SONG.bpm);
 
 		curSong = SONG.song;
 
 		vocals = new FlxSound();
 		if (SONG.needsVoices) vocals.loadEmbedded(Paths.voices(SONG.song));
+		vocals.looped = false; // Don't loop the vocals
 		vocals.pitch = playbackRate;
 
 		FlxG.sound.list.add(vocals);
 		FlxG.sound.list.add(new FlxSound().loadEmbedded(Paths.inst(SONG.song)));
 
+		generateChart();
+
+		generatedMusic = true;
+	}
+
+	private function generateChart():Void
+	{
 		trace('Loading chart data...');
 
 		var songName:String = Paths.formatToSongPath(SONG.song);
@@ -2613,8 +2621,6 @@ class PlayState extends MusicBeatState
 		openfl.system.System.gc();
 
 		trace('Done!');
-
-		generatedMusic = true;
 	}
 
 	function eventPushed(event:EventNote) {
@@ -3151,7 +3157,7 @@ class PlayState extends MusicBeatState
 		
 		if (startedCountdown)
 		{
-			Conductor.songPosition += (elapsed * 1000) * playbackRate;
+			Conductor.songPosition += (FlxG.elapsed * 1000) * playbackRate;
 		}
 
 		if (startingSong)
@@ -3343,7 +3349,7 @@ class PlayState extends MusicBeatState
 
 					// From 0.7+
 					final center = strumGroup.members[daNote.noteData].y + (Note.swagWidth * 0.5);
-					var playerClipRectCheck:Bool = daNote.mustPress && daNote.isSustainNote && (daNote.wasGoodHit && daNote.prevNote.wasGoodHit || !daNote.tooLate) &&
+					var playerClipRectCheck:Bool = daNote.mustPress && daNote.isSustainNote && (daNote.wasGoodHit && (daNote.prevNote != null && daNote.prevNote.wasGoodHit) || !daNote.tooLate) &&
 						(parseKeys()[daNote.noteData] || daNote.animation.curAnim.name.endsWith('end') || cpuControlled);
 					var opponentClipRectCheck:Bool = !daNote.mustPress && daNote.isSustainNote;
 					if (playerClipRectCheck || opponentClipRectCheck)
@@ -4535,7 +4541,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		if (FlxG.keys.anyJustPressed(ClientPrefs.keyBinds.get('qt_taunt').filter(k -> k != -1) /* Don't check for NONE keys */) && ClientPrefs.spaceVPose && !cpuControlled) {
+		if (FlxG.keys.anyJustPressed(ClientPrefs.keyBinds.get('qt_taunt').filter(k -> k != -1) /* Don't check for NONE keys */) && ClientPrefs.spaceVPose) {
 			if (boyfriend != null) {
 				FlxG.sound.play(Paths.sound('hey'), 0.6);
 				boyfriend.playAnim('hey', true);
@@ -5381,29 +5387,38 @@ class PlayState extends MusicBeatState
 	}
 
 	public function trollModeInit():Void {
-		var unspawnNotesCopy = [for (n in unspawnNotes) n]; /* Make an entirely new unspawnNotes */
+		/*var unspawnNotesCopy = unspawnNotes.copy();
 		for (n in unspawnNotesCopy) {
-			n.strumTime += songLength;
-			if (n.strumTime - songLength > 3500) {
+			if (n.strumTime > 3500) {
 				break;
 			}
+			n.strumTime += songLength;
 			unspawnNotes.push(n);
 		}
 
-		var eventNotesCopy = [for (n in eventNotes) n]; /* Make an entirely new eventNotes */
+		var eventNotesCopy = eventNotes.copy();
 		for (n in eventNotesCopy) {
-			n.strumTime += songLength;
-			if (n.strumTime - songLength > 3500) {
+			if (n.strumTime > 3500) {
 				break;
 			}
+			n.strumTime += songLength;
 			eventNotes.push(n);
-		}
+		}*/
 	}
 
 	public function trollModeTrigger(voiid:Bool = false):Void {
+		// Just for convenience
+		curStep = 0;
+		curBeat = 0;
+		curSection = 0;
+		stepHit();
+		beatHit();
+		sectionHit();
+
 		// Reset the song's time
 		FlxG.sound.music.time = 0;
 		if (SONG.needsVoices && vocals != null) vocals.time = 0;
+		Conductor.songPosition = 0;
 
 		// And now it's time for the actual troll mode stuff
 		var TROLL_MAX_SPEED:Float = 2048; // Default is medium max speed
@@ -5434,6 +5449,10 @@ class PlayState extends MusicBeatState
 		if (playbackRate >= TROLL_MAX_SPEED && ClientPrefs.trollMaxSpeed != 'Disabled') { // Limit playback rate to the troll mode max speed
 			playbackRate = TROLL_MAX_SPEED;
 		}
+
+		unspawnNotes = [];
+		eventNotes = [];
+		generateChart();
 
 		startSong();
 	}
