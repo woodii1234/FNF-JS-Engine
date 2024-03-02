@@ -87,13 +87,6 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		option.scrollSpeed = 30;
 		option.decimals = 0;
 
-        var option:Option = new Option('Unlock Framerate',
-			"If checked, the fps limit will be 1000 in rendering.",
-			'unlockFPS',
-			'bool',
-			false);
-		addOption(option);
-
         var option:Option = new Option('No Screenshot',
 			"If checked, Skip taking of screenshot.\nIt's a function for debug.",
 			'noCapture',
@@ -105,9 +98,10 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		
 		super();
 	}
+
 	function onChangeFramerate()
 	{
-		fpsOption.scrollSpeed = fpsOption.getValue() / 2;
+		fpsOption.scrollSpeed = 1;
 	}
 
 	function resetTimeScale()
