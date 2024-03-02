@@ -1,17 +1,5 @@
 package;
 
-// Chart loading rewrite + troll mode rewrite WIP
-/*
-There were SO many white spaces so I removed them easily using vsc. Also increased back spawn time because what if the zoom was less than 1?
-AND also, you can just check how long it took to load the chart just by recording the loading process, stopping the recording once the chart is fully loaded, and check how long it took to load the chart total.
-
-Note spawn note by me! ;) (Actually I literally generated it in ChatGPT, I didn't test all these changes so yeah, I'll just wait for Jordan to test it)
-
-The troll mode rewrite will have code that is a LOT cleaner than the old version. It also prevents you from getting achievements when a specific song for it is complete, because that's troll mode and the song infinitely loops.
-
-It also adds a new visual option named "Use Wrong Note Sorting". Do you want the notes to look like a rainfall with a background that looks like the notes are literally showing random lines at this point? Enable this!
-*/
-
 import flixel.graphics.FlxGraphic;
 #if DISCORD_ALLOWED
 import DiscordClient;
@@ -111,7 +99,8 @@ typedef PreloadedChartNote = {
 	isSustainEnd:Bool,
 	sustainLength:Float,
 	parent:Note,
-	prevNote:Note
+	prevNote:Note,
+	strum:StrumNote
 }
 
 class PlayState extends MusicBeatState
@@ -3576,8 +3565,6 @@ class PlayState extends MusicBeatState
 			setOnLuas('startedCountdown', true);
 			callOnLuas('onCountdownStarted', []);
 
-			curBeat = -5;
-
 			var swagCounter:Int = 0;
 
 			if(startOnTime < 0) startOnTime = 0;
@@ -4085,6 +4072,13 @@ class PlayState extends MusicBeatState
 					}
 					final gottaHitNote:Bool = ((songNotes[1] < 4 && !opponentChart && !bothsides)
 						|| (songNotes[1] > 3 && opponentChart) ? section.mustHitSection : !section.mustHitSection);
+
+					if (gottaHitNote && !songNotes.hitCausesMiss) {
+						totalNotes += 1;
+					}
+					if (!gottaHitNote) {
+						opponentNoteTotal += 1;
+					}
 		
 					var oldNote:PreloadedChartNote = unspawnNotes[unspawnNotes.length - 1];
 		
@@ -4098,8 +4092,13 @@ class PlayState extends MusicBeatState
 						isSustainEnd: false,
 						sustainLength: songNotes[2],
 						parent: null,
-						prevNote: oldNote
+						prevNote: oldNote,
+						strum: null
 					};
+		
+					if (!noteTypeMap.exists(swagNote.noteType)) {
+						noteTypeMap.set(swagNote.noteType, true);
+					}
 		
 					unspawnNotes.push(swagNote);
 		
@@ -4115,18 +4114,15 @@ class PlayState extends MusicBeatState
 								noteType: songNotes[3],
 								gfNote: (section.gfSection && songNotes[1] < 4),
 								isSustainNote: true,
-								isSustainEnd: susNote == (floorSus - 1),
+								isSustainEnd: susNote == floorSus, //idk
 								sustainLength: 0,
 								parent: swagNote,
-								prevNote: oldNote
+								prevNote: oldNote,
+								strum: null
 							};
 							unspawnNotes.push(sustainNote);
 							Sys.sleep(0.0001);
 						}
-					}
-		
-					if (!noteTypeMap.exists(swagNote.noteType)) {
-						noteTypeMap.set(swagNote.noteType, true);
 					}
 		
 					if (jackingtime > 0) {
@@ -4141,7 +4137,8 @@ class PlayState extends MusicBeatState
 								isSustainEnd: false,
 								sustainLength: swagNote.sustainLength,
 								parent: null,
-								prevNote: oldNote
+								prevNote: oldNote,
+								strum: null
 							};
 							unspawnNotes.push(jackNote);
 							Sys.sleep(0.0001);
@@ -4180,8 +4177,9 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		unspawnNotes.sort((b, a) -> Std.int(a.strumTime - b.strumTime));
-		eventNotes.sort((b, a) -> Std.int(a.strumTime - b.strumTime));
+		unspawnNotes.sort(sortByTime);
+		eventNotes.sort(sortByTime);
+		generatedMusic = true;
 
 		openfl.system.System.gc();
 
@@ -4347,6 +4345,10 @@ class PlayState extends MusicBeatState
 			else if (ClientPrefs.mobileMidScroll) insert(members.indexOf(playerStrums), babyArrow);
 				else playerStrums.add(babyArrow);
 			}
+
+			for (swagNote in unspawnNotes)
+				if (swagNote.noteData == i) swagNote.strum = (swagNote.mustPress ? playerStrums : opponentStrums).members[swagNote.noteData];
+
 
 			strumLineNotes.add(babyArrow);
 			babyArrow.postAddedToGroup();
@@ -5235,32 +5237,43 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 		doDeathCheck();
 
-		while (Conductor.songPosition > unspawnNotes[unspawnNotes.length-1].strumTime - NOTE_SPAWN_TIME) {
-			trace('Note spawned at ${unspawnNotes[unspawnNotes.length-1].strumTime}');
-			var dunceNote = new Note(unspawnNotes[unspawnNotes.length-1].strumTime, unspawnNotes[unspawnNotes.length-1].noteData, notes.members[notes.members.length-1], null, unspawnNotes[unspawnNotes.length-1].isSustainNote);
-			dunceNote.mustPress = unspawnNotes[unspawnNotes.length-1].mustPress;
-			dunceNote.noteType = unspawnNotes[unspawnNotes.length-1].noteType;
-			dunceNote.gfNote = unspawnNotes[unspawnNotes.length-1].gfNote;
-			//dunceNote.prevNote = notes.members[notes.members.length-1]; // Do this before adding the note onto ``notes``
+	if (unspawnNotes.length > 0 && (unspawnNotes[0] != null))
+	{
+		notesAddedCount = 0;
+
+		if (notesAddedCount > unspawnNotes.length)
+			notesAddedCount -= (notesAddedCount - unspawnNotes.length);
+
+		while (unspawnNotes.length > 0 && unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < NOTE_SPAWN_TIME) {
+			var dunceNote:Note = new Note(unspawnNotes[notesAddedCount].strumTime, unspawnNotes[notesAddedCount].noteData, unspawnNotes[notesAddedCount].prevNote, null, unspawnNotes[notesAddedCount].isSustainNote);
+					dunceNote.mustPress = unspawnNotes[notesAddedCount].mustPress;
+					dunceNote.sustainLength = unspawnNotes[notesAddedCount].sustainLength;
+					dunceNote.gfNote = unspawnNotes[notesAddedCount].gfNote;
+					dunceNote.noteType = unspawnNotes[notesAddedCount].noteType;
+
 			if (dunceNote.isSustainNote) {
-				dunceNote.parent = unspawnNotes[unspawnNotes.length-1].parent;
-				if (unspawnNotes[unspawnNotes.length-1].isSustainEnd) { // Generate hold end
+				dunceNote.parent = unspawnNotes[notesAddedCount].parent;
+				if (unspawnNotes[notesAddedCount].isSustainEnd) { // Generate hold end
 					dunceNote.animation.play(Note.colArray[dunceNote.noteData] + 'holdend');
 					dunceNote.scale.set(0.7, 1.0);
 					dunceNote.updateHitbox();
 				}
 			}
-			dunceNote.strum = (dunceNote.mustPress ? playerStrums : opponentStrums).members[dunceNote.noteData];
 
+			dunceNote.scrollFactor.set();
+
+				dunceNote.strum = unspawnNotes[notesAddedCount].strum;
 			if (ClientPrefs.useWrongNoteSorting) {
-				(dunceNote.isSustainNote ? sustainNotes : notes).insert(0, dunceNote);
+				!dunceNote.isSustainNote ? notes.insert(0, dunceNote) : sustainNotes.insert(0, dunceNote);
 			} else {
 				(dunceNote.isSustainNote ? sustainNotes : notes).add(dunceNote);
 			}
 			callOnLuas('onSpawnNote', [notes.members.indexOf(dunceNote), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);
-
-			unspawnNotes.pop();
+			notesAddedCount++;
 		}
+			if (notesAddedCount > 0)
+				unspawnNotes.splice(0, notesAddedCount);
+	}
 
 		if (generatedMusic)
 		{
@@ -5322,7 +5335,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 								daNote.visible = false;
 								group.remove(daNote, true);
 							}
-							if(cpuControlled && daNote.strumTime + (ClientPrefs.communityGameBot ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition) {
+							if(cpuControlled && daNote.strumTime + (ClientPrefs.communityGameBot ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition && !daNote.ignoreNote) {
 								if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) goodNoteHit(daNote);
 								if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
 								{
@@ -5350,20 +5363,20 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 			// This used to be a function
 			while(eventNotes.length > 0) {
-				var leStrumTime:Float = eventNotes[eventNotes.length-1].strumTime;
+				var leStrumTime:Float = eventNotes[0].strumTime;
 				if(Conductor.songPosition < leStrumTime) {
 					break;
 				}
 	
-				trace(eventNotes[eventNotes.length-1].event);
+				//trace(eventNotes[eventNotes.length-1].event); This was probably to check if events actually work, now that I know they work we don't need this
 	
 				var value1:String = '';
-				if(eventNotes[eventNotes.length-1].value1 != null)
-					value1 = eventNotes[eventNotes.length-1].value1;
+				if(eventNotes[0].value1 != null)
+					value1 = eventNotes[0].value1;
 	
 				var value2:String = '';
-				if(eventNotes[eventNotes.length-1].value2 != null)
-					value2 = eventNotes[eventNotes.length-1].value2;
+				if(eventNotes[0].value2 != null)
+					value2 = eventNotes[0].value2;
 	
 				triggerEventNote(eventNotes.pop().event, value1, value2);
 			}
