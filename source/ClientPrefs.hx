@@ -59,7 +59,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var antiCheatEnable:Bool = false;
 	public static var showRamUsage:Bool = true;
 	public static var showMaxRamUsage:Bool = true;
-	public static var rainbowNotes:Bool = false;
 	public static var rainbowFPS:Bool = false;
 	public static var widescreenSweep:Bool = false;
 	public static var bfIconStyle:String = 'Default';
@@ -167,7 +166,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var ffmpegMode:Bool = false;
 	public static var ffmpegInfo:Bool = false;
 	public static var targetFPS:Float = 60;
-	public static var unlockFPS:Bool = false;
 	public static var lossless:Bool = false;
 	public static var quality:Int = 80;
 	public static var noCapture:Bool = false;
@@ -348,7 +346,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.hudType = hudType;
 		FlxG.save.data.ratingCounter = ratingCounter;
 		FlxG.save.data.colorRatingHit = colorRatingHit;
-		FlxG.save.data.rainbowNotes = rainbowNotes;
 		FlxG.save.data.rainbowFPS = rainbowFPS;
 		FlxG.save.data.widescreenSweep = widescreenSweep;
 		FlxG.save.data.healthGainType = healthGainType;
@@ -415,7 +412,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.ffmpegMode = ffmpegMode;
 		FlxG.save.data.ffmpegInfo = ffmpegInfo;
 		FlxG.save.data.targetFPS = targetFPS;
-		FlxG.save.data.unlockFPS = unlockFPS;
 		FlxG.save.data.lossless = lossless;
 		FlxG.save.data.quality = quality;
 		FlxG.save.data.noCapture = noCapture;
@@ -580,9 +576,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.resyncType != null) {
 			resyncType = FlxG.save.data.resyncType;
-		}
-		if(FlxG.save.data.rainbowNotes != null) {
-			rainbowNotes = FlxG.save.data.rainbowNotes;
 		}
 		if(FlxG.save.data.rainbowFPS != null) {
 			rainbowFPS = FlxG.save.data.rainbowFPS;
@@ -962,9 +955,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.targetFPS != null) {
 			targetFPS = FlxG.save.data.targetFPS;
-		}
-		if(FlxG.save.data.unlockFPS != null) {
-			unlockFPS = FlxG.save.data.unlockFPS;
 		}
 		if(FlxG.save.data.lossless != null) {
 			lossless = FlxG.save.data.lossless;
