@@ -3372,9 +3372,8 @@ class PlayState extends MusicBeatState
 					// Kill extremely late notes and cause misses
 					if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
 					{
-						if (daNote.mustPress && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit)) {
+						if (daNote.mustPress && !cpuControlled && !daNote.ignoreNote && !endingSong && !daNote.tooLate && !daNote.wasGoodHit) {
 							noteMiss(daNote);
-							daNote.ignoreNote = true;
 							doDeathCheck();
 						}
 
@@ -4536,7 +4535,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		if (FlxG.keys.anyJustPressed(ClientPrefs.keyBinds.get('qt_taunt').filter(k -> k != -1) /* Don't check for NONE keys */) && ClientPrefs.spaceVPose) {
+		if (FlxG.keys.anyJustPressed(ClientPrefs.keyBinds.get('qt_taunt').filter(k -> k != -1) /* Don't check for NONE keys */) && ClientPrefs.spaceVPose && !cpuControlled) {
 			if (boyfriend != null) {
 				FlxG.sound.play(Paths.sound('hey'), 0.6);
 				boyfriend.playAnim('hey', true);
@@ -4585,6 +4584,8 @@ class PlayState extends MusicBeatState
 			var animToPlay:String = singAnimations[Std.int(Math.abs(daNote.noteData))] + 'miss' + daNote.animSuffix;
 			char.playAnim(animToPlay, true);
 		}
+
+		daNote.tooLate = true;
 
 		callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote]);
 	}
@@ -5380,7 +5381,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public function trollModeInit():Void {
-		var unspawnNotesCopy = unspawnNotes.copy();
+		var unspawnNotesCopy = [for (n in unspawnNotes) n]; /* Make an entirely new unspawnNotes */
 		for (n in unspawnNotesCopy) {
 			n.strumTime += songLength;
 			if (n.strumTime - songLength > 3500) {
@@ -5389,7 +5390,7 @@ class PlayState extends MusicBeatState
 			unspawnNotes.push(n);
 		}
 
-		var eventNotesCopy = eventNotes.copy();
+		var eventNotesCopy = [for (n in eventNotes) n]; /* Make an entirely new eventNotes */
 		for (n in eventNotesCopy) {
 			n.strumTime += songLength;
 			if (n.strumTime - songLength > 3500) {
@@ -5426,7 +5427,8 @@ class PlayState extends MusicBeatState
 		if (voiid) {
 			playbackRate *= 1.05;
 		} else {
-			playbackRate += 0.05 * (trollModeTriggerCount / (trollModeTriggerCount * 0.45));
+			playbackRate += 0.0833333333333333 * (playbackRate > 5 ? 2 : 1) * (playbackRate > 10 ? 4 : 1) *
+				(playbackRate > 25 ? 7 : 1) * (playbackRate > 50 ? 8 : 1) * (playbackRate > 100 ? 10 : 0);
 		}
 
 		if (playbackRate >= TROLL_MAX_SPEED && ClientPrefs.trollMaxSpeed != 'Disabled') { // Limit playback rate to the troll mode max speed
