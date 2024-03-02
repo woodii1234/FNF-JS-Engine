@@ -2608,8 +2608,8 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		unspawnNotes.sort((b, a) -> Std.int(a.strumTime - b.strumTime));
-		eventNotes.sort((b, a) -> Std.int(a.strumTime - b.strumTime));
+		unspawnNotes.sort(sortByTime);
+		eventNotes.sort(sortByTime);
 
 		unspawnNotesCopy = unspawnNotes.copy();
 		eventNotesCopy = eventNotes.copy();
@@ -2713,12 +2713,7 @@ class PlayState extends MusicBeatState
 		return 0;
 	}
 
-	function sortByShit(Obj1:Note, Obj2:Note):Int
-	{
-		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
-	}
-
-	function sortByTime(Obj1:EventNote, Obj2:EventNote):Int
+	function sortByTime(Obj1:Dynamic, Obj2:Dynamic):Int
 	{
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
 	}
@@ -3221,28 +3216,34 @@ class PlayState extends MusicBeatState
 			trace("RESET = True");
 		}
 
-		while (unspawnNotes.length > 0 && unspawnNotes[unspawnNotes.length-(notesAdded+1)] != null && Conductor.songPosition > unspawnNotes[unspawnNotes.length-(notesAdded+1)].strumTime -
+		notesAdded = 0;
+
+		if (notesAdded > unspawnNotes.length)
+			notesAdded -= (notesAdded - unspawnNotes.length);
+
+		while (unspawnNotes.length > 0 && unspawnNotes[notesAdded] != null && Conductor.songPosition > unspawnNotes[notesAdded].strumTime -
 			(ClientPrefs.dynamicSpawnTime ? 1850 / (songSpeed / camHUD.zoom) : 2000 / (songSpeed * ClientPrefs.noteSpawnTime))) {
-			var dunceNote = new Note(unspawnNotes[unspawnNotes.length-(notesAdded+1)].strumTime, unspawnNotes[unspawnNotes.length-(notesAdded+1)].noteData, unspawnNotes[unspawnNotes.length-(notesAdded+1)].prevNote, unspawnNotes[unspawnNotes.length-(notesAdded+1)].isSustainNote);
-			dunceNote.mustPress = unspawnNotes[unspawnNotes.length-(notesAdded+1)].mustPress;
-			dunceNote.noteType = unspawnNotes[unspawnNotes.length-(notesAdded+1)].noteType;
-			dunceNote.gfNote = unspawnNotes[unspawnNotes.length-(notesAdded+1)].gfNote;
-			dunceNote.prevNote = notes.members[notes.members.length-1]; // Do this before adding the note onto ``notes``
+			var dunceNote = new Note(unspawnNotes[notesAdded].strumTime, unspawnNotes[notesAdded].noteData, unspawnNotes[notesAdded].prevNote, unspawnNotes[notesAdded].isSustainNote);
+			dunceNote.mustPress = unspawnNotes[notesAdded].mustPress;
+			dunceNote.noteType = unspawnNotes[notesAdded].noteType;
+			dunceNote.gfNote = unspawnNotes[notesAdded].gfNote;
 			if (dunceNote.isSustainNote) {
-				dunceNote.parent = unspawnNotes[unspawnNotes.length-(notesAdded+1)].parent;
+				dunceNote.parent = unspawnNotes[notesAdded].parent;
 				if (dunceNote.parent != null) dunceNote.parent.tail.push(dunceNote);
-				if (unspawnNotes[unspawnNotes.length-(notesAdded+1)].isSustainEnd) { // Generate hold end
+				if (unspawnNotes[notesAdded].isSustainEnd) { // Generate hold end
 					dunceNote.animation.play(@:privateAccess dunceNote.colArray[dunceNote.noteData] + 'holdend');
 					dunceNote.scale.set(0.7, 1.0);
 					dunceNote.updateHitbox();
 				}
 			}
 
-			if (ClientPrefs.useOldNoteSorting) (dunceNote.isSustainNote ? sustains : notes).insert(0, dunceNote);
+			if (!ClientPrefs.useOldNoteSorting) (dunceNote.isSustainNote ? sustains : notes).insert(0, dunceNote);
 			else (dunceNote.isSustainNote ? sustains : notes).add(dunceNote);
 			callOnLuas('onSpawnNote', [notes.members.indexOf(dunceNote), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);
 			notesAdded++;
 		}
+			if (notesAdded > 0)
+				unspawnNotes.splice(0, notesAdded);
 
 		if (generatedMusic && !inCutscene)
 		{
@@ -3419,7 +3420,6 @@ class PlayState extends MusicBeatState
 
 		if (trollMode && startedCountdown && canPause && !endingSong) {
 			if (FlxG.sound.music.length - Conductor.songPosition <= 20) {
-				KillNotes(); //Kill any existing notes
 				FlxG.sound.music.time = 0;
 				if (SONG.needsVoices && vocals != null) vocals.time = 0;
 				Conductor.songPosition = 0;
@@ -3992,6 +3992,14 @@ class PlayState extends MusicBeatState
 
 	public function trollModeTrigger(?voiid:Bool = false)
 	{
+
+		for (i in 0...NPSShit.length) 
+			for (_i in 0...NPSShit[i].length)
+				NPSShit[i][_i] -= FlxG.sound.music.length;
+
+		stepsToDo = /* You need stepsToDo to change, otherwise the sections break. */ curStep = curBeat = curSection = 0; // Wow.
+		oldStep = lastStepHit = lastBeatHit = -1;
+
 			var TROLL_MAX_SPEED:Float = 2048; // Default is medium max speed
 			switch(ClientPrefs.trollMaxSpeed) {
 				case 'Lowest':
@@ -4178,11 +4186,11 @@ class PlayState extends MusicBeatState
 
 	public function KillNotes() {
 		while(notes.length > 0) {
-			notes.members[0].destroy();
+			//notes.members[0].destroy();
 			notes.remove(notes.members[0], true);
 		}
 		while(sustains.length > 0) {
-			sustains.members[0].destroy();
+			//sustains.members[0].destroy();
 			sustains.remove(sustains.members[0], true);
 		}
 	}
@@ -4706,7 +4714,7 @@ class PlayState extends MusicBeatState
 
 		if (!note.isSustainNote)
 		{
-			note.kill();
+			notes.remove(note, true);
 				if (ClientPrefs.showNPS) {
 					if (noteMult == 1) {
 						NPSShit[1].push(Conductor.songPosition + 1000);
@@ -4746,7 +4754,7 @@ class PlayState extends MusicBeatState
 				note.wasGoodHit = true;
 				if (!note.isSustainNote)
 				{
-					note.kill();
+					notes.remove(note, true);
 				}
 				return;
 			}
@@ -4820,7 +4828,7 @@ class PlayState extends MusicBeatState
 
 			if (!note.isSustainNote)
 			{
-				note.kill();
+				notes.remove(note, true);
 				if (ClientPrefs.showNPS) {
 					if (noteMult == 1) {
 						NPSShit[0].push(Conductor.songPosition + 1000);
