@@ -3397,12 +3397,12 @@ class PlayState extends MusicBeatState
 				trace(eventNotes[eventNotes.length-1].event);
 	
 				var value1:String = '';
-				if(eventNotes[0].value1 != null)
-					value1 = eventNotes[0].value1;
+				if(eventNotes[eventNotes.length-1].value1 != null)
+					value1 = eventNotes[eventNotes.length-1].value1;
 	
 				var value2:String = '';
-				if(eventNotes[0].value2 != null)
-					value2 = eventNotes[0].value2;
+				if(eventNotes[eventNotes.length-1].value2 != null)
+					value2 = eventNotes[eventNotes.length-1].value2;
 	
 				triggerEventNote(eventNotes.pop().event, value1, value2);
 			}
