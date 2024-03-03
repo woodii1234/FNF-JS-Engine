@@ -64,7 +64,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var bfIconStyle:String = 'Default';
 	public static var strumLitStyle:String = 'Full Anim';
 	public static var noteStyleThing:String = 'Default';
-	public static var daMenuMusic:String = 'Mashup';
+	public static var daMenuMusic:String = 'Default';
 	public static var ratingIntensity:String = 'Normal';
 	public static var autoPause:Bool = true;
 	public static var randomBotplayText:Bool = true;
@@ -133,7 +133,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var ogHPColor:Bool = false;
 	public static var hudType:String = 'Kade Engine';
 	public static var smoothHealth:Bool = true;
-	public static var smoothHealthType:String = 'Golden Apple 1.5';
 	public static var rateNameStuff:String = 'Quotes';
 	public static var timeBounce:Bool = true;
 	public static var percentDecimals:Int = 2;
@@ -367,7 +366,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.npsWithSpeed = npsWithSpeed;
 		FlxG.save.data.timebarShowSpeed = timebarShowSpeed;
 		FlxG.save.data.trollMaxSpeed = trollMaxSpeed;
-		FlxG.save.data.smoothHealthType = smoothHealthType;
 		FlxG.save.data.smoothHealth = smoothHealth;
 		FlxG.save.data.moreSpecificSpeed = moreSpecificSpeed;
 		FlxG.save.data.spaceVPose = spaceVPose;
@@ -835,9 +833,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.ghostTapping != null) {
 			ghostTapping = FlxG.save.data.ghostTapping;
-		}
-		if(FlxG.save.data.smoothHealthType != null) {
-			smoothHealthType = FlxG.save.data.smoothHealthType;
 		}
 		if(FlxG.save.data.smoothHealth != null) {
 			smoothHealth = FlxG.save.data.smoothHealth;

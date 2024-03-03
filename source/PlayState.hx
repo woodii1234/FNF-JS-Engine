@@ -104,7 +104,10 @@ typedef PreloadedChartNote = {
 	sustainLength:Float,
 	parent:Note,
 	prevNote:Note,
-	strum:StrumNote
+	strum:StrumNote,
+	hitHealth:Float,
+	missHealth:Float,
+	hitCausesMiss:Null<Bool>
 }
 
 class PlayState extends MusicBeatState
@@ -313,7 +316,7 @@ class PlayState extends MusicBeatState
 	public var maxOppNPS:Float = 0;
 	public var enemyHits:Float = 0;
 	public var opponentNoteTotal:Float = 0;
-	public var polyphony:Float = 1;
+	public var polyphony(default, set):Float = 1;
 	public var comboMultiplier:Float = 1;
 	private var allSicks:Bool = true;
 
@@ -1916,7 +1919,7 @@ class PlayState extends MusicBeatState
 		add(iconP2);
 		reloadHealthBarColors(dad.healthColorArray, boyfriend.healthColorArray);
 
-		if (ClientPrefs.smoothHealth && ClientPrefs.smoothHealthType == 'Golden Apple 1.5') healthBar.numDivisions = Std.int(healthBar.width);
+		if (ClientPrefs.smoothHealth) healthBar.numDivisions = Std.int(healthBar.width);
 
 		if (SONG.player1 == 'bf' || SONG.player1 == 'boyfriend') {
 			final iconToChange:String = switch (ClientPrefs.bfIconStyle){
@@ -2633,6 +2636,13 @@ class PlayState extends MusicBeatState
 		trace('Anim speed: ' + FlxG.animationTimeScale);
 		Conductor.safeZoneOffset = (ClientPrefs.safeFrames / 60) * 1000 * value;
 		setOnLuas('playbackRate', playbackRate);
+		return value;
+	}
+
+	function set_polyphony(value:Float):Float
+	{
+		polyphony = value;
+		setOnLuas('polyphony', value);
 		return value;
 	}
 
@@ -3867,7 +3877,7 @@ class PlayState extends MusicBeatState
 				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 0, false);
 				vocals.volume = 0;
 			}
-			if (!ffmpegMode && !trollingMode && SONG.song.toLowerCase() != 'anti-cheat-song' && SONG.song.toLowerCase() != 'desert bus')
+			if (!ffmpegMode && (!trollingMode || SONG.song.toLowerCase() != 'anti-cheat-song'))
 				FlxG.sound.music.onComplete = finishSong.bind();
 			vocals.play();
 		}
@@ -4106,12 +4116,15 @@ class PlayState extends MusicBeatState
 						noteType: songNotes[3],
 						noteskin: (gottaHitNote ? bfNoteskin : dadNoteskin),
 						gfNote: songNotes[3] == 'GF Sing' || (section.gfSection && songNotes[1] < 4),
+						noAnimation: songNotes[3] == 'No Animation',
 						isSustainNote: false,
 						isSustainEnd: false,
 						sustainLength: songNotes[2],
 						parent: null,
 						prevNote: oldNote,
-						strum: null
+						strum: null,
+						hitHealth: 0.023,
+						missHealth: 0.0475
 					};
 		
 					if (!noteTypeMap.exists(swagNote.noteType)) {
@@ -4795,7 +4808,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 	// Filter notesHitDateArray and notesHitArray in place
 	for (i in 0...notesHitDateArray.length) {
-		if (!Math.isNaN(notesHitDateArray[i]) && (notesHitDateArray[i] + (ClientPrefs.npsWithSpeed ? 1000 / playbackRate : 1000) * npsSpeedMult * npsSpeedMult < Conductor.songPosition)) {
+		if (!Math.isNaN(notesHitDateArray[i]) && (notesHitDateArray[i] + 1000 * npsSpeedMult < Conductor.songPosition)) {
 			notesToRemoveCount++;
 		}
 	}
@@ -4898,13 +4911,15 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			lerpingScore = false;
 		}
 
-		// Peak code
-		if (ClientPrefs.smoothHPBug) displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, health, 0.078) : health;
-		health = FlxMath.bound(health, 0, 2.0015 /* Fix for smooth health bar when it's full */);
-		if (!ClientPrefs.smoothHPBug) displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, health, 0.078) : health;
+		if (health < 2)
+		{
+			if (!opponentChart) displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, health, 0.078) : health;
+			else displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, maxHealth - health, 0.078) : maxHealth - health;
+		}
+		else 
+			if (!opponentChart) 
+				displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, !opponentChart ? health : maxHealth - health, CoolUtil.boundTo(elapsed * 20, 0, 1)) : !opponentChart ? health : maxHealth - health;
 		
-		health = FlxMath.bound(health, 0, 2.0015 /* Fix for smooth health bar when it's full */);
-
 		setOnLuas('curDecStep', curDecStep);
 		setOnLuas('curDecBeat', curDecBeat);
 
@@ -5119,21 +5134,12 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		iconP1.updateHitbox();
 		iconP2.updateHitbox();
 
-		if (ClientPrefs.smoothHealth && ClientPrefs.smoothHealthType != 'Golden Apple 1.5' || !ClientPrefs.smoothHealth) //checks if you're using smooth health. if you are, but are not using the indie cross one then you know what that means
-		{
-			iconP1.x = 0 + healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
-			iconP2.x = 0 + healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
-		}
-		if (ClientPrefs.smoothHealth && ClientPrefs.smoothHealthType == 'Golden Apple 1.5') //really makes it feel like the gapple 1.5 build's health tween
+		if (ClientPrefs.smoothHealth)
 		{
 			final percent:Float = 1 - (ClientPrefs.smoothHPBug ? (displayedHealth / maxHealth) : (FlxMath.bound(displayedHealth, 0, maxHealth) / maxHealth));
 
 			iconP1.x = 0 + healthBar.x + (healthBar.width * percent) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
 			iconP2.x = 0 + healthBar.x + (healthBar.width * percent) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
-		}
-
-		if (28820000 - Conductor.songPosition <= 20 && SONG.song.toLowerCase() == 'desert bus') { // WOW, who wants to load an 8 hour long song anyway? LMAO
-			endSong();
 		}
 
 		if (health > maxHealth)
@@ -5261,6 +5267,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					dunceNote.noteType = unspawnNotes[notesAddedCount].noteType;
 					dunceNote.noAnimation = unspawnNotes[notesAddedCount].noAnimation;
 					dunceNote.noMissAnimation = unspawnNotes[notesAddedCount].noMissAnimation;
+					if (!Math.isNaN(unspawnNotes[notesAddedCount].hitHealth)) dunceNote.hitHealth = unspawnNotes[notesAddedCount].hitHealth;
+					if (!Math.isNaN(unspawnNotes[notesAddedCount].missHealth)) dunceNote.missHealth = unspawnNotes[notesAddedCount].missHealth;
+					if (unspawnNotes[notesAddedCount].hitCausesMiss != null) dunceNote.hitCausesMiss = unspawnNotes[notesAddedCount].hitCausesMiss;
 
 					if (ClientPrefs.doubleGhost && !dunceNote.isSustainNote)
 						{
@@ -5429,7 +5438,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 		#end
 
-		if (trollingMode && startedCountdown && canPause && !endingSong) {
+		if ((trollingMode || SONG.song.toLowerCase() == 'anti-cheat-song') && startedCountdown && canPause && !endingSong) {
 			if (FlxG.sound.music.length - Conductor.songPosition <= endingTimeLimit) {
 				KillNotes(); //kill any existing notes
 				FlxG.sound.music.time = 0;
@@ -5439,7 +5448,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 				unspawnNotes = unspawnNotesCopy.copy();
 				eventNotes = eventNotesCopy.copy();
-				loopSongLol();
+				SONG.song.toLowerCase() != 'anti-cheat-song' ? loopSongLol() : loopCallback(0);
 			}
 		}
 
@@ -5497,6 +5506,33 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("Chart Editor", null, null, true);
 		#end
+	}
+
+	public function loopCallback(startingPoint:Float = 0)
+	{
+		var notesToKill:Int = 0;
+		var eventsToRemove:Int = 0;
+		KillNotes(); //kill any existing notes
+		FlxG.sound.music.time = startingPoint;
+		if (SONG.needsVoices && vocals != null) vocals.time = startingPoint;
+		lastUpdateTime = startingPoint;
+		Conductor.songPosition = startingPoint;
+
+		unspawnNotes = unspawnNotesCopy.copy();
+		eventNotes = eventNotesCopy.copy();
+		for (n in unspawnNotes)
+			if (n.strumTime <= startingPoint)
+				notesToKill++;
+
+		for (e in eventNotes)
+			if (e.strumTime <= startingPoint)
+				eventsToRemove++;
+
+		if (notesToKill > 0)
+			unspawnNotes.splice(0, notesToKill);
+
+		if (eventsToRemove > 0)
+			eventNotes.splice(0, eventsToRemove);
 	}
 
 	public var isDead:Bool = false; //Don't mess with this on Lua!!!
@@ -6165,7 +6201,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 	public function finishSong(?ignoreNoteOffset:Bool = false):Void
 	{
-		if (!trollingMode) {
+		if (!trollingMode && SONG.song.toLowerCase() != 'anti-cheat-song') {
 			var finishCallback:Void->Void = endSong; //In case you want to change it in a specific song.
 			updateTime = false;
 			if (ClientPrefs.songLoading) {
@@ -6185,20 +6221,10 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 	}
 
-	public var loopMult:Int = 1;
-	public var loopCount:Int = 0;
-	public var rateTroll:Float = 0;
 	public function loopSongLol()
 	{
 		stepsToDo = /* You need stepsToDo to change, otherwise the sections break. */ curStep = curBeat = curSection = 0; // Wow.
 		oldStep = lastStepHit = lastBeatHit = -1;
-			rateTroll = playbackRate / loopMult;
-			loopCount++;
-			if (Std.int(rateTroll) % 2 == 0) 
-			{
-				loopMult *= 2;
-				rateTroll = 0;
-			}
 
 			// And now it's time for the actual troll mode stuff
 			var TROLL_MAX_SPEED:Float = 2048; // Default is medium max speed
@@ -6222,7 +6248,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			if (ClientPrefs.voiidTrollMode) {
 				playbackRate *= 1.05;
 			} else {
-				playbackRate += 0.05 * loopMult;
+				playbackRate += calculateTrollModeStuff(playbackRate);
 			}
 
 			if (playbackRate >= TROLL_MAX_SPEED && ClientPrefs.trollMaxSpeed != 'Disabled') { // Limit playback rate to the troll mode max speed
@@ -6232,6 +6258,20 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			readyToTriggerTrollMode = false;
 
 			songWasLooped = true;
+	}
+
+	function calculateTrollModeStuff(pb:Float):Float {
+		// Peak Code 2
+		if (pb >= 2 && pb < 4) return 0.1;
+		if (pb >= 4 && pb < 8) return 0.2;
+		if (pb >= 8 && pb < 16) return 0.4;
+		if (pb >= 16 && pb < 32) return 0.8;
+		if (pb >= 32 && pb < 64) return 1.6;
+		if (pb >= 64 && pb < 128) return 3.2;
+		if (pb >= 128 && pb < 256) return 6.4;
+		if (pb >= 256 && pb < 512) return 12.8;
+		if (pb >= 512 && pb < 1024) return 25.6;
+		return 0.05;
 	}
 
 	public var transitioning = false;
@@ -6987,7 +7027,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					judgeTxt.scale.y = 1.075;
 					FlxTween.tween(judgeTxt.scale,
 						{x: 1, y: 1},
-						0.1 / playbackRate,
+					0.1 / playbackRate,
 						{onComplete: function(_){
 								FlxTween.tween(judgeTxt.scale, {x: 0, y: 0}, 0.1 / playbackRate, {
 									onComplete: function(_){judgeTxt.visible = false;},

@@ -264,14 +264,6 @@ class VisualsUISubState extends BaseOptionsMenu
 			'bool',
 			true);
 		addOption(option);
-		
-		var option:Option = new Option('Health Tween Type:',
-			"How would you like your health tween to look like?",
-			'smoothHealthType',
-			'string',
-			'Golden Apple 1.5',
-			['Golden Apple 1.5', 'Indie Cross']);
-		addOption(option);
 
 		var option:Option = new Option('Smooth Health Bug',
 			'This was too cool to be removed, apparently.\nIf checked the icons will be able to go past the normal boundaries of the health bar.',
@@ -525,8 +517,8 @@ class VisualsUISubState extends BaseOptionsMenu
 			"What song do you prefer when you're in menus?",
 			'daMenuMusic',
 			'string',
-			'Mashup',
-			['Mashup', 'Base Game', 'DDTO+', 'Dave & Bambi', 'Dave & Bambi (Old)', 'VS Impostor', 'VS Nonsense V2']);
+			'Default',
+			['Default', 'Mashup', 'Base Game', 'DDTO+', 'Dave & Bambi', 'Dave & Bambi (Old)', 'VS Impostor', 'VS Nonsense V2']);
 		addOption(option);
 		option.onChange = onChangeMenuMusic;
 		
@@ -609,8 +601,8 @@ class VisualsUISubState extends BaseOptionsMenu
 	var menuMusicChanged:Bool = false;
 	function onChangeMenuMusic()
 	{
-			if (ClientPrefs.daMenuMusic != 'Mashup') FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
-			if (ClientPrefs.daMenuMusic == 'Mashup') FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			if (ClientPrefs.daMenuMusic != 'Default') FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
+			if (ClientPrefs.daMenuMusic == 'Default') FlxG.sound.playMusic(Paths.music('freakyMenu'));
 		menuMusicChanged = true;
 	}
 
