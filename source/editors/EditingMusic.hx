@@ -29,8 +29,8 @@ class EditingMusic
 			if (time > 0)
 		{
 				if (music.fadeTween != null)
-		music.fadeTween.cancel(); //cancel the fade tween so it doesnt NULL OBJECT REFERENCE
-		startTimer.cancel();
+			music.fadeTween.cancel(); //cancel the fade tween so it doesnt NULL OBJECT REFERENCE
+			if (startTimer != null) startTimer.cancel();
 				startTimer = new FlxTimer().start(time, function(tmr:FlxTimer)
 					{
 					   				music.fadeIn(1, 0, 0.5);

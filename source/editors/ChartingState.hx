@@ -302,7 +302,7 @@ class ChartingState extends MusicBeatState
 		lilStage.scrollFactor.set();
 		add(lilStage);
 
-		lilBf = new FlxSprite(32, 432).loadGraphic(Paths.image(ClientPrefs.noteColorStyle == 'Default' || !ClientPrefs.rainbowNotes ? "chartEditor/lilBf" : "chartEditor/lilBfRed"), true, 300, 256);
+		lilBf = new FlxSprite(32, 432).loadGraphic(Paths.image(ClientPrefs.noteColorStyle == 'Normal' ? "chartEditor/lilBf" : "chartEditor/lilBfRed"), true, 300, 256);
 		lilBf.animation.add("idle", [0, 1], 12, true);
 		lilBf.animation.add("0", [3, 4, 5], 12, false);
 		lilBf.animation.add("1", [6, 7, 8], 12, false);
@@ -320,7 +320,7 @@ class ChartingState extends MusicBeatState
 		lilBuddiesColorSwap = new ColorSwap();
 		lilBuddies2ColorSwap = new ColorSwap();
 		lilBf.shader = lilBuddiesColorSwap.shader;
-		lilOpp = new FlxSprite(32, 432).loadGraphic(Paths.image(ClientPrefs.noteColorStyle == 'Default' || !ClientPrefs.rainbowNotes ? "chartEditor/lilOpp" : "chartEditor/lilOppRed"), true, 300, 256);
+		lilOpp = new FlxSprite(32, 432).loadGraphic(Paths.image(ClientPrefs.noteColorStyle == 'Normal' ? "chartEditor/lilOpp" : "chartEditor/lilOppRed"), true, 300, 256);
 		lilOpp.animation.add("idle", [0, 1], 12, true);
 		lilOpp.animation.add("0", [3, 4, 5], 12, false);
 		lilOpp.animation.add("1", [6, 7, 8], 12, false);
@@ -1040,8 +1040,9 @@ class ChartingState extends MusicBeatState
 			if(value == 0) return;
 
 			var daSec = FlxMath.maxInt(curSec, value);
+			if (_song.notes[daSec - value] == null || _song.notes[daSec] == null) return;
 
-			if (check_notesSec.checked)
+			if (check_notesSec.checked && _song.notes[daSec - value] != null)
 			{
 				for (note in _song.notes[daSec - value].sectionNotes)
 				{
@@ -1053,7 +1054,7 @@ class ChartingState extends MusicBeatState
 				}
 			}
 
-			if (check_eventsSec.checked)
+			if (check_eventsSec.checked && _song.notes[daSec - value] != null)
 			{
 				var startThing:Float = sectionStartTime(-value);
 				var endThing:Float = sectionStartTime(-value + 1);
@@ -4141,17 +4142,17 @@ class SelectionNote extends FlxSprite
 		} else {
 			if (noteData > -1 && noteData < ClientPrefs.arrowHSV.length && ClientPrefs.enableColorShader)
 			{
-				if (ClientPrefs.noteColorStyle == 'Normal' || !ClientPrefs.rainbowNotes)
+				if (ClientPrefs.noteColorStyle == 'Normal')
 				{
-				colorSwap.hue = ClientPrefs.arrowHSV[noteData][0] / 360;
-				colorSwap.saturation = ClientPrefs.arrowHSV[noteData][1] / 100;
-				colorSwap.brightness = ClientPrefs.arrowHSV[noteData][2] / 100;
+					colorSwap.hue = ClientPrefs.arrowHSV[noteData][0] / 360;
+					colorSwap.saturation = ClientPrefs.arrowHSV[noteData][1] / 100;
+					colorSwap.brightness = ClientPrefs.arrowHSV[noteData][2] / 100;
 				}
-				if (ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.rainbowNotes)
+				if (ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow')
 				{
-				colorSwap.hue = hue;
-				colorSwap.saturation = sat;
-				colorSwap.brightness = brt;
+					colorSwap.hue = hue;
+					colorSwap.saturation = sat;
+					colorSwap.brightness = brt;
 				}
 			}
 			if(animation.curAnim.name == 'confirm' + noteData && !PlayState.isPixelStage) {

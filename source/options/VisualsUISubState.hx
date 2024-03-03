@@ -184,7 +184,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			'noteColorStyle',
 			'string',
 			'Normal',
-			['Normal', 'Quant-Based', 'Char-Based', 'Grayscale']);
+			['Normal', 'Quant-Based', 'Char-Based', 'Grayscale', 'Rainbow']);
 		addOption(option);
 
 		var option:Option = new Option('Enable Note Colors',
@@ -263,14 +263,6 @@ class VisualsUISubState extends BaseOptionsMenu
 			'smoothHealth',
 			'bool',
 			true);
-		addOption(option);
-		
-		var option:Option = new Option('Health Tween Type:',
-			"How would you like your health tween to look like?",
-			'smoothHealthType',
-			'string',
-			'Golden Apple 1.5',
-			['Golden Apple 1.5', 'Indie Cross']);
 		addOption(option);
 
 		var option:Option = new Option('Smooth Health Bug',
@@ -414,10 +406,10 @@ class VisualsUISubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
-		var option:Option = new Option('Use Wrong Note Sorting',
+		var option:Option = new Option('Use Old Note Sorting',
 			'Basically, the notes are added at the beginning of the note groups\' members like vanilla' +
 			'\npsych engine instead of adding them at the end.\nIf you prefer psych\'s note sorting like on older versions of JS Engine, enable this.',
-			'useWrongNoteSorting',
+			'useOldNoteSorting',
 			'bool',
 			false);
 		addOption(option);
@@ -525,8 +517,8 @@ class VisualsUISubState extends BaseOptionsMenu
 			"What song do you prefer when you're in menus?",
 			'daMenuMusic',
 			'string',
-			'Mashup',
-			['Mashup', 'Base Game', 'DDTO+', 'Dave & Bambi', 'Dave & Bambi (Old)', 'VS Impostor', 'VS Nonsense V2']);
+			'Default',
+			['Default', 'Mashup', 'Base Game', 'DDTO+', 'Dave & Bambi', 'Dave & Bambi (Old)', 'VS Impostor', 'VS Nonsense V2']);
 		addOption(option);
 		option.onChange = onChangeMenuMusic;
 		
@@ -609,8 +601,8 @@ class VisualsUISubState extends BaseOptionsMenu
 	var menuMusicChanged:Bool = false;
 	function onChangeMenuMusic()
 	{
-			if (ClientPrefs.daMenuMusic != 'Mashup') FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
-			if (ClientPrefs.daMenuMusic == 'Mashup') FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			if (ClientPrefs.daMenuMusic != 'Default') FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
+			if (ClientPrefs.daMenuMusic == 'Default') FlxG.sound.playMusic(Paths.music('freakyMenu'));
 		menuMusicChanged = true;
 	}
 

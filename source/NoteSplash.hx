@@ -83,7 +83,7 @@ class NoteSplash extends FlxSprite
 		offset.set(-10, 0);
 		}
 		var splashToPlay:Int = note;
-		if (ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Char-Based' || ClientPrefs.rainbowNotes)
+		if (ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Char-Based' || ClientPrefs.noteColorStyle == 'Rainbow')
 			splashToPlay = (ClientPrefs.splashType != 'TGT V4' ? 3 : 1); //for tgt noteskin, the down note is the red splash
 		var animNum:Int = 0;
 		if (ClientPrefs.splashType != 'Doki Doki+' && ClientPrefs.splashType != 'Base Game')

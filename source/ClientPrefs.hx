@@ -59,13 +59,12 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var antiCheatEnable:Bool = false;
 	public static var showRamUsage:Bool = true;
 	public static var showMaxRamUsage:Bool = true;
-	public static var rainbowNotes:Bool = false;
 	public static var rainbowFPS:Bool = false;
 	public static var widescreenSweep:Bool = false;
 	public static var bfIconStyle:String = 'Default';
 	public static var strumLitStyle:String = 'Full Anim';
 	public static var noteStyleThing:String = 'Default';
-	public static var daMenuMusic:String = 'Mashup';
+	public static var daMenuMusic:String = 'Default';
 	public static var ratingIntensity:String = 'Normal';
 	public static var autoPause:Bool = true;
 	public static var randomBotplayText:Bool = true;
@@ -111,7 +110,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var timebarShowSpeed:Bool = false;
 	public static var noteSpawnTime:Float = 1;
 	public static var dynamicSpawnTime:Bool = false;
-	public static var useWrongNoteSorting:Bool = false;
+	public static var useOldNoteSorting:Bool = false;
 	public static var evenLessBotLag:Bool = false;
 	public static var showcaseMode:Bool = false;
 	public static var oppNoteAlpha:Float = 0.65;
@@ -134,7 +133,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var ogHPColor:Bool = false;
 	public static var hudType:String = 'Kade Engine';
 	public static var smoothHealth:Bool = true;
-	public static var smoothHealthType:String = 'Golden Apple 1.5';
 	public static var rateNameStuff:String = 'Quotes';
 	public static var timeBounce:Bool = true;
 	public static var percentDecimals:Int = 2;
@@ -167,7 +165,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var ffmpegMode:Bool = false;
 	public static var ffmpegInfo:Bool = false;
 	public static var targetFPS:Float = 60;
-	public static var unlockFPS:Bool = false;
 	public static var lossless:Bool = false;
 	public static var quality:Int = 80;
 	public static var noCapture:Bool = false;
@@ -339,7 +336,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.memLeaks = memLeaks;
 		FlxG.save.data.communityGameBot = communityGameBot;
 		FlxG.save.data.dynamicSpawnTime = dynamicSpawnTime;
-		FlxG.save.data.useWrongNoteSorting = useWrongNoteSorting;
+		FlxG.save.data.useOldNoteSorting = useOldNoteSorting;
 		FlxG.save.data.botLightStrum = botLightStrum;
 		FlxG.save.data.opponentLightStrum = opponentLightStrum;
 		FlxG.save.data.opponentRateCount = opponentRateCount;
@@ -348,7 +345,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.hudType = hudType;
 		FlxG.save.data.ratingCounter = ratingCounter;
 		FlxG.save.data.colorRatingHit = colorRatingHit;
-		FlxG.save.data.rainbowNotes = rainbowNotes;
 		FlxG.save.data.rainbowFPS = rainbowFPS;
 		FlxG.save.data.widescreenSweep = widescreenSweep;
 		FlxG.save.data.healthGainType = healthGainType;
@@ -370,7 +366,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.npsWithSpeed = npsWithSpeed;
 		FlxG.save.data.timebarShowSpeed = timebarShowSpeed;
 		FlxG.save.data.trollMaxSpeed = trollMaxSpeed;
-		FlxG.save.data.smoothHealthType = smoothHealthType;
 		FlxG.save.data.smoothHealth = smoothHealth;
 		FlxG.save.data.moreSpecificSpeed = moreSpecificSpeed;
 		FlxG.save.data.spaceVPose = spaceVPose;
@@ -415,7 +410,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.ffmpegMode = ffmpegMode;
 		FlxG.save.data.ffmpegInfo = ffmpegInfo;
 		FlxG.save.data.targetFPS = targetFPS;
-		FlxG.save.data.unlockFPS = unlockFPS;
 		FlxG.save.data.lossless = lossless;
 		FlxG.save.data.quality = quality;
 		FlxG.save.data.noCapture = noCapture;
@@ -581,9 +575,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		if(FlxG.save.data.resyncType != null) {
 			resyncType = FlxG.save.data.resyncType;
 		}
-		if(FlxG.save.data.rainbowNotes != null) {
-			rainbowNotes = FlxG.save.data.rainbowNotes;
-		}
 		if(FlxG.save.data.rainbowFPS != null) {
 			rainbowFPS = FlxG.save.data.rainbowFPS;
 		}
@@ -677,8 +668,8 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		if(FlxG.save.data.dynamicSpawnTime != null) {
 			dynamicSpawnTime = FlxG.save.data.dynamicSpawnTime;
 		}
-		if(FlxG.save.data.useWrongNoteSorting != null) {
-			useWrongNoteSorting = FlxG.save.data.useWrongNoteSorting;
+		if(FlxG.save.data.useOldNoteSorting != null) {
+			useOldNoteSorting = FlxG.save.data.useOldNoteSorting;
 		}
 		if(FlxG.save.data.evenLessBotLag != null) {
 			evenLessBotLag = FlxG.save.data.evenLessBotLag;
@@ -843,9 +834,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		if(FlxG.save.data.ghostTapping != null) {
 			ghostTapping = FlxG.save.data.ghostTapping;
 		}
-		if(FlxG.save.data.smoothHealthType != null) {
-			smoothHealthType = FlxG.save.data.smoothHealthType;
-		}
 		if(FlxG.save.data.smoothHealth != null) {
 			smoothHealth = FlxG.save.data.smoothHealth;
 		}
@@ -962,9 +950,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.targetFPS != null) {
 			targetFPS = FlxG.save.data.targetFPS;
-		}
-		if(FlxG.save.data.unlockFPS != null) {
-			unlockFPS = FlxG.save.data.unlockFPS;
 		}
 		if(FlxG.save.data.lossless != null) {
 			lossless = FlxG.save.data.lossless;

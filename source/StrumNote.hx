@@ -66,7 +66,7 @@ class StrumNote extends FlxSprite
 			if (ClientPrefs.noteStyleThing != 'VS Nonsense V2' && ClientPrefs.noteStyleThing != 'DNB 3D' && ClientPrefs.noteStyleThing != 'VS AGOTI' && ClientPrefs.noteStyleThing != 'Doki Doki+' && ClientPrefs.noteStyleThing != 'TGT V4' && ClientPrefs.noteStyleThing != 'Default') {
 				skin = 'NOTE_assets_' + ClientPrefs.noteStyleThing.toLowerCase();
 			}
-			if(ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.rainbowNotes) {
+			if(ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') {
 				skin = ClientPrefs.noteStyleThing == 'TGT V4' ? 'RED_TGTNOTE_assets' : 'RED_NOTE_assets';
 			}
 			if(ClientPrefs.noteColorStyle == 'Grayscale') {
@@ -206,13 +206,13 @@ class StrumNote extends FlxSprite
 		if (enableRGBShader && gfRGB) enableRGBGF();
 			if (noteData > -1 && noteData < ClientPrefs.arrowHSV.length && ClientPrefs.enableColorShader)
 			{
-				if (ClientPrefs.noteColorStyle == 'Normal' || !ClientPrefs.rainbowNotes)
+				if (ClientPrefs.noteColorStyle == 'Normal')
 				{
 				colorSwap.hue = ClientPrefs.arrowHSV[noteData][0] / 360;
 				colorSwap.saturation = ClientPrefs.arrowHSV[noteData][1] / 100;
 				colorSwap.brightness = ClientPrefs.arrowHSV[noteData][2] / 100;
 				}
-				if (ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.rainbowNotes)
+				if (ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow')
 				{
 				colorSwap.hue = hue;
 				colorSwap.saturation = sat;
@@ -274,7 +274,7 @@ class StrumNote extends FlxSprite
 			if (ClientPrefs.noteStyleThing != 'VS Nonsense V2' && ClientPrefs.noteStyleThing != 'DNB 3D' && ClientPrefs.noteStyleThing != 'VS AGOTI' && ClientPrefs.noteStyleThing != 'Doki Doki+' && ClientPrefs.noteStyleThing != 'TGT V4' && ClientPrefs.noteStyleThing != 'Default') {
 				texture = 'NOTE_assets_' + ClientPrefs.noteStyleThing.toLowerCase();
 			}
-			if(ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.rainbowNotes) {
+			if(ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') {
 				texture = ClientPrefs.noteStyleThing == 'TGT V4' ? 'RED_TGTNOTE_assets' : 'RED_NOTE_assets';
 			}
 			if(ClientPrefs.noteColorStyle == 'Char-Based') {
