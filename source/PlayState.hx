@@ -102,6 +102,7 @@ typedef PreloadedChartNote = {
 	isSustainNote:Bool,
 	isSustainEnd:Bool,
 	sustainLength:Float,
+	sustainScale:Float,
 	parent:Note,
 	prevNote:Note,
 	strum:StrumNote,
@@ -172,6 +173,8 @@ class PlayState extends MusicBeatState
 	public var songSpeedTween:FlxTween;
 	public var songSpeed(default, set):Float = 1;
 	public var songSpeedType:String = "multiplicative";
+
+	public var prevSongSpeed:Float = 1;
 
 	public var noteKillOffset:Float = 350;
 
@@ -2602,6 +2605,7 @@ class PlayState extends MusicBeatState
 
 	function set_songSpeed(value:Float):Float
 	{
+		prevSongSpeed = songSpeed;
 		if(generatedMusic)
 		{
 			var ratio:Float = value / songSpeed; //funny word huh
@@ -4045,7 +4049,10 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
+		var currentBPMLol:Float = Conductor.bpm;
 		for (section in noteData) {
+			if (section.changeBPM) currentBPMLol = section.bpm;
+
 			for (songNotes in section.sectionNotes) {
 				if (usingEkFile && (songNotes[1] > 3) && !isEkSong) {
 					trace("one of the notes' note data exceeded the normal note count and there's a lua ek file, so im assuming this song is an ek song");
@@ -4120,6 +4127,7 @@ class PlayState extends MusicBeatState
 						isSustainNote: false,
 						isSustainEnd: false,
 						sustainLength: songNotes[2],
+						sustainScale: 0,
 						parent: null,
 						prevNote: oldNote,
 						strum: null,
@@ -4132,6 +4140,8 @@ class PlayState extends MusicBeatState
 					}
 		
 					unspawnNotes.push(swagNote);
+				
+					var ratio:Float = Conductor.bpm / currentBPMLol;
 		
 					final floorSus:Int = Math.floor(swagNote.sustainLength / Conductor.stepCrochet);
 					if (floorSus > 0) {
@@ -4146,11 +4156,14 @@ class PlayState extends MusicBeatState
 								noteskin: (gottaHitNote ? bfNoteskin : dadNoteskin),
 								gfNote: songNotes[3] == 'GF Sing' || (section.gfSection && songNotes[1] < 4),
 								isSustainNote: true,
-								isSustainEnd: susNote == floorSus, //idk
+								isSustainEnd: susNote == floorSus, 
 								sustainLength: 0,
+								sustainScale: 1 / ratio,
 								parent: swagNote,
 								prevNote: oldNote,
-								strum: null
+								strum: null,
+								hitHealth: 0.023,
+								missHealth: 0.0475
 							};
 							unspawnNotes.push(sustainNote);
 							Sys.sleep(0.0001);
@@ -4169,9 +4182,12 @@ class PlayState extends MusicBeatState
 								isSustainNote: false,
 								isSustainEnd: false,
 								sustainLength: swagNote.sustainLength,
+								sustainScale: 0,
 								parent: null,
 								prevNote: oldNote,
-								strum: null
+								strum: null,
+								hitHealth: 0.023,
+								missHealth: 0.0475
 							};
 							unspawnNotes.push(jackNote);
 							Sys.sleep(0.0001);
@@ -4911,14 +4927,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			lerpingScore = false;
 		}
 
-		if (health < 2)
-		{
-			if (!opponentChart) displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, health, 0.078) : health;
-			else displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, maxHealth - health, 0.078) : maxHealth - health;
-		}
-		else 
-			if (!opponentChart) 
-				displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, !opponentChart ? health : maxHealth - health, CoolUtil.boundTo(elapsed * 20, 0, 1)) : !opponentChart ? health : maxHealth - health;
+			if (!opponentChart) displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, health, 0.2 / (ClientPrefs.framerate/60)) : health;
+			else displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, maxHealth - health, 0.2 / (ClientPrefs.framerate/60)) : maxHealth - health;
 		
 		setOnLuas('curDecStep', curDecStep);
 		setOnLuas('curDecBeat', curDecBeat);
@@ -5296,11 +5306,16 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 						dunceNote.prevNote.updateHitbox();
 					}
 				}
+				if (!unspawnNotes[notesAddedCount].isSustainEnd && unspawnNotes[notesAddedCount].sustainScale != 1) 
+				{
+					dunceNote.resizeByRatio(unspawnNotes[notesAddedCount].sustainScale);
+				}
 			}
 
 			dunceNote.scrollFactor.set();
 
 				dunceNote.strum = unspawnNotes[notesAddedCount].strum;
+				if (ClientPrefs.noteColorStyle == 'Char-Based') dunceNote.updateRGBColors();
 			if (!ClientPrefs.useOldNoteSorting) {
 				(dunceNote.isSustainNote ? sustainNotes : notes).insert(0, dunceNote);
 			} else {
@@ -8560,14 +8575,14 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		iconP1.scale.set(1.1, 0.8);
 		iconP2.scale.set(1.1, 1.3);
 
-		FlxTween.angle(iconP1, -15, 0, Conductor.crochet / 1300 / playbackRate, {ease: FlxEase.quadOut});
-		FlxTween.angle(iconP2, 15, 0, Conductor.crochet / 1300 / playbackRate, {ease: FlxEase.quadOut});
+		FlxTween.angle(iconP1, -15, 0, Conductor.crochet / 1300 / playbackRate * gfSpeed, {ease: FlxEase.quadOut});
+		FlxTween.angle(iconP2, 15, 0, Conductor.crochet / 1300 / playbackRate * gfSpeed, {ease: FlxEase.quadOut});
 		} : {
 		iconP1.scale.set(1.1, 1.3);
 		iconP2.scale.set(1.1, 0.8);
 
-		FlxTween.angle(iconP2, -15, 0, Conductor.crochet / 1300 / playbackRate, {ease: FlxEase.quadOut});
-		FlxTween.angle(iconP1, 15, 0, Conductor.crochet / 1300 / playbackRate, {ease: FlxEase.quadOut});
+		FlxTween.angle(iconP2, -15, 0, Conductor.crochet / 1300 / playbackRate * gfSpeed, {ease: FlxEase.quadOut});
+		FlxTween.angle(iconP1, 15, 0, Conductor.crochet / 1300 / playbackRate * gfSpeed, {ease: FlxEase.quadOut});
 		}
 
 		FlxTween.tween(iconP1, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 / playbackRate * gfSpeed, {ease: FlxEase.quadOut});
@@ -8696,14 +8711,14 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		iconP1.scale.set(1.1, 0.8);
 		iconP2.scale.set(1.1, 1.3);
 
-		FlxTween.angle(iconP1, -15, 0, Conductor.crochet / 1300 / playbackRate, {ease: FlxEase.quadOut});
-		FlxTween.angle(iconP2, 15, 0, Conductor.crochet / 1300 / playbackRate, {ease: FlxEase.quadOut});
+		FlxTween.angle(iconP1, -15, 0, Conductor.crochet / 1300 / playbackRate * gfSpeed, {ease: FlxEase.quadOut});
+		FlxTween.angle(iconP2, 15, 0, Conductor.crochet / 1300 / playbackRate * gfSpeed, {ease: FlxEase.quadOut});
 		} : {
 		iconP1.scale.set(1.1, 1.3);
 		iconP2.scale.set(1.1, 0.8);
 
-		FlxTween.angle(iconP2, -15, 0, Conductor.crochet / 1300 / playbackRate, {ease: FlxEase.quadOut});
-		FlxTween.angle(iconP1, 15, 0, Conductor.crochet / 1300 / playbackRate, {ease: FlxEase.quadOut});
+		FlxTween.angle(iconP2, -15, 0, Conductor.crochet / 1300 / playbackRate * gfSpeed, {ease: FlxEase.quadOut});
+		FlxTween.angle(iconP1, 15, 0, Conductor.crochet / 1300 / playbackRate * gfSpeed, {ease: FlxEase.quadOut});
 		}
 
 		FlxTween.tween(iconP1, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 / playbackRate * gfSpeed, {ease: FlxEase.quadOut});

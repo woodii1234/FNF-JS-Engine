@@ -695,33 +695,29 @@ class Note extends FlxSprite
 
 	public function clipToStrumNote(myStrum:StrumNote)
 	{
-					// From 0.7+
-					final center = strum.y + (Note.swagWidth * 0.5);
-					var playerClipRectCheck:Bool = mustPress && isSustainNote && (wasGoodHit && prevNote.wasGoodHit || !tooLate) &&
-						(PlayState.instance.parseKeys()[noteData] || animation.curAnim.name.endsWith('end') || PlayState.instance.cpuControlled);
-					var opponentClipRectCheck:Bool = !mustPress && isSustainNote;
-					if (playerClipRectCheck || opponentClipRectCheck)
-					{
-						var swagRect:FlxRect = clipRect;
-						if(swagRect == null) swagRect = new FlxRect(0, 0, frameWidth, frameHeight);
+		final center:Float = myStrum.y + offsetY + Note.swagWidth / 2;
+		if(isSustainNote && (mustPress || !ignoreNote) &&
+			(!mustPress || (wasGoodHit || (prevNote.wasGoodHit && !canBeHit))))
+		{
+			final swagRect:FlxRect = clipRect != null ? clipRect : new FlxRect(0, 0, frameWidth, frameHeight);
 
-						if (strum.downScroll)
-						{
-							if(y - offset.y * scale.y + height >= center)
-							{
-								swagRect.width = frameWidth;
-								swagRect.height = (center - y) / scale.y;
-								swagRect.y = frameHeight - swagRect.height;
-							}
-						}
-						else if (y + offset.y * scale.y <= center)
-						{
-							swagRect.y = (center - y) / scale.y;
-							swagRect.width = width / scale.x;
-							swagRect.height = (height / scale.y) - swagRect.y;
-						}
-						clipRect = swagRect;
-					}
+			if (myStrum.downScroll)
+			{
+				if(y - offset.y * scale.y + height >= center)
+				{
+					swagRect.width = frameWidth;
+					swagRect.height = (center - y) / scale.y;
+					swagRect.y = frameHeight - swagRect.height;
+				}
+			}
+			else if (y + offset.y * scale.y <= center)
+			{
+				swagRect.y = (center - y) / scale.y;
+				swagRect.width = width / scale.x;
+				swagRect.height = (height / scale.y) - swagRect.y;
+			}
+			clipRect = swagRect;
+		}
 	}
 	public function updateRGBColors() {
         	if (Std.isOfType(this.shader, ColoredNoteShader))

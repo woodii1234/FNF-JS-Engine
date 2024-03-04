@@ -38,7 +38,7 @@ class Main extends Sprite {
 	var game = {
 		width: 1280,
 		height: 720,
-		initialState: TitleState.new,
+		initialState: StartupState.new,
 		zoom: -1.0,
 		framerate: 60,
 		skipSplash: true,
