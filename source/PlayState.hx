@@ -373,7 +373,7 @@ class PlayState extends MusicBeatState
 	var waves:Bool = false;
 	var oneK:Bool = false;
 	var randomSpeedThing:Bool = false;
-	var trollingMode:Bool = false;
+	public var trollingMode:Bool = false;
 	public var jackingtime:Float = 0;
 
 	public var songWasLooped:Bool = false; //If the song was looped. Used in Troll Mode
@@ -3836,8 +3836,8 @@ class PlayState extends MusicBeatState
 			vocals.pause();
 
 			FlxG.sound.music.time = time;
-			FlxG.sound.music.pitch = playbackRate;
 			FlxG.sound.music.play();
+			FlxG.sound.music.pitch = playbackRate;
 			if (ffmpegMode) FlxG.sound.music.volume = 0;
 
 			if (Conductor.songPosition <= vocals.length)
@@ -3883,7 +3883,9 @@ class PlayState extends MusicBeatState
 			}
 			if (!ffmpegMode && (!trollingMode || SONG.song.toLowerCase() != 'anti-cheat-song'))
 				FlxG.sound.music.onComplete = finishSong.bind();
+				FlxG.sound.music.pitch = playbackRate;
 			vocals.play();
+			vocals.pitch = playbackRate;
 		}
 
 		if(startOnTime > 0)
@@ -4155,6 +4157,7 @@ class PlayState extends MusicBeatState
 								noteType: songNotes[3],
 								noteskin: (gottaHitNote ? bfNoteskin : dadNoteskin),
 								gfNote: songNotes[3] == 'GF Sing' || (section.gfSection && songNotes[1] < 4),
+								noAnimation: songNotes[3] == 'No Animation',
 								isSustainNote: true,
 								isSustainEnd: susNote == floorSus, 
 								sustainLength: 0,
@@ -4927,8 +4930,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			lerpingScore = false;
 		}
 
-			if (!opponentChart) displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, health, 0.2 / (ClientPrefs.framerate/60)) : health;
-			else displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, maxHealth - health, 0.2 / (ClientPrefs.framerate/60)) : maxHealth - health;
+			if (!opponentChart) displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, health, 0.09 / (ClientPrefs.framerate/60)) : health;
+			else displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, maxHealth - health, 0.09 / (ClientPrefs.framerate/60)) : maxHealth - health;
 		
 		setOnLuas('curDecStep', curDecStep);
 		setOnLuas('curDecBeat', curDecBeat);
@@ -5276,7 +5279,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					dunceNote.gfNote = unspawnNotes[notesAddedCount].gfNote;
 					dunceNote.noteType = unspawnNotes[notesAddedCount].noteType;
 					dunceNote.noAnimation = unspawnNotes[notesAddedCount].noAnimation;
-					dunceNote.noMissAnimation = unspawnNotes[notesAddedCount].noMissAnimation;
+					dunceNote.noMissAnimation = unspawnNotes[notesAddedCount].noAnimation;
 					if (!Math.isNaN(unspawnNotes[notesAddedCount].hitHealth)) dunceNote.hitHealth = unspawnNotes[notesAddedCount].hitHealth;
 					if (!Math.isNaN(unspawnNotes[notesAddedCount].missHealth)) dunceNote.missHealth = unspawnNotes[notesAddedCount].missHealth;
 					if (unspawnNotes[notesAddedCount].hitCausesMiss != null) dunceNote.hitCausesMiss = unspawnNotes[notesAddedCount].hitCausesMiss;

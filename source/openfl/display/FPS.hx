@@ -76,6 +76,8 @@ class FPS extends TextField
 	var colorInterp:Float = 0;
 	var currentColor:Int = 0;
 
+	var fpsMultiplier:Float = 1.0;
+
 	// Event Handlers
 	@:noCompletion
 	private #if !flash override #end function __enterFrame(deltaTime:Float):Void
@@ -83,16 +85,21 @@ class FPS extends TextField
 		currentTime += deltaTime;
 		times.push(currentTime);
 
-		while (times[0] < currentTime - 1000)
+		if (Type.getClassName(Type.getClass(FlxG.state)) == 'PlayState' && !PlayState.instance.trollingMode) { 
+			try { fpsMultiplier = PlayState.instance.playbackRate; }
+			catch (e:Dynamic) { fpsMultiplier = 1.0; }
+		}
+		else fpsMultiplier = 1.0;
+
+		while (times[0] < currentTime - 1000 / fpsMultiplier)
 		{
 			times.shift();
 		}
 
 		//Literally the stupidest thing i've done for the FPS counter but it allows it to update correctly when on 60 FPS??
 		var currentCount = times.length;
-		currentFPS = Math.round((currentCount + cacheCount) / 2);
-		if (currentFPS > ClientPrefs.framerate) currentFPS = ClientPrefs.framerate;
-		if (FlxG.state != null && Type.getClassName(Type.getClass(FlxG.state)) == 'PlayState' && PlayState.instance.playbackRate != 1) currentFPS /= PlayState.instance.playbackRate;
+		currentFPS = Math.round((currentCount + cacheCount) / 2) - 1;
+		if (currentFPS > ClientPrefs.framerate / fpsMultiplier) currentFPS = ClientPrefs.framerate / fpsMultiplier;
 
 			text = (ClientPrefs.showFPS ? "FPS: " + (ClientPrefs.ffmpegMode ? ClientPrefs.targetFPS : currentFPS) : "");
 			if (ClientPrefs.ffmpegMode) {

@@ -197,7 +197,7 @@ class Main extends Sprite {
 			var last:Int = 0;
 			var s = "";
 
-			trace(line);
+			//trace(line);
 			while ((last = buff.readByte()) != 10) {
 				buf.addByte(last);
 			}
