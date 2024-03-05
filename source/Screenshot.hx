@@ -86,7 +86,7 @@ class Screenshot {
 		byteData = image.encode(ClientPrefs.lossless ? PNG : JPEG, ClientPrefs.quality);
 		if (ClientPrefs.enableGC) openfl.system.System.gc();
 		var f:FileOutput = sys.io.File.write(path, true);
-		if(byteData != null && f != null) {
+		if(byteData != null && f != null && FileSystem.exists(path)) {
 			f.write(byteData);
 			if (ClientPrefs.enableGC) openfl.system.System.gc();
 			f.close();

@@ -1196,7 +1196,7 @@ class ChartingState extends MusicBeatState
 			if(value1 == 0) {
 			return;
 			} 
-			if(_song.notes[curSection] != null && Math.isNaN(_song.notes[curSection].sectionNotes.length)) {
+			if(_song.notes[curSection] != null && Math.isNaN(_song.notes[daSec].sectionNotes.length)) {
 			trace ("HEY! your section doesn't have any notes! please place at least 1 note then try using this.");
 			return; //prevent a crash if the section doesn't have any notes
 			}
@@ -1224,6 +1224,8 @@ class ChartingState extends MusicBeatState
 					}
 					changeSection(curSec+1);
 					daSec = FlxMath.maxInt(curSec, Std.int(CopyLastSectionCount.value)-1);
+					//Feel free to comment this out.
+					trace ('Loops Remaining: ' + (value2 - i) + ', current note count: ' + FlxStringUtil.formatMoney(CoolUtil.getNoteAmount(_song), false) + ' Notes');
 				}
 			}
 			updateGrid(false);
