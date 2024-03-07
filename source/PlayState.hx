@@ -111,6 +111,7 @@ typedef PreloadedChartNote = {
 	missHealth:Float,
 	hitCausesMiss:Null<Bool>,
 	wasHit:Bool,
+	multSpeed:Float,
 }
 
 class PlayState extends MusicBeatState
@@ -4141,7 +4142,8 @@ class PlayState extends MusicBeatState
 						strum: null,
 						hitHealth: 0.023,
 						missHealth: 0.0475,
-						wasHit: false
+						wasHit: false,
+						multSpeed: 1,
 					};
 		
 					if (!noteTypeMap.exists(swagNote.noteType)) {
@@ -4175,7 +4177,8 @@ class PlayState extends MusicBeatState
 								strum: null,
 								hitHealth: 0.023,
 								missHealth: 0.0475,
-								wasHit: false
+								wasHit: false,
+								multSpeed: 1,
 							};
 							unspawnNotes.push(sustainNote);
 							Sys.sleep(0.0001);
@@ -4199,7 +4202,9 @@ class PlayState extends MusicBeatState
 								prevNote: oldNote,
 								strum: null,
 								hitHealth: 0.023,
-								missHealth: 0.0475
+								missHealth: 0.0475,
+								wasHit: false,
+								multSpeed: 1
 							};
 							unspawnNotes.push(jackNote);
 							Sys.sleep(0.0001);
@@ -4691,7 +4696,8 @@ class PlayState extends MusicBeatState
 			reloadHealthBarColors(dad.healthColorArray, boyfriend.healthColorArray);
 		}
 
-		var NOTE_SPAWN_TIME = (ClientPrefs.dynamicSpawnTime ? 2000 / songSpeed : (1600 / songSpeed) / camHUD.zoom /* Just enough for the notes to barely inch off the screen */);
+			//That says / songSpeed. If it's less than 1 it'll multiply instead of divide.
+		var NOTE_SPAWN_TIME = (ClientPrefs.dynamicSpawnTime ? (1600 / songSpeed) : 1600 * ClientPrefs.noteSpawnTime) / camHUD.zoom;
 
 		if (ClientPrefs.charsAndBG && curStage != 'stage') switch (curStage)
 		{
@@ -5063,10 +5069,10 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 		if (FlxG.keys.anyJustPressed(debugKeysChart) && !endingSong && !inCutscene)
 		{
-			if (SONG.event7 != null && SONG.event7 != "---" && SONG.event7 != 'None')
+			if (SONG.event7 != null && SONG.event7 != "---" && SONG.event7 != '' && SONG.event7 != 'None')
 			switch(SONG.event7)
 				{
-				case "---", null, 'None':
+				case "---" | null | '' | 'None':
 				if (!ClientPrefs.antiCheatEnable)
 				{
 				openChartEditor();
@@ -5301,7 +5307,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 		else if (ClientPrefs.showNotes || !ClientPrefs.showNotes && !cpuControlled)
 		{
-			while (unspawnNotes.length > 0 && unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < NOTE_SPAWN_TIME) {
+			while (unspawnNotes.length > 0 && unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < (NOTE_SPAWN_TIME / unspawnNotes[notesAddedCount].multSpeed)) {
 				var dunceNote:Note = new Note(unspawnNotes[notesAddedCount].strumTime, unspawnNotes[notesAddedCount].noteData, unspawnNotes[notesAddedCount].prevNote, unspawnNotes[notesAddedCount].noteskin, unspawnNotes[notesAddedCount].isSustainNote);
 						if (unspawnNotes[notesAddedCount].texture.length > 1 && unspawnNotes[notesAddedCount].noteskin.length < 1) dunceNote.texture = unspawnNotes[notesAddedCount].texture;
 						dunceNote.mustPress = unspawnNotes[notesAddedCount].mustPress;
@@ -5495,8 +5501,20 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				lastUpdateTime = 0.0;
 				Conductor.songPosition = 0;
 
-				unspawnNotes = unspawnNotesCopy.copy();
-				eventNotes = eventNotesCopy.copy();
+				if (SONG.song.toLowerCase() != 'anti-cheat-song')
+				{
+					unspawnNotes = unspawnNotesCopy.copy();
+					eventNotes = eventNotesCopy.copy();
+					if (!ClientPrefs.showNotes)
+					{
+						var noteIndex:Int = 0;
+						while (unspawnNotes.length > 0 && unspawnNotes[noteIndex] != null)
+						{
+							unspawnNotes[noteIndex].wasHit = false;
+							noteIndex++;
+						}
+					}
+				}
 				SONG.song.toLowerCase() != 'anti-cheat-song' ? loopSongLol() : loopCallback(0);
 			}
 		}
@@ -5582,6 +5600,16 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 		if (eventsToRemove > 0)
 			eventNotes.splice(0, eventsToRemove);
+
+		if (!ClientPrefs.showNotes)
+		{
+			var noteIndex:Int = 0;
+			while (unspawnNotes.length > 0 && unspawnNotes[noteIndex] != null)
+			{
+				unspawnNotes[noteIndex].wasHit = false;
+				noteIndex++;
+			}
+		}
 	}
 
 	public var isDead:Bool = false; //Don't mess with this on Lua!!!

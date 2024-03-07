@@ -476,6 +476,7 @@ class FreeplayState extends MusicBeatState
 			}
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			FlxG.switchState(MainMenuState.new);
+			FlxG.mouse.visible = false;
 		}
 
 		if(ctrl)
@@ -608,6 +609,7 @@ class FreeplayState extends MusicBeatState
 			}
 
 			FlxG.sound.music.volume = 0;
+			FlxG.mouse.visible = false;
 					
 			destroyFreeplayVocals();
 

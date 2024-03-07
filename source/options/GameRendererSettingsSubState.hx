@@ -44,14 +44,14 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
-        var option:Option = new Option('Show Debug Info',
-			"If checked, it shows FrameTime and FrameCount\nby replacing botplay text.",
+        	var option:Option = new Option('Show Debug Info',
+			"If checked, the Botplay text will show how long it took to render 1 frame.",
 			'ffmpegInfo',
 			'bool',
 			false);
 		addOption(option);
 
-        var option:Option = new Option('Video Framerate',
+        	var option:Option = new Option('Video Framerate',
 			"How much FPS would you like for your videos?",
 			'targetFPS',
 			'float',
@@ -76,10 +76,10 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 
 		var option:Option = new Option('JPEG Quality',
-			"Change the JPEG quality in here.\nRecommend is 80.",
+			"Change the JPEG quality in here.\nThe recommended value is 50.",
 			'quality',
 			'int',
-			80);
+			50);
 		addOption(option);
 
 		option.minValue = 1;
@@ -87,7 +87,7 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		option.scrollSpeed = 30;
 		option.decimals = 0;
 
-        var option:Option = new Option('No Screenshot',
+       		var option:Option = new Option('No Screenshot',
 			"If checked, Skip taking of screenshot.\nIt's a function for debug.",
 			'noCapture',
 			'bool',
