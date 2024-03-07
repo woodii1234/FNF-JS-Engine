@@ -265,7 +265,7 @@ class FreeplayState extends MusicBeatState
 				if (start != null && start.length > 0) {
 					var songName = song[0].toLowerCase();
 					var s = start.toLowerCase();
-					if (StringTools.startsWith(songName, s)) foundSongs++;
+					if (songName.indexOf(s) != -1) foundSongs++;
 				}
 			}
 		}
@@ -313,7 +313,7 @@ class FreeplayState extends MusicBeatState
 				if (start != null && start.length > 0) {
 					var songName = song[0].toLowerCase();
 					var s = start.toLowerCase();
-					if (StringTools.startsWith(songName, s)) addSong(song[0], i, song[1], FlxColor.fromRGB(colors[0], colors[1], colors[2]));
+					if (songName.indexOf(s) != -1) addSong(song[0], i, song[1], FlxColor.fromRGB(colors[0], colors[1], colors[2]));
 				} else addSong(song[0], i, song[1], FlxColor.fromRGB(colors[0], colors[1], colors[2])); //??????????
 			}
 		}
