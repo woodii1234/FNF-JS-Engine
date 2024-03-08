@@ -5346,7 +5346,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 					if(!isPixelStage)
 					{
-						if (ClientPrefs.noteColorStyle == 'Quant-Based' && ClientPrefs.enableColorShader)
+						if (ClientPrefs.noteColorStyle == 'Quant-Based' && ClientPrefs.enableColorShader && notes.members[Std.int(notes.length-1)] != null && dunceNote.noteData == notes.members[Std.int(notes.length-1)].noteData)
 						{
 							dunceNote.colorSwap.hue = notes.members[Std.int(notes.length-1)].colorSwap.hue;
 							dunceNote.colorSwap.saturation = notes.members[Std.int(notes.length-1)].colorSwap.saturation;

@@ -1,4 +1,6 @@
-1.21.0;
+1.21.1;
+
+Fixed Color Quants crashing the game if there were no notes on screen
 
 The chart loading system has been rewritten! As a result charts now load a LOT faster!
 The Gapple 1.5 tween is now smoother
