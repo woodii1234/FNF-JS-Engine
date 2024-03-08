@@ -2373,6 +2373,12 @@ class PlayState extends MusicBeatState
 		eventPushedMap.clear();
 		eventPushedMap = null;
 
+		if(eventNotes.length > 1)
+		{
+			for (event in eventNotes) event.strumTime -= eventNoteEarlyTrigger(event);
+			eventNotes.sort(sortByTime);
+		}
+
 		// SONG SPECIFIC SCRIPTS
 		#if LUA_ALLOWED
 		var filesPushed:Array<String> = [];
@@ -4143,7 +4149,7 @@ class PlayState extends MusicBeatState
 						hitHealth: 0.023,
 						missHealth: 0.0475,
 						wasHit: false,
-						multSpeed: 1,
+						multSpeed: 1
 					};
 		
 					if (!noteTypeMap.exists(swagNote.noteType)) {
@@ -4178,10 +4184,10 @@ class PlayState extends MusicBeatState
 								hitHealth: 0.023,
 								missHealth: 0.0475,
 								wasHit: false,
-								multSpeed: 1,
+								multSpeed: 1
 							};
 							unspawnNotes.push(sustainNote);
-							Sys.sleep(0.0001);
+							//Sys.sleep(0.0001);
 						}
 					}
 		
@@ -4207,7 +4213,7 @@ class PlayState extends MusicBeatState
 								multSpeed: 1
 							};
 							unspawnNotes.push(jackNote);
-							Sys.sleep(0.0001);
+							//Sys.sleep(0.0001);
 						}
 					}
 				} else {
@@ -4956,8 +4962,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			lerpingScore = false;
 		}
 
-			if (!opponentChart) displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, health, 0.09 / (ClientPrefs.framerate/60)) : health;
-			else displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, maxHealth - health, 0.09 / (ClientPrefs.framerate/60)) : maxHealth - health;
+			if (!opponentChart) displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, health, 0.1 / (ClientPrefs.framerate/60)) : health;
+			else displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, maxHealth - health, 0.1 / (ClientPrefs.framerate/60)) : maxHealth - health;
 		
 		setOnLuas('curDecStep', curDecStep);
 		setOnLuas('curDecBeat', curDecBeat);
@@ -5319,6 +5325,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 						if (!Math.isNaN(unspawnNotes[notesAddedCount].hitHealth)) dunceNote.hitHealth = unspawnNotes[notesAddedCount].hitHealth;
 						if (!Math.isNaN(unspawnNotes[notesAddedCount].missHealth)) dunceNote.missHealth = unspawnNotes[notesAddedCount].missHealth;
 						if (unspawnNotes[notesAddedCount].hitCausesMiss != null) dunceNote.hitCausesMiss = unspawnNotes[notesAddedCount].hitCausesMiss;
+						dunceNote.multSpeed = unspawnNotes[notesAddedCount].multSpeed;
 
 						if (ClientPrefs.doubleGhost && !dunceNote.isSustainNote)
 							{
@@ -5339,6 +5346,13 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 					if(!isPixelStage)
 					{
+						if (ClientPrefs.noteColorStyle == 'Quant-Based' && ClientPrefs.enableColorShader)
+						{
+							dunceNote.colorSwap.hue = notes.members[Std.int(notes.length-1)].colorSwap.hue;
+							dunceNote.colorSwap.saturation = notes.members[Std.int(notes.length-1)].colorSwap.saturation;
+							dunceNote.colorSwap.brightness = notes.members[Std.int(notes.length-1)].colorSwap.brightness;
+						}
+
 						if(dunceNote.prevNote.isSustainNote)
 						{
 							dunceNote.prevNote.scale.y *= Note.SUSTAIN_SIZE / dunceNote.prevNote.frameHeight;

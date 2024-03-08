@@ -8,6 +8,7 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
+import flixel.addons.transition.FlxTransitionableState;
 
 class StartupState extends MusicBeatState
 {
@@ -19,6 +20,8 @@ class StartupState extends MusicBeatState
 
 	override public function create():Void
 	{
+		FlxTransitionableState.skipNextTransIn = true;
+		FlxTransitionableState.skipNextTransOut = true;
 		logo = new FlxSprite().loadGraphic(Paths.image('sillyLogo', 'splash'));
 		logo.scrollFactor.set();
 		logo.screenCenter();

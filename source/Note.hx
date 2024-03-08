@@ -306,9 +306,9 @@ class Note extends FlxSprite
 		}
 		if (ClientPrefs.showNotes && ClientPrefs.enableColorShader)
 		{
-		noteSplashHue = colorSwap.hue;
-		noteSplashSat = colorSwap.saturation;
-		noteSplashBrt = colorSwap.brightness;
+			noteSplashHue = colorSwap.hue;
+			noteSplashSat = colorSwap.saturation;
+			noteSplashBrt = colorSwap.brightness;
 		}
 		return value;
 	}
@@ -376,7 +376,7 @@ class Note extends FlxSprite
 			{
 					colorSwap = new ColorSwap();
 					shader = colorSwap.shader;
-					if (ClientPrefs.noteColorStyle == 'Normal' && noteData < ClientPrefs.arrowHSV.length) //the notedata check prevents a null object reference when loading ek lua charts
+					if (ClientPrefs.noteColorStyle == 'Normal' && noteData < ClientPrefs.arrowHSV.length)
 					{
 						colorSwap.hue = ClientPrefs.arrowHSV[noteData][0] / 360;
 						colorSwap.saturation = ClientPrefs.arrowHSV[noteData][1] / 100;
@@ -445,7 +445,7 @@ class Note extends FlxSprite
 				colorSwap.brightness = prevNote.colorSwap.brightness;
 				}
 
-			updateHitbox();
+				updateHitbox();
 			}
 
 			offsetX -= width / 2;
