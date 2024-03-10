@@ -218,8 +218,6 @@ class ColorSwapShader extends FlxShader {
 	public function new()
 	{
 		super();
-		var motion_blur = ClientPrefs.noteMotionBlur;
-       		this.blurEnabled.value = [motion_blur];
         	this.y.value = [0.0075];
 		this.passes.value = [10];
 	}

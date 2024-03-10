@@ -60,7 +60,6 @@ class Screenshot {
 
 	public function save(path:String = "", name:String = '') {
 		getScreen();
-		if (ClientPrefs.enableGC) openfl.system.System.gc();
 
 		if(FileSystem.exists(target)) {
 			if(!FileSystem.isDirectory(target)) {
@@ -84,11 +83,9 @@ class Screenshot {
 		path = target + slash + fixFilename(path + name, ClientPrefs.lossless);
 
 		byteData = image.encode(ClientPrefs.lossless ? PNG : JPEG, ClientPrefs.quality);
-		if (ClientPrefs.enableGC) openfl.system.System.gc();
 		var f:FileOutput = sys.io.File.write(path, true);
 		if(byteData != null && f != null && FileSystem.exists(path)) {
 			f.write(byteData);
-			if (ClientPrefs.enableGC) openfl.system.System.gc();
 			f.close();
 			return true;
 		} else {

@@ -112,6 +112,7 @@ typedef PreloadedChartNote = {
 	hitCausesMiss:Null<Bool>,
 	wasHit:Bool,
 	multSpeed:Float,
+	wasSpawned:Bool
 }
 
 class PlayState extends MusicBeatState
@@ -233,8 +234,6 @@ class PlayState extends MusicBeatState
 	var tankmanAscend:Bool = false; // funni (2021 nostalgia oh my god)
 	public var isEkSong:Bool = false; //we'll use this so that the game doesn't load all notes twice?
 	public var usingEkFile:Bool = false; //we'll also use this so that the game doesn't load all notes twice?
-
-	public var memoryOver6GB:Bool = false; //For Rendering Mode
 
 	public var notes:NoteGroup;
 	public var sustainNotes:FlxTypedGroup<Note>;
@@ -603,7 +602,6 @@ class PlayState extends MusicBeatState
 
 	override public function create()
 	{
-		if (Main.getMemoryAmount() > Math.pow(2, 32) * 1.5) memoryOver6GB = true;
 		//Stops playing on a height that isn't divisible by 2
 		if (ClientPrefs.ffmpegMode && ClientPrefs.resolution != null) {
 				var resolutionValue = cast(ClientPrefs.resolution, String);
@@ -3566,7 +3564,7 @@ class PlayState extends MusicBeatState
 			secretsong.cameras = [camGame];
 			add(secretsong);
 		}
-		if (ClientPrefs.middleScroll || ClientPrefs.mobileMidScroll)
+		if (ClientPrefs.middleScroll)
 		{
 			laneunderlayOpponent.alpha = 0;
 			laneunderlay.screenCenter(X);
@@ -3698,18 +3696,15 @@ class PlayState extends MusicBeatState
 				}
 
 				for (group in [notes, sustainNotes]) group.forEachAlive(function(note:Note) {
-					if(ClientPrefs.opponentStrums || !ClientPrefs.opponentStrums && ClientPrefs.mobileMidScroll || ClientPrefs.middleScroll || !note.mustPress)
+					if(ClientPrefs.opponentStrums || !ClientPrefs.opponentStrums || ClientPrefs.middleScroll || !note.mustPress)
 					{
 							note.alpha *= 0.35;
 					}
-					if(ClientPrefs.opponentStrums || !ClientPrefs.opponentStrums && ClientPrefs.mobileMidScroll || note.mustPress)
+					if(ClientPrefs.opponentStrums || !ClientPrefs.opponentStrums || note.mustPress)
 					{
 						note.copyAlpha = false;
 						note.alpha = note.multAlpha;
 						if(ClientPrefs.middleScroll && !note.mustPress) {
-							note.alpha *= 0.35;
-						}
-						if(ClientPrefs.mobileMidScroll && !note.mustPress) {
 							note.alpha *= 0.35;
 						}
 					}
@@ -3978,7 +3973,7 @@ class PlayState extends MusicBeatState
 				playbackRate = ting; //why cant i just tween a variable
 
 			if (ClientPrefs.songLoading) FlxG.sound.music.time = Conductor.songPosition;
-			if (ClientPrefs.songLoading && !ClientPrefs.noSyncing && !ffmpegMode) resyncVocals();
+			if (ClientPrefs.songLoading && !ffmpegMode) resyncVocals();
 		}});
 	}
 
@@ -4149,7 +4144,8 @@ class PlayState extends MusicBeatState
 						hitHealth: 0.023,
 						missHealth: 0.0475,
 						wasHit: false,
-						multSpeed: 1
+						multSpeed: 1,
+						wasSpawned: false
 					};
 		
 					if (!noteTypeMap.exists(swagNote.noteType)) {
@@ -4184,7 +4180,8 @@ class PlayState extends MusicBeatState
 								hitHealth: 0.023,
 								missHealth: 0.0475,
 								wasHit: false,
-								multSpeed: 1
+								multSpeed: 1,
+								wasSpawned: false
 							};
 							unspawnNotes.push(sustainNote);
 							//Sys.sleep(0.0001);
@@ -4210,7 +4207,8 @@ class PlayState extends MusicBeatState
 								hitHealth: 0.023,
 								missHealth: 0.0475,
 								wasHit: false,
-								multSpeed: 1
+								multSpeed: 1,
+								wasSpawned: false
 							};
 							unspawnNotes.push(jackNote);
 							//Sys.sleep(0.0001);
@@ -4397,7 +4395,7 @@ class PlayState extends MusicBeatState
 
 			var noteSkinExists:Bool = FileSystem.exists("assets/shared/images/noteskins/" + (player == 0 ? dadNoteskin : bfNoteskin)) || FileSystem.exists(Paths.modsImages("noteskins/" + (player == 0 ? dadNoteskin : bfNoteskin)));
 
-			var babyArrow:StrumNote = new StrumNote(ClientPrefs.middleScroll || ClientPrefs.mobileMidScroll ? STRUM_X_MIDDLESCROLL : STRUM_X, strumLine.y, i, player);
+			var babyArrow:StrumNote = new StrumNote(ClientPrefs.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X, strumLine.y, i, player);
 			babyArrow.downScroll = ClientPrefs.downScroll;
 			if (noteSkinExists) babyArrow.texture = "noteskins/" + (player == 0 ? dad.noteskin : boyfriend.noteskin);
 			if (!isStoryMode && !skipArrowStartTween)
@@ -4413,9 +4411,8 @@ class PlayState extends MusicBeatState
 
 			if (player == 1)
 			{
-				if (!opponentChart || opponentChart && ClientPrefs.middleScroll || opponentChart && ClientPrefs.mobileMidScroll || !opponentChart && ClientPrefs.mobileMidScroll) playerStrums.add(babyArrow);
-			else if (ClientPrefs.mobileMidScroll) insert(members.indexOf(playerStrums), babyArrow);
-			else opponentStrums.add(babyArrow);
+				if (!opponentChart || opponentChart && ClientPrefs.middleScroll) playerStrums.add(babyArrow);
+				else opponentStrums.add(babyArrow);
 			}
 			else
 			{
@@ -4426,8 +4423,7 @@ class PlayState extends MusicBeatState
 						babyArrow.x += FlxG.width / 2 + 25;
 					}
 				}
-				if (!opponentChart || opponentChart && ClientPrefs.mobileMidScroll || opponentChart && ClientPrefs.mobileMidScroll || !opponentChart && ClientPrefs.mobileMidScroll) opponentStrums.add(babyArrow);
-			else if (ClientPrefs.mobileMidScroll) insert(members.indexOf(playerStrums), babyArrow);
+				if (!opponentChart || opponentChart && ClientPrefs.middleScroll) opponentStrums.add(babyArrow);
 				else playerStrums.add(babyArrow);
 			}
 
@@ -4483,7 +4479,7 @@ class PlayState extends MusicBeatState
 	{
 		if (paused)
 		{
-			if (FlxG.sound.music != null && !startingSong && !ClientPrefs.noSyncing && !ffmpegMode)
+			if (FlxG.sound.music != null && !startingSong && !ffmpegMode)
 			{
 				resyncVocals();
 			}
@@ -4882,7 +4878,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 	oppNotesToRemoveCount = 0;
 
 	for (i in 0...oppNotesHitDateArray.length) {
-		if (!Math.isNaN(notesHitDateArray[i]) && (oppNotesHitDateArray[i] + (ClientPrefs.npsWithSpeed ? 1000 / playbackRate : 1000) * npsSpeedMult * npsSpeedMult < Conductor.songPosition)) {
+		if (!Math.isNaN(notesHitDateArray[i]) && (oppNotesHitDateArray[i] + 1000 * npsSpeedMult < Conductor.songPosition)) {
 			oppNotesToRemoveCount++;
 		}
 	}
@@ -5346,7 +5342,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 					if(!isPixelStage)
 					{
-						if (ClientPrefs.noteColorStyle == 'Quant-Based' && ClientPrefs.enableColorShader && notes.members[Std.int(notes.length-1)] != null && dunceNote.noteData == notes.members[Std.int(notes.length-1)].noteData)
+						if (ClientPrefs.noteColorStyle == 'Quant-Based' && ClientPrefs.enableColorShader && notes.members[Std.int(notes.length-1)] != null && dunceNote.mustPress == notes.members[Std.int(notes.length-1)].mustPress)
 						{
 							dunceNote.colorSwap.hue = notes.members[Std.int(notes.length-1)].colorSwap.hue;
 							dunceNote.colorSwap.saturation = notes.members[Std.int(notes.length-1)].colorSwap.saturation;
@@ -5368,6 +5364,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				dunceNote.scrollFactor.set();
 
 					dunceNote.strum = unspawnNotes[notesAddedCount].strum;
+					unspawnNotes[notesAddedCount].wasSpawned = true;
 					if (ClientPrefs.noteColorStyle == 'Char-Based') dunceNote.updateRGBColors();
 				if (!ClientPrefs.useOldNoteSorting) {
 					(dunceNote.isSustainNote ? sustainNotes : notes).insert(0, dunceNote);
@@ -5519,15 +5516,13 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				{
 					unspawnNotes = unspawnNotesCopy.copy();
 					eventNotes = eventNotesCopy.copy();
-					if (!ClientPrefs.showNotes)
-					{
 						var noteIndex:Int = 0;
 						while (unspawnNotes.length > 0 && unspawnNotes[noteIndex] != null)
 						{
-							unspawnNotes[noteIndex].wasHit = false;
+							if (ClientPrefs.showNotes) unspawnNotes[noteIndex].wasSpawned = false;
+								else unspawnNotes[noteIndex].wasHit = false;
 							noteIndex++;
 						}
-					}
 				}
 				SONG.song.toLowerCase() != 'anti-cheat-song' ? loopSongLol() : loopCallback(0);
 			}
@@ -5545,9 +5540,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		{
 			var filename = CoolUtil.zeroFill(frameCaptured, 7);
 			capture.save(Paths.formatToSongPath(SONG.song) + #if linux '/' #else '\\' #end, filename);
-			#if windows //linux and mac should have good pcs iirc
-				if (!memoryOver6GB) openfl.system.System.gc();
-			#end
+			if (ClientPrefs.renderGCRate > 0 && (frameCaptured / targetFPS) % ClientPrefs.renderGCRate == 0) openfl.system.System.gc();
 		}
 		frameCaptured++;
 
@@ -8506,7 +8499,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			}
 		}
 		final gamerValue = 20 * playbackRate;
-		if (!ffmpegMode && !ClientPrefs.noSyncing && ClientPrefs.songLoading && playbackRate < 256) //much better resync code, doesn't just resync every step!!
+		if (!ffmpegMode && ClientPrefs.songLoading && playbackRate < 256) //much better resync code, doesn't just resync every step!!
 		{
 			if (FlxG.sound.music.time > Conductor.songPosition + gamerValue
 				|| FlxG.sound.music.time < Conductor.songPosition - gamerValue
@@ -9063,7 +9056,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 		final hittingStuff = (!ClientPrefs.lessBotLag ? 'Combo (Max): $formattedCombo ($formattedMaxCombo)\n' : '') + 'Hits: ' + (!ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(totalNotesPlayed, false) : compactTotalPlays) + ' / ' + FlxStringUtil.formatMoney(totalNotes, false) + ' (' + FlxMath.roundDecimal((totalNotesPlayed/totalNotes) * 100, 2) + '%)';
 		final ratingCountString = (!cpuControlled || cpuControlled && !ClientPrefs.lessBotLag ? '\n' + (!ClientPrefs.noMarvJudge ? judgeCountStrings[0] + '!!!: $perfects \n' : '') + judgeCountStrings[1] + '!!: $sicks \n' + judgeCountStrings[2] + '!: $goods \n' + judgeCountStrings[3] + ': $bads \n' + judgeCountStrings[4] + ': $shits \n' + judgeCountStrings[5] + ': $formattedSongMisses ' : '');
-		final comboMultString = (ClientPrefs.comboScoreEffect ? '\nScore Multiplier: $(comboMultiplier)x' : '');
+		final comboMultString = (ClientPrefs.comboScoreEffect ? '\nScore Multiplier: ' + comboMultiplier + 'x' : '');
 		judgementCounter.text = hittingStuff + ratingCountString + comboMultString;
 		judgementCounter.text += (ClientPrefs.showNPS ? '\nNPS (Max): ' + formattedNPS + ' (' + formattedMaxNPS + ')' : '');
 		if (ClientPrefs.opponentRateCount) judgementCounter.text += '\n\nOpponent Hits: ' + formattedEnemyHits + ' / ' + FlxStringUtil.formatMoney(opponentNoteTotal, false) + ' (' + FlxMath.roundDecimal((enemyHits / opponentNoteTotal) * 100, 2) + '%)' + (ClientPrefs.showNPS ? '\nOpponent NPS (Max): ' + formattedOppNPS + ' (' + formattedMaxOppNPS + ')' : '');

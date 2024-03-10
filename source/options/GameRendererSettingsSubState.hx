@@ -87,6 +87,20 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		option.scrollSpeed = 30;
 		option.decimals = 0;
 
+		var option:Option = new Option('Garbage Collection Rate',
+			"After how many seconds rendered should a garbage collection be performed?\nIf it's set to 0, the game will not garbage collect at all.",
+			'renderGCRate',
+			'float',
+			5.0);
+		addOption(option);
+
+		option.minValue = 1.0;
+		option.maxValue = 60.0;
+		option.scrollSpeed = 3;
+		option.changeValue = 0.1;
+		option.decimals = 1;
+		option.displayFormat = '%vs';
+
        		var option:Option = new Option('No Screenshot',
 			"If checked, Skip taking of screenshot.\nIt's a function for debug.",
 			'noCapture',
