@@ -27,6 +27,14 @@ The engine:
 
 (and possibly more stuff that will be listed here...)
 
+## FAQ
+
+Q: Can I use this engine for my mod(s)?
+A: Yes, you can! just be sure to credit me (@JordanSantiago on YouTube) and give a link to this page. or [the link to download the latest release.](https://github.com/JordanSantiagoYT/FNF-PsychEngine-NoBotplayLag/releases/latest)
+
+Q: How do I (change the background, add characters, etc.)?
+A: You do it here the same way you'd do it in Psych Engine.
+
 ## Installation:
 You must have [the most up-to-date version of Haxe](https://haxe.org/download/), seriously, stop using 4.1.5, it misses some stuff.
 
