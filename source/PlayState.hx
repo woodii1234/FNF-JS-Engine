@@ -470,6 +470,7 @@ class PlayState extends MusicBeatState
 	public var singDurMult:Int = 1;
 
 	public var disableCoolHealthTween:Bool = false;
+	public var iconsShouldGoUp:Bool = false;
 
 	var tankWatchtower:BGSprite;
 	var tankGround:BGSprite;
@@ -3926,6 +3927,7 @@ class PlayState extends MusicBeatState
 
 		if (!disableCoolHealthTween && !ClientPrefs.hideHud && !ClientPrefs.showcaseMode)
 		{
+			iconsShouldGoUp = true;
 			var renderedTxtY = -70;
 			if (ClientPrefs.downScroll) renderedTxtY = 70;
 			if (ClientPrefs.hudType == 'VS Impostor') renderedTxtY = (ClientPrefs.downScroll ? 70 : -100);
@@ -3944,7 +3946,7 @@ class PlayState extends MusicBeatState
 				yTweens = [0, 4, scoreTxtY, -75, -75, renderedTxtY, -55];	
 			}
 			for (i in 0...healthBarElements.length)
-				if (healthBarElements[i] != null && i < yTweens.length) FlxTween.tween(healthBarElements[i], {y: (FlxG.height * (ClientPrefs.downScroll ? 0.11 : 0.89)) + yTweens[i]}, 1, {ease: FlxEase.expoOut});
+				if (healthBarElements[i] != null && i < yTweens.length) FlxTween.tween(healthBarElements[i], {y: (FlxG.height * (ClientPrefs.downScroll ? 0.11 : 0.89)) + yTweens[i]}, 1, {ease: FlxEase.expoOut, onComplete: function(tween:FlxTween) {iconsShouldGoUp = false;}});
 		}
 
 		switch(curStage)
@@ -4670,6 +4672,8 @@ class PlayState extends MusicBeatState
 			if (ClientPrefs.showRendered)
 			renderedTxt.text = 'Rendered Notes: ' + FlxStringUtil.formatMoney(notes.length, false);
 
+		if (iconsShouldGoUp) iconP1.y = iconP2.y = healthBarBG.y - 75;
+
 		callOnLuas('onUpdate', [elapsed]);
 
 		if (sickOnly && (goods > 0 || bads > 0 || shits > 0 || songMisses > 0))
@@ -5181,6 +5185,11 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 			iconP1.x = 0 + healthBar.x + (healthBar.width * percent) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
 			iconP2.x = 0 + healthBar.x + (healthBar.width * percent) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
+		}
+		else //mb forgot to include this
+		{
+			iconP1.x = 0 + healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
+			iconP2.x = 0 + healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
 		}
 
 		if (health > maxHealth)
