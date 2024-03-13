@@ -272,6 +272,13 @@ class VisualsUISubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
+		var option:Option = new Option('No Icon Bop Limiter',
+			'Another comedic option that is hilarious when turned on.\nWhen enabled, disables the Icon Bop limiter which..\nleads to some interesting visuals when spam happens.',
+			'noBopLimit',
+			'bool',
+			false);
+		addOption(option);
+
 		var option:Option = new Option('Denpa Engine Health Bug', //ill remove this at the request of AT - Jordan Santiago
 			'If checked, well.. replicates the health drain bug in Denpa Engine.',
 			'denpaDrainBug',

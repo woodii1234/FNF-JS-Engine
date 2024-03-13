@@ -2704,7 +2704,7 @@ class ChartingState extends MusicBeatState
 		vocals.pitch = playbackSpeed;
 
 		bpmTxt.text =
-		FlxStringUtil.formatTime(Conductor.songPosition / 1000, true) + ' / ' + FlxStringUtil.formatTime(FlxG.sound.music.length / 1000, true) +
+		CoolUtil.formatTime(Conductor.songPosition, 2) + ' / ' + CoolUtil.formatTime(FlxG.sound.music.length, 2) +
 		"\nSection: " + curSec +
 		"\n\nBeat: " + Std.string(curDecBeat).substring(0,4) +
 		"\nStep: " + curStep +

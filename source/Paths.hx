@@ -1,8 +1,11 @@
 package;
 
 import flixel.graphics.frames.FlxAtlasFrames;
+import flixel.graphics.frames.FlxFramesCollection;
 import flixel.graphics.FlxGraphic;
 import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.animation.FlxAnimationController;
 import openfl.display.BitmapData;
 import openfl.display3D.textures.RectangleTexture;
 import openfl.utils.AssetType;
@@ -41,6 +44,9 @@ class Paths
 	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
 	inline public static var VIDEO_EXT = "mp4";
 
+	private static var noteFrames:FlxFramesCollection;
+	private static var noteAnimation:FlxAnimationController;
+
 	#if MODS_ALLOWED
 	public static var ignoreModFolders:Array<String> = [
 		'characters',
@@ -60,6 +66,29 @@ class Paths
 		'achievements'
 	];
 	#end
+
+	//Function that initializes the first note. This way, we can recycle the notes
+	public static function initNote(keys:Int = 4, noteSkin:String = 'NOTE_assets')
+	{
+		noteFrames = getSparrowAtlas(noteSkin.length > 1 ? noteSkin : 'NOTE_assets');
+
+		// Do this to be able to just copy over the note animations and not reallocate it
+
+		var spr:FlxSprite = new FlxSprite();
+		spr.frames = noteFrames;
+		noteAnimation = new FlxAnimationController(spr);
+
+		// Use a for loop for adding all of the animations in the note spritesheet, otherwise it won't find the animations for the next recycle
+		for (d in 0...keys)
+		{
+			noteAnimation.addByPrefix('purpleholdend', 'pruple end hold'); // ?????
+			noteAnimation.addByPrefix(Note.colArray[d] + 'holdend', Note.colArray[d] + ' hold end');
+			noteAnimation.addByPrefix(Note.colArray[d] + 'hold', Note.colArray[d] + ' hold piece');
+			noteAnimation.addByPrefix(Note.colArray[d] + 'Scroll', Note.colArray[d] + '0');
+		}
+		PlayState.instance.noteSkinFramesMap.set(noteSkin, getSparrowAtlas(noteSkin.length > 1 ? noteSkin : 'NOTE_assets'));
+		PlayState.instance.noteSkinAnimsMap.set(noteSkin, noteAnimation);
+	}
 
 	public static function excludeAsset(key:String) {
 		if (!dumpExclusions.contains(key))

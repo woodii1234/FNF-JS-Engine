@@ -49,6 +49,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var globalAntialiasing:Bool = true;
 	public static var dynamicColors:Bool = true;
 	public static var healthDisplay:Bool = false;
+	public static var noBopLimit:Bool = false;
 	public static var cameraPanning:Bool = true;
 	public static var colorQuants:Bool = false;
 	public static var panIntensity:Float = 1;
@@ -316,6 +317,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.showMaxRamUsage = showMaxRamUsage;
 		FlxG.save.data.playerLightStrum = playerLightStrum;
 		FlxG.save.data.healthDisplay = healthDisplay;
+		FlxG.save.data.noBopLimit = noBopLimit;
 		FlxG.save.data.wrongCameras = wrongCameras;
 		FlxG.save.data.denpaDrainBug = denpaDrainBug;
 		FlxG.save.data.ogHPColor = ogHPColor;
@@ -747,6 +749,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.healthDisplay != null) {
 			healthDisplay = FlxG.save.data.healthDisplay;
+		}
+		if(FlxG.save.data.noBopLimit != null) {
+			noBopLimit = FlxG.save.data.noBopLimit;
 		}
 		if(FlxG.save.data.lowQuality != null) {
 			lowQuality = FlxG.save.data.lowQuality;
