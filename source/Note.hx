@@ -37,7 +37,7 @@ typedef PreloadedChartNote = {
 	isSustainEnd:Bool,
 	sustainLength:Float,
 	sustainScale:Float,
-	parent:Note,
+	parent:PreloadedChartNote,
 	prevNote:Note,
 	strum:StrumNote,
 	hitHealth:Float,
@@ -126,8 +126,6 @@ class Note extends FlxSprite
 
 	public var strum:StrumNote = null;
 
-	public var instance:Note = null;
-
 	public var loadSprite:Bool = false;
 	public var inEkSong:Bool = false;
 
@@ -162,9 +160,9 @@ class Note extends FlxSprite
 		}
 		if (!inEditor && !PlayState.isPixelStage)
 		{
-			if (!PlayState.instance.noteSkinFramesMap.exists(value)) Paths.initNote(4, value);
-			frames = @:privateAccess PlayState.instance.noteSkinFramesMap.get(value);
-			animation.copyFrom(@:privateAccess PlayState.instance.noteSkinAnimsMap.get(value));
+			if (!Paths.noteSkinFramesMap.exists(value)) Paths.initNote(4, value);
+			frames = @:privateAccess Paths.noteSkinFramesMap.get(value);
+			animation.copyFrom(@:privateAccess Paths.noteSkinAnimsMap.get(value));
 			antialiasing = ClientPrefs.globalAntialiasing;
 			scale.set(0.7, 0.7);
 			updateHitbox();
@@ -173,11 +171,10 @@ class Note extends FlxSprite
 		return value;
 	}
 
-	public function quantCheck():Void 
+	public function quantCheck(timeToCheck:Float):Void 
 	{
-		if (colorSwap != null && ClientPrefs.noteColorStyle == 'Quant-Based' && !isSustainNote && (ClientPrefs.showNotes && ClientPrefs.enableColorShader))
+		if (colorSwap != null && ClientPrefs.noteColorStyle == 'Quant-Based' && (ClientPrefs.showNotes && ClientPrefs.enableColorShader))
 			{
-				var time = strumTime;
 				var theCurBPM = Conductor.bpm;
 				var stepCrochet:Float = (60 / theCurBPM) * 1000;
 				var latestBpmChangeIndex = -1;
@@ -185,18 +182,18 @@ class Note extends FlxSprite
 
 				for (i in 0...Conductor.bpmChangeMap.length) {
 					var bpmchange = Conductor.bpmChangeMap[i];
-					if (strumTime >= bpmchange.songTime) {
+					if (timeToCheck >= bpmchange.songTime) {
 						latestBpmChangeIndex = i; // Update index of latest change
 						latestBpmChange = bpmchange;
 					}
 				}
 				if (latestBpmChangeIndex >= 0) {
 					theCurBPM = latestBpmChange.bpm;
-					time -= latestBpmChange.songTime;
+					timeToCheck -= latestBpmChange.songTime;
 					stepCrochet = (60 / theCurBPM) * 1000;
 				}
 
-				var beat = Math.round((time / stepCrochet) * 48);
+				var beat = Math.round((timeToCheck / stepCrochet) * 48);
 				for (i in 0...beats.length)
 				{
 					if (beat % (192 / beats[i]) == 0)
@@ -348,36 +345,24 @@ class Note extends FlxSprite
 		return value;
 	}
 
-	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?noteskinToLoad:String, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?loadSprite:Bool = true)
+	public function new(?noteskinToLoad:String, ?inEditor:Bool = false, ?loadSprite:Bool = true)
 	{
 		super();
-
-		instance = this;
 
 		if (prevNote == null)
 			prevNote = this;
 
 		this.loadSprite = loadSprite;
 		if (PlayState.instance != null && PlayState.instance.isEkSong) inEkSong = true;
-
-		this.prevNote = prevNote;
-		isSustainNote = sustainNote;
 		this.inEditor = inEditor;
 
-		x += (ClientPrefs.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X) + 50;
-		// MAKE SURE ITS DEFINITELY OFF SCREEN?
 		y -= 2000;
-		this.strumTime = strumTime;
-		if(!inEditor) this.strumTime += ClientPrefs.noteOffset;
-		var noteskin:String = noteskinToLoad;
-
-		this.noteData = noteData;
 
 		if(noteData > -1) {
 			if (ClientPrefs.showNotes && loadSprite)
 			{
-			texture = ''; 
-			if (noteskin != null && noteskin != '') texture = "noteskins/" + noteskin;
+			texture = 'NOTE_assets'; 
+			if (noteskinToLoad.length > 1) texture = "noteskins/" + noteskinToLoad;
 			if(ClientPrefs.noteStyleThing == 'VS Nonsense V2') {
 				texture = 'Nonsense_NOTE_assets';
 			}
@@ -434,11 +419,6 @@ class Note extends FlxSprite
 				}
 			}
 			}
-			x += swagWidth * (noteData);
-			if(!isSustainNote && noteData > -1 && noteData < 4) { //Doing this 'if' check to fix the warnings on Senpai songs
-				final animToPlay:String = colArray[noteData % 4];
-				animation.play(animToPlay + 'Scroll');
-			}
 		}
 
 		if(prevNote!=null)
@@ -457,65 +437,6 @@ class Note extends FlxSprite
 			default:
 				missHealth = 0.0475;
 		}
-
-		if (isSustainNote && prevNote != null)
-		{
-			alpha = 0.6;
-			multAlpha = 0.6;
-			hitsoundDisabled = true;
-			flipY = ClientPrefs.downScroll;
-			prevNoteIsSustainNote = prevNote.isSustainNote;
-
-			offsetX += width / 2;
-			copyAngle = false;
-
-			animation.play(colArray[noteData % 4] + 'holdend');
-			if (ClientPrefs.showNotes)
-			{
-				if (ClientPrefs.noteColorStyle == 'Quant-Based' && ClientPrefs.enableColorShader)
-				{
-				colorSwap.hue = prevNote.colorSwap.hue;
-				colorSwap.saturation = prevNote.colorSwap.saturation;
-				colorSwap.brightness = prevNote.colorSwap.brightness;
-				}
-
-				updateHitbox();
-			}
-
-			offsetX -= width / 2;
-
-			if (PlayState.isPixelStage)
-				offsetX += 30;
-
-			if (prevNote.isSustainNote)
-			{
-				prevNote.animation.play(colArray[prevNote.noteData % 4] + 'hold');
-
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05;
-				if(PlayState.instance != null)
-				{
-					prevNote.scale.y *= PlayState.instance.songSpeed;
-				}
-
-				if(PlayState.isPixelStage) {
-					prevNote.scale.y *= 1.19;
-					prevNote.scale.y *= (6 / height); //Auto adjust note size
-				}
-				prevNote.updateHitbox();
-				// prevNote.setGraphicSize();
-			}
-
-			if(PlayState.isPixelStage) {
-				scale.y *= PlayState.daPixelZoom;
-				updateHitbox();
-			}
-		} else if(!isSustainNote) {
-			earlyHitMult = 1;
-			centerOffsets();
-			centerOrigin();
-		}
-		x += offsetX;
-		if (ClientPrefs.noteColorStyle == 'Quant-Based' && ClientPrefs.showNotes && ClientPrefs.enableColorShader) quantCheck();
 	}
 
 	var lastNoteOffsetXForPixelAutoAdjusting:Float = 0;
@@ -695,7 +616,7 @@ class Note extends FlxSprite
 		{
 			offsetX = SUSTAIN_NOTE_OFFSET_THRESHOLD;
 			flipY = ClientPrefs.downScroll;
-			scale.set(0.7, animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? 1 : Conductor.stepCrochet * 0.0105 * (PlayState.instance.songSpeed * multSpeed));
+			scale.set(0.7, animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? 1 : Conductor.stepCrochet * 0.0105 * (songSpeed * multSpeed));
 			updateHitbox();
 		}
 
@@ -780,6 +701,7 @@ class Note extends FlxSprite
 		wasGoodHit = hitByOpponent = tooLate = false; // Don't make an update call of this for the note group
 
 		strumTime = chartNoteData.strumTime;
+		if(!inEditor) strumTime += ClientPrefs.noteOffset;
 		noteData = Std.int(chartNoteData.noteData % 4);
 		noteType = chartNoteData.noteType;
 		animSuffix = chartNoteData.animSuffix;
@@ -801,11 +723,11 @@ class Note extends FlxSprite
 		animation.play(colArray[noteData % 4] + 'Scroll');
 		if (isSustainNote) animation.play(colArray[noteData % 4] + (chartNoteData.isSustainEnd ? 'holdend' : 'hold'));
 
-		if (ClientPrefs.noteColorStyle == 'Quant-Based' && ClientPrefs.showNotes && ClientPrefs.enableColorShader) quantCheck();
-		if (ClientPrefs.noteColorStyle == 'Char-Based') updateRGBColors();
-		if (ClientPrefs.noteColorStyle == 'Rainbow')
+		if (ClientPrefs.showNotes && ClientPrefs.enableColorShader)
 		{
-			colorSwap.hue = ((strumTime / 5000 * 360) / 360) % 1;
+			if (ClientPrefs.noteColorStyle == 'Quant-Based') quantCheck(isSustainNote ? chartNoteData.parent.strumTime : chartNoteData.strumTime);
+			if (ClientPrefs.noteColorStyle == 'Char-Based') updateRGBColors();
+			if (ClientPrefs.noteColorStyle == 'Rainbow') colorSwap.hue = ((strumTime / 5000 * 360) / 360) % 1;
 		}
 		if (isSustainNote) correctionOffset = ClientPrefs.downScroll ? 0 : 55;
 

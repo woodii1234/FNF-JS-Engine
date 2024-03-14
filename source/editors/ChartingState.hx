@@ -2290,8 +2290,11 @@ class ChartingState extends MusicBeatState
 			if (FlxG.keys.justPressed.ESCAPE)
 			{
 				autosaveSong();
+				FlxG.sound.music.pause();
+				vocals.pause();
 				LoadingState.loadAndSwitchState(() -> new editors.EditorPlayState(sectionStartTime()));
 				if (idleMusic != null && idleMusic.music != null) idleMusic.destroy();
+				FlxG.sound.music.onComplete = null; //So that it doesn't crash when you reach the end
 			}
 			if (FlxG.keys.justPressed.ENTER)
 			{
@@ -3492,8 +3495,11 @@ class ChartingState extends MusicBeatState
 		var daStrumTime = i[0];
 		var daSus:Dynamic = i[2];
 
-		var note:Note = new Note(daStrumTime, daNoteInfo % 4, null, null, null, false, true);
+		var note:Note = new Note('', false, true);
+		note.strumTime = daStrumTime;
+		note.noteData = daNoteInfo % 4;
 		if(daSus != null) { //Common note
+			note.animation.play(Note.colArray[daNoteInfo % 4] + 'Scroll');
 			if(!Std.isOfType(i[3], String)) //Convert old note type to new note type format
 			{
 				i[3] = noteTypeIntMap.get(i[3]);

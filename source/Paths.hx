@@ -47,6 +47,9 @@ class Paths
 	private static var noteFrames:FlxFramesCollection;
 	private static var noteAnimation:FlxAnimationController;
 
+	public static var noteSkinFramesMap:Map<String, FlxFramesCollection> = new Map();
+	public static var noteSkinAnimsMap:Map<String, FlxAnimationController> = new Map();
+
 	#if MODS_ALLOWED
 	public static var ignoreModFolders:Array<String> = [
 		'characters',
@@ -86,8 +89,8 @@ class Paths
 			noteAnimation.addByPrefix(Note.colArray[d] + 'hold', Note.colArray[d] + ' hold piece');
 			noteAnimation.addByPrefix(Note.colArray[d] + 'Scroll', Note.colArray[d] + '0');
 		}
-		PlayState.instance.noteSkinFramesMap.set(noteSkin, getSparrowAtlas(noteSkin.length > 1 ? noteSkin : 'NOTE_assets'));
-		PlayState.instance.noteSkinAnimsMap.set(noteSkin, noteAnimation);
+		noteSkinFramesMap.set(noteSkin, getSparrowAtlas(noteSkin.length > 1 ? noteSkin : 'NOTE_assets'));
+		noteSkinAnimsMap.set(noteSkin, noteAnimation);
 	}
 
 	public static function excludeAsset(key:String) {
