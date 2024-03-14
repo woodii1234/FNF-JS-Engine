@@ -7765,6 +7765,13 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 						}
 					}
 				}
+
+				if ((!note.gfNote ? !opponentChart ? boyfriend : dad : gf).shakeScreen)
+				{
+					final char:Character = !note.gfNote ? !opponentChart ? boyfriend : dad : gf;
+					camGame.shake(char.shakeIntensity, char.shakeDuration / playbackRate);
+					camHUD.shake(char.shakeIntensity / 2, char.shakeDuration / playbackRate);
+				}
 				note.wasGoodHit = true;
 				if (ClientPrefs.songLoading && !ffmpegMode) vocals.volume = 1;
 
@@ -8012,12 +8019,18 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			}
 			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
 			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
-		   		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
+		   	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
+
 			if (shouldDrainHealth && health > healthDrainFloor && !practiceMode || opponentDrain && practiceMode) {
 				health -= (opponentDrain ? daNote.hitHealth : healthDrainAmount) * hpDrainLevel * polyphony;
 				if (ClientPrefs.healthDisplay && !ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 			}
-
+			if ((!daNote.gfNote ? !opponentChart ? dad : boyfriend : gf).shakeScreen)
+			{
+				final char:Character = !daNote.gfNote ? !opponentChart ? dad : boyfriend : gf;
+				camGame.shake(char.shakeIntensity, char.shakeDuration / playbackRate);
+				camHUD.shake(char.shakeIntensity / 2, char.shakeDuration / playbackRate);
+			}
 			if (ClientPrefs.denpaDrainBug) displayedHealth -= daNote.hitHealth * hpDrainLevel * polyphony;
 			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
 		   		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
@@ -8086,6 +8099,12 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					health -= (opponentDrain ? daNote.hitHealth : healthDrainAmount) * hpDrainLevel * polyphony;
 					if (ClientPrefs.healthDisplay && !ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 				}
+			}
+			if ((!daNote.gfNote ? !opponentChart ? dad : boyfriend : gf).shakeScreen)
+			{
+				final char:Character = !daNote.gfNote ? !opponentChart ? dad : boyfriend : gf;
+				camGame.shake(char.shakeIntensity, char.shakeDuration / playbackRate);
+				camHUD.shake(char.shakeIntensity / 2, char.shakeDuration / playbackRate);
 			}
 			if (ClientPrefs.songLoading && !ffmpegMode) vocals.volume = 1;
 		}

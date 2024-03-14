@@ -690,6 +690,10 @@ class CharacterEditorState extends MusicBeatState
 	var minimumHealthStepper:FlxUINumericStepper;
 	var drainAmountStepper:FlxUINumericStepper;
 	var healthDrainCheckBox:FlxUICheckBox;
+
+	var shakeIntensityStepper:FlxUINumericStepper;
+	var shakeDurationStepper:FlxUINumericStepper;
+	var shakeScreenBox:FlxUICheckBox;
 	function addMiscUI() {
 		var tab_group = new FlxUI(null, UI_box);
 		tab_group.name = "Misc";
@@ -701,17 +705,38 @@ class CharacterEditorState extends MusicBeatState
 			ghostChar.healthDrain = healthDrainCheckBox.checked;
 		};
 
-		minimumHealthStepper = new FlxUINumericStepper(healthDrainCheckBox.x + 80, healthDrainCheckBox.y, 0.05, char.drainFloor, -1, 2, 3);
+		minimumHealthStepper = new FlxUINumericStepper(healthDrainCheckBox.x + 80, healthDrainCheckBox.y, 0.01, char.drainFloor, -1, 2, 3);
 		minimumHealthStepper.name = 'minimumHealthStepper';
 
-		drainAmountStepper = new FlxUINumericStepper(minimumHealthStepper.x + 90, healthDrainCheckBox.y, 0.05, char.drainAmount, 0, 2, 3);
+		drainAmountStepper = new FlxUINumericStepper(minimumHealthStepper.x + 90, healthDrainCheckBox.y, 0.005, char.drainAmount, 0, 2, 3);
 		drainAmountStepper.name = 'drainAmountStepper';
+
+		shakeScreenBox = new FlxUICheckBox(healthDrainCheckBox.x, healthDrainCheckBox.y + 40, null, null, "Shake Screen", 50);
+		shakeScreenBox.checked = char.shakeScreen;
+		shakeScreenBox.callback = function() {
+			char.shakeScreen = shakeScreenBox.checked;
+			ghostChar.shakeScreen = shakeScreenBox.checked;
+		};
+
+		shakeIntensityStepper = new FlxUINumericStepper(shakeScreenBox.x + 80, shakeScreenBox.y, 0.0005, char.shakeIntensity, 0, 1, 4);
+		shakeIntensityStepper.name = 'shakeIntensityStepper';
+
+		shakeDurationStepper = new FlxUINumericStepper(shakeIntensityStepper.x + 90, shakeScreenBox.y, 0.01, char.shakeDuration, 0, 1, 4);
+		shakeDurationStepper.name = 'shakeDurationStepper';
 
 		tab_group.add(healthDrainCheckBox);
 		tab_group.add(minimumHealthStepper);
 		tab_group.add(drainAmountStepper);
+
+		tab_group.add(shakeScreenBox);
+		tab_group.add(shakeIntensityStepper);
+		tab_group.add(shakeDurationStepper);
+
 		tab_group.add(new FlxText(minimumHealthStepper.x, minimumHealthStepper.y - 18, 0, 'Minimum Health:'));
 		tab_group.add(new FlxText(drainAmountStepper.x, drainAmountStepper.y - 18, 0, 'Drain Amount:'));
+
+		tab_group.add(new FlxText(shakeIntensityStepper.x, shakeIntensityStepper.y - 18, 0, 'Shake Intensity:'));
+		tab_group.add(new FlxText(shakeDurationStepper.x, shakeDurationStepper.y - 18, 0, 'Shake Duration:'));
 
 		UI_characterbox.addGroup(tab_group);
 	}
@@ -935,6 +960,14 @@ class CharacterEditorState extends MusicBeatState
 			else if(sender == minimumHealthStepper)
 			{
 				char.drainFloor = minimumHealthStepper.value;
+			}
+			else if(sender == shakeIntensityStepper)
+			{
+				char.shakeIntensity = shakeIntensityStepper.value;
+			}
+			else if(sender == shakeDurationStepper)
+			{
+				char.shakeDuration = shakeDurationStepper.value;
 			}
 			else if(sender == healthColorStepperR)
 			{
@@ -1485,7 +1518,11 @@ class CharacterEditorState extends MusicBeatState
 
 			"health_drain": char.healthDrain,
 			"drain_amount": char.drainAmount,
-			"drain_floor": char.drainFloor
+			"drain_floor": char.drainFloor,
+
+			"shake_screen": char.shakeScreen,
+			"shake_intensity": char.shakeIntensity,
+			"shake_duration": char.shakeDuration
 		};
 
 		var data:String = Json.stringify(json, "\t");
