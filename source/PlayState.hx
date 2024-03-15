@@ -5105,19 +5105,19 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 
 		if (ClientPrefs.iconBounceType == 'Old Psych') {
-		iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, CoolUtil.boundTo(1 - (elapsed * 30 * playbackRate), 0, 1))));
-		iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, CoolUtil.boundTo(1 - (elapsed * 30 * playbackRate), 0, 1))));
+		iconP1.setGraphicSize(Std.int(FlxMath.lerp(iconP1.width / iconP1.scale.x, iconP1.width, CoolUtil.boundTo(1 - (elapsed * 30 * playbackRate), 0, 1))), Std.int(FlxMath.lerp(iconP1.height / iconP1.scale.y, iconP1.height, CoolUtil.boundTo(1 - (elapsed * 30 * playbackRate), 0, 1))));
+		iconP2.setGraphicSize(Std.int(FlxMath.lerp(iconP2.width / iconP2.scale.x, iconP2.width, CoolUtil.boundTo(1 - (elapsed * 30 * playbackRate), 0, 1))), Std.int(FlxMath.lerp(iconP2.height / iconP2.scale.y, iconP2.height, CoolUtil.boundTo(1 - (elapsed * 30 * playbackRate), 0, 1))));
 		}
 		if (ClientPrefs.iconBounceType == 'Strident Crisis') {
-		iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, 0.50 / playbackRate)));
+		iconP1.setGraphicSize(Std.int(FlxMath.lerp(iconP1.width / iconP1.scale.x, iconP1.width, 0.50 / playbackRate)), Std.int(FlxMath.lerp(iconP1.height / iconP1.scale.y, iconP1.height, 0.50 / playbackRate)));
 		iconP1.updateHitbox();
 
-		iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, 0.50 / playbackRate)));
+		iconP2.setGraphicSize(Std.int(FlxMath.lerp(iconP2.width / iconP2.scale.x, iconP2.width, 0.50 / playbackRate)), Std.int(FlxMath.lerp(iconP2.height / iconP2.scale.y, iconP1.height, 0.50 / playbackRate)));
 		iconP2.updateHitbox();
 		}
 		if (ClientPrefs.iconBounceType == 'Dave and Bambi') {
-		iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, 0.8 / playbackRate)),Std.int(FlxMath.lerp(150, iconP1.height, 0.8 / playbackRate)));
-		iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, 0.8 / playbackRate)),Std.int(FlxMath.lerp(150, iconP2.height, 0.8 / playbackRate)));
+		iconP1.setGraphicSize(Std.int(FlxMath.lerp(iconP1.width / iconP1.scale.x, iconP1.width, 0.8 / playbackRate)), Std.int(FlxMath.lerp(iconP1.height / iconP1.scale.y, iconP1.height, 0.8 / playbackRate)));
+		iconP2.setGraphicSize(Std.int(FlxMath.lerp(iconP2.width / iconP2.scale.x, iconP2.width, 0.8 / playbackRate)), Std.int(FlxMath.lerp(iconP2.height / iconP2.scale.y, iconP2.height, 0.8 / playbackRate)));
 		}
 		if (ClientPrefs.iconBounceType == 'Plank Engine') {
 		final funnyBeat = (Conductor.songPosition / 1000) * (Conductor.bpm / 60);
@@ -8816,8 +8816,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			}
 		}
 		if (ClientPrefs.iconBounceType == 'Old Psych') {
-		if (bopBF) iconP1.setGraphicSize(Std.int(iconP1.width + 30));
-		else iconP2.setGraphicSize(Std.int(iconP2.width + 30));
+		if (bopBF) iconP1.setGraphicSize(Std.int(iconP1.width + 30), Std.int(iconP1.height + 30));
+		else iconP2.setGraphicSize(Std.int(iconP2.width + 30), Std.int(iconP2.height + 30));
 		}
 		if (ClientPrefs.iconBounceType == 'Strident Crisis') {
 		final funny:Float = (healthBar.percent * 0.01) + 0.01;

@@ -712,7 +712,7 @@ class Note extends FlxSprite
 		gfNote = chartNoteData.gfNote;
 		isSustainNote = chartNoteData.isSustainNote;
 		sustainLength = chartNoteData.sustainLength;
-		if (chartNoteData.isSustainNote && chartNoteData.sustainScale != 1 && !chartNoteData.isSustainEnd) resizeByRatio(chartNoteData.sustainScale);
+		//if (chartNoteData.isSustainNote && chartNoteData.sustainScale != 1 && !chartNoteData.isSustainEnd) resizeByRatio(chartNoteData.sustainScale);
 
 		strum = chartNoteData.strum;
 		hitHealth = chartNoteData.hitHealth;
