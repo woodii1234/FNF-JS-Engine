@@ -320,7 +320,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			'hudType',
 			'string',
 			'VS Impostor',
-			['VS Impostor', 'Kade Engine', 'Tails Gets Trolled V4', 'Dave and Bambi', 'Doki Doki+', 'Psych Engine', 'Leather Engine', 'Box Funkin', "Mic'd Up", 'JS Engine']);
+			['VS Impostor', 'Kade Engine', 'Tails Gets Trolled V4', 'Dave and Bambi', 'Doki Doki+', 'Psych Engine', 'Leather Engine', 'JS Engine']);
 		addOption(option);
 
 		var option:Option = new Option('Strum Light Up Style:',
@@ -409,14 +409,6 @@ class VisualsUISubState extends BaseOptionsMenu
 		var option:Option = new Option('Use Wrong Popup Camera',
 			'If checked, the popups will use the game world camera instead of the HUD.',
 			'wrongCameras',
-			'bool',
-			false);
-		addOption(option);
-
-		var option:Option = new Option('Use Old Note Sorting',
-			'Basically, the notes are added at the beginning of the note groups\' members like vanilla' +
-			'\npsych engine instead of adding them at the end.\nIf you prefer psych\'s note sorting like on older versions of JS Engine, enable this.',
-			'useOldNoteSorting',
 			'bool',
 			false);
 		addOption(option);

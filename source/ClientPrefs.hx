@@ -108,7 +108,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var timebarShowSpeed:Bool = false;
 	public static var noteSpawnTime:Float = 1;
 	public static var dynamicSpawnTime:Bool = false;
-	public static var useOldNoteSorting:Bool = false;
 	public static var evenLessBotLag:Bool = false;
 	public static var showcaseMode:Bool = false;
 	public static var oppNoteAlpha:Float = 0.65;
@@ -343,7 +342,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.doubleGhostZoom = doubleGhostZoom;
 		FlxG.save.data.memLeaks = memLeaks;
 		FlxG.save.data.dynamicSpawnTime = dynamicSpawnTime;
-		FlxG.save.data.useOldNoteSorting = useOldNoteSorting;
 		FlxG.save.data.botLightStrum = botLightStrum;
 		FlxG.save.data.opponentLightStrum = opponentLightStrum;
 		FlxG.save.data.opponentRateCount = opponentRateCount;
@@ -695,9 +693,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.dynamicSpawnTime != null) {
 			dynamicSpawnTime = FlxG.save.data.dynamicSpawnTime;
-		}
-		if(FlxG.save.data.useOldNoteSorting != null) {
-			useOldNoteSorting = FlxG.save.data.useOldNoteSorting;
 		}
 		if(FlxG.save.data.evenLessBotLag != null) {
 			evenLessBotLag = FlxG.save.data.evenLessBotLag;

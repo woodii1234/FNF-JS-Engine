@@ -405,19 +405,19 @@ class Note extends FlxSprite
 					{
 						colorSwap.hue = ((strumTime / 5000 * 360) / 360) % 1;
 					}
-				if (ClientPrefs.noteColorStyle == 'Char-Based')
-				{
-					if (PlayState.instance != null) {
- 						if (!mustPress) !PlayState.opponentChart ? this.shader = new ColoredNoteShader(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2], false, 10) : this.shader = new ColoredNoteShader(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2], false, 10);
-						if (mustPress) {
-							!PlayState.opponentChart ? this.shader = new ColoredNoteShader(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2], false, 10) : this.shader = new ColoredNoteShader(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2], false, 10);
-						}
-						if (gfNote) {
-						if (PlayState.instance.gf != null) this.shader = new ColoredNoteShader(PlayState.instance.gf.healthColorArray[0], PlayState.instance.gf.healthColorArray[1], PlayState.instance.gf.healthColorArray[2], false, 10);
+					if (ClientPrefs.noteColorStyle == 'Char-Based')
+					{
+						if (PlayState.instance != null) {
+ 							if (!mustPress) !PlayState.opponentChart ? this.shader = new ColoredNoteShader(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2], false, 10) : this.shader = new ColoredNoteShader(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2], false, 10);
+							if (mustPress) {
+								!PlayState.opponentChart ? this.shader = new ColoredNoteShader(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2], false, 10) : this.shader = new ColoredNoteShader(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2], false, 10);
+							}
+							if (gfNote) {
+								if (PlayState.instance.gf != null) this.shader = new ColoredNoteShader(PlayState.instance.gf.healthColorArray[0], PlayState.instance.gf.healthColorArray[1], PlayState.instance.gf.healthColorArray[2], false, 10);
+							}
 						}
 					}
 				}
-			}
 			}
 		}
 
@@ -607,19 +607,22 @@ class Note extends FlxSprite
 		}
 	}
 
-	public static final SUSTAIN_NOTE_OFFSET_THRESHOLD:Float = 36.5;
-
 	public function followStrum(strum:StrumNote, fakeCrochet:Float, songSpeed:Float = 1):Void
 	{
-		// Sustain scaling for song speed (even if it's changed)
-		if (isSustainNote)
+		if (isSustainNote) 
 		{
-			offsetX = SUSTAIN_NOTE_OFFSET_THRESHOLD;
-			flipY = ClientPrefs.downScroll;
-			scale.set(0.7, animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? 1 : Conductor.stepCrochet * 0.0105 * (songSpeed * multSpeed));
+			
+			flipY = strum.downScroll;
+			if (ClientPrefs.noteStyleThing == 'Chip' || ClientPrefs.noteStyleThing == 'Future') scale.set(0.7, animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? 0.7 : Conductor.stepCrochet * 0.0105 * (0.58 * songSpeed / multSpeed));
+			else 
+			{
+				offsetX = 36.5;
+				scale.set(0.7, animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? 1 : Conductor.stepCrochet * 0.0105 * (songSpeed * multSpeed));
+			}
+
 			updateHitbox();
 		}
-
+			
 		distance = (0.45 * (Conductor.songPosition - strumTime) * songSpeed * multSpeed);
 		if (!strum.downScroll) distance *= -1;
 
@@ -712,7 +715,6 @@ class Note extends FlxSprite
 		gfNote = chartNoteData.gfNote;
 		isSustainNote = chartNoteData.isSustainNote;
 		sustainLength = chartNoteData.sustainLength;
-		//if (chartNoteData.isSustainNote && chartNoteData.sustainScale != 1 && !chartNoteData.isSustainEnd) resizeByRatio(chartNoteData.sustainScale);
 
 		strum = chartNoteData.strum;
 		hitHealth = chartNoteData.hitHealth;

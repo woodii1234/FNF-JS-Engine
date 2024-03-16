@@ -1989,100 +1989,6 @@ class PlayState extends MusicBeatState
 			scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
 			add(scoreTxt);
 		}
-		if (ClientPrefs.hudType == "Mic'd Up")
-		{
-			scoreTxt = new FlxText(healthBarBG.x - (healthBarBG.width / 2), healthBarBG.y - 26, 0, "", 20);
-			if (ClientPrefs.downScroll)
-				scoreTxt.y = healthBarBG.y + 18;
-			scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, RIGHT);
-			scoreTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-			scoreTxt.scrollFactor.set();
-			add(scoreTxt);
-			scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-
-			missTxt = new FlxText(scoreTxt.x, scoreTxt.y - 26, 0, "", 20);
-			if (ClientPrefs.downScroll)
-				missTxt.y = scoreTxt.y + 26;
-			missTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, RIGHT);
-			missTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-			missTxt.scrollFactor.set();
-			add(missTxt);
-			missTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-
-			accuracyTxt = new FlxText(missTxt.x, missTxt.y - 26, 0, "", 20);
-			if (ClientPrefs.downScroll)
-				accuracyTxt.y = missTxt.y + 26;
-			accuracyTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, RIGHT);
-			accuracyTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-			accuracyTxt.scrollFactor.set();
-			add(accuracyTxt);
-			accuracyTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-
-			comboTxt = new FlxText(scoreTxt.x, scoreTxt.y + 26, 0, "", 21);
-			if (ClientPrefs.downScroll)
-				comboTxt.y = scoreTxt.y - 26;
-			comboTxt.setFormat(Paths.font("vcr.ttf"), 21, FlxColor.WHITE, RIGHT);
-			comboTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-			comboTxt.scrollFactor.set();
-			add(comboTxt);
-			comboTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-
-			npsTxt = new FlxText(accuracyTxt.x, accuracyTxt.y - 46, 0, "", 20);
-			if (ClientPrefs.downScroll)
-				npsTxt.y = accuracyTxt.y + 46;
-			npsTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, RIGHT);
-			npsTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-			npsTxt.scrollFactor.set();
-			add(npsTxt);
-			npsTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-		}
-		if (ClientPrefs.hudType == 'Box Funkin')
-		{
-			scoreTxt = new FlxText(25, healthBarBG.y - 26, 0, "", 21);
-			if (ClientPrefs.downScroll)
-				scoreTxt.y = healthBarBG.y + 26;
-			scoreTxt.setFormat(Paths.font("MilkyNice.ttf"), 21, FlxColor.WHITE, RIGHT);
-			scoreTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-			scoreTxt.scrollFactor.set();
-			add(scoreTxt);
-			scoreTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-
-			missTxt = new FlxText(scoreTxt.x, scoreTxt.y - 26, 0, "", 21);
-			if (ClientPrefs.downScroll)
-				missTxt.y = scoreTxt.y + 26;
-			missTxt.setFormat(Paths.font("MilkyNice.ttf"), 21, FlxColor.WHITE, RIGHT);
-			missTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-			missTxt.scrollFactor.set();
-			add(missTxt);
-			missTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-
-			accuracyTxt = new FlxText(missTxt.x, missTxt.y - 26, 0, "", 21);
-			if (ClientPrefs.downScroll)
-				accuracyTxt.y = missTxt.y + 26;
-			accuracyTxt.setFormat(Paths.font("MilkyNice.ttf"), 21, FlxColor.WHITE, RIGHT);
-			accuracyTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-			accuracyTxt.scrollFactor.set();
-			add(accuracyTxt);
-			accuracyTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-
-			comboTxt = new FlxText(scoreTxt.x, scoreTxt.y + 26, 0, "", 21);
-			if (ClientPrefs.downScroll)
-				comboTxt.y = scoreTxt.y - 26;
-			comboTxt.setFormat(Paths.font("MilkyNice.ttf"), 21, FlxColor.WHITE, RIGHT);
-			comboTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-			comboTxt.scrollFactor.set();
-			add(comboTxt);
-			comboTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-
-			npsTxt = new FlxText(accuracyTxt.x, accuracyTxt.y - 46, 0, "", 21);
-			if (ClientPrefs.downScroll)
-				npsTxt.y = accuracyTxt.y + 46;
-			npsTxt.setFormat(Paths.font("MilkyNice.ttf"), 21, FlxColor.WHITE, RIGHT);
-			npsTxt.setBorderStyle(OUTLINE, 0xFF000000, 3, 1);
-			npsTxt.scrollFactor.set();
-			add(npsTxt);
-			npsTxt.visible = !ClientPrefs.hideHud || !ClientPrefs.showcaseMode;
-		}
 		if (ClientPrefs.hudType == 'Leather Engine')
 		{
 			scoreTxt = new FlxText(0, healthBarBG.y + 50, FlxG.width, "", 20);
@@ -2201,29 +2107,6 @@ class PlayState extends MusicBeatState
 				botplayTxt.setFormat(Paths.font("vcr.ttf"), 30, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 				botplayTxt.scrollFactor.set();
 				botplayTxt.borderSize = 1.5;
-				botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-				add(botplayTxt);
-				if (ClientPrefs.downScroll)
-					botplayTxt.y = timeBarBG.y - 78;
-			}
-			if (ClientPrefs.hudType == 'Box Funkin')
-			{
-				botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
-				botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-				botplayTxt.scrollFactor.set();
-				botplayTxt.borderSize = 1.25;
-				botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
-				add(botplayTxt);
-				if (ClientPrefs.downScroll)
-					botplayTxt.y = timeBarBG.y - 78;
-			}
-			if (ClientPrefs.hudType == "Mic'd Up")
-			{
-				botplayTxt = new FlxText((healthBarBG.width / 2), healthBar.y, 0, "AutoPlayCPU", 20);
-				botplayTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-				botplayTxt.scrollFactor.set();
-				botplayTxt.screenCenter(X);
-				botplayTxt.borderSize = 3;
 				botplayTxt.visible = cpuControlled && !ClientPrefs.showcaseMode;
 				add(botplayTxt);
 				if (ClientPrefs.downScroll)
@@ -5309,19 +5192,14 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 						if (ClientPrefs.doubleGhost && !dunceNote.isSustainNote)
 							{
 							dunceNote.row = Conductor.secsToRow(dunceNote.strumTime);
-							if(noteRows[dunceNote.mustPress?0:1][dunceNote.row]==null)
-								noteRows[dunceNote.mustPress?0:1][dunceNote.row]=[];
-							noteRows[dunceNote.mustPress ? 0 : 1][dunceNote.row].push(dunceNote);
+							if(noteRows[dunceNote.mustPress?0:1][dunceNote.row] == null)
+								noteRows[dunceNote.mustPress?0:1][dunceNote.row] = [];
+							if (noteRows[dunceNote.mustPress?0:1][dunceNote.row][0] == null) noteRows[dunceNote.mustPress ? 0 : 1][dunceNote.row].push(dunceNote);
 							}
 
 				dunceNote.scrollFactor.set();
 
 					unspawnNotes[notesAddedCount].wasSpawned = true;
-				if (!ClientPrefs.useOldNoteSorting) {
-					inline (dunceNote.isSustainNote ? sustainNotes : notes).insert(0, dunceNote);
-				} else {
-					inline (dunceNote.isSustainNote ? sustainNotes : notes).add(dunceNote);
-				}
 				callOnLuas('onSpawnNote', [notes.members.indexOf(dunceNote), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);
 				notesAddedCount++;
 			}
@@ -5354,7 +5232,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 						if (ClientPrefs.showNotes && daNote.exists)
 						{
 							inline daNote.followStrum((daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData], (60 / SONG.bpm) * 1000, songSpeed);
-							if(daNote.isSustainNote && daNote.strum != null && daNote.strum.sustainReduce) inline daNote.clipToStrumNote(daNote.strum);
+							if(daNote.isSustainNote && daNote.strum.sustainReduce) inline daNote.clipToStrumNote(daNote.strum);
 						}
 
 						if (!daNote.mustPress && !daNote.hitByOpponent && !daNote.ignoreNote && daNote.strumTime <= Conductor.songPosition)
