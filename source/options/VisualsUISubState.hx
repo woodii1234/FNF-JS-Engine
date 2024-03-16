@@ -31,11 +31,6 @@ using StringTools;
 
 class VisualsUISubState extends BaseOptionsMenu
 {
-
-	var noteOptionID:Int = -1;
-	var notes:FlxTypedGroup<StrumNote>;
-	var notesTween:Array<FlxTween> = [];
-	var noteY:Float = 90;
 	public function new()
 	{
 		title = 'Visuals and UI';

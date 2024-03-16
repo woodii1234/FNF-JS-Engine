@@ -288,11 +288,20 @@ class Paths
 		return file;
 	}
 	//Loads the Voices. Crucial for generateSong
-	inline static public function voices(song:String):Any
+	static public function voices(song:String, ?difficulty:String = ''):Any
 	{
 		#if html5
 		return 'songs:assets/songs/${formatToSongPath(song)}/Voices.$SOUND_EXT';
 		#else
+		if (difficulty != null)
+		{
+			var songKey:String = '${formatToSongPath(song)}/Voices-$difficulty';
+			if (FileSystem.exists(Paths.modFolders('songs/' + songKey + '.$SOUND_EXT')) || FileSystem.exists('assets/songs/' + songKey + '.$SOUND_EXT')) 
+			{
+				var voices = (ClientPrefs.progAudioLoad ? returnSound('songs', songKey) : returnSoundFull('songs', songKey));
+				return voices;
+			}
+		}
 		var songKey:String = '${formatToSongPath(song)}/Voices';
 		var voices = returnSound('songs', songKey);
 		if (!ClientPrefs.progAudioLoad) voices = returnSoundFull('songs', songKey);
@@ -300,11 +309,20 @@ class Paths
 		#end
 	}
 	//Loads the instrumental. Crucial for generateSong
-	inline static public function inst(song:String):Any
+	static public function inst(song:String, ?difficulty:String = ''):Any
 	{
 		#if html5
 		return 'songs:assets/songs/${formatToSongPath(song)}/Inst.$SOUND_EXT';
 		#else
+		if (difficulty != null)
+		{
+			var songKey:String = '${formatToSongPath(song)}/Inst-$difficulty';
+			if (FileSystem.exists(Paths.modFolders('songs/' + songKey + '.$SOUND_EXT')) || FileSystem.exists('assets/songs/' + songKey + '.$SOUND_EXT')) 
+			{
+				var inst = (ClientPrefs.progAudioLoad ? returnSound('songs', songKey) : returnSoundFull('songs', songKey));
+				return inst;
+			}
+		}
 		var songKey:String = '${formatToSongPath(song)}/Inst';
 		var inst = returnSound('songs', songKey);
 		if (!ClientPrefs.progAudioLoad) inst = returnSoundFull('songs', songKey);
@@ -312,34 +330,6 @@ class Paths
 		#end
 	}
 
-//Difficulty-specific Inst and Voices loading. Doesn't work so i've scrapped it for now but this was taken directly from Leather Engine
-	/*
-	static public function voices(song:String, ?difficulty:String)
-	{
-		if(difficulty != null)
-		{
-			if(Assets.exists('songs:assets/songs/${song.toLowerCase()}/Voices-$difficulty.$SOUND_EXT'))
-			{
-				return 'songs:assets/songs/${song.toLowerCase()}/Voices-$difficulty.$SOUND_EXT';
-			}
-		}
-
-		return 'songs:assets/songs/${song.toLowerCase()}/Voices.$SOUND_EXT';
-	}
-
-	static public function inst(song:String, ?difficulty:String)
-	{
-		if(difficulty != null)
-		{
-			if(Assets.exists('songs:assets/songs/${song.toLowerCase()}/Inst-$difficulty.$SOUND_EXT'))
-			{
-				return 'songs:assets/songs/${song.toLowerCase()}/Inst-$difficulty.$SOUND_EXT';
-			}
-		}
-		
-		return 'songs:assets/songs/${song.toLowerCase()}/Inst.$SOUND_EXT';
-	}
-	*/
 	//Loads images.
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
 	static public function image(key:String, ?library:String = null):FlxGraphic

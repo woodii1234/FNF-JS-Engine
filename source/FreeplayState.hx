@@ -40,8 +40,6 @@ class FreeplayState extends MusicBeatState
 	var curDifficulty:Int = -1;
 	private static var lastDifficultyName:String = '';
 
-	var searchHelperShits:Map<String, Array<Int>> = [];
-
 	var scoreBG:FlxSprite;
 	var scoreText:FlxText;
 	var searchText:FlxText;
@@ -65,7 +63,7 @@ class FreeplayState extends MusicBeatState
 	var colorTween:FlxTween;
 	var missingTextBG:FlxSprite;
 	var missingText:FlxText;
-	var iconInputText:FlxUIInputText;
+	var songSearchText:FlxUIInputText;
 
 	override function create()
 	{
@@ -227,14 +225,14 @@ class FreeplayState extends MusicBeatState
 		text.scrollFactor.set();
 		add(text);
 
-		iconInputText = new FlxUIInputText(0, scoreBG.y + scoreBG.height + 5, 500, '', 16);
-		iconInputText.x = FlxG.width - iconInputText.width;
-		add(iconInputText);
+		songSearchText = new FlxUIInputText(0, scoreBG.y + scoreBG.height + 5, 500, '', 16);
+		songSearchText.x = FlxG.width - songSearchText.width;
+		add(songSearchText);
 
-		var buttonTop:FlxButton = new FlxButton(0, iconInputText.y + iconInputText.height + 5, "", function() {
-			checkForSongsThatMatch(iconInputText.text);
+		var buttonTop:FlxButton = new FlxButton(0, songSearchText.y + songSearchText.height + 5, "", function() {
+			checkForSongsThatMatch(songSearchText.text);
 		});
-		buttonTop.setGraphicSize(Std.int(iconInputText.width), 50);
+		buttonTop.setGraphicSize(Std.int(songSearchText.width), 50);
 		buttonTop.updateHitbox();
 		buttonTop.label.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.BLACK, RIGHT);
 		buttonTop.x = FlxG.width - buttonTop.width;
@@ -426,7 +424,7 @@ class FreeplayState extends MusicBeatState
 		var shiftMult:Int = 1;
 		if (FlxG.keys.pressed.SHIFT) shiftMult = 3;
 
-		if (!iconInputText.hasFocus)
+		if (!songSearchText.hasFocus)
 		{
 		if(songs.length > 1)
 		{
@@ -502,12 +500,12 @@ class FreeplayState extends MusicBeatState
 				}
 				
 				if (PlayState.SONG.needsVoices)
-					vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song));
+					vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song, CoolUtil.difficulties[curDifficulty].toLowerCase()));
 				else
 					vocals = new FlxSound();
 
 				FlxG.sound.list.add(vocals);
-				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 0.7);
+				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song, CoolUtil.difficulties[curDifficulty].toLowerCase()), 0.7);
 				vocals.play();
 				vocals.persist = true;
 				vocals.looped = true;
@@ -552,7 +550,7 @@ class FreeplayState extends MusicBeatState
 			#if MODS_ALLOWED
 			if(instPlaying != curSelected)
 			{
-				if(sys.FileSystem.exists(Paths.inst(songLowercase)) || sys.FileSystem.exists(Paths.json(songLowercase + '/' + poop)) || sys.FileSystem.exists(Paths.modsJson(songLowercase + '/' + poop)))
+				if(sys.FileSystem.exists(Paths.inst(songLowercase, CoolUtil.difficulties[curDifficulty].toLowerCase())) || sys.FileSystem.exists(Paths.json(songLowercase + '/' + poop)) || sys.FileSystem.exists(Paths.modsJson(songLowercase + '/' + poop)))
 					playSong();
 				else
 					songJsonPopup();
@@ -560,7 +558,7 @@ class FreeplayState extends MusicBeatState
 			#else
 			if(instPlaying != curSelected)
 			{
-				if(OpenFlAssets.exists(Paths.inst(songLowercase + '/' + poop)) || OpenFlAssets.exists(Paths.json(songLowercase + '/' + poop)))
+				if(OpenFlAssets.exists(Paths.inst(songLowercase + '/' + poop, CoolUtil.difficulties[curDifficulty].toLowerCase())) || OpenFlAssets.exists(Paths.json(songLowercase + '/' + poop)))
 					playSong();
 				else
 					songJsonPopup();
@@ -584,6 +582,8 @@ class FreeplayState extends MusicBeatState
 				trace('Couldnt find file');
 			}*/
 			trace(poop);
+
+			CoolUtil.currentDifficulty = CoolUtil.difficultyString();
 
 			if(sys.FileSystem.exists(Paths.modsJson(songLowercase + '/' + poop)) || sys.FileSystem.exists(Paths.json(songLowercase + '/' + poop)) || OpenFlAssets.exists(Paths.modsJson(songLowercase + '/' + poop)) || OpenFlAssets.exists(Paths.json(songLowercase + '/' + poop))) {
 					PlayState.SONG = Song.loadFromJson(poop, songLowercase);
@@ -614,11 +614,11 @@ class FreeplayState extends MusicBeatState
 			destroyFreeplayVocals();
 
 					} else {
-					if(sys.FileSystem.exists(Paths.inst(songLowercase)) && !sys.FileSystem.exists(Paths.json(poop + '/' + poop))) { //the json doesn't exist, but the song files do, or you put a typo in the name
+					if(sys.FileSystem.exists(Paths.inst(songLowercase, CoolUtil.difficulties[curDifficulty].toLowerCase())) && !sys.FileSystem.exists(Paths.json(poop + '/' + poop))) { //the json doesn't exist, but the song files do, or you put a typo in the name
 							CoolUtil.coolError("The JSON's name does not match with  " + poop + "!\nTry making them match.", "JS Engine Anti-Crash Tool");
-					} else if(sys.FileSystem.exists(Paths.json(poop + '/' + poop)) && !sys.FileSystem.exists(Paths.inst(songLowercase)))  {//the json exists, but the song files don't
+					} else if(sys.FileSystem.exists(Paths.json(poop + '/' + poop)) && !sys.FileSystem.exists(Paths.inst(songLowercase, CoolUtil.difficulties[curDifficulty].toLowerCase())))  {//the json exists, but the song files don't
 							CoolUtil.coolError("Your song seems to not have an Inst.ogg, check the folder name in 'songs'!", "JS Engine Anti-Crash Tool");
-				} else if(!sys.FileSystem.exists(Paths.json(poop + '/' + poop)) && !sys.FileSystem.exists(Paths.inst(songLowercase))) { //neither the json nor the song files actually exist
+				} else if(!sys.FileSystem.exists(Paths.json(poop + '/' + poop)) && !sys.FileSystem.exists(Paths.inst(songLowercase, CoolUtil.difficulties[curDifficulty].toLowerCase()))) { //neither the json nor the song files actually exist
 					CoolUtil.coolError("It appears that " + poop + " doesn't actually have a JSON, nor does it actually have voices/instrumental files!\nMaybe try fixing its name in weeks/" + WeekData.getWeekFileName() + "?", "JS Engine Anti-Crash Tool");
 				}
 			}

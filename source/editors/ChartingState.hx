@@ -124,6 +124,8 @@ class ChartingState extends MusicBeatState
 	public static var lastSection:Int = 0;
 	private static var lastSong:String = '';
 
+	var difficulty:String = 'normal';
+
 	var bpmTxt:FlxText;
 	var songSlider:FlxUISlider;
 
@@ -279,6 +281,7 @@ class ChartingState extends MusicBeatState
 			addSection();
 			PlayState.SONG = _song;
 		}
+		difficulty = CoolUtil.currentDifficulty;
 		hitsound = FlxG.sound.load(Paths.sound("hitsounds/" + 'osu!mania'));
 		hitsound.volume = 1;
 
@@ -564,6 +567,7 @@ class ChartingState extends MusicBeatState
 		super.create();
 	}
 
+	var UI_songDiff:FlxUIInputText;
 	var check_mute_inst:FlxUICheckBox = null;
 	var check_vortex:FlxUICheckBox = null;
 	var check_showGrid:FlxUICheckBox = null;
@@ -606,7 +610,7 @@ class ChartingState extends MusicBeatState
 		var reloadSongJson:FlxButton = new FlxButton(reloadSong.x, saveButton.y + 30, "Reload JSON", function()
 		{
 			openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function() 
-			{loadJson(_song.song.toLowerCase()); }, null,ignoreWarnings));
+			{loadJson(_song.song.toLowerCase(), difficulty); }, null,ignoreWarnings));
 		});
 
 		var loadAutosaveBtn:FlxButton = new FlxButton(reloadSongJson.x, reloadSongJson.y + 30, 'Load Autosave', function()
@@ -771,6 +775,9 @@ class ChartingState extends MusicBeatState
 		stageDropDown.selectedLabel = _song.stage;
 		blockPressWhileScrolling.push(stageDropDown);
 
+		UI_songDiff = new FlxUIInputText(stageDropDown.x, stageDropDown.y + 50, 70, CoolUtil.currentDifficulty, 8);
+		blockPressWhileTypingOn.push(UI_songDiff);
+
 		var skin = PlayState.SONG.arrowSkin;
 		if(skin == null) skin = '';
 		noteSkinInputText = new FlxUIInputText(player2DropDown.x, player2DropDown.y + 50, 150, skin, 8);
@@ -790,6 +797,7 @@ class ChartingState extends MusicBeatState
 		var tab_group_song = new FlxUI(null, UI_box);
 		tab_group_song.name = "Song";
 		tab_group_song.add(UI_songTitle);
+		tab_group_song.add(UI_songDiff);
 
 		tab_group_song.add(check_voices);
 		tab_group_song.add(clear_events);
@@ -815,6 +823,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(new FlxText(stageDropDown.x, stageDropDown.y - 15, 0, 'Stage:'));
 		tab_group_song.add(new FlxText(noteSkinInputText.x, noteSkinInputText.y - 15, 0, 'Note Texture:'));
 		tab_group_song.add(new FlxText(noteSplashesInputText.x, noteSplashesInputText.y - 15, 0, 'Note Splashes Texture:'));
+		tab_group_song.add(new FlxText(UI_songDiff.x, UI_songDiff.y - 15, 0, "Difficulty:"));
 		tab_group_song.add(player2DropDown);
 		tab_group_song.add(gfVersionDropDown);
 		tab_group_song.add(player1DropDown);
@@ -1913,10 +1922,11 @@ class ChartingState extends MusicBeatState
 		if (FlxG.sound.music != null)
 		{
 			FlxG.sound.music.stop();
-			// vocals.stop();
 		}
+		if (vocals != null)
+			vocals.stop();
 
-		var file:Dynamic = Paths.voices(currentSongName);
+		var file:Dynamic = Paths.voices(currentSongName, difficulty);
 		vocals = new FlxSound();
 		if (Std.isOfType(file, Sound) || OpenFlAssets.exists(file)) {
 			vocals.loadEmbedded(file);
@@ -1938,7 +1948,7 @@ class ChartingState extends MusicBeatState
 	}
 
 	function generateSong() {
-		FlxG.sound.playMusic(Paths.inst(currentSongName), 0.6/*, false*/);
+		FlxG.sound.playMusic(Paths.inst(currentSongName, difficulty), 0.6/*, false*/);
 		if (instVolume != null) FlxG.sound.music.volume = instVolume.value;
 		if (check_mute_inst != null && check_mute_inst.checked) FlxG.sound.music.volume = 0;
 
@@ -2113,6 +2123,7 @@ class ChartingState extends MusicBeatState
 		}
 		Conductor.songPosition = FlxG.sound.music.time;
 		_song.song = UI_songTitle.text;
+		difficulty = UI_songDiff.text.toLowerCase();
 
 		_song.songCredit = creditInputText.text;
 		_song.songCreditIcon = creditIconInputText.text;
@@ -2306,8 +2317,7 @@ class ChartingState extends MusicBeatState
 				if (FlxG.keys.pressed.SHIFT) {
 					PlayState.startOnTime = sectionStartTime();
 				}
-
-				//if(_song.stage == null) _song.stage = stageDropDown.selectedLabel;
+				CoolUtil.currentDifficulty = difficulty;
 				StageData.loadDirectory(_song);
 				LoadingState.loadAndSwitchState(PlayState.new);
 				if (idleMusic != null && idleMusic.music != null) idleMusic.destroy();
@@ -2334,7 +2344,8 @@ class ChartingState extends MusicBeatState
 			if (FlxG.keys.justPressed.BACKSPACE) {
 				// Protect against lost data when quickly leaving the chart editor.
 				autosaveSong();
-				
+
+				CoolUtil.currentDifficulty = difficulty;
 				PlayState.chartingMode = false;
 				FlxG.switchState(editors.MasterEditorMenu.new);
 				FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
@@ -3872,22 +3883,25 @@ class ChartingState extends MusicBeatState
 		return noteData;
 	}
 
-	function loadJson(song:String):Void
+	function loadJson(song:String, ?diff:String = ''):Void
 	{
 		//shitty null fix, i fucking hate it when this happens
 		//make it look sexier if possible
 			var songName:String = Paths.formatToSongPath(_song.song);
-		if(sys.FileSystem.exists(Paths.json(songName + '/' + songName)) || sys.FileSystem.exists(Paths.modsJson(songName + '/' + songName)))
+			var jsonExists = sys.FileSystem.exists(Paths.json(songName + '/' + songName)) || sys.FileSystem.exists(Paths.modsJson(songName + '/' + songName));
+			var diffJsonExists = sys.FileSystem.exists(Paths.json(songName + '/' + songName + '-$diff')) || sys.FileSystem.exists(Paths.modsJson(songName + '/' + songName + '-$diff'));
+		if(jsonExists || diffJsonExists)
 		{
-		if (CoolUtil.difficulties[PlayState.storyDifficulty] != CoolUtil.defaultDifficulty) {
-			if(CoolUtil.difficulties[PlayState.storyDifficulty] == null){
+		if (diff != CoolUtil.defaultDifficulty.toLowerCase()) {
+			if(CoolUtil.difficulties[PlayState.storyDifficulty] == null || !diffJsonExists){
 				PlayState.SONG = Song.loadFromJson(songName.toLowerCase(), songName.toLowerCase());
 			}else{
-				PlayState.SONG = Song.loadFromJson(songName.toLowerCase() + "-" + CoolUtil.difficulties[PlayState.storyDifficulty], songName.toLowerCase());
+				PlayState.SONG = Song.loadFromJson(songName.toLowerCase() + "-" + diff, songName.toLowerCase());
 			}
 		}else{
 		PlayState.SONG = Song.loadFromJson(songName.toLowerCase(), songName.toLowerCase());
 		}
+		CoolUtil.currentDifficulty = diff;
 		FlxG.resetState();
 		if (idleMusic != null && idleMusic.music != null) idleMusic.destroy();
 		}
@@ -3919,9 +3933,9 @@ class ChartingState extends MusicBeatState
 
 	private function saveLevel()
 	{
+		Paths.gc(true);
 		if (CoolUtil.getNoteAmount(_song) > 1000000) 
 		{
-			Paths.gc(true);
 			cpp.vm.Gc.enable(false);
 		}
 		if(_song.events != null && _song.events.length > 1) _song.events.sort(sortByTime);
@@ -3937,7 +3951,12 @@ class ChartingState extends MusicBeatState
 			_file.addEventListener(Event.COMPLETE, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file.save(data.trim(), Paths.formatToSongPath(_song.song) + ".json");
+			var gamingName:String = Paths.formatToSongPath(_song.song);
+
+			if (difficulty.toLowerCase() != 'normal')
+				gamingName = gamingName + '-' + difficulty.toLowerCase();
+
+			_file.save(data.trim(), gamingName + ".json");
 		}
 			cpp.vm.Gc.enable(true);
 	}

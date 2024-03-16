@@ -131,6 +131,8 @@ class Note extends FlxSprite
 
 	public var texture(default, set):String = null;
 
+	public var sustainScale:Float = 1;
+
 	public var noAnimation:Bool = false;
 	public var noMissAnimation:Bool = false;
 	public var hitCausesMiss:Bool = false;
@@ -613,11 +615,11 @@ class Note extends FlxSprite
 		{
 			
 			flipY = strum.downScroll;
-			if (ClientPrefs.noteStyleThing == 'Chip' || ClientPrefs.noteStyleThing == 'Future') scale.set(0.7, animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? 0.7 : Conductor.stepCrochet * 0.0105 * (0.58 * songSpeed / multSpeed));
+			if (ClientPrefs.noteStyleThing == 'Chip' || ClientPrefs.noteStyleThing == 'Future') scale.set(0.7, animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? 0.7 : Conductor.stepCrochet * 0.0105 * (0.58 * songSpeed / multSpeed) * sustainScale);
 			else 
 			{
 				offsetX = 36.5;
-				scale.set(0.7, animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? 1 : Conductor.stepCrochet * 0.0105 * (songSpeed * multSpeed));
+				scale.set(0.7, animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? 1 : Conductor.stepCrochet * 0.0105 * (songSpeed * multSpeed) * sustainScale);
 			}
 
 			updateHitbox();
@@ -715,6 +717,7 @@ class Note extends FlxSprite
 		gfNote = chartNoteData.gfNote;
 		isSustainNote = chartNoteData.isSustainNote;
 		sustainLength = chartNoteData.sustainLength;
+		sustainScale = chartNoteData.sustainScale;
 
 		strum = chartNoteData.strum;
 		hitHealth = chartNoteData.hitHealth;

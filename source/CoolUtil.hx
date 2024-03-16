@@ -36,6 +36,8 @@ class CoolUtil
 
 	public static var difficulties:Array<String> = [];
 
+	public static var currentDifficulty:String = 'Normal';
+
 	public static var defaultSongs:Array<String> = ['tutorial', 'bopeebo', 'fresh', 'dad battle', 'spookeez', 'south', 'monster', 'pico', 'philly nice', 'blammed', 'satin panties', 'high', 'milf', 'cocoa', 'eggnog', 'winter horrorland', 'senpai', 'roses', 'thorns', 'ugh', 'guns', 'stress'];
 
 	inline public static function quantize(f:Float, snap:Float){
@@ -229,8 +231,8 @@ class CoolUtil
 	{
 		if(num == null) num = PlayState.storyDifficulty;
 
-		var fileSuffix:String = difficulties[num];
-		if(fileSuffix != defaultDifficulty || !defaultDifficultyThings.contains(fileSuffix)) //this is meant to fix a bug where putting the difficulty in all lowercase would treat normal as a custom difficulty
+		var fileSuffix:String = difficulties[num].toLowerCase();
+		if(fileSuffix != defaultDifficulty.toLowerCase())
 		{
 			fileSuffix = '-' + fileSuffix;
 		}

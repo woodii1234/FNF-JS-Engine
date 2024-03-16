@@ -758,6 +758,8 @@ class PlayState extends MusicBeatState
 		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);
 
+		if (!chartingMode) CoolUtil.currentDifficulty = CoolUtil.difficultyString();
+
 		#if desktop
 		storyDifficultyText = CoolUtil.difficulties[storyDifficulty];
 
@@ -3748,10 +3750,10 @@ class PlayState extends MusicBeatState
 		{
 			@:privateAccess
 			if (!ffmpegMode) {
-				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 1, false);
+				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song, CoolUtil.difficultyString().toLowerCase()), 1, false);
 				FlxG.sound.music.onComplete = finishSong.bind();
 			} else {
-				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 0, false);
+				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song, CoolUtil.difficultyString().toLowerCase()), 0, false);
 				vocals.volume = 0;
 			}
 			if (!ffmpegMode && (!trollingMode || SONG.song.toLowerCase() != 'anti-cheat-song'))
@@ -3870,13 +3872,13 @@ class PlayState extends MusicBeatState
 			MusicBeatState.windowNamePrefix = SONG.windowName;
 
 		if (SONG.needsVoices && ClientPrefs.songLoading)
-			vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song));
+			vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song, CoolUtil.difficultyString().toLowerCase()));
 		else
 			vocals = new FlxSound();
 
 		if (ClientPrefs.songLoading) vocals.pitch = playbackRate;
 		if (ClientPrefs.songLoading) FlxG.sound.list.add(vocals);
-		if (ClientPrefs.songLoading) FlxG.sound.list.add(new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song)));
+		if (ClientPrefs.songLoading) FlxG.sound.list.add(new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song, CoolUtil.difficultyString().toLowerCase())));
 
 		final noteData:Array<SwagSection> = SONG.notes;
 
@@ -5138,13 +5140,12 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 						}
 						if (cpuControlled && ClientPrefs.timeBarType != 'Song Name' && !ClientPrefs.communityGameBot) timeTxt.text += ' (Bot)';
 						if(ClientPrefs.timebarShowSpeed && cpuControlled && ClientPrefs.timeBarType == 'Song Name') timeTxt.text = SONG.song + ' (' + FlxMath.roundDecimal(playbackRate, 2) + 'x) (Bot)';
-
-						if(ffmpegMode) {
-							if(!endingSong && Conductor.songPosition >= FlxG.sound.music.length - 20) {
-								finishSong();
-								endSong();
-							}
-						}
+					}
+				}
+				if(ffmpegMode) {
+					if(!endingSong && Conductor.songPosition >= FlxG.sound.music.length - 20) {
+						finishSong();
+						endSong();
 					}
 				}
 			}
