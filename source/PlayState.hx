@@ -5195,7 +5195,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 							dunceNote.row = Conductor.secsToRow(dunceNote.strumTime);
 							if(noteRows[dunceNote.mustPress?0:1][dunceNote.row] == null)
 								noteRows[dunceNote.mustPress?0:1][dunceNote.row] = [];
-							if (noteRows[dunceNote.mustPress?0:1][dunceNote.row][0] == null) noteRows[dunceNote.mustPress ? 0 : 1][dunceNote.row].push(dunceNote);
+							if (noteRows[dunceNote.mustPress?0:1][dunceNote.row] == null) noteRows[dunceNote.mustPress ? 0 : 1][dunceNote.row].push(dunceNote);
 							}
 
 				dunceNote.scrollFactor.set();

@@ -157,9 +157,6 @@ class Note extends FlxSprite
 	}
 
 	private function set_texture(value:String):String {
-		if(texture != value && ClientPrefs.showNotes && PlayState.isPixelStage && inEditor) {
-			reloadNote('', value);
-		}
 		if (!inEditor && !PlayState.isPixelStage)
 		{
 			if (!Paths.noteSkinFramesMap.exists(value)) Paths.initNote(4, value);
@@ -536,12 +533,11 @@ class Note extends FlxSprite
 	}
 
 	function loadPixelNoteAnims() {
-		if(isSustainNote) {
-			animation.add(colArray[noteData] + 'holdend', [pixelInt[noteData] + 4]);
-			animation.add(colArray[noteData] + 'hold', [pixelInt[noteData]]);
-		} else {
-			animation.add(colArray[noteData] + 'Scroll', [pixelInt[noteData] + 4]);
-		}
+		if(isSustainNote)
+		{
+			animation.add(colArray[noteData] + 'holdend', [noteData + 4], 24, true);
+			animation.add(colArray[noteData] + 'hold', [noteData], 24, true);
+		} else animation.add(colArray[noteData] + 'Scroll', [noteData + 4], 24, true);
 	}
 
 	public function updateNoteSkin(noteskin:String) {
@@ -620,6 +616,11 @@ class Note extends FlxSprite
 			{
 				offsetX = 36.5;
 				scale.set(0.7, animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? 1 : Conductor.stepCrochet * 0.0105 * (songSpeed * multSpeed) * sustainScale);
+				if (PlayState.isPixelStage) 
+				{
+					scale.x *= PlayState.daPixelZoom;
+					scale.y *= PlayState.daPixelZoom;
+				}
 			}
 
 			updateHitbox();
@@ -710,12 +711,12 @@ class Note extends FlxSprite
 		noteData = Std.int(chartNoteData.noteData % 4);
 		noteType = chartNoteData.noteType;
 		animSuffix = chartNoteData.animSuffix;
-		if (chartNoteData.noteskin.length > 0 && chartNoteData.noteskin != '' && chartNoteData.noteskin != texture) texture = 'noteskins/' + chartNoteData.noteskin;
-		if (chartNoteData.texture.length > 0 && chartNoteData.texture != texture) texture = chartNoteData.texture;
 		noAnimation = noMissAnimation = chartNoteData.noAnimation;
 		mustPress = chartNoteData.mustPress;
 		gfNote = chartNoteData.gfNote;
 		isSustainNote = chartNoteData.isSustainNote;
+		if (chartNoteData.noteskin.length > 0 && chartNoteData.noteskin != '' && chartNoteData.noteskin != texture) texture = 'noteskins/' + chartNoteData.noteskin;
+		if (chartNoteData.texture.length > 0 && chartNoteData.texture != texture) texture = chartNoteData.texture;
 		sustainLength = chartNoteData.sustainLength;
 		sustainScale = chartNoteData.sustainScale;
 
@@ -725,6 +726,7 @@ class Note extends FlxSprite
 		hitCausesMiss = chartNoteData.hitCausesMiss;
 		multSpeed = chartNoteData.multSpeed;
 
+		if (PlayState.isPixelStage) reloadNote('', texture);
 		animation.play(colArray[noteData % 4] + 'Scroll');
 		if (isSustainNote) animation.play(colArray[noteData % 4] + (chartNoteData.isSustainEnd ? 'holdend' : 'hold'));
 
