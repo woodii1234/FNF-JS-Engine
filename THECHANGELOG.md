@@ -1,18 +1,24 @@
-1.20.1;
+1.21.1;
 
-Fixed a bug where Linux users would have captures save in the engine's directory instead of in the gameRenders folder (Fixes issue #213)
-Linux builds now get an icon
-Lowered the volume of the note removal sound effect in the Chart Editor
+Fixed Color Quants crashing the game if there were no notes on screen
 
-Linux support is revived
-Probably the best addition to this engine: Rendering Mode by HRK_EXEX. Now instead of waiting 1 hour playing a song at 0.1 playback rate you can render the video instead! (You'll need FFmpeg for this though)
-Rendered Notes is now separate from the botplay text and is now a toggleable option
-Changed the FPS counter color indicators:
-Yellow when your FPS is half of the expected framerate
-Orange when your FPS is 1/3 of the expected framerate
-And red when your FPS is 1/4 of the expected framerate
-Added missing Freeplay search bar credits
-All editors now have music and sound effects. (The chart editor sound effects are toggleable so you don't go insane while charting)
-Added a LOT of new botplay texts and some more tips
-Characters can now have specific health drain amounts tied to them
-Added an option to enable the garbage collector. It stops memory leaks for some reason (making the engine actually usable on higher framerates)
+The chart loading system has been rewritten! As a result charts now load a LOT faster!
+The Gapple 1.5 tween is now smoother
+Freeplay Search bar now finds songs whose names contain what you're looking for
+Show Notes is now a LOT more powerful than before
+Enabling Troll Mode no longer multiplies your FPS
+Added a Startup State (inspired by DENPA!!)
+A new Visuals & UI option: Use Old Note Sorting. Do you like the notes being sorted like in older versions of JSE? Then enable this!
+Added a cool healthbar tween when the song starts
+The game now automatically sets your resolution back to 16:9 if you set it to smth other than that in Rendering Mode
+Moved the Rainbow Notes option as one of the note color styles
+Fixed the engine not being able to check for updates
+Fixed Linux users having game captures in Rendering Mode save in the engine's main directory
+Fixed big icons cropping off
+Fixed Hurt Notes not crashing the game if you disabled the Color Shader
+Fixed crashes with the Editor Music
+Fixed a bug where GPU Caching would break the Get Icon Color button if turned on
+Fixed Hide HUD crashing the game on a Change Character event
+Fixed Gapple tweens finishing too fast on higher GF speeds
+Fixed events and stuff being broken on Rendering Mode
+Fixed a rare bug where sometimes Rendering Mode would try writing to a file that didn't exist

@@ -29,7 +29,7 @@ class HealthIcon extends FlxSprite
 		super.update(elapsed);
 
 		if (sprTracker != null)
-			setPosition(sprTracker.x + sprTracker.width + 10, sprTracker.y - 30);
+			setPosition(sprTracker.x + sprTracker.width + 12, sprTracker.y - 30);
 
 		if(canBounce) {
 			var mult:Float = FlxMath.lerp(1, scale.x, CoolUtil.boundTo(1 - (elapsed * 9), 0, 1));
@@ -61,15 +61,13 @@ class HealthIcon extends FlxSprite
 			loadGraphic(file); //Load stupidly first for getting the file size
 			var width2 = width;
 			if (width == 450) {
-				iconOffsets = [0, 0, 0];
 				loadGraphic(file, true, Math.floor(width / 3), Math.floor(height)); //Then load it fr // winning icons go br
 				iconOffsets[0] = (width - 150) / 3;
-				iconOffsets[1] = (width - 150) / 3;
-				iconOffsets[2] = (width - 150) / 3;
+				iconOffsets[1] = (height - 150) / 3;
 			} else {
 				loadGraphic(file, true, Math.floor(width / 2), Math.floor(height)); //Then load it fr // winning icons go br
 				iconOffsets[0] = (width - 150) / 2;
-				iconOffsets[1] = (width - 150) / 2;
+				iconOffsets[1] = (height - 150) / 2;
 			}
 
 			updateHitbox();

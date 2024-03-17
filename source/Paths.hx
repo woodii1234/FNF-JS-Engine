@@ -1,8 +1,11 @@
 package;
 
 import flixel.graphics.frames.FlxAtlasFrames;
+import flixel.graphics.frames.FlxFramesCollection;
 import flixel.graphics.FlxGraphic;
 import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.animation.FlxAnimationController;
 import openfl.display.BitmapData;
 import openfl.display3D.textures.RectangleTexture;
 import openfl.utils.AssetType;
@@ -41,6 +44,12 @@ class Paths
 	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
 	inline public static var VIDEO_EXT = "mp4";
 
+	private static var noteFrames:FlxFramesCollection;
+	private static var noteAnimation:FlxAnimationController;
+
+	public static var noteSkinFramesMap:Map<String, FlxFramesCollection> = new Map();
+	public static var noteSkinAnimsMap:Map<String, FlxAnimationController> = new Map();
+
 	#if MODS_ALLOWED
 	public static var ignoreModFolders:Array<String> = [
 		'characters',
@@ -60,6 +69,29 @@ class Paths
 		'achievements'
 	];
 	#end
+
+	//Function that initializes the first note. This way, we can recycle the notes
+	public static function initNote(keys:Int = 4, noteSkin:String = 'NOTE_assets')
+	{
+		noteFrames = getSparrowAtlas(noteSkin.length > 1 ? noteSkin : 'NOTE_assets');
+
+		// Do this to be able to just copy over the note animations and not reallocate it
+
+		var spr:FlxSprite = new FlxSprite();
+		spr.frames = noteFrames;
+		noteAnimation = new FlxAnimationController(spr);
+
+		// Use a for loop for adding all of the animations in the note spritesheet, otherwise it won't find the animations for the next recycle
+		for (d in 0...keys)
+		{
+			noteAnimation.addByPrefix('purpleholdend', 'pruple end hold'); // ?????
+			noteAnimation.addByPrefix(Note.colArray[d] + 'holdend', Note.colArray[d] + ' hold end');
+			noteAnimation.addByPrefix(Note.colArray[d] + 'hold', Note.colArray[d] + ' hold piece');
+			noteAnimation.addByPrefix(Note.colArray[d] + 'Scroll', Note.colArray[d] + '0');
+		}
+		noteSkinFramesMap.set(noteSkin, getSparrowAtlas(noteSkin.length > 1 ? noteSkin : 'NOTE_assets'));
+		noteSkinAnimsMap.set(noteSkin, noteAnimation);
+	}
 
 	public static function excludeAsset(key:String) {
 		if (!dumpExclusions.contains(key))
@@ -256,11 +288,20 @@ class Paths
 		return file;
 	}
 	//Loads the Voices. Crucial for generateSong
-	inline static public function voices(song:String):Any
+	static public function voices(song:String, ?difficulty:String = ''):Any
 	{
 		#if html5
 		return 'songs:assets/songs/${formatToSongPath(song)}/Voices.$SOUND_EXT';
 		#else
+		if (difficulty != null)
+		{
+			var songKey:String = '${formatToSongPath(song)}/Voices-$difficulty';
+			if (FileSystem.exists(Paths.modFolders('songs/' + songKey + '.$SOUND_EXT')) || FileSystem.exists('assets/songs/' + songKey + '.$SOUND_EXT')) 
+			{
+				var voices = (ClientPrefs.progAudioLoad ? returnSound('songs', songKey) : returnSoundFull('songs', songKey));
+				return voices;
+			}
+		}
 		var songKey:String = '${formatToSongPath(song)}/Voices';
 		var voices = returnSound('songs', songKey);
 		if (!ClientPrefs.progAudioLoad) voices = returnSoundFull('songs', songKey);
@@ -268,11 +309,20 @@ class Paths
 		#end
 	}
 	//Loads the instrumental. Crucial for generateSong
-	inline static public function inst(song:String):Any
+	static public function inst(song:String, ?difficulty:String = ''):Any
 	{
 		#if html5
 		return 'songs:assets/songs/${formatToSongPath(song)}/Inst.$SOUND_EXT';
 		#else
+		if (difficulty != null)
+		{
+			var songKey:String = '${formatToSongPath(song)}/Inst-$difficulty';
+			if (FileSystem.exists(Paths.modFolders('songs/' + songKey + '.$SOUND_EXT')) || FileSystem.exists('assets/songs/' + songKey + '.$SOUND_EXT')) 
+			{
+				var inst = (ClientPrefs.progAudioLoad ? returnSound('songs', songKey) : returnSoundFull('songs', songKey));
+				return inst;
+			}
+		}
 		var songKey:String = '${formatToSongPath(song)}/Inst';
 		var inst = returnSound('songs', songKey);
 		if (!ClientPrefs.progAudioLoad) inst = returnSoundFull('songs', songKey);
@@ -280,34 +330,6 @@ class Paths
 		#end
 	}
 
-//Difficulty-specific Inst and Voices loading. Doesn't work so i've scrapped it for now but this was taken directly from Leather Engine
-	/*
-	static public function voices(song:String, ?difficulty:String)
-	{
-		if(difficulty != null)
-		{
-			if(Assets.exists('songs:assets/songs/${song.toLowerCase()}/Voices-$difficulty.$SOUND_EXT'))
-			{
-				return 'songs:assets/songs/${song.toLowerCase()}/Voices-$difficulty.$SOUND_EXT';
-			}
-		}
-
-		return 'songs:assets/songs/${song.toLowerCase()}/Voices.$SOUND_EXT';
-	}
-
-	static public function inst(song:String, ?difficulty:String)
-	{
-		if(difficulty != null)
-		{
-			if(Assets.exists('songs:assets/songs/${song.toLowerCase()}/Inst-$difficulty.$SOUND_EXT'))
-			{
-				return 'songs:assets/songs/${song.toLowerCase()}/Inst-$difficulty.$SOUND_EXT';
-			}
-		}
-		
-		return 'songs:assets/songs/${song.toLowerCase()}/Inst.$SOUND_EXT';
-	}
-	*/
 	//Loads images.
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
 	static public function image(key:String, ?library:String = null):FlxGraphic

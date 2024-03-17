@@ -31,11 +31,6 @@ using StringTools;
 
 class VisualsUISubState extends BaseOptionsMenu
 {
-
-	var noteOptionID:Int = -1;
-	var notes:FlxTypedGroup<StrumNote>;
-	var notesTween:Array<FlxTween> = [];
-	var noteY:Float = 90;
 	public function new()
 	{
 		title = 'Visuals and UI';
@@ -272,6 +267,13 @@ class VisualsUISubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
+		var option:Option = new Option('No Icon Bop Limiter',
+			'Another comedic option that is hilarious when turned on.\nWhen enabled, disables the Icon Bop limiter which..\nleads to some interesting visuals when spam happens.',
+			'noBopLimit',
+			'bool',
+			false);
+		addOption(option);
+
 		var option:Option = new Option('Denpa Engine Health Bug', //ill remove this at the request of AT - Jordan Santiago
 			'If checked, well.. replicates the health drain bug in Denpa Engine.',
 			'denpaDrainBug',
@@ -313,7 +315,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			'hudType',
 			'string',
 			'VS Impostor',
-			['VS Impostor', 'Kade Engine', 'Tails Gets Trolled V4', 'Dave and Bambi', 'Doki Doki+', 'Psych Engine', 'Leather Engine', 'Box Funkin', "Mic'd Up", 'JS Engine']);
+			['VS Impostor', 'Kade Engine', 'Tails Gets Trolled V4', 'Dave and Bambi', 'Doki Doki+', 'Psych Engine', 'Leather Engine', 'JS Engine']);
 		addOption(option);
 
 		var option:Option = new Option('Strum Light Up Style:',
@@ -353,7 +355,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			'iconBounceType',
 			'string',
 			'Golden Apple',
-			['Golden Apple', 'Dave and Bambi', 'Old Psych', 'New Psych', 'VS Steve', 'Plank Engine', 'Strident Crisis', 'SB Engine']);
+			['Golden Apple', 'Dave and Bambi', 'Old Psych', 'New Psych', 'VS Steve', 'Plank Engine', 'Strident Crisis', 'SB Engine', 'None']);
 		addOption(option);
 
 		var option:Option = new Option('Note Splash Type:',
@@ -402,14 +404,6 @@ class VisualsUISubState extends BaseOptionsMenu
 		var option:Option = new Option('Use Wrong Popup Camera',
 			'If checked, the popups will use the game world camera instead of the HUD.',
 			'wrongCameras',
-			'bool',
-			false);
-		addOption(option);
-
-		var option:Option = new Option('Use Old Note Sorting',
-			'Basically, the notes are added at the beginning of the note groups\' members like vanilla' +
-			'\npsych engine instead of adding them at the end.\nIf you prefer psych\'s note sorting like on older versions of JS Engine, enable this.',
-			'useOldNoteSorting',
 			'bool',
 			false);
 		addOption(option);

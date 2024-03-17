@@ -110,8 +110,8 @@ class ControlsSubState extends MusicBeatSubstate {
 				if(curSelected < 0) curSelected = i;
 			}
 		}
-		changeSelection();
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length-1]];
+		changeSelection();
 	}
 
 	var leaving:Bool = false;

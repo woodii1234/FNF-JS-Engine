@@ -124,6 +124,8 @@ class ChartingState extends MusicBeatState
 	public static var lastSection:Int = 0;
 	private static var lastSong:String = '';
 
+	var difficulty:String = 'normal';
+
 	var bpmTxt:FlxText;
 	var songSlider:FlxUISlider;
 
@@ -279,6 +281,7 @@ class ChartingState extends MusicBeatState
 			addSection();
 			PlayState.SONG = _song;
 		}
+		difficulty = CoolUtil.currentDifficulty;
 		hitsound = FlxG.sound.load(Paths.sound("hitsounds/" + 'osu!mania'));
 		hitsound.volume = 1;
 
@@ -564,6 +567,7 @@ class ChartingState extends MusicBeatState
 		super.create();
 	}
 
+	var UI_songDiff:FlxUIInputText;
 	var check_mute_inst:FlxUICheckBox = null;
 	var check_vortex:FlxUICheckBox = null;
 	var check_showGrid:FlxUICheckBox = null;
@@ -606,7 +610,7 @@ class ChartingState extends MusicBeatState
 		var reloadSongJson:FlxButton = new FlxButton(reloadSong.x, saveButton.y + 30, "Reload JSON", function()
 		{
 			openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function() 
-			{loadJson(_song.song.toLowerCase()); }, null,ignoreWarnings));
+			{loadJson(_song.song.toLowerCase(), difficulty); }, null,ignoreWarnings));
 		});
 
 		var loadAutosaveBtn:FlxButton = new FlxButton(reloadSongJson.x, reloadSongJson.y + 30, 'Load Autosave', function()
@@ -771,6 +775,9 @@ class ChartingState extends MusicBeatState
 		stageDropDown.selectedLabel = _song.stage;
 		blockPressWhileScrolling.push(stageDropDown);
 
+		UI_songDiff = new FlxUIInputText(stageDropDown.x, stageDropDown.y + 50, 70, CoolUtil.currentDifficulty, 8);
+		blockPressWhileTypingOn.push(UI_songDiff);
+
 		var skin = PlayState.SONG.arrowSkin;
 		if(skin == null) skin = '';
 		noteSkinInputText = new FlxUIInputText(player2DropDown.x, player2DropDown.y + 50, 150, skin, 8);
@@ -790,6 +797,7 @@ class ChartingState extends MusicBeatState
 		var tab_group_song = new FlxUI(null, UI_box);
 		tab_group_song.name = "Song";
 		tab_group_song.add(UI_songTitle);
+		tab_group_song.add(UI_songDiff);
 
 		tab_group_song.add(check_voices);
 		tab_group_song.add(clear_events);
@@ -815,6 +823,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(new FlxText(stageDropDown.x, stageDropDown.y - 15, 0, 'Stage:'));
 		tab_group_song.add(new FlxText(noteSkinInputText.x, noteSkinInputText.y - 15, 0, 'Note Texture:'));
 		tab_group_song.add(new FlxText(noteSplashesInputText.x, noteSplashesInputText.y - 15, 0, 'Note Splashes Texture:'));
+		tab_group_song.add(new FlxText(UI_songDiff.x, UI_songDiff.y - 15, 0, "Difficulty:"));
 		tab_group_song.add(player2DropDown);
 		tab_group_song.add(gfVersionDropDown);
 		tab_group_song.add(player1DropDown);
@@ -1196,7 +1205,7 @@ class ChartingState extends MusicBeatState
 			if(value1 == 0) {
 			return;
 			} 
-			if(_song.notes[curSection] != null && Math.isNaN(_song.notes[curSection].sectionNotes.length)) {
+			if(_song.notes[curSection] != null && Math.isNaN(_song.notes[daSec].sectionNotes.length)) {
 			trace ("HEY! your section doesn't have any notes! please place at least 1 note then try using this.");
 			return; //prevent a crash if the section doesn't have any notes
 			}
@@ -1224,6 +1233,8 @@ class ChartingState extends MusicBeatState
 					}
 					changeSection(curSec+1);
 					daSec = FlxMath.maxInt(curSec, Std.int(CopyLastSectionCount.value)-1);
+					//Feel free to comment this out.
+					trace ('Loops Remaining: ' + (value2 - i) + ', current note count: ' + FlxStringUtil.formatMoney(CoolUtil.getNoteAmount(_song), false) + ' Notes');
 				}
 			}
 			updateGrid(false);
@@ -1411,6 +1422,7 @@ class ChartingState extends MusicBeatState
 	var stepperStackNum:FlxUINumericStepper;
 	var stepperStackOffset:FlxUINumericStepper;
 	var stepperStackSideOffset:FlxUINumericStepper;
+	var stepperShrinkAmount:FlxUINumericStepper;
 
 	function addNoteStackingUI():Void
 	{
@@ -1463,18 +1475,112 @@ class ChartingState extends MusicBeatState
 		stepperStackSideOffset.name = 'stack_sideways';
 		blockPressWhileTypingOnStepper.push(stepperStackSideOffset);
 
+		stepperShrinkAmount = new FlxUINumericStepper(10, stepperStackSideOffset.y + 30, 1, 1, 0, 8192, 4);
+		stepperShrinkAmount.name = 'shrinker_amount';
+		blockPressWhileTypingOnStepper.push(stepperShrinkAmount);
+
+		var doubleShrinker:FlxButton = new FlxButton(stepperShrinkAmount.x, stepperShrinkAmount.y + 20, 'x2 SH', function()
+		{
+			stepperShrinkAmount.value *= 2;
+		});
+		doubleShrinker.color = FlxColor.GREEN;
+		doubleShrinker.label.color = FlxColor.WHITE;
+
+		var halfShrinker:FlxButton = new FlxButton(doubleShrinker.x + doubleShrinker.width + 20, doubleShrinker.y, 'x0.5 SH', function()
+		{
+			stepperShrinkAmount.value /= 2;
+		});
+		halfShrinker.setGraphicSize(Std.int(halfShrinker.width), Std.int(halfShrinker.height));
+		halfShrinker.color = FlxColor.RED;
+		halfShrinker.label.color = FlxColor.WHITE;
+
+		var shrinkNotesButton:FlxButton = new FlxButton(10, doubleShrinker.y + 30, "Stretch Notes", function()
+		{
+			var minimumTime:Float = sectionStartTime();
+			var sectionEndTime:Float = sectionStartTime(1);
+			for (i in 0..._song.notes[curSec].sectionNotes.length)
+			{
+				var note:Array<Dynamic> = _song.notes[curSec].sectionNotes[i];
+				if (note[2] > 0) note[2] *= stepperShrinkAmount.value;
+       				var originalStartTime:Float = note[0]; // Original start time (in seconds)
+				originalStartTime = originalStartTime - sectionStartTime();
+
+        			var stretchedStartTime:Float = originalStartTime * stepperShrinkAmount.value;
+
+        			var newStartTime:Float = sectionStartTime() + stretchedStartTime;
+
+       				note[0] = Math.max(newStartTime, minimumTime);
+				if (note[0] < minimumTime) note[0] = minimumTime;
+				_song.notes[curSec].sectionNotes[i] = note;
+			}
+			updateGrid(false);
+		});
+
+		var stepperShiftSteps:FlxUINumericStepper = new FlxUINumericStepper(10, shrinkNotesButton.y + 30, 1, 1, -8192, 8192, 4);
+		stepperShiftSteps.name = 'shifter_amount';
+		blockPressWhileTypingOnStepper.push(stepperShiftSteps);
+
+		var shiftNotesButton:FlxButton = new FlxButton(10, stepperShiftSteps.y + 20, "Shift Notes", function()
+		{
+			for (i in 0..._song.notes[curSec].sectionNotes.length)
+			{
+				_song.notes[curSec].sectionNotes[i][0] += (stepperShiftSteps.value) * (15000/Conductor.bpm);
+			}
+			updateGrid(false);
+		});
+		shiftNotesButton.setGraphicSize(Std.int(shiftNotesButton.width), Std.int(shiftNotesButton.height));
+
+		//ok im adding way too many spamcharting features LOL
+
+		var stepperDuplicateAmount:FlxUINumericStepper = new FlxUINumericStepper(10, shiftNotesButton.y + 30, 1, 1, 0, 32, 4);
+		stepperDuplicateAmount.name = 'duplicater_amount';
+		blockPressWhileTypingOnStepper.push(stepperDuplicateAmount);
+
+		var dupeNotesButton:FlxButton = new FlxButton(10, stepperDuplicateAmount.y + 20, "Duplicate Notes", function()
+		{
+			var copiedNotes:Array<Dynamic> = [];
+			for (i in 0..._song.notes[curSec].sectionNotes.length)
+			{
+				var note:Array<Dynamic> = _song.notes[curSec].sectionNotes[i];
+				copiedNotes.push(note);
+			}
+			for (_i in 1...Std.int(stepperDuplicateAmount.value)+1)
+			{
+				for (i in 0...copiedNotes.length)
+				{
+					final copiedNote:Array<Dynamic> = [copiedNotes[i][0], copiedNotes[i][1], copiedNotes[i][2], copiedNotes[i][3]];
+					copiedNote[0] += (stepperShiftSteps.value * _i) * (15000/Conductor.bpm);
+					//yeah.. unfortunately this relies on the value of the Shift Notes stepper.. stupid but it works, so im gonna keep it this way until i find a better solution
+					_song.notes[curSec].sectionNotes.push(copiedNote);
+				}
+			}
+			_song.notes[curSec].sectionNotes.length <= 30000 ? updateGrid(false) : changeSection(curSec + 1); //if there's now more than 30,000 notes in the same section then uh.. change to the next section so you don't suffer a crash
+		});
+		dupeNotesButton.setGraphicSize(Std.int(dupeNotesButton.width), Std.int(dupeNotesButton.height));
+
 		tab_group_stacking.add(check_stackActive);
 		tab_group_stacking.add(stepperStackNum);
 		tab_group_stacking.add(stepperStackOffset);
 		tab_group_stacking.add(stepperStackSideOffset);
+		tab_group_stacking.add(stepperShrinkAmount);
+		tab_group_stacking.add(stepperShiftSteps);
+		tab_group_stacking.add(stepperDuplicateAmount);
 		tab_group_stacking.add(doubleSpamNum);
 		tab_group_stacking.add(halfSpamNum);
 		tab_group_stacking.add(doubleSpamMult);
 		tab_group_stacking.add(halfSpamMult);
+		tab_group_stacking.add(doubleShrinker);
+		tab_group_stacking.add(halfShrinker);
+		tab_group_stacking.add(shrinkNotesButton);
+		tab_group_stacking.add(shiftNotesButton);
+		tab_group_stacking.add(dupeNotesButton);
 		
 		tab_group_stacking.add(new FlxText(100, 30, 0, "Spam Count"));
 		tab_group_stacking.add(new FlxText(100, 80, 0, "Spam Multiplier"));
 		tab_group_stacking.add(new FlxText(100, 140, 0, "Spam Scroll Amount"));
+		tab_group_stacking.add(new FlxText(100, stepperShrinkAmount.y, 0, "Stretch Amount"));
+		tab_group_stacking.add(new FlxText(100, stepperShiftSteps.y, 0, "Steps to Shift By"));
+		tab_group_stacking.add(new FlxText(100, stepperDuplicateAmount.y, 0, "Amount of Duplicates"));
 
 		UI_box.addGroup(tab_group_stacking);
 	}
@@ -1911,10 +2017,11 @@ class ChartingState extends MusicBeatState
 		if (FlxG.sound.music != null)
 		{
 			FlxG.sound.music.stop();
-			// vocals.stop();
 		}
+		if (vocals != null)
+			vocals.stop();
 
-		var file:Dynamic = Paths.voices(currentSongName);
+		var file:Dynamic = Paths.voices(currentSongName, difficulty);
 		vocals = new FlxSound();
 		if (Std.isOfType(file, Sound) || OpenFlAssets.exists(file)) {
 			vocals.loadEmbedded(file);
@@ -1936,7 +2043,7 @@ class ChartingState extends MusicBeatState
 	}
 
 	function generateSong() {
-		FlxG.sound.playMusic(Paths.inst(currentSongName), 0.6/*, false*/);
+		FlxG.sound.playMusic(Paths.inst(currentSongName, difficulty), 0.6/*, false*/);
 		if (instVolume != null) FlxG.sound.music.volume = instVolume.value;
 		if (check_mute_inst != null && check_mute_inst.checked) FlxG.sound.music.volume = 0;
 
@@ -2111,6 +2218,7 @@ class ChartingState extends MusicBeatState
 		}
 		Conductor.songPosition = FlxG.sound.music.time;
 		_song.song = UI_songTitle.text;
+		difficulty = UI_songDiff.text.toLowerCase();
 
 		_song.songCredit = creditInputText.text;
 		_song.songCreditIcon = creditIconInputText.text;
@@ -2288,8 +2396,11 @@ class ChartingState extends MusicBeatState
 			if (FlxG.keys.justPressed.ESCAPE)
 			{
 				autosaveSong();
+				FlxG.sound.music.pause();
+				vocals.pause();
 				LoadingState.loadAndSwitchState(() -> new editors.EditorPlayState(sectionStartTime()));
 				if (idleMusic != null && idleMusic.music != null) idleMusic.destroy();
+				FlxG.sound.music.onComplete = null; //So that it doesn't crash when you reach the end
 			}
 			if (FlxG.keys.justPressed.ENTER)
 			{
@@ -2301,8 +2412,7 @@ class ChartingState extends MusicBeatState
 				if (FlxG.keys.pressed.SHIFT) {
 					PlayState.startOnTime = sectionStartTime();
 				}
-
-				//if(_song.stage == null) _song.stage = stageDropDown.selectedLabel;
+				CoolUtil.currentDifficulty = difficulty;
 				StageData.loadDirectory(_song);
 				LoadingState.loadAndSwitchState(PlayState.new);
 				if (idleMusic != null && idleMusic.music != null) idleMusic.destroy();
@@ -2329,7 +2439,8 @@ class ChartingState extends MusicBeatState
 			if (FlxG.keys.justPressed.BACKSPACE) {
 				// Protect against lost data when quickly leaving the chart editor.
 				autosaveSong();
-				
+
+				CoolUtil.currentDifficulty = difficulty;
 				PlayState.chartingMode = false;
 				FlxG.switchState(editors.MasterEditorMenu.new);
 				FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
@@ -2702,7 +2813,7 @@ class ChartingState extends MusicBeatState
 		vocals.pitch = playbackSpeed;
 
 		bpmTxt.text =
-		FlxStringUtil.formatTime(Conductor.songPosition / 1000, true) + ' / ' + FlxStringUtil.formatTime(FlxG.sound.music.length / 1000, true) +
+		CoolUtil.formatTime(Conductor.songPosition, 2) + ' / ' + CoolUtil.formatTime(FlxG.sound.music.length, 2) +
 		"\nSection: " + curSec +
 		"\n\nBeat: " + Std.string(curDecBeat).substring(0,4) +
 		"\nStep: " + curStep +
@@ -3490,8 +3601,11 @@ class ChartingState extends MusicBeatState
 		var daStrumTime = i[0];
 		var daSus:Dynamic = i[2];
 
-		var note:Note = new Note(daStrumTime, daNoteInfo % 4, null, null, null, false, true);
+		var note:Note = new Note('', false, true);
+		note.strumTime = daStrumTime;
+		note.noteData = daNoteInfo % 4;
 		if(daSus != null) { //Common note
+			note.animation.play(Note.colArray[daNoteInfo % 4] + 'Scroll');
 			if(!Std.isOfType(i[3], String)) //Convert old note type to new note type format
 			{
 				i[3] = noteTypeIntMap.get(i[3]);
@@ -3864,22 +3978,25 @@ class ChartingState extends MusicBeatState
 		return noteData;
 	}
 
-	function loadJson(song:String):Void
+	function loadJson(song:String, ?diff:String = ''):Void
 	{
 		//shitty null fix, i fucking hate it when this happens
 		//make it look sexier if possible
 			var songName:String = Paths.formatToSongPath(_song.song);
-		if(sys.FileSystem.exists(Paths.json(songName + '/' + songName)) || sys.FileSystem.exists(Paths.modsJson(songName + '/' + songName)))
+			var jsonExists = sys.FileSystem.exists(Paths.json(songName + '/' + songName)) || sys.FileSystem.exists(Paths.modsJson(songName + '/' + songName));
+			var diffJsonExists = sys.FileSystem.exists(Paths.json(songName + '/' + songName + '-$diff')) || sys.FileSystem.exists(Paths.modsJson(songName + '/' + songName + '-$diff'));
+		if(jsonExists || diffJsonExists)
 		{
-		if (CoolUtil.difficulties[PlayState.storyDifficulty] != CoolUtil.defaultDifficulty) {
-			if(CoolUtil.difficulties[PlayState.storyDifficulty] == null){
+		if (diff != CoolUtil.defaultDifficulty.toLowerCase()) {
+			if(CoolUtil.difficulties[PlayState.storyDifficulty] == null || !diffJsonExists){
 				PlayState.SONG = Song.loadFromJson(songName.toLowerCase(), songName.toLowerCase());
 			}else{
-				PlayState.SONG = Song.loadFromJson(songName.toLowerCase() + "-" + CoolUtil.difficulties[PlayState.storyDifficulty], songName.toLowerCase());
+				PlayState.SONG = Song.loadFromJson(songName.toLowerCase() + "-" + diff, songName.toLowerCase());
 			}
 		}else{
 		PlayState.SONG = Song.loadFromJson(songName.toLowerCase(), songName.toLowerCase());
 		}
+		CoolUtil.currentDifficulty = diff;
 		FlxG.resetState();
 		if (idleMusic != null && idleMusic.music != null) idleMusic.destroy();
 		}
@@ -3911,6 +4028,11 @@ class ChartingState extends MusicBeatState
 
 	private function saveLevel()
 	{
+		Paths.gc(true);
+		if (CoolUtil.getNoteAmount(_song) > 1000000) 
+		{
+			cpp.vm.Gc.enable(false);
+		}
 		if(_song.events != null && _song.events.length > 1) _song.events.sort(sortByTime);
 		var json = {
 			"song": _song
@@ -3924,8 +4046,14 @@ class ChartingState extends MusicBeatState
 			_file.addEventListener(Event.COMPLETE, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file.save(data.trim(), Paths.formatToSongPath(_song.song) + ".json");
+			var gamingName:String = Paths.formatToSongPath(_song.song);
+
+			if (difficulty.toLowerCase() != 'normal')
+				gamingName = gamingName + '-' + difficulty.toLowerCase();
+
+			_file.save(data.trim(), gamingName + ".json");
 		}
+			cpp.vm.Gc.enable(true);
 	}
 
 	function sortByTime(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int

@@ -38,7 +38,7 @@ class Main extends Sprite {
 	var game = {
 		width: 1280,
 		height: 720,
-		initialState: TitleState.new,
+		initialState: StartupState.new,
 		zoom: -1.0,
 		framerate: 60,
 		skipSplash: true,
@@ -197,7 +197,7 @@ class Main extends Sprite {
 			var last:Int = 0;
 			var s = "";
 
-			trace(line);
+			//trace(line);
 			while ((last = buff.readByte()) != 10) {
 				buf.addByte(last);
 			}

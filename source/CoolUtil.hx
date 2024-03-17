@@ -36,6 +36,8 @@ class CoolUtil
 
 	public static var difficulties:Array<String> = [];
 
+	public static var currentDifficulty:String = 'Normal';
+
 	public static var defaultSongs:Array<String> = ['tutorial', 'bopeebo', 'fresh', 'dad battle', 'spookeez', 'south', 'monster', 'pico', 'philly nice', 'blammed', 'satin panties', 'high', 'milf', 'cocoa', 'eggnog', 'winter horrorland', 'senpai', 'roses', 'thorns', 'ugh', 'guns', 'stress'];
 
 	inline public static function quantize(f:Float, snap:Float){
@@ -86,48 +88,48 @@ class CoolUtil
 		Sys.exit(0);
 	}
 
-public static function updateTheEngine():Void {
-    // Get the directory of the executable
-    var exePath = Sys.programPath();
-    var exeDir = haxe.io.Path.directory(exePath);
+	public static function updateTheEngine():Void {
+		// Get the directory of the executable
+		var exePath = Sys.programPath();
+		var exeDir = haxe.io.Path.directory(exePath);
 
-    // Construct the source directory path based on the executable location
-    var sourceDirectory = haxe.io.Path.join([exeDir, "update", "raw"]);
-    var sourceDirectory2 = haxe.io.Path.join([exeDir, "update"]);
+		// Construct the source directory path based on the executable location
+		var sourceDirectory = haxe.io.Path.join([exeDir, "update", "raw"]);
+		var sourceDirectory2 = haxe.io.Path.join([exeDir, "update"]);
 
-    // Escape backslashes for use in the batch script
-    sourceDirectory = sourceDirectory.split('\\').join('\\\\');
+		// Escape backslashes for use in the batch script
+		sourceDirectory = sourceDirectory.split('\\').join('\\\\');
 
-    var excludeFolder = "mods";
+		var excludeFolder = "mods";
 
-    // Construct the batch script with echo statements
-    var theBatch = "@echo off\r\n";
-    theBatch += "setlocal enabledelayedexpansion\r\n";
-    theBatch += "set \"sourceDirectory=" + sourceDirectory + "\"\r\n";
-    theBatch += "set \"sourceDirectory2=" + sourceDirectory2 + "\"\r\n";
-    theBatch += "set \"destinationDirectory=" + exeDir + "\"\r\n";
-    theBatch += "set \"excludeFolder=mods\"\r\n";
-    theBatch += "if not exist \"!sourceDirectory!\" (\r\n";
-    theBatch += "  echo Source directory does not exist: !sourceDirectory!\r\n";
-    theBatch += "  pause\r\n";
-    theBatch += "  exit /b\r\n";
-    theBatch += ")\r\n";
-    theBatch += "taskkill /F /IM JSEngine.exe\r\n";
-    theBatch += "cd /d \"%~dp0\"\r\n";
-    theBatch += "xcopy /e /y \"!sourceDirectory!\" \"!destinationDirectory!\"\r\n";
-    theBatch += "rd /s /q \"!sourceDirectory!\"\r\n";
-    theBatch += "start /d \"!destinationDirectory!\" JSEngine.exe\r\n";
-    theBatch += "rd /s /q \"%~dp0\\update\"\r\n";
-    theBatch += "del \"%~f0\"\r\n";
-    theBatch += "endlocal\r\n";
+		// Construct the batch script with echo statements
+		var theBatch = "@echo off\r\n";
+		theBatch += "setlocal enabledelayedexpansion\r\n";
+		theBatch += "set \"sourceDirectory=" + sourceDirectory + "\"\r\n";
+		theBatch += "set \"sourceDirectory2=" + sourceDirectory2 + "\"\r\n";
+		theBatch += "set \"destinationDirectory=" + exeDir + "\"\r\n";
+		theBatch += "set \"excludeFolder=mods\"\r\n";
+		theBatch += "if not exist \"!sourceDirectory!\" (\r\n";
+		theBatch += "  echo Source directory does not exist: !sourceDirectory!\r\n";
+		theBatch += "  pause\r\n";
+		theBatch += "  exit /b\r\n";
+		theBatch += ")\r\n";
+		theBatch += "taskkill /F /IM JSEngine.exe\r\n";
+		theBatch += "cd /d \"%~dp0\"\r\n";
+		theBatch += "xcopy /e /y \"!sourceDirectory!\" \"!destinationDirectory!\"\r\n";
+		theBatch += "rd /s /q \"!sourceDirectory!\"\r\n";
+		theBatch += "start /d \"!destinationDirectory!\" JSEngine.exe\r\n";
+		theBatch += "rd /s /q \"%~dp0\\update\"\r\n";
+		theBatch += "del \"%~f0\"\r\n";
+		theBatch += "endlocal\r\n";
 
-    // Save the batch file in the executable's directory
-    File.saveContent(haxe.io.Path.join([exeDir, "update.bat"]), theBatch);
+		// Save the batch file in the executable's directory
+		File.saveContent(haxe.io.Path.join([exeDir, "update.bat"]), theBatch);
 
-    // Execute the batch file
-			new Process(exeDir + "/update.bat", []);
-    Sys.exit(0);
-}
+		// Execute the batch file
+				new Process(exeDir + "/update.bat", []);
+		Sys.exit(0);
+	}
 
 	public static function checkForOBS():Bool
 	{
@@ -146,7 +148,7 @@ public static function updateTheEngine():Void {
 		return tasklist.contains("obs64.exe") || tasklist.contains("obs32.exe");
 	}
 
-	public static function getSongDuration(musicTime:Float, musicLength:Float):String
+	public static function getSongDuration(musicTime:Float, musicLength:Float, precision:Int = 0):String
 	{
 		final secondsMax:Int = Math.floor((musicLength - musicTime) / 1000); // 1 second = 1000 miliseconds
 		var secs:String = '' + Math.floor(secondsMax) % 60;
@@ -161,13 +163,20 @@ public static function updateTheEngine():Void {
 			if (mins.length < 2) mins = "0"+ mins;
 			shit = hour+":"+mins + ":" + secs;
 		}
+		if (precision > 0)
+		{
+			var secondsForMS:Float = ((musicLength - musicTime) / 1000) % 60;
+			var seconds:Int = Std.int((secondsForMS - Std.int(secondsForMS)) * Math.pow(10, precision));
+			shit += ".";
+			shit += seconds;
+		}
 		return shit;
 	}
-	public static function formatTime(musicTime:Float):String
+	public static function formatTime(musicTime:Float, precision:Int = 0):String
 	{
 		var secs:String = '' + Math.floor(musicTime / 1000) % 60;
-		var mins:String = "" + Math.floor(musicTime / 1000 / 60)%60;
-		final hour:String = '' + Math.floor((musicTime / 1000 / 3600))%24;
+		var mins:String = "" + Math.floor(musicTime / 1000 / 60) % 60;
+		var hour:String = '' + Math.floor((musicTime / 1000 / 3600)) % 24;
 
 		if (secs.length < 2)
 			secs = '0' + secs;
@@ -176,6 +185,18 @@ public static function updateTheEngine():Void {
 		if (hour != "0"){
 			if (mins.length < 2) mins = "0"+ mins;
 			shit = hour+":"+mins + ":" + secs;
+		}
+		if (precision > 0)
+		{
+			var secondsForMS:Float = (musicTime / 1000) % 60;
+			var seconds:Int = Std.int((secondsForMS - Std.int(secondsForMS)) * Math.pow(10, precision));
+			shit += ".";
+			if (precision > 1 && Std.string(seconds).length < precision)
+			{
+				var zerosToAdd:Int = precision - Std.string(seconds).length;
+				for (i in 0...zerosToAdd) shit += '0';
+			}
+			shit += seconds;
 		}
 		return shit;
 	}
@@ -210,8 +231,8 @@ public static function updateTheEngine():Void {
 	{
 		if(num == null) num = PlayState.storyDifficulty;
 
-		var fileSuffix:String = difficulties[num];
-		if(fileSuffix != defaultDifficulty || !defaultDifficultyThings.contains(fileSuffix)) //this is meant to fix a bug where putting the difficulty in all lowercase would treat normal as a custom difficulty
+		var fileSuffix:String = difficulties[num].toLowerCase();
+		if(fileSuffix != defaultDifficulty.toLowerCase())
 		{
 			fileSuffix = '-' + fileSuffix;
 		}

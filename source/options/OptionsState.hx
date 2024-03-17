@@ -45,6 +45,7 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 	public var enteringDebugMenu:Bool = false;
 	private var mainCamera:FlxCamera;
 	private var subCamera:FlxCamera;
+	private var otherCamera:FlxCamera;
 
 	function openSelectedSubstate(label:String) {
 		switch(label) {
@@ -79,19 +80,22 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 		Paths.clearUnusedMemory();
 		mainCamera = new FlxCamera();
 		subCamera = new FlxCamera();
+		otherCamera = new FlxCamera();
 		subCamera.bgColor.alpha = 0;
+		otherCamera.bgColor.alpha = 0;
 
 		FlxG.cameras.reset(mainCamera);
 		FlxG.cameras.add(subCamera, false);
+		FlxG.cameras.add(otherCamera, false);
 
 		FlxG.cameras.setDefaultDrawTarget(mainCamera, true);
-		CustomFadeTransition.nextCamera = subCamera;
+		CustomFadeTransition.nextCamera = otherCamera;
 
 		camFollow = new FlxObject(0, 0, 1, 1);
 		camFollowPos = new FlxObject(0, 0, 1, 1);
 		add(camFollow);
 		add(camFollowPos);
-		FlxG.camera.follow(camFollowPos, null, 1);
+		FlxG.cameras.list[FlxG.cameras.list.indexOf(subCamera)].follow(camFollowPos, null, 1);
 
 		#if desktop
 		DiscordClient.changePresence("Options Menu", null);
@@ -117,14 +121,17 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 			optionText.screenCenter();
 			optionText.y += (100 * (i - (options.length / 2))) + 50;
 			optionText.scrollFactor.set(0, yScroll*1.5);
+			optionText.cameras = [subCamera];
 			grpOptions.add(optionText);
 		}
 		//I TOOK THIS FROM THE MAIN MENU STATE, NOT FROM DENPA ENGINE
 		selectorLeft = new Alphabet(0, 0, '>', true);
 		selectorLeft.scrollFactor.set(0, yScroll*1.5);
+		selectorLeft.cameras = [subCamera];
 		add(selectorLeft);
 		selectorRight = new Alphabet(0, 0, '<', true);
 		selectorRight.scrollFactor.set(0, yScroll*1.5);
+		selectorRight.cameras = [subCamera];
 		add(selectorRight);
 
 		changeSelection();
@@ -152,6 +159,7 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 		}
 
 		if (controls.BACK && !isEnteringKonamiCode) {
+			CustomFadeTransition.nextCamera = otherCamera;
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			if(PauseSubState.inPause)
 			{

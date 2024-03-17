@@ -41,6 +41,10 @@ typedef CharacterFile = {
 	var health_drain:Bool;
 	var drain_amount:Float;
 	var drain_floor:Float;
+
+	var shake_screen:Bool;
+	var shake_intensity:Float;
+	var shake_duration:Float;
 }
 
 typedef AnimArray = {
@@ -89,6 +93,10 @@ class Character extends FlxSprite
 	public var healthDrain:Bool = false;
 	public var drainAmount:Float = 0;
 	public var drainFloor:Float = 0;
+
+	public var shakeScreen:Bool = false;
+	public var shakeIntensity:Float = 0;
+	public var shakeDuration:Float = 0;
 
 	//Used on Character Editor
 	public var imageFile:String = '';
@@ -211,14 +219,15 @@ class Character extends FlxSprite
 					healthDrain = json.health_drain;
 				} else healthDrain = false;
 
-				if(healthDrain) {
-					drainAmount = json.drain_amount;
-					drainFloor = json.drain_floor;
-				}
-				else {
-					drainAmount = 0.01;
-					drainFloor = 0.1;
-				}
+				if(Std.string(json.shake_screen).length > 0) {
+					shakeScreen = json.shake_screen;
+				} else shakeScreen = false;
+
+				drainAmount = json.drain_amount;
+				drainFloor = json.drain_floor;
+
+				shakeIntensity = (!Math.isNaN(json.shake_intensity) ? json.shake_intensity : 0.0075);
+				shakeDuration = (!Math.isNaN(json.shake_duration) ? json.shake_duration : 0.1);
 
 				if(json.healthbar_colors != null && json.healthbar_colors.length > 2)
 					healthColorArray = json.healthbar_colors;

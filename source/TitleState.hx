@@ -136,7 +136,7 @@ class TitleState extends MusicBeatState
 
 		ClientPrefs.loadPrefs();
 
-		#if (CHECK_FOR_UPDATESd)
+		#if (CHECK_FOR_UPDATES)
 		if(ClientPrefs.checkForUpdates && !closedState) {
 			trace('checking for update');
 			var http = new haxe.Http("https://raw.githubusercontent.com/JordanSantiagoYT/FNF-PsychEngine-NoBotplayLag/main/THECHANGELOG.md");

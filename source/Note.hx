@@ -22,6 +22,32 @@ typedef EventNote = {
 	value2:String
 }
 
+typedef PreloadedChartNote = {
+	strumTime:Float,
+	noteData:Int,
+	mustPress:Bool,
+	noteType:String,
+	animSuffix:String,
+	noteskin:String,
+	texture:String,
+	noAnimation:Bool,
+	noMissAnimation:Bool,
+	gfNote:Bool,
+	isSustainNote:Bool,
+	isSustainEnd:Bool,
+	sustainLength:Float,
+	sustainScale:Float,
+	parent:PreloadedChartNote,
+	prevNote:Note,
+	strum:StrumNote,
+	hitHealth:Float,
+	missHealth:Float,
+	hitCausesMiss:Null<Bool>,
+	wasHit:Bool,
+	multSpeed:Float,
+	wasSpawned:Bool
+}
+
 class Note extends FlxSprite
 {
 
@@ -100,12 +126,12 @@ class Note extends FlxSprite
 
 	public var strum:StrumNote = null;
 
-	public var instance:Note = null;
-
 	public var loadSprite:Bool = false;
 	public var inEkSong:Bool = false;
 
 	public var texture(default, set):String = null;
+
+	public var sustainScale:Float = 1;
 
 	public var noAnimation:Bool = false;
 	public var noMissAnimation:Bool = false;
@@ -131,18 +157,23 @@ class Note extends FlxSprite
 	}
 
 	private function set_texture(value:String):String {
-		if(texture != value && ClientPrefs.showNotes) {
-			reloadNote('', value);
+		if (!inEditor && !PlayState.isPixelStage)
+		{
+			if (!Paths.noteSkinFramesMap.exists(value)) Paths.initNote(4, value);
+			frames = @:privateAccess Paths.noteSkinFramesMap.get(value);
+			animation.copyFrom(@:privateAccess Paths.noteSkinAnimsMap.get(value));
+			antialiasing = ClientPrefs.globalAntialiasing;
+			scale.set(0.7, 0.7);
+			updateHitbox();
 		}
 		texture = value;
 		return value;
 	}
 
-	public function quantCheck():Void 
+	public function quantCheck(timeToCheck:Float):Void 
 	{
-		if (colorSwap != null && ClientPrefs.noteColorStyle == 'Quant-Based' && !isSustainNote && (ClientPrefs.showNotes && ClientPrefs.enableColorShader))
+		if (colorSwap != null && ClientPrefs.noteColorStyle == 'Quant-Based' && (ClientPrefs.showNotes && ClientPrefs.enableColorShader))
 			{
-				var time = strumTime;
 				var theCurBPM = Conductor.bpm;
 				var stepCrochet:Float = (60 / theCurBPM) * 1000;
 				var latestBpmChangeIndex = -1;
@@ -150,18 +181,18 @@ class Note extends FlxSprite
 
 				for (i in 0...Conductor.bpmChangeMap.length) {
 					var bpmchange = Conductor.bpmChangeMap[i];
-					if (strumTime >= bpmchange.songTime) {
+					if (timeToCheck >= bpmchange.songTime) {
 						latestBpmChangeIndex = i; // Update index of latest change
 						latestBpmChange = bpmchange;
 					}
 				}
 				if (latestBpmChangeIndex >= 0) {
 					theCurBPM = latestBpmChange.bpm;
-					time -= latestBpmChange.songTime;
+					timeToCheck -= latestBpmChange.songTime;
 					stepCrochet = (60 / theCurBPM) * 1000;
 				}
 
-				var beat = Math.round((time / stepCrochet) * 48);
+				var beat = Math.round((timeToCheck / stepCrochet) * 48);
 				for (i in 0...beats.length)
 				{
 					if (beat % (192 / beats[i]) == 0)
@@ -306,45 +337,31 @@ class Note extends FlxSprite
 		}
 		if (ClientPrefs.showNotes && ClientPrefs.enableColorShader)
 		{
-		noteSplashHue = colorSwap.hue;
-		noteSplashSat = colorSwap.saturation;
-		noteSplashBrt = colorSwap.brightness;
+			noteSplashHue = colorSwap.hue;
+			noteSplashSat = colorSwap.saturation;
+			noteSplashBrt = colorSwap.brightness;
 		}
 		return value;
 	}
 
-	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?noteskinToLoad:String, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?loadSprite:Bool = true)
+	public function new(?noteskinToLoad:String, ?inEditor:Bool = false, ?loadSprite:Bool = true)
 	{
 		super();
-
-		instance = this;
 
 		if (prevNote == null)
 			prevNote = this;
 
 		this.loadSprite = loadSprite;
 		if (PlayState.instance != null && PlayState.instance.isEkSong) inEkSong = true;
-
-		this.prevNote = prevNote;
-		isSustainNote = sustainNote;
 		this.inEditor = inEditor;
 
-		x += (ClientPrefs.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X) + 50;
-		// MAKE SURE ITS DEFINITELY OFF SCREEN?
 		y -= 2000;
-		this.strumTime = strumTime;
-		if(!inEditor) this.strumTime += ClientPrefs.noteOffset;
-		var noteskin:String = noteskinToLoad;
-
-		this.noteData = noteData;
-
-		if (!ClientPrefs.showNotes) loadNoteAnims();
 
 		if(noteData > -1) {
 			if (ClientPrefs.showNotes && loadSprite)
 			{
-			texture = ''; 
-			if (noteskin != null && noteskin != '') texture = "noteskins/" + noteskin;
+			texture = 'NOTE_assets'; 
+			if (noteskinToLoad.length > 1) texture = "noteskins/" + noteskinToLoad;
 			if(ClientPrefs.noteStyleThing == 'VS Nonsense V2') {
 				texture = 'Nonsense_NOTE_assets';
 			}
@@ -372,11 +389,12 @@ class Note extends FlxSprite
 			if(ClientPrefs.noteColorStyle == 'Grayscale') {
 				texture = 'GRAY_NOTE_assets';
 			}
+
 			if (ClientPrefs.enableColorShader)
 			{
 					colorSwap = new ColorSwap();
 					shader = colorSwap.shader;
-					if (ClientPrefs.noteColorStyle == 'Normal' && noteData < ClientPrefs.arrowHSV.length) //the notedata check prevents a null object reference when loading ek lua charts
+					if (ClientPrefs.noteColorStyle == 'Normal' && noteData < ClientPrefs.arrowHSV.length)
 					{
 						colorSwap.hue = ClientPrefs.arrowHSV[noteData][0] / 360;
 						colorSwap.saturation = ClientPrefs.arrowHSV[noteData][1] / 100;
@@ -386,24 +404,19 @@ class Note extends FlxSprite
 					{
 						colorSwap.hue = ((strumTime / 5000 * 360) / 360) % 1;
 					}
-				if (ClientPrefs.noteColorStyle == 'Char-Based')
-				{
-					if (PlayState.instance != null) {
- 						if (!mustPress) !PlayState.opponentChart ? this.shader = new ColoredNoteShader(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2], false, 10) : this.shader = new ColoredNoteShader(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2], false, 10);
-						if (mustPress) {
-							!PlayState.opponentChart ? this.shader = new ColoredNoteShader(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2], false, 10) : this.shader = new ColoredNoteShader(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2], false, 10);
-						}
-						if (gfNote) {
-						if (PlayState.instance.gf != null) this.shader = new ColoredNoteShader(PlayState.instance.gf.healthColorArray[0], PlayState.instance.gf.healthColorArray[1], PlayState.instance.gf.healthColorArray[2], false, 10);
+					if (ClientPrefs.noteColorStyle == 'Char-Based')
+					{
+						if (PlayState.instance != null) {
+ 							if (!mustPress) !PlayState.opponentChart ? this.shader = new ColoredNoteShader(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2], false, 10) : this.shader = new ColoredNoteShader(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2], false, 10);
+							if (mustPress) {
+								!PlayState.opponentChart ? this.shader = new ColoredNoteShader(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2], false, 10) : this.shader = new ColoredNoteShader(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2], false, 10);
+							}
+							if (gfNote) {
+								if (PlayState.instance.gf != null) this.shader = new ColoredNoteShader(PlayState.instance.gf.healthColorArray[0], PlayState.instance.gf.healthColorArray[1], PlayState.instance.gf.healthColorArray[2], false, 10);
+							}
 						}
 					}
 				}
-			}
-			}
-			x += swagWidth * (noteData);
-			if(!isSustainNote && noteData > -1 && noteData < 4) { //Doing this 'if' check to fix the warnings on Senpai songs
-				final animToPlay:String = colArray[noteData % 4];
-				animation.play(animToPlay + 'Scroll');
 			}
 		}
 
@@ -423,65 +436,6 @@ class Note extends FlxSprite
 			default:
 				missHealth = 0.0475;
 		}
-
-		if (isSustainNote && prevNote != null)
-		{
-			alpha = 0.6;
-			multAlpha = 0.6;
-			hitsoundDisabled = true;
-			flipY = ClientPrefs.downScroll;
-			prevNoteIsSustainNote = prevNote.isSustainNote;
-
-			offsetX += width / 2;
-			copyAngle = false;
-
-			animation.play(colArray[noteData % 4] + 'holdend');
-			if (ClientPrefs.showNotes)
-			{
-				if (ClientPrefs.noteColorStyle == 'Quant-Based' && ClientPrefs.enableColorShader)
-				{
-				colorSwap.hue = prevNote.colorSwap.hue;
-				colorSwap.saturation = prevNote.colorSwap.saturation;
-				colorSwap.brightness = prevNote.colorSwap.brightness;
-				}
-
-			updateHitbox();
-			}
-
-			offsetX -= width / 2;
-
-			if (PlayState.isPixelStage)
-				offsetX += 30;
-
-			if (prevNote.isSustainNote)
-			{
-				prevNote.animation.play(colArray[prevNote.noteData % 4] + 'hold');
-
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05;
-				if(PlayState.instance != null)
-				{
-					prevNote.scale.y *= PlayState.instance.songSpeed;
-				}
-
-				if(PlayState.isPixelStage) {
-					prevNote.scale.y *= 1.19;
-					prevNote.scale.y *= (6 / height); //Auto adjust note size
-				}
-				prevNote.updateHitbox();
-				// prevNote.setGraphicSize();
-			}
-
-			if(PlayState.isPixelStage) {
-				scale.y *= PlayState.daPixelZoom;
-				updateHitbox();
-			}
-		} else if(!isSustainNote) {
-			earlyHitMult = 1;
-			centerOffsets();
-			centerOrigin();
-		}
-		x += offsetX;
-		if (ClientPrefs.noteColorStyle == 'Quant-Based' && ClientPrefs.showNotes && ClientPrefs.enableColorShader) quantCheck();
 	}
 
 	var lastNoteOffsetXForPixelAutoAdjusting:Float = 0;
@@ -579,12 +533,11 @@ class Note extends FlxSprite
 	}
 
 	function loadPixelNoteAnims() {
-		if(isSustainNote) {
-			animation.add(colArray[noteData] + 'holdend', [pixelInt[noteData] + 4]);
-			animation.add(colArray[noteData] + 'hold', [pixelInt[noteData]]);
-		} else {
-			animation.add(colArray[noteData] + 'Scroll', [pixelInt[noteData] + 4]);
-		}
+		if(isSustainNote)
+		{
+			animation.add(colArray[noteData] + 'holdend', [noteData + 4], 24, true);
+			animation.add(colArray[noteData] + 'hold', [noteData], 24, true);
+		} else animation.add(colArray[noteData] + 'Scroll', [noteData + 4], 24, true);
 	}
 
 	public function updateNoteSkin(noteskin:String) {
@@ -652,8 +605,27 @@ class Note extends FlxSprite
 		}
 	}
 
-	public function followStrumNote(strum:StrumNote, fakeCrochet:Float, songSpeed:Float = 1)
+	public function followStrum(strum:StrumNote, fakeCrochet:Float, songSpeed:Float = 1):Void
 	{
+		if (isSustainNote) 
+		{
+			
+			flipY = strum.downScroll;
+			if (ClientPrefs.noteStyleThing == 'Chip' || ClientPrefs.noteStyleThing == 'Future') scale.set(0.7, animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? 0.7 : Conductor.stepCrochet * 0.0105 * (0.58 * songSpeed / multSpeed) * sustainScale);
+			else 
+			{
+				offsetX = 36.5;
+				scale.set(0.7, animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? 1 : Conductor.stepCrochet * 0.0105 * (songSpeed * multSpeed) * sustainScale);
+				if (PlayState.isPixelStage) 
+				{
+					scale.x *= PlayState.daPixelZoom;
+					scale.y *= PlayState.daPixelZoom;
+				}
+			}
+
+			updateHitbox();
+		}
+			
 		distance = (0.45 * (Conductor.songPosition - strumTime) * songSpeed * multSpeed);
 		if (!strum.downScroll) distance *= -1;
 
@@ -695,33 +667,29 @@ class Note extends FlxSprite
 
 	public function clipToStrumNote(myStrum:StrumNote)
 	{
-					// From 0.7+
-					final center = strum.y + (Note.swagWidth * 0.5);
-					var playerClipRectCheck:Bool = mustPress && isSustainNote && (wasGoodHit && prevNote.wasGoodHit || !tooLate) &&
-						(PlayState.instance.parseKeys()[noteData] || animation.curAnim.name.endsWith('end') || PlayState.instance.cpuControlled);
-					var opponentClipRectCheck:Bool = !mustPress && isSustainNote;
-					if (playerClipRectCheck || opponentClipRectCheck)
-					{
-						var swagRect:FlxRect = clipRect;
-						if(swagRect == null) swagRect = new FlxRect(0, 0, frameWidth, frameHeight);
+		final center:Float = myStrum.y + offsetY + Note.swagWidth / 2;
+		if(isSustainNote && (mustPress || !ignoreNote) &&
+			(!mustPress || (wasGoodHit || (prevNote.wasGoodHit && !canBeHit))))
+		{
+			final swagRect:FlxRect = clipRect != null ? clipRect : new FlxRect(0, 0, frameWidth, frameHeight);
 
-						if (strum.downScroll)
-						{
-							if(y - offset.y * scale.y + height >= center)
-							{
-								swagRect.width = frameWidth;
-								swagRect.height = (center - y) / scale.y;
-								swagRect.y = frameHeight - swagRect.height;
-							}
-						}
-						else if (y + offset.y * scale.y <= center)
-						{
-							swagRect.y = (center - y) / scale.y;
-							swagRect.width = width / scale.x;
-							swagRect.height = (height / scale.y) - swagRect.y;
-						}
-						clipRect = swagRect;
-					}
+			if (myStrum.downScroll)
+			{
+				if(y - offset.y * scale.y + height >= center)
+				{
+					swagRect.width = frameWidth;
+					swagRect.height = (center - y) / scale.y;
+					swagRect.y = frameHeight - swagRect.height;
+				}
+			}
+			else if (y + offset.y * scale.y <= center)
+			{
+				swagRect.y = (center - y) / scale.y;
+				swagRect.width = width / scale.x;
+				swagRect.height = (height / scale.y) - swagRect.y;
+			}
+			clipRect = swagRect;
+		}
 	}
 	public function updateRGBColors() {
         	if (Std.isOfType(this.shader, ColoredNoteShader))
@@ -732,5 +700,44 @@ class Note extends FlxSprite
 				!PlayState.opponentChart ? cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2]) : cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2]);
 	    		else if (gfNote && PlayState.instance.gf != null) cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.gf.healthColorArray[0], PlayState.instance.gf.healthColorArray[1], PlayState.instance.gf.healthColorArray[2]);
 		}
+	}
+	// this is used for note recycling
+	public function setupNoteData(chartNoteData:PreloadedChartNote):Note
+	{
+		wasGoodHit = hitByOpponent = tooLate = false; // Don't make an update call of this for the note group
+
+		strumTime = chartNoteData.strumTime;
+		if(!inEditor) strumTime += ClientPrefs.noteOffset;
+		noteData = Std.int(chartNoteData.noteData % 4);
+		noteType = chartNoteData.noteType;
+		animSuffix = chartNoteData.animSuffix;
+		noAnimation = noMissAnimation = chartNoteData.noAnimation;
+		mustPress = chartNoteData.mustPress;
+		gfNote = chartNoteData.gfNote;
+		isSustainNote = chartNoteData.isSustainNote;
+		if (chartNoteData.noteskin.length > 0 && chartNoteData.noteskin != '' && chartNoteData.noteskin != texture) texture = 'noteskins/' + chartNoteData.noteskin;
+		if (chartNoteData.texture.length > 0 && chartNoteData.texture != texture) texture = chartNoteData.texture;
+		sustainLength = chartNoteData.sustainLength;
+		sustainScale = chartNoteData.sustainScale;
+
+		strum = chartNoteData.strum;
+		hitHealth = chartNoteData.hitHealth;
+		missHealth = chartNoteData.missHealth;
+		hitCausesMiss = chartNoteData.hitCausesMiss;
+		multSpeed = chartNoteData.multSpeed;
+
+		if (PlayState.isPixelStage) reloadNote('', texture);
+		animation.play(colArray[noteData % 4] + 'Scroll');
+		if (isSustainNote) animation.play(colArray[noteData % 4] + (chartNoteData.isSustainEnd ? 'holdend' : 'hold'));
+
+		if (ClientPrefs.showNotes && ClientPrefs.enableColorShader)
+		{
+			if (ClientPrefs.noteColorStyle == 'Quant-Based') quantCheck(isSustainNote ? chartNoteData.parent.strumTime : chartNoteData.strumTime);
+			if (ClientPrefs.noteColorStyle == 'Char-Based') updateRGBColors();
+			if (ClientPrefs.noteColorStyle == 'Rainbow') colorSwap.hue = ((strumTime / 5000 * 360) / 360) % 1;
+		}
+		if (isSustainNote) correctionOffset = ClientPrefs.downScroll ? 0 : 55;
+
+		return this;
 	}
 }

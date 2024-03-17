@@ -25,6 +25,9 @@ import flixel.input.keyboard.FlxKey;
 import flixel.graphics.FlxGraphic;
 import Controls;
 
+import flixel.ui.FlxButton;
+import flixel.addons.ui.FlxUIInputText; //These are both for the search bars
+
 using StringTools;
 
 class BaseOptionsMenu extends MusicBeatSubstate
@@ -40,6 +43,9 @@ class BaseOptionsMenu extends MusicBeatSubstate
 	private var boyfriend:Character = null;
 	private var descBox:FlxSprite;
 	private var descText:FlxText;
+
+	var optionSearchText:FlxUIInputText;
+	var searchText:FlxText;
 
 	public var title:String;
 	public var rpcTitle:String;
@@ -123,6 +129,26 @@ class BaseOptionsMenu extends MusicBeatSubstate
 
 		changeSelection();
 		reloadCheckboxes();
+
+		originalOptionsArray = optionsArray.copy();
+
+		optionSearchText = new FlxUIInputText(0, 0, 500, '', 16);
+		optionSearchText.x = FlxG.width - optionSearchText.width;
+		add(optionSearchText);
+
+		var buttonTop:FlxButton = new FlxButton(0, optionSearchText.y + optionSearchText.height + 5, "", function() {
+			optionsSearch(optionSearchText.text);
+		});
+		buttonTop.setGraphicSize(Std.int(optionSearchText.width), 50);
+		buttonTop.updateHitbox();
+		buttonTop.label.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.BLACK, RIGHT);
+		buttonTop.x = FlxG.width - buttonTop.width;
+		add(buttonTop);
+
+		searchText = new FlxText(975, buttonTop.y + 20, 100, "Search", 24);
+		searchText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.BLACK);
+		add(searchText);
+		FlxG.mouse.visible = true;
 	}
 
 	public function addOption(option:Option) {
@@ -130,11 +156,111 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		optionsArray.push(option);
 	}
 
+	var originalOptionsArray:Array<Option> = [];
+	var optionsFound:Array<Option> = [];
+	function optionsSearch(?query:String = '')
+	{
+		optionsFound = [];
+		var foundOptions:Int = 0;
+		final txt:FlxText = new FlxText(0, 0, 0, 'No options found matching your query', 16);
+		txt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		txt.scrollFactor.set();
+		txt.screenCenter(XY);
+		for (i in 0...originalOptionsArray.length) {
+				if (query != null && query.length > 0) {
+					var optionName = originalOptionsArray[i].name.toLowerCase();
+					var q = query.toLowerCase();
+					if (optionName.indexOf(q) != -1) 
+					{
+						optionsFound.push(originalOptionsArray[i]);
+						foundOptions++;
+					}
+				}
+		}
+		if (foundOptions > 0 || query.length <= 0){
+			if (txt != null)
+				remove(txt); // don't do destroy/kill on this btw
+			regenerateOptions(query);
+		}
+		else if (foundOptions <= 0){
+			add(txt);
+			new FlxTimer().start(3, function(timer) {
+				if (txt != null)
+					remove(txt);
+			});
+			return;
+		}
+	}
+	function regenerateOptions(?query:String = '') {
+		if (query.length > 0) optionsArray = optionsFound;
+		else if (optionsArray != originalOptionsArray) optionsArray = originalOptionsArray.copy();
+		regenList();
+	}
+
+	function regenList() {
+			grpOptions.forEach(option -> {
+				grpOptions.remove(option, true);
+				option.destroy();
+			});
+			grpTexts.forEach(text -> {
+				grpTexts.remove(text, true);
+				text.destroy();
+			});
+			checkboxGroup.forEach(check -> {
+				checkboxGroup.remove(check, true);
+				check.destroy();
+			});
+			
+			//we clear the remaining ones
+			grpOptions.clear();
+			grpTexts.clear();
+			checkboxGroup.clear();
+
+		for (i in 0...optionsArray.length)
+		{
+			var optionText:Alphabet = new Alphabet(290, 260, optionsArray[i].name, false);
+			optionText.isMenuItem = true;
+			/*optionText.forceX = 300;
+			optionText.yMult = 90;*/
+			optionText.targetY = i;
+			grpOptions.add(optionText);
+
+			if(optionsArray[i].type == 'bool') {
+				var checkbox:CheckboxThingie = new CheckboxThingie(optionText.x - 105, optionText.y, optionsArray[i].getValue() == true);
+				checkbox.sprTracker = optionText;
+				checkbox.ID = i;
+				checkboxGroup.add(checkbox);
+			} else if (optionsArray[i].type != 'link') {
+				optionText.x -= 80;
+				optionText.startPosition.x -= 80;
+				//optionText.xAdd -= 80;
+				var valueText:AttachedText = new AttachedText('' + optionsArray[i].getValue(), optionText.width + 80);
+				valueText.sprTracker = optionText;
+				valueText.copyAlpha = true;
+				valueText.ID = i;
+				grpTexts.add(valueText);
+				optionsArray[i].setChild(valueText);
+			}
+			//optionText.snapToPosition(); //Don't ignore me when i ask for not making a fucking pull request to uncomment this line ok
+
+			if(optionsArray[i].showBoyfriend && boyfriend == null)
+			{
+				reloadBoyfriend();
+			}
+			updateTextFrom(optionsArray[i]);
+		}
+
+		changeSelection();
+		reloadCheckboxes();
+	}
+
 	var nextAccept:Int = 5;
 	var holdTime:Float = 0;
 	var holdValue:Float = 0;
 	override function update(elapsed:Float)
 	{
+		if (!optionSearchText.hasFocus)
+		{
 		if (controls.UI_UP_P)
 		{
 			changeSelection(-1);
@@ -257,6 +383,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				reloadCheckboxes();
 			}
+		}
 		}
 
 		if(boyfriend != null && boyfriend.animation.curAnim.finished) {

@@ -8,6 +8,7 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
+import flixel.addons.transition.FlxTransitionableState;
 
 class StartupState extends MusicBeatState
 {
@@ -19,6 +20,8 @@ class StartupState extends MusicBeatState
 
 	override public function create():Void
 	{
+		FlxTransitionableState.skipNextTransIn = true;
+		FlxTransitionableState.skipNextTransOut = true;
 		logo = new FlxSprite().loadGraphic(Paths.image('sillyLogo', 'splash'));
 		logo.scrollFactor.set();
 		logo.screenCenter();
@@ -26,7 +29,7 @@ class StartupState extends MusicBeatState
 		logo.active = true;
 		add(logo);
 
-			skipTxt = new FlxText(0, FlxG.height, 0, 'Press Enter To Skip', 16);
+			skipTxt = new FlxText(0, FlxG.height, 0, 'Press ENTER To Skip', 16);
 			skipTxt.setFormat("Comic Sans MS Bold", 18, FlxColor.WHITE, FlxTextAlign.LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			skipTxt.borderSize = 1.5;
 			skipTxt.antialiasing = true;
@@ -46,12 +49,10 @@ class StartupState extends MusicBeatState
 						logo.updateHitbox();
 						logo.screenCenter();
 						FlxTween.tween(logo, {alpha: 1, "scale.x": 1, "scale.y": 1}, 0.95, {
-							ease: FlxEase.quadInOut,
+							ease: FlxEase.expoOut,
 							onComplete: _ -> {
-								logo.updateHitbox();
-								logo.screenCenter();
-								FlxTween.tween(logo, {alpha: 0, "scale.x": 8, "scale.y": 8}, 1, {
-									ease: FlxEase.quadInOut,
+								FlxTween.tween(logo, {alpha: 0}, 1, {
+									ease: FlxEase.linear,
 									onComplete: function(_){
 										FlxG.switchState(TitleState.new);
 									}
@@ -66,12 +67,10 @@ class StartupState extends MusicBeatState
 						logo.updateHitbox();
 						logo.screenCenter();
 						FlxTween.tween(logo, {alpha: 1, "scale.x": 1, "scale.y": 1}, 1.35, {
-							ease: FlxEase.quadInOut,
+							ease: FlxEase.expoOut,
 							onComplete: _ -> {
-								logo.updateHitbox();
-								logo.screenCenter();
-								FlxTween.tween(logo, {alpha: 0, "scale.x": 8, "scale.y": 8}, 1, {
-									ease: FlxEase.quadInOut,
+								FlxTween.tween(logo, {alpha: 0}, 1, {
+									ease: FlxEase.linear,
 									onComplete: function(_){
 										FlxG.switchState(TitleState.new);
 									}
