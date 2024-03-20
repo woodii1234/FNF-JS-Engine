@@ -67,6 +67,22 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		option.displayFormat = '%v FPS';
 		option.onChange = onChangeFramerate;
 		fpsOption = option;
+
+		#if windows
+		var option:Option = new Option('Video Bitrate: ',
+			"Use this option to set your video's bitrate!",
+			'renderBitrate',
+			'float',
+			5.00);
+		addOption(option);
+
+		option.minValue = 1.0;
+		option.maxValue = 100.0;
+		option.scrollSpeed = 5;
+		option.changeValue = 0.01;
+		option.decimals = 2;
+		option.displayFormat = '%v Mbps';
+		#end
 		
 		#if !windows
 		var option:Option = new Option('Lossless Screenshots',

@@ -159,6 +159,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var quality:Int = 80;
 	public static var noCapture:Bool = false;
 	public static var renderGCRate:Float = 5.0;
+	public static var renderBitrate:Float = 5.0;
 
 	//Misc
 	public static var JSEngineRecharts:Bool = false;
@@ -401,6 +402,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.quality = quality;
 		FlxG.save.data.noCapture = noCapture;
 		FlxG.save.data.renderGCRate = renderGCRate;
+		FlxG.save.data.renderBitrate = renderBitrate;
 
 		//Note HSV
 		FlxG.save.data.arrowHSV = arrowHSV;
@@ -932,6 +934,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.renderGCRate != null) {
 			renderGCRate = FlxG.save.data.renderGCRate;
+		}
+		if(FlxG.save.data.renderBitrate != null) {
+			renderBitrate = FlxG.save.data.renderBitrate;
 		}
 
 		//Misc Settings
