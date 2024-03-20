@@ -45,7 +45,10 @@ typedef PreloadedChartNote = {
 	hitCausesMiss:Null<Bool>,
 	wasHit:Bool,
 	multSpeed:Float,
-	wasSpawned:Bool
+	wasSpawned:Bool,
+	canBeHit:Bool,
+	ignoreNote:Bool,
+	wasMissed:Bool
 }
 
 class Note extends FlxSprite
