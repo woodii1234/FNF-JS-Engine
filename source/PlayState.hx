@@ -317,6 +317,8 @@ class PlayState extends MusicBeatState
 	public static var chartingMode:Bool = false;
 	public static var playerIsCheating:Bool = false; //Whether the player is cheating. Enables if you change BOTPLAY or Practice Mode in the Pause menu
 
+	public static var disableBotWatermark:Bool = false;
+
 	public var shownScore:Float = 0;
 
 	public var fcStrings:Array<String> = ['No Play', 'PFC', 'SFC', 'GFC', 'BFC', 'FC', 'SDCB', 'Clear', 'TDCB', 'QDCB'];
@@ -5148,8 +5150,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 								timeTxt.text += ' (' + playbackRateDecimal + 'x)';
 							else timeTxt.text = SONG.song + ' (' + playbackRateDecimal + 'x)';
 						}
-						if (cpuControlled && ClientPrefs.timeBarType != 'Song Name' && !ClientPrefs.communityGameBot) timeTxt.text += ' (Bot)';
-						if(ClientPrefs.timebarShowSpeed && cpuControlled && ClientPrefs.timeBarType == 'Song Name') timeTxt.text = SONG.song + ' (' + FlxMath.roundDecimal(playbackRate, 2) + 'x) (Bot)';
+						if (cpuControlled && ClientPrefs.timeBarType != 'Song Name' && !ClientPrefs.communityGameBot && !disableBotWatermark) timeTxt.text += ' (Bot)';
+						if(ClientPrefs.timebarShowSpeed && cpuControlled && ClientPrefs.timeBarType == 'Song Name' && !ClientPrefs.communityGameBot && !disableBotWatermark) timeTxt.text = SONG.song + ' (' + FlxMath.roundDecimal(playbackRate, 2) + 'x) (Bot)';
 					}
 				}
 				if(ffmpegMode) {
@@ -9178,6 +9180,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		process.close();
 		process.kill();
 
-		FlxG.autoPause = true;
+		FlxG.autoPause = ClientPrefs.autoPause;
 	}
 }
