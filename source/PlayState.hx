@@ -4025,6 +4025,8 @@ class PlayState extends MusicBeatState
 					if (swagNote.noteskin.length > 0 && !Paths.noteSkinFramesMap.exists(swagNote.noteskin)) inline Paths.initNote(4, swagNote.noteskin);
 
 					if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
+
+					if(Std.isOfType(songNotes[3], Bool)) swagNote.animSuffix = (songNotes[3] || section.altAnim ? '-alt' : ''); //Compatibility with charts made by SNIFF
 		
 					if (!noteTypeMap.exists(swagNote.noteType)) {
 						noteTypeMap.set(swagNote.noteType, true);
@@ -6410,6 +6412,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 	public static function restartSong(noTrans:Bool = true)
 	{
+		if (process != null) stopRender();
 		PlayState.instance.paused = true; // For lua
 		if (ClientPrefs.songLoading) FlxG.sound.music.volume = 0;
 		if (ClientPrefs.songLoading) PlayState.instance.vocals.volume = 0;
@@ -9141,7 +9144,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 	// Render mode stuff.. If SGWLC isn't ok with this I will remove it :thumbsup:
 
-	private var process:sys.io.Process;
+	public static var process:sys.io.Process;
 	var ffmpegExists:Bool = false;
 
 	private function initRender():Void
@@ -9171,7 +9174,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		process.stdin.writeBytes(bytes, 0, bytes.length);
 	}
 
-	public function stopRender():Void
+	public static function stopRender():Void
 	{
 		if (!ClientPrefs.ffmpegMode)
 			return;
