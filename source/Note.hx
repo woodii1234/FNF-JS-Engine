@@ -95,6 +95,7 @@ class Note extends FlxSprite
 	public static final colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
 	private final pixelInt:Array<Int> = [0, 1, 2, 3];
 	public static final beats:Array<Int> = [4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192,256,384,512,768,1024,1536,2048,3072,6144];
+	public final arrowAngles:Array<Int> = [180, 90, 270, 0];
 
 	// Lua shit
 	public var noteSplashDisabled:Bool = false;
@@ -382,9 +383,6 @@ class Note extends FlxSprite
 			}
 			if (ClientPrefs.noteStyleThing != 'VS Nonsense V2' && ClientPrefs.noteStyleThing != 'DNB 3D' && ClientPrefs.noteStyleThing != 'VS AGOTI' && ClientPrefs.noteStyleThing != 'Doki Doki+' && ClientPrefs.noteStyleThing != 'TGT V4' && ClientPrefs.noteStyleThing != 'Default') {
 				texture = 'NOTE_assets_' + ClientPrefs.noteStyleThing.toLowerCase();
-			}
-			if(ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') {
-				texture = ClientPrefs.noteStyleThing == 'TGT V4' ? 'RED_TGTNOTE_assets' : 'RED_NOTE_assets';
 			}
 			if(ClientPrefs.noteColorStyle == 'Char-Based') {
 				texture = 'NOTE_assets_colored';
@@ -730,8 +728,8 @@ class Note extends FlxSprite
 		multSpeed = chartNoteData.multSpeed;
 
 		if (PlayState.isPixelStage) reloadNote('', texture);
-		animation.play(colArray[noteData % 4] + 'Scroll');
-		if (isSustainNote) animation.play(colArray[noteData % 4] + (chartNoteData.isSustainEnd ? 'holdend' : 'hold'));
+		animation.play((ClientPrefs.noteColorStyle == 'Normal' ? colArray[noteData % 4] : 'red') + 'Scroll');
+		if (isSustainNote) animation.play((ClientPrefs.noteColorStyle == 'Normal' ? colArray[noteData % 4] : 'red') + (chartNoteData.isSustainEnd ? 'holdend' : 'hold'));
 
 		if (ClientPrefs.showNotes && ClientPrefs.enableColorShader)
 		{
@@ -739,7 +737,10 @@ class Note extends FlxSprite
 			if (ClientPrefs.noteColorStyle == 'Char-Based') updateRGBColors();
 			if (ClientPrefs.noteColorStyle == 'Rainbow') colorSwap.hue = ((strumTime / 5000 * 360) / 360) % 1;
 		}
-		if (isSustainNote) correctionOffset = ClientPrefs.downScroll ? 0 : 55;
+		if (isSustainNote) {
+			correctionOffset = ClientPrefs.downScroll ? 0 : 55;
+			copyAngle = false;
+		}
 
 		return this;
 	}

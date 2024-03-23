@@ -4343,9 +4343,21 @@ class PlayState extends MusicBeatState
 			for (swagNote in unspawnNotes)
 				if (swagNote.noteData == i) swagNote.strum = (swagNote.mustPress ? playerStrums : opponentStrums).members[swagNote.noteData];
 
-
 			strumLineNotes.add(babyArrow);
 			babyArrow.postAddedToGroup();
+			if (ClientPrefs.enableColorShader && ClientPrefs.noteColorStyle != 'Normal') 
+			{
+				var arrowAngle = switch(i)
+				{
+					case 0: 180;
+					case 1: 90;
+					case 2: 270;
+					default: 0;
+				}
+				babyArrow.noteData = 3;
+				babyArrow.angle += arrowAngle;
+				babyArrow.reloadNote();
+			}
 		}
 	}
 
