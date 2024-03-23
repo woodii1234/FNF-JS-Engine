@@ -3830,6 +3830,27 @@ class PlayState extends MusicBeatState
 				});
 		}
 
+		if (oneK)
+		{
+			playerStrums.forEachAlive(function(daNote:FlxSprite)
+			{
+				if (daNote != playerStrums.members[firstNoteData]) 
+				{
+					FlxTween.cancelTweensOf(daNote);
+					FlxTween.tween(daNote, {alpha: 0}, 0.7, {ease: FlxEase.expoOut,});
+				}
+			});
+			opponentStrums.forEachAlive(function(daNote:FlxSprite)
+			{
+				if (daNote != opponentStrums.members[firstNoteData]) 
+				{
+					FlxTween.cancelTweensOf(daNote);
+					FlxTween.tween(daNote, {alpha: 0}, 0.7, {ease: FlxEase.expoOut,});
+				}
+			});
+			FlxG.sound.play(Paths.sound('FunnyVanish'));
+		}
+
 		#if DISCORD_ALLOWED
 		if (cpuControlled) detailsText = detailsText + ' (using a bot)';
 		// Updating Discord Rich Presence (with Time Left)
@@ -3852,6 +3873,8 @@ class PlayState extends MusicBeatState
 
 	var debugNum:Int = 0;
 	var stair:Int = 0;
+	var firstNoteData:Int = 0;
+	var assignedFirstData:Bool = false;
 	private var noteTypeMap:Map<String, Bool> = new Map<String, Bool>();
 	private var eventPushedMap:Map<String, Bool> = new Map<String, Bool>();
 	private function generateSong(dataPath:String, ?startingPoint:Float = 0):Void
@@ -3943,11 +3966,16 @@ class PlayState extends MusicBeatState
 				if (songNotes[0] >= startingPoint - 350) {
 					final daStrumTime:Float = songNotes[0];
 					var daNoteData:Int = 0;
+					if (!assignedFirstData && oneK)
+					{
+						firstNoteData = Std.int(songNotes[1] % 4);
+						assignedFirstData = true;
+					}
 					if (!randomMode && !flip && !stairs && !waves) {
 						daNoteData = Std.int(songNotes[1] % 4);
 					}
 					if (oneK) {
-						daNoteData = 2;
+						daNoteData = firstNoteData;
 					}
 					if (randomMode) {
 						daNoteData = FlxG.random.int(0, 3);
