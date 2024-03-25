@@ -161,7 +161,7 @@ class Note extends FlxSprite
 	}
 
 	private function set_texture(value:String):String {
-		if (!inEditor && !PlayState.isPixelStage)
+		if (!PlayState.isPixelStage)
 		{
 			if (!Paths.noteSkinFramesMap.exists(value)) Paths.initNote(4, value);
 			frames = @:privateAccess Paths.noteSkinFramesMap.get(value);
@@ -383,6 +383,9 @@ class Note extends FlxSprite
 			}
 			if (ClientPrefs.noteStyleThing != 'VS Nonsense V2' && ClientPrefs.noteStyleThing != 'DNB 3D' && ClientPrefs.noteStyleThing != 'VS AGOTI' && ClientPrefs.noteStyleThing != 'Doki Doki+' && ClientPrefs.noteStyleThing != 'TGT V4' && ClientPrefs.noteStyleThing != 'Default') {
 				texture = 'NOTE_assets_' + ClientPrefs.noteStyleThing.toLowerCase();
+			}
+			if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && inEditor) {
+				texture = ClientPrefs.noteStyleThing == 'TGT V4' ? 'RED_TGTNOTE_assets' : 'RED_NOTE_assets';
 			}
 			if(ClientPrefs.noteColorStyle == 'Char-Based') {
 				texture = 'NOTE_assets_colored';

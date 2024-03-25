@@ -607,7 +607,7 @@ class PlayState extends MusicBeatState
 		if (ffmpegMode) {
 			FlxG.fixedTimestep = true;
 			FlxG.animationTimeScale = ClientPrefs.framerate / targetFPS;
-			#if windows initRender(); #end
+			#if !mac initRender(); #end
 		}
 			var compactCombo:String = formatCompactNumber(combo);
 			var compactMaxCombo:String = formatCompactNumber(maxCombo);
@@ -5189,11 +5189,11 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 						{
 							playbackRateDecimal = FlxMath.roundDecimal(playbackRate, 2);
 							if (ClientPrefs.timeBarType != 'Song Name')
-								timeTxt.text += ' (' + playbackRateDecimal + 'x)';
-							else timeTxt.text = SONG.song + ' (' + playbackRateDecimal + 'x)';
+								timeTxt.text += ' (' + (!ffmpegMode ? playbackRateDecimal + 'x)' : 'Rendering)');
+							else timeTxt.text = SONG.song + ' (' + (!ffmpegMode ? playbackRateDecimal + 'x)' : 'Rendering)');
 						}
 						if (cpuControlled && ClientPrefs.timeBarType != 'Song Name' && !ClientPrefs.communityGameBot && !disableBotWatermark) timeTxt.text += ' (Bot)';
-						if(ClientPrefs.timebarShowSpeed && cpuControlled && ClientPrefs.timeBarType == 'Song Name' && !ClientPrefs.communityGameBot && !disableBotWatermark) timeTxt.text = SONG.song + ' (' + FlxMath.roundDecimal(playbackRate, 2) + 'x) (Bot)';
+						if(ClientPrefs.timebarShowSpeed && cpuControlled && ClientPrefs.timeBarType == 'Song Name' && !ClientPrefs.communityGameBot && !disableBotWatermark) timeTxt.text = SONG.song + ' (' + (!ffmpegMode ? FlxMath.roundDecimal(playbackRate, 2) + 'x)' : 'Rendering)') + ' (Bot)';
 					}
 				}
 				if(ffmpegMode) {
@@ -5425,7 +5425,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 		if (!ffmpegMode) return;
 
-		#if windows pipeFrame();
+		#if !mac pipeFrame();
 		#else
 			var filename = CoolUtil.zeroFill(frameCaptured, 7);
 			capture.save(Paths.formatToSongPath(SONG.song) + #if linux '/' #else '\\' #end, filename);
@@ -7883,7 +7883,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 								}
 							}
 							else if (gf != null) {
-								inline gf.playAnim(animToPlay + daNote.animSuffix, true);
+								inline gf.playAnim(animToPlay, true);
 								gf.holdTimer = 0;
 							}
 				}
@@ -7926,13 +7926,13 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 								}
 							}
 							else{
-								inline dad.playAnim(animToPlay + daNote.animSuffix, true);
+								inline dad.playAnim(animToPlay, true);
 								// dad.angle = 0;
 							}
 				}
 					if (opponentChart && ClientPrefs.charsAndBG && !daNote.gfNote)
 					{
-						inline boyfriend.playAnim(animToPlay + daNote.animSuffix, true);
+						inline boyfriend.playAnim(animToPlay, true);
 						boyfriend.holdTimer = 0;
 						if (ClientPrefs.cameraPanning) inline camPanRoutine(animToPlay, 'bf');
 						if (ClientPrefs.doubleGhost)
@@ -7952,7 +7952,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 								inline doGhostAnim('bf', animToPlay);
 							}
 							else{
-								inline boyfriend.playAnim(animToPlay + daNote.animSuffix, true);
+								inline boyfriend.playAnim(animToPlay, true);
 							}
 						}
 					}
@@ -7990,7 +7990,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			daNote.hitByOpponent = true;
 
 
-			callOnLuas('opponentNoteHit', [notes.members.indexOf(daNote), Math.abs(daNote.noteData), daNote.noteType, daNote.isSustainNote]);
+			callOnLuas(opponentChart ? 'opponentNoteHit' : 'goodNoteHit', [notes.members.indexOf(daNote), Math.abs(daNote.noteData), daNote.noteType, daNote.isSustainNote]);
 			callOnLuas((opponentChart ? 'goodNoteHitFix' : 'opponentNoteHitFix'), [notes.members.indexOf(daNote), Math.abs(daNote.noteData), daNote.noteType, daNote.isSustainNote]);
 
 			if (!daNote.isSustainNote)
@@ -9192,9 +9192,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		if (!ffmpegMode)
 			return;
 
-		if (!sys.FileSystem.exists('ffmpeg.exe'))
+		if (!sys.FileSystem.exists(#if linux 'ffmpeg' #else 'ffmpeg.exe' #end))
 		{
-			trace("\"ffmpeg.exe\" not found! (Is it in the same folder as the JS Engine exe?");
+			trace("\"FFmpeg.exe\" not found! (Is it in the same folder as the JS Engine exe?");
 			return;
 		}
 
