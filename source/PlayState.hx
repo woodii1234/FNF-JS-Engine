@@ -1490,8 +1490,8 @@ class PlayState extends MusicBeatState
 		}
 
 		shouldDrainHealth = (opponentDrain || (opponentChart ? boyfriend.healthDrain : dad.healthDrain));
-		if (!opponentDrain && !Math.isNaN((opponentChart ? boyfriend : dad).drainAmount)) healthDrainAmount = opponentChart ? boyfriend.drainAmount : dad.drainAmount;
-		if (!opponentDrain && !Math.isNaN((opponentChart ? boyfriend : dad).drainFloor)) healthDrainFloor = opponentChart ? boyfriend.drainFloor : dad.drainFloor;
+		if (!opponentDrain && !Math.isNaN((opponentChart ? boyfriend : dad).drainAmount) && (opponentChart ? boyfriend : dad).drainFloor != 0) healthDrainAmount = opponentChart ? boyfriend.drainAmount : dad.drainAmount;
+		if (!opponentDrain && !Math.isNaN((opponentChart ? boyfriend : dad).drainFloor) && (opponentChart ? boyfriend : dad).drainFloor != 0) healthDrainFloor = opponentChart ? boyfriend.drainFloor : dad.drainFloor;
 
 		var camPos:FlxPoint = new FlxPoint(girlfriendCameraOffset[0], girlfriendCameraOffset[1]);
 		if(gf != null)
