@@ -50,6 +50,14 @@ class Paths
 	public static var noteSkinFramesMap:Map<String, FlxFramesCollection> = new Map();
 	public static var noteSkinAnimsMap:Map<String, FlxAnimationController> = new Map();
 
+	private static var splashFrames:FlxFramesCollection;
+	private static var splashAnimation:FlxAnimationController;
+
+	public static var splashSkinFramesMap:Map<String, FlxFramesCollection> = new Map();
+	public static var splashSkinAnimsMap:Map<String, FlxAnimationController> = new Map();
+
+	public static var splashConfigs:Map<String, NoteSplash.NoteSplashConfig> = new Map();
+
 	#if MODS_ALLOWED
 	public static var ignoreModFolders:Array<String> = [
 		'characters',
@@ -91,6 +99,113 @@ class Paths
 		}
 		noteSkinFramesMap.set(noteSkin, getSparrowAtlas(noteSkin.length > 1 ? noteSkin : 'NOTE_assets'));
 		noteSkinAnimsMap.set(noteSkin, noteAnimation);
+	}
+
+	//Note Splash initialization
+	public static function initSplash(keys:Int = 4, splashSkin:String = 'noteSplashes', ?maxAnims:Int = 2)
+	{
+		splashFrames = getSparrowAtlas(splashSkin.length > 1 ? 'noteSplashes/' + splashSkin : 'noteSplashes/noteSplashes');
+
+		// Do this to be able to just copy over the splash animations and not reallocate it
+
+		var spr:FlxSprite = new FlxSprite();
+		spr.frames = splashFrames;
+		splashAnimation = new FlxAnimationController(spr);
+
+		// Use a for loop for adding all of the animations in the splash spritesheet, otherwise it won't find the animations for the next recycle
+		
+		for (i in 1...maxAnims+1)
+		{
+			splashAnimation.addByPrefix("note1-" + i, "note splash blue " + i, 24, false);
+			splashAnimation.addByPrefix("note2-" + i, "note splash green " + i, 24, false);
+			splashAnimation.addByPrefix("note0-" + i, "note splash purple " + i, 24, false);
+			splashAnimation.addByPrefix("note3-" + i, "note splash red " + i, 24, false);
+		}
+		splashSkinFramesMap.set(splashSkin, getSparrowAtlas(splashSkin.length > 1 ? 'noteSplashes/' + splashSkin : 'noteSplashes/noteSplashes'));
+		splashSkinAnimsMap.set(splashSkin, splashAnimation);
+	}
+	public static function initSplashConfig(skin:String)
+	{
+		var path:String = Paths.getSharedPath('images/noteSplashes/' + skin + '.txt');
+		var configFile:Array<String> = CoolUtil.coolTextFile(path);
+
+		if (configFile.length < 1) return null;
+
+		var framerates:Array<String> = configFile[1].split(' ');
+		var offs:Array<Array<Float>> = [];
+		for (i in 3...configFile.length)
+		{
+			var animOffs:Array<String> = configFile[i].split(' ');
+			offs.push([Std.parseFloat(animOffs[0]), Std.parseFloat(animOffs[1])]);
+		}
+		var config:NoteSplash.NoteSplashConfig = {
+			anim: configFile[0],
+			minFps: Std.parseInt(framerates[0]),
+			maxFps: Std.parseInt(framerates[1]),
+			redAnim: Std.parseInt(configFile[2]),
+			offsets: offs
+		};
+		splashConfigs.set(skin, config);
+		return config;
+	}
+
+	inline public static function mergeAllTextsNamed(path:String, defaultDirectory:String = null, allowDuplicates:Bool = false)
+	{
+		if(defaultDirectory == null) defaultDirectory = getSharedPath();
+		defaultDirectory = defaultDirectory.trim();
+		if(!defaultDirectory.endsWith('/')) defaultDirectory += '/';
+		if(!defaultDirectory.startsWith('assets/')) defaultDirectory = 'assets/$defaultDirectory';
+
+		var mergedList:Array<String> = [];
+		var paths:Array<String> = directoriesWithFile(defaultDirectory, path);
+
+		var defaultPath:String = defaultDirectory + path;
+		if(paths.contains(defaultPath))
+		{
+			paths.remove(defaultPath);
+			paths.insert(0, defaultPath);
+		}
+
+		for (file in paths)
+		{
+			var list:Array<String> = CoolUtil.coolTextFile(file);
+			for (value in list)
+				if((allowDuplicates || !mergedList.contains(value)) && value.length > 0)
+					mergedList.push(value);
+		}
+		return mergedList;
+	}
+	inline public static function directoriesWithFile(path:String, fileToFind:String, mods:Bool = true)
+	{
+		var foldersToCheck:Array<String> = [];
+		#if sys
+		if(FileSystem.exists(path + fileToFind))
+		#end
+			foldersToCheck.push(path + fileToFind);
+
+		#if MODS_ALLOWED
+		if(mods)
+		{
+			// Global mods first
+			for(mod in getGlobalMods())
+			{
+				var folder:String = Paths.mods(mod + '/' + fileToFind);
+				if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(folder);
+			}
+
+			// Then "PsychEngine/mods/" main folder
+			var folder:String = Paths.mods(fileToFind);
+			if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(Paths.mods(fileToFind));
+
+			// And lastly, the loaded mod's folder
+			if(currentModDirectory != null && currentModDirectory.length > 0)
+			{
+				var folder:String = Paths.mods(currentModDirectory + '/' + path + fileToFind);
+				if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(folder);
+			}
+		}
+		#end
+		return foldersToCheck;
 	}
 
 	public static function excludeAsset(key:String) {
@@ -225,6 +340,10 @@ class Paths
 	inline public static function getPreloadPath(file:String = '')
 	{
 		return 'assets/$file';
+	}
+	inline public static function getSharedPath(file:String = '')
+	{
+		return 'assets/shared/$file';
 	}
 
 	inline static public function file(file:String, type:AssetType = TEXT, ?library:String)

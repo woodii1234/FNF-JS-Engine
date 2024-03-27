@@ -216,13 +216,19 @@ class VisualsUISubState extends BaseOptionsMenu
 		option.displayFormat = '%vX';
 		addOption(option);
 
-		var option:Option = new Option('Rating Quotes',
-			"What should the rating names display?",
-			'rateNameStuff',
-			'string',
-			'Quotes',
-			['Quotes', 'Letters', 'Psych Quotes', 'Shaggyverse Quotes']);
-		addOption(option);
+		var ratingQuoteList:Array<String> = Paths.mergeAllTextsNamed('ratingQuotes/list.txt', Paths.getPreloadPath() + 'data');
+		if (ratingQuoteList.length > 0)
+		{
+			if (!ratingQuoteList.contains(ClientPrefs.rateNameStuff))
+				ClientPrefs.rateNameStuff = ratingQuoteList[0];
+			var option:Option = new Option('Rating Quotes',
+				"What should the rating names display?",
+				'rateNameStuff',
+				'string',
+				'Quotes',
+				ratingQuoteList);
+			addOption(option);
+		}
 
 		var option:Option = new Option('Golden Sick on MFC/SFC',
 			'If checked, your Sick! & Perfect!! ratings will be golden if your FC rating is better than GFC.',
@@ -358,13 +364,19 @@ class VisualsUISubState extends BaseOptionsMenu
 			['Golden Apple', 'Dave and Bambi', 'Old Psych', 'New Psych', 'VS Steve', 'Plank Engine', 'Strident Crisis', 'SB Engine', 'None']);
 		addOption(option);
 
-		var option:Option = new Option('Note Splash Type:',
-			"Which note splash would you like?",
-			'splashType',
-			'string',
-			'Psych Engine',
-			['Psych Engine', 'VS Impostor', 'Base Game', 'Doki Doki+', 'TGT V4', 'Indie Cross']);
-		addOption(option);
+		var noteSplashList:Array<String> = Paths.mergeAllTextsNamed('images/noteSplashes/list.txt');
+		if (noteSplashList.length > 0)
+		{
+			if (!noteSplashList.contains(ClientPrefs.splashType))
+				ClientPrefs.splashType = noteSplashList[0];
+			var option:Option = new Option('Note Splash Type:',
+				"Which note splash would you like?",
+				'splashType',
+				'string',
+				'Psych Engine',
+				noteSplashList);
+			addOption(option);
+		}
 
 		var option:Option = new Option('long ass health bar',
 			"If this is checked, the Health Bar will become LOOOOOONG",

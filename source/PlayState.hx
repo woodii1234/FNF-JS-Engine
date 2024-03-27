@@ -187,6 +187,7 @@ class PlayState extends MusicBeatState
 	public var healthDrainFloor:Float = 0.1;
 
 	public var strumAnimsPerFrame:Array<Int> = [0, 0];
+	public var splashesPerFrame:Array<Int> = [0, 0];
 
 	public var vocals:FlxSound;
 	public var dadGhostTween:FlxTween;
@@ -1381,74 +1382,23 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-	if (ClientPrefs.rateNameStuff == 'Quotes')
+	var ratingQuoteStuff:Array<Dynamic> = CoolUtil.coolTextFile(Paths.txt('ratingQuotes/' + ClientPrefs.rateNameStuff));
+	for (i in 0...ratingQuoteStuff.length)
 	{
-	ratingStuff = [
-		['you suck ass lol', 0.2], //From 0% to 19%
-		['you aint doin good', 0.4], //From 20% to 39%
-		['Bad', 0.5], //From 40% to 49%
-		['Bruh', 0.6], //From 50% to 59%
-		['Meh', 0.69], //From 60% to 68%
-		['funny number', 0.69417], //69.0% to 69.419% ( ͡° ͜ʖ ͡°)
-		['( ͡° ͜ʖ ͡°)', 0.6943], //69.420% ( ͡° ͜ʖ ͡°)
-		['funny number', 0.7], //69.421% to 69.999% ( ͡° ͜ʖ ͡°)
-		['nice', 0.8], //From 70% to 79%
-		['awesome', 0.9], //From 80% to 89%
-		['thats amazing', 1], //From 90% to 99%
-		['PERFECT!!!!!!', 1] //The value on this one isn't used actually, since Perfect is always "1"
-	];
-	}
-	if (ClientPrefs.rateNameStuff == 'Psych Quotes')
-	{
-	ratingStuff = [
-		['How are you this bad?', 0.1], //From 0% to 9%
-		['You Suck!', 0.2], //From 10% to 19%
-		['Horribly Shit', 0.3], //From 20% to 29%
-		['Shit', 0.4], //From 30% to 39%
-		['Bad', 0.5], //From 40% to 49%
-		['Bruh', 0.6], //From 50% to 59%
-		['Meh', 0.69], //From 60% to 68%
-		['Nice', 0.7], //69%
-		['Good', 0.8], //From 70% to 79%
-		['Great', 0.9], //From 80% to 89%
-		['Sick!', 1], //From 90% to 99%
-		['Perfect!!', 1] //The value on this one isn't used actually, since Perfect is always "1"
-	];
-	}
-	if (ClientPrefs.rateNameStuff == 'Shaggyverse Quotes')
-	{
-	ratingStuff = [
-		['G - Ruh Rouh!', 0.2], //From 0% to 19%
-		['F - OOF', 0.4], //From 20% to 39%
-		["E - Like, You're Bad", 0.5], //From 40% to 49%
-		['D - Like, how are you still alive?', 0.6], //From 50% to 59%
-		['C - ZOINKS!', 0.69], //From 60% to 68%
-		["Nice - WOW, that's a funny number man!", 0.7], //69%
-		["B - That's like, really cool...", 0.75], //From 70% to 74%
-		["B+ - Hey, man, you're starting to improve!", 0.8], //From 75% to 79%
-		['A - This is a challenge!', 0.85], //From 80% to 84%
-		['AA - Hey Scoob, This kid is good!', 0.9], //From 85% to 90%
-		['S - Like, Thats Good', 0.95], //From 90% to 94%
-		['SS - Like, Thats Great!', 0.99], //From 95% to 98%
-		['SSS - Like, Thats Sick!', 1], //99%
-		['SSSS - Like, WOW', 1] //The value on this one isn't used actually, since Perfect is always "1"
-	];
-	}
-	if (ClientPrefs.rateNameStuff == 'Letters')
-	{
-	ratingStuff = [
-		['HOW?', 0.2], //From 0% to 19%
-		['F', 0.4], //From 20% to 39%
-		['E', 0.5], //From 40% to 49%
-		['D', 0.6], //From 50% to 59%
-		['C', 0.69], //From 60% to 68%
-		['FUNNY', 0.7], //69%
-		['B', 0.8], //From 70% to 79%
-		['A', 0.9], //From 80% to 89%
-		['S', 0.97], //From 90% to 98%
-		['S+', 1], //98% to 99%
-		['X', 1] //The value on this one isn't used actually, since Perfect is always "1"
-	];
+		var quotes:Array<Dynamic> = ratingQuoteStuff[i].split(',');
+		if (quotes.length > 2) //In case your quote has more than 1 comma
+		{
+			var quotesToRemove:Int = 0;
+			for (i in 1...quotes.length-1)
+			{
+				quotesToRemove++;
+				quotes[0] += ',' + quotes[i];
+			}
+			if (quotesToRemove > 0)
+				quotes.splice(1, quotesToRemove);
+
+		}
+		ratingStuff.push(quotes);
 	}
 		if (!ClientPrefs.charsAndBG)
 		{
@@ -4045,10 +3995,11 @@ class PlayState extends MusicBeatState
 						hitHealth: 0.023,
 						missHealth: 0.0475,
 						wasHit: false,
+						hitCausesMiss: songNotes[3] == 'Hurt Note',
 						multSpeed: 1,
 						wasSpawned: false,
 						wasMissed: false,
-						ignoreNote: false
+						ignoreNote: songNotes[3] == 'Hurt Note'
 					};
 					if (swagNote.noteskin.length > 0 && !Paths.noteSkinFramesMap.exists(swagNote.noteskin)) inline Paths.initNote(4, swagNote.noteskin);
 
@@ -4089,10 +4040,11 @@ class PlayState extends MusicBeatState
 								missHealth: 0.0475,
 								wasHit: false,
 								multSpeed: 1,
+								hitCausesMiss: songNotes[3] == 'Hurt Note',
 								wasSpawned: false,
 								canBeHit:false,
 								wasMissed: false,
-								ignoreNote: false
+								ignoreNote: songNotes[3] == 'Hurt Note'
 							};
 							inline unspawnNotes.push(sustainNote);
 							//Sys.sleep(0.0001);
@@ -4875,6 +4827,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		if (charAnimsFrame > 0) charAnimsFrame = 0;
 		if (oppAnimsFrame > 0) oppAnimsFrame = 0;
 		if (strumAnimsPerFrame[0] > 0 || strumAnimsPerFrame[1] > 0) strumAnimsPerFrame = [0, 0];
+		if (splashesPerFrame[0] > 0 || splashesPerFrame[1] > 0) splashesPerFrame = [0, 0];
 
 		if (lerpingScore) updateScore();
 		if (shownScore != songScore && ClientPrefs.hudType == 'JS Engine' && Math.abs(shownScore - songScore) >= 10) {
@@ -6701,7 +6654,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					}
 			}
 
-		if(daRating.noteSplash && !note.noteSplashDisabled && !miss)
+		if(daRating.noteSplash && !note.noteSplashDisabled && !miss && splashesPerFrame[1] <= 4)
 		{
 			spawnNoteSplashOnNote(false, note, note.gfNote);
 		}
@@ -7440,7 +7393,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 				if(note.hitCausesMiss) {
 					noteMiss(note);
-					if(!note.noteSplashDisabled && !note.isSustainNote) {
+					if(!note.noteSplashDisabled && !note.isSustainNote && splashesPerFrame[1] <= 4) {
 						spawnNoteSplashOnNote(false, note, note.gfNote);
 					}
 
@@ -7527,7 +7480,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 						inline notesHitArray.push(1 * polyphony);
 						inline notesHitDateArray.push(Conductor.songPosition);
 					}
-					if(!note.noteSplashDisabled && !note.isSustainNote && ClientPrefs.noteSplashes) {
+					if(!note.noteSplashDisabled && !note.isSustainNote && ClientPrefs.noteSplashes && splashesPerFrame[1] <= 4) {
 						spawnNoteSplashOnNote(false, note, note.gfNote);
 					}
 				}
@@ -7560,7 +7513,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					note.rating = daRating.name;
 					songScore += daRating.score * comboMultiplier * polyphony;
 					totalPlayed++;
-					if(daRating.noteSplash && !note.noteSplashDisabled && ClientPrefs.noteSplashes)
+					if(daRating.noteSplash && !note.noteSplashDisabled && ClientPrefs.noteSplashes && splashesPerFrame[1] <= 4)
 					{
 						spawnNoteSplashOnNote(false, note, note.gfNote);
 					}
@@ -7958,7 +7911,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					}
 				}
 
-			if(ClientPrefs.oppNoteSplashes && !daNote.isSustainNote)
+			if(ClientPrefs.oppNoteSplashes && !daNote.isSustainNote && splashesPerFrame[0] <= 4)
 			{
 				spawnNoteSplashOnNote(true, daNote, daNote.gfNote);
 			}
@@ -8098,15 +8051,19 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 	public function spawnNoteSplashOnNote(isDad:Bool, note:Note, ?isGf:Bool = false) {
 		if(ClientPrefs.noteSplashes && note != null) {
+			splashesPerFrame[(isDad ? 0 : 1)] += 1;
 			final strum:StrumNote = !isDad ? playerStrums.members[note.noteData] : opponentStrums.members[note.noteData];
 			if(strum != null) {
-				ClientPrefs.showNotes && ClientPrefs.enableColorShader ? spawnNoteSplash(strum.x, strum.y, note.noteData, null, note.colorSwap.hue, note.colorSwap.saturation, note.colorSwap.brightness, isGf, isDad) : spawnNoteSplash(strum.x, strum.y, note.noteData, null, 0, 0, 0, isGf, isDad);
+				ClientPrefs.showNotes && ClientPrefs.enableColorShader ? spawnNoteSplash(strum.x, strum.y, note.noteData, null, note.colorSwap.hue, note.colorSwap.saturation, note.colorSwap.brightness, isGf, isDad) : spawnNoteSplash(strum.x, strum.y, note.noteData, null, 0, 0, 0, isGf, isDad, note.noteType == 'Hurt Note');
 			}
 		}
 	}
 
-	public function spawnNoteSplash(x:Float, y:Float, data:Int, ?note:Note = null, ?hue:Float = 0, ?sat:Float = 0, ?brt:Float = 0, ?isGfNote:Bool = false, ?isDadNote:Bool = true) {
+	public function spawnNoteSplash(x:Float, y:Float, data:Int, ?note:Note = null, ?hue:Float = 0, ?sat:Float = 0, ?brt:Float = 0, ?isGfNote:Bool = false, ?isDadNote:Bool = true, ?hurtNote:Bool = false) {
 		var skin:String = (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) ? PlayState.SONG.splashSkin : 'noteSplashes';
+
+		if (ClientPrefs.splashType != 'Psych Engine') skin = (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0 && PlayState.SONG.splashSkin != 'noteSplashes') ? PlayState.SONG.splashSkin : 'noteSplashes-' + ClientPrefs.splashType.toLowerCase();
+		if (hurtNote) skin = HURTnoteSplashes;
 
 		if (data > -1 && data < ClientPrefs.arrowHSV.length)
 		{
@@ -8345,6 +8302,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 		Paths.noteSkinFramesMap.clear();
 		Paths.noteSkinAnimsMap.clear();
+		Paths.splashSkinFramesMap.clear();
+		Paths.splashSkinAnimsMap.clear();
+		Paths.splashConfigs.clear();
 
 		super.destroy();
 	}
