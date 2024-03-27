@@ -8063,7 +8063,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		var skin:String = (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) ? PlayState.SONG.splashSkin : 'noteSplashes';
 
 		if (ClientPrefs.splashType != 'Psych Engine') skin = (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0 && PlayState.SONG.splashSkin != 'noteSplashes') ? PlayState.SONG.splashSkin : 'noteSplashes-' + ClientPrefs.splashType.toLowerCase();
-		if (hurtNote) skin = HURTnoteSplashes;
+		if (hurtNote) skin = 'HURTnoteSplashes';
 
 		if (data > -1 && data < ClientPrefs.arrowHSV.length)
 		{
