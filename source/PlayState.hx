@@ -782,36 +782,17 @@ class PlayState extends MusicBeatState
 		detailsPausedText = "BRB! - " + detailsText;
 		#end
 
-		if (ClientPrefs.ratingType == 'Tails Gets Trolled V4')
-		{
-			fcStrings = ['No Play', 'KFC', 'AFC', 'CFC', 'SDC', 'FC', 'SDCB', 'Clear', 'TDCB', 'QDCB'];
-			hitStrings = ['Killer!!!', 'Awesome!!', 'Cool!', 'Gay.', 'Retarded.', 'Fail..'];
-			judgeCountStrings = ['Killers', 'Awesomes', 'Cools', 'Gays', 'Retardeds', 'Fails'];
-		}
-		if (ClientPrefs.longFCName) fcStrings = ['No Play', 'Perfect Full Combo', 'Sick Full Combo', 'Great Full Combo', 'Bad Full Combo', 'Full Combo', 'Single Digit Misses', 'Clear', 'TDCB', 'QDCB'];
-		if (ClientPrefs.longFCName && ClientPrefs.ratingType == 'Tails Gets Trolled V4')
-		{
-			fcStrings = ['No Play', 'Killer Full Combo', 'Awesome Full Combo', 'Cool Full Combo', 'Gay Full Combo', 'Full Combo', 'Single Digit Misses', 'Clear', 'TDCB', 'QDCB'];
-			hitStrings = ['Killer!!!', 'Awesome!!', 'Cool!', 'Gay.', 'Retarded.', 'Fail..'];
-			judgeCountStrings = ['Killers', 'Awesomes', 'Cools', 'Gays', 'Retardeds', 'Fails'];
-		}
-
-		if (ClientPrefs.ratingType == 'Doki Doki+')
-		{
-			hitStrings = ['Very Doki!!!', 'Doki!!', 'Good!', 'OK.', 'No.', 'Miss..'];
-			judgeCountStrings = ['Very Doki', 'Doki', 'Good', 'OK', 'No', 'Misses'];
-		}
-
-		if (ClientPrefs.ratingType == 'VS Impostor')
-		{
-			hitStrings = ['VERY SUSSY!!!', 'Sussy!!', 'Sus!', 'Sad.', 'ASS!', 'Miss..'];
-			judgeCountStrings = ['Very Sussy', 'Sussy', 'Sus', 'Sad', 'Ass', 'Miss'];
-		}
-		if (ClientPrefs.ratingType == 'FIRE IN THE HOLE')
-		{
-			hitStrings = ['Easy :D', 'Normal!!', 'Hard!', 'Harder.', 'INSANE!', 'FIRE IN THE HOLE!'];
-			judgeCountStrings = ['Easys', 'Normals', 'Hards', 'Harders', 'Insanes', 'Extreme Demon Fails'];
-		}
+		final map = backend.RatingStuff.ratingsMap;
+		if (ClientPrefs.longFCName) 
+			fcStrings = [
+				'No Play', 'Perfect Full Combo', 'Sick Full Combo', 'Great Full Combo', 'Bad Full Combo', 'Full Combo', 'Single Digit Misses', 'Clear', 'TDCB', 'QDCB'
+			];
+		else
+			fcStrings = (map != null && map.get(ClientPrefs.ratingType).fc != null) ? map.get(ClientPrefs.ratingType).fc : [
+				'No Play', 'PFC', 'SFC', 'GFC', 'BFC', 'FC', 'SDCB', 'Clear', 'TDCB', 'QDCB'
+			];
+		hitStrings = map.get(ClientPrefs.ratingType).hit;
+		judgeCountStrings = map.get(ClientPrefs.ratingType).judgeCount;
 
 		GameOverSubstate.resetVariables();
 		var songName:String = Paths.formatToSongPath(SONG.song);
