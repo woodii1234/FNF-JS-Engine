@@ -78,7 +78,7 @@ class NoteSplash extends FlxSprite
 		}
 		offset.set(10, 10);
 
-		var animNum:Int = FlxG.random.int(1, maxAnims);
+		var animNum:Int = FlxG.random.int(1, Paths.splashAnimCountMap.get(texture));
 		var minFps:Int = 22;
 		var maxFps:Int = 26;
 		if(config != null)
@@ -94,6 +94,7 @@ class NoteSplash extends FlxSprite
 		var splashToPlay:Int = note;
 		if (ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Char-Based' || ClientPrefs.noteColorStyle == 'Rainbow')
 			splashToPlay = config.redAnim;
+
 		animation.play('note' + splashToPlay + '-' + (animNum), true);
 
 		if(animation.curAnim != null)animation.curAnim.frameRate = FlxG.random.int(config.minFps, config.maxFps);
@@ -101,35 +102,9 @@ class NoteSplash extends FlxSprite
 
 	function loadAnims(skin:String) {
 		maxAnims = 0;
-		if (!Paths.splashSkinFramesMap.exists(skin)) Paths.initSplash(4, skin, maxAnims);
+		if (!Paths.splashSkinFramesMap.exists(skin)) Paths.initSplash(4, skin);
 		frames = Paths.splashSkinFramesMap.get(skin);
 		animation.copyFrom(Paths.splashSkinAnimsMap.get(skin));
-		var animName = config.anim;
-		if(animName == null)
-			animName = config != null ? config.anim : 'note splash';
-
-		while(true) {
-			var animID:Int = maxAnims + 1;
-			for (i in 0...Note.colArray.length) {
-				if (!addAnimAndCheck('note$i-$animID', '$animName ${Note.colArray[i]} $animID', 24, false)) {
-					//trace('maxAnims: $maxAnims');
-					return config;
-				}
-			}
-			maxAnims++;
-			//trace('currently: $maxAnims');
-		}
-	}
-	function addAnimAndCheck(name:String, anim:String, ?framerate:Int = 24, ?loop:Bool = false)
-	{
-		var animFrames = [];
-		@:privateAccess
-		animation.findByPrefix(animFrames, anim); // adds valid frames to animFrames
-
-		if(animFrames.length < 1) return false;
-	
-		animation.addByPrefix(name, anim, framerate, loop);
-		return true;
 	}
 
 	override function update(elapsed:Float) {

@@ -6565,7 +6565,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		final noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset) / playbackRate;
 		final wife:Float = EtternaFunctions.wife3(noteDiff, Conductor.timeScale) / playbackRate;
 
-		if (!miss || !ffmpegMode) vocals.volume = 1;
+		if (!miss && !ffmpegMode) vocals.volume = 1;
 
 		final offset = FlxG.width * 0.35;
 		if(ClientPrefs.scoreZoom && !ClientPrefs.hideScore && !cpuControlled && !miss)
@@ -8305,6 +8305,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		Paths.splashSkinFramesMap.clear();
 		Paths.splashSkinAnimsMap.clear();
 		Paths.splashConfigs.clear();
+		Paths.splashAnimCountMap.clear();
 
 		super.destroy();
 	}

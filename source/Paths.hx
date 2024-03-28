@@ -57,6 +57,7 @@ class Paths
 	public static var splashSkinAnimsMap:Map<String, FlxAnimationController> = new Map();
 
 	public static var splashConfigs:Map<String, NoteSplash.NoteSplashConfig> = new Map();
+	public static var splashAnimCountMap:Map<String, Int> = new Map();
 
 	#if MODS_ALLOWED
 	public static var ignoreModFolders:Array<String> = [
@@ -97,12 +98,12 @@ class Paths
 			noteAnimation.addByPrefix(Note.colArray[d] + 'hold', Note.colArray[d] + ' hold piece');
 			noteAnimation.addByPrefix(Note.colArray[d] + 'Scroll', Note.colArray[d] + '0');
 		}
-		noteSkinFramesMap.set(noteSkin, getSparrowAtlas(noteSkin.length > 1 ? noteSkin : 'NOTE_assets'));
+		noteSkinFramesMap.set(noteSkin, noteFrames);
 		noteSkinAnimsMap.set(noteSkin, noteAnimation);
 	}
 
 	//Note Splash initialization
-	public static function initSplash(keys:Int = 4, splashSkin:String = 'noteSplashes', ?maxAnims:Int = 2)
+	public static function initSplash(keys:Int = 4, splashSkin:String = 'noteSplashes')
 	{
 		splashFrames = getSparrowAtlas(splashSkin.length > 1 ? 'noteSplashes/' + splashSkin : 'noteSplashes/noteSplashes');
 
@@ -114,15 +115,40 @@ class Paths
 
 		// Use a for loop for adding all of the animations in the splash spritesheet, otherwise it won't find the animations for the next recycle
 		
-		for (i in 1...maxAnims+1)
-		{
-			splashAnimation.addByPrefix("note1-" + i, "note splash blue " + i, 24, false);
-			splashAnimation.addByPrefix("note2-" + i, "note splash green " + i, 24, false);
-			splashAnimation.addByPrefix("note0-" + i, "note splash purple " + i, 24, false);
-			splashAnimation.addByPrefix("note3-" + i, "note splash red " + i, 24, false);
+		var config = splashConfigs.get(splashSkin);
+		var maxAnims:Int = 0;
+		var animName = config.anim;
+		if(animName == null)
+			animName = config != null ? config.anim : 'note splash';
+
+		var shouldBreakLoop = false;
+		while(!shouldBreakLoop) {
+			var animID:Int = maxAnims + 1;
+			for (i in 0...Note.colArray.length) {
+				if (!addAnimAndCheck('note$i-$animID', '$animName ${Note.colArray[i]} $animID', 24, false)) {
+					//Reached the maximum amount of anims, break the loop
+					shouldBreakLoop = true;
+					break;
+				}
+			}
+			if (!shouldBreakLoop) maxAnims++;
+			else break;
+			//trace('currently: $maxAnims');
 		}
-		splashSkinFramesMap.set(splashSkin, getSparrowAtlas(splashSkin.length > 1 ? 'noteSplashes/' + splashSkin : 'noteSplashes/noteSplashes'));
+		splashSkinFramesMap.set(splashSkin, splashFrames);
 		splashSkinAnimsMap.set(splashSkin, splashAnimation);
+		splashAnimCountMap.set(splashSkin, maxAnims);
+	}
+	public static function addAnimAndCheck(name:String, anim:String, ?framerate:Int = 24, ?loop:Bool = false)
+	{
+		var animFrames = [];
+		@:privateAccess
+		splashAnimation.findByPrefix(animFrames, anim); // adds valid frames to animFrames
+
+		if(animFrames.length < 1) return false;
+	
+		splashAnimation.addByPrefix(name, anim, framerate, loop);
+		return true;
 	}
 	public static function initSplashConfig(skin:String)
 	{
