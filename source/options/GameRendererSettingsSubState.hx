@@ -38,7 +38,7 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		rpcTitle = 'Game Renderer Settings Menu'; //for Discord Rich Presence
 
 		var option:Option = new Option('Video Rendering Mode', //Name
-			'If checked, the game will render each frame as a screenshot into a folder. They can then be rendered into MP4s using FFmpeg.\nThey are located in a folder called gameRenders.\nDo NOT use this if you have a low-end PC!',
+			#if windows 'If checked, the game will render songs you play to an MP4.\nThey will be located in a folder inside assets called gameRenders.' #else 'If checked, the game will render each frame as a screenshot into a folder. They can then be rendered into MP4s using FFmpeg.\nThey are located in a folder called gameRenders.' #end,
 			'ffmpegMode',
 			'bool',
 			false);
@@ -68,6 +68,23 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		option.onChange = onChangeFramerate;
 		fpsOption = option;
 
+		#if windows
+		var option:Option = new Option('Video Bitrate: ',
+			"Use this option to set your video's bitrate!",
+			'renderBitrate',
+			'float',
+			5.00);
+		addOption(option);
+
+		option.minValue = 1.0;
+		option.maxValue = 100.0;
+		option.scrollSpeed = 5;
+		option.changeValue = 0.01;
+		option.decimals = 2;
+		option.displayFormat = '%v Mbps';
+		#end
+		
+		#if !windows
 		var option:Option = new Option('Lossless Screenshots',
 			"If checked, screenshots will save as PNGs.\nOtherwise, It uses JPEG.",
 			'lossless',
@@ -107,6 +124,7 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 			'bool',
 			false);
 		addOption(option);
+		#end
 
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length-1]];
 		

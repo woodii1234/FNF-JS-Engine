@@ -13,7 +13,7 @@ class StrumNote extends FlxSprite
     	public var notes_angle:Null<Float> = null;
 	public var noteThing:Note;
 	public var resetAnim:Float = 0;
-	private var noteData:Int = 0;
+	public var noteData:Int = 0;
 	public var direction:Float = 90;//plan on doing scroll directions soon -bb
 	public var downScroll:Bool = false;//plan on doing scroll directions soon -bb
 	public var sustainReduce:Bool = true;
@@ -35,7 +35,7 @@ class StrumNote extends FlxSprite
        		return (notes_angle == null ? angle : notes_angle);
     	}
 
-	public function new(x:Float, y:Float, leData:Int, player:Int) {
+	public function new(x:Float, y:Float, leData:Int, player:Int, ?inEditor:Bool = false) {
 		colorSwap = new ColorSwap();
 		shader = colorSwap.shader;
 		if (ClientPrefs.noteColorStyle == 'Char-Based' && PlayState.instance != null) shader = new ColoredNoteShader(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2], false, 10);
@@ -65,7 +65,7 @@ class StrumNote extends FlxSprite
 			if (ClientPrefs.noteStyleThing != 'VS Nonsense V2' && ClientPrefs.noteStyleThing != 'DNB 3D' && ClientPrefs.noteStyleThing != 'VS AGOTI' && ClientPrefs.noteStyleThing != 'Doki Doki+' && ClientPrefs.noteStyleThing != 'TGT V4' && ClientPrefs.noteStyleThing != 'Default') {
 				skin = 'NOTE_assets_' + ClientPrefs.noteStyleThing.toLowerCase();
 			}
-			if(ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') {
+			if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && inEditor) {
 				skin = ClientPrefs.noteStyleThing == 'TGT V4' ? 'RED_TGTNOTE_assets' : 'RED_NOTE_assets';
 			}
 			if(ClientPrefs.noteColorStyle == 'Grayscale') {

@@ -423,7 +423,7 @@ class ChartingState extends MusicBeatState
 
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		for (i in 0...8){
-			var note:StrumNote = new StrumNote(GRID_SIZE * (i+1), strumLine.y, i % 4, 0);
+			var note:StrumNote = new StrumNote(GRID_SIZE * (i+1), strumLine.y, i % 4, 0, true);
 			note.setGraphicSize(GRID_SIZE, GRID_SIZE);
 			note.updateHitbox();
 			note.playAnim('static', true);
@@ -3601,7 +3601,7 @@ class ChartingState extends MusicBeatState
 		var daStrumTime = i[0];
 		var daSus:Dynamic = i[2];
 
-		var note:Note = new Note('', false, true);
+		var note:Note = new Note('', true, true);
 		note.strumTime = daStrumTime;
 		note.noteData = daNoteInfo % 4;
 		if(daSus != null) { //Common note
@@ -3616,6 +3616,7 @@ class ChartingState extends MusicBeatState
 			}
 			note.sustainLength = daSus;
 			note.noteType = i[3];
+			if (ClientPrefs.noteColorStyle == 'Quant-Based') note.quantCheck(note.strumTime);
 		} else { //Event note
 			note.loadGraphic(Paths.image('eventArrow'));
 			note.eventName = getEventName(i[1]);

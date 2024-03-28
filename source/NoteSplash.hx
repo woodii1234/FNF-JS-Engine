@@ -4,10 +4,19 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
+import flixel.math.FlxMath;
 import NoteShader.ColoredNoteShader;
 import flixel.util.FlxColor;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.FlxCamera;
+
+typedef NoteSplashConfig = {
+	anim:String,
+	minFps:Int,
+	maxFps:Int,
+	redAnim:Int,
+	offsets:Array<Array<Float>>
+}
 
 class NoteSplash extends FlxSprite
 {
@@ -21,8 +30,7 @@ class NoteSplash extends FlxSprite
 
 		var skin:String = 'noteSplashes';
 		if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
-
-		loadAnims(skin);
+		if (ClientPrefs.splashType != 'Psych Engine') skin = 'noteSplashes-' + ClientPrefs.splashType.toLowerCase();
 		
 		colorSwap = new ColorSwap();
 		shader = colorSwap.shader;
@@ -42,6 +50,8 @@ class NoteSplash extends FlxSprite
 		}
 	}
 
+	var maxAnims:Int = 2;
+	var config:NoteSplashConfig = null;
 	public function setupNoteSplash(x:Float, y:Float, note:Int = 0, texture:String = null, hueColor:Float = 0, satColor:Float = 0, brtColor:Float = 0, color:FlxColor = null) {
 		setPosition(x - Note.swagWidth * 0.95, y - Note.swagWidth);
 		alpha = 0.6;
@@ -50,21 +60,10 @@ class NoteSplash extends FlxSprite
 			texture = 'noteSplashes';
 			if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
 		}
-		if(ClientPrefs.splashType == 'VS Impostor') {
-			texture = 'impostorNoteSplashes';
-		}
-		if(ClientPrefs.splashType == 'Base Game') {
-			texture = 'baseNoteSplashes';
-		}
-		if(ClientPrefs.splashType == 'Doki Doki+') {
-			texture = 'NOTE_splashes_doki';
-		}
-		if(ClientPrefs.splashType == 'TGT V4') {
-			texture = 'tgtNoteSplashes';
-		}
-		if(ClientPrefs.splashType == 'Indie Cross') {
-			texture = 'icNoteSplashes';
-		}
+		if (texture == null && ClientPrefs.splashType != 'Psych Engine') texture = 'noteSplashes-' + ClientPrefs.splashType.toLowerCase();
+
+		if (!Paths.splashConfigs.exists(texture)) config = Paths.initSplashConfig(texture); 
+		config = Paths.splashConfigs.get(texture);
 		if(textureLoaded != texture) {
 			loadAnims(texture);
 		}
@@ -77,95 +76,60 @@ class NoteSplash extends FlxSprite
 		        rgbShader.enabled.value = [true];
        			rgbShader.setColors(color.red, color.green, color.blue);
 		}
-		if (ClientPrefs.splashType != 'Base Game') {
 		offset.set(10, 10);
-		} else {
-		offset.set(-10, 0);
+
+		var animNum:Int = FlxG.random.int(1, maxAnims);
+		var minFps:Int = 22;
+		var maxFps:Int = 26;
+		if(config != null)
+		{
+			var animID:Int = note + ((animNum - 1) * Note.colArray.length);
+			var offs:Array<Float> = config.offsets[FlxMath.wrap(animID, 0, config.offsets.length-1)];
+			offset.x += offs[0];
+			offset.y += offs[1];
+			minFps = config.minFps;
+			maxFps = config.maxFps;
 		}
+
 		var splashToPlay:Int = note;
 		if (ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Char-Based' || ClientPrefs.noteColorStyle == 'Rainbow')
-			splashToPlay = (ClientPrefs.splashType != 'TGT V4' ? 3 : 1); //for tgt noteskin, the down note is the red splash
-		var animNum:Int = 0;
-		if (ClientPrefs.splashType != 'Doki Doki+' && ClientPrefs.splashType != 'Base Game')
-		{
-		animNum = FlxG.random.int(1, 2);
-		animation.play('note' + splashToPlay + '-' + animNum, true);
-		if(animation.curAnim != null)animation.curAnim.frameRate = 24 + FlxG.random.int(-2, 2);
-		}
-		if (ClientPrefs.splashType == 'Doki Doki+')
-		{
-		animNum = 1;
-		animation.play('note' + splashToPlay, true);
-		if(animation.curAnim != null)animation.curAnim.frameRate = 24 + FlxG.random.int(-2, 2);
-		}
-		if (ClientPrefs.splashType == 'Base Game')
-		{
-		animNum = FlxG.random.int(0, 1);
-		animation.play('note' + splashToPlay + '-' + animNum, true);
-		if(animation.curAnim != null)animation.curAnim.frameRate = 24 + FlxG.random.int(-2, 2);
-		}
+			splashToPlay = config.redAnim;
+		animation.play('note' + splashToPlay + '-' + (animNum), true);
+
+		if(animation.curAnim != null)animation.curAnim.frameRate = FlxG.random.int(config.minFps, config.maxFps);
 	}
 
 	function loadAnims(skin:String) {
-		frames = Paths.getSparrowAtlas(skin);
-		if (ClientPrefs.splashType == 'Psych Engine')
-		{
-		for (i in 1...3) {
-			animation.addByPrefix("note1-" + i, "note splash blue " + i, 24, false);
-			animation.addByPrefix("note2-" + i, "note splash green " + i, 24, false);
-			animation.addByPrefix("note0-" + i, "note splash purple " + i, 24, false);
-			animation.addByPrefix("note3-" + i, "note splash red " + i, 24, false);
+		maxAnims = 0;
+		if (!Paths.splashSkinFramesMap.exists(skin)) Paths.initSplash(4, skin, maxAnims);
+		frames = Paths.splashSkinFramesMap.get(skin);
+		animation.copyFrom(Paths.splashSkinAnimsMap.get(skin));
+		var animName = config.anim;
+		if(animName == null)
+			animName = config != null ? config.anim : 'note splash';
+
+		while(true) {
+			var animID:Int = maxAnims + 1;
+			for (i in 0...Note.colArray.length) {
+				if (!addAnimAndCheck('note$i-$animID', '$animName ${Note.colArray[i]} $animID', 24, false)) {
+					//trace('maxAnims: $maxAnims');
+					return config;
+				}
+			}
+			maxAnims++;
+			//trace('currently: $maxAnims');
 		}
-		}
-		if (ClientPrefs.splashType == 'Indie Cross')
-		{
-		for (i in 1...3) {
-			animation.addByPrefix("note1-" + i, "note splash blue " + i, 24, false);
-			animation.addByPrefix("note2-" + i, "note splash green " + i, 24, false);
-			animation.addByPrefix("note0-" + i, "note splash purple " + i, 24, false);
-			animation.addByPrefix("note3-" + i, "note splash red " + i, 24, false);
-		}
-		}
-		if (ClientPrefs.splashType == 'TGT V4')
-		{
-		for (i in 1...3) {
-			animation.addByPrefix("note1-" + i, "note splash blue " + i, 24, false);
-			animation.addByPrefix("note2-" + i, "note splash green " + i, 24, false);
-			animation.addByPrefix("note0-" + i, "note splash purple " + i, 24, false);
-			animation.addByPrefix("note3-" + i, "note splash red " + i, 24, false);
-		}
-		}
-		if (ClientPrefs.splashType == 'VS Impostor')
-		{
-		for (i in 1...3) {
-			animation.addByPrefix("note1-" + i, "note splash blue " + i, 24, false);
-			animation.addByPrefix("note2-" + i, "note splash green " + i, 24, false);
-			animation.addByPrefix("note0-" + i, "note splash purple " + i, 24, false);
-			animation.addByPrefix("note3-" + i, "note splash red " + i, 24, false);
-		}
-		}
-		if (ClientPrefs.splashType == 'Doki Doki+')
-		{
-		for (i in 1...3) {
-		animation.addByPrefix('note1', 'note splash blue', 24, false);
-		animation.addByPrefix('note2', 'note splash green', 24, false);
-		animation.addByPrefix('note0', 'note splash purple', 24, false);
-		animation.addByPrefix('note3', 'note splash red', 24, false);
-		}
-		}
-		if (ClientPrefs.splashType == 'Base Game')
-		{
-		for (i in 1...3) {
-		animation.addByPrefix('note1-0', 'note impact 1 blue', 24, false);
-		animation.addByPrefix('note2-0', 'note impact 1 green', 24, false);
-		animation.addByPrefix('note0-0', 'note impact 1 purple', 24, false);
-		animation.addByPrefix('note3-0', 'note impact 1 red', 24, false);
-		animation.addByPrefix('note1-1', 'note impact 2 blue', 24, false);
-		animation.addByPrefix('note2-1', 'note impact 2 green', 24, false);
-		animation.addByPrefix('note0-1', 'note impact 2 purple', 24, false);
-		animation.addByPrefix('note3-1', 'note impact 2 red', 24, false);
-		}
-		}
+	}
+	function addAnimAndCheck(name:String, anim:String, ?framerate:Int = 24, ?loop:Bool = false)
+	{
+		var animFrames = [];
+		@:privateAccess
+		animation.findByPrefix(animFrames, anim); // adds valid frames to animFrames
+
+		if(animFrames.length < 1) return false;
+	
+		animation.addByPrefix(name, anim, framerate, loop);
+		return true;
 	}
 
 	override function update(elapsed:Float) {
