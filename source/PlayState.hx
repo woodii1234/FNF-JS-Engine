@@ -3932,7 +3932,7 @@ class PlayState extends MusicBeatState
 					final gottaHitNote:Bool = ((songNotes[1] < 4 && !opponentChart && !bothsides)
 						|| (songNotes[1] > 3 && opponentChart) ? section.mustHitSection : !section.mustHitSection);
 
-					if (gottaHitNote && !songNotes.hitCausesMiss) {
+					if (gottaHitNote && songNotes[3] != 'Hurt Note') {
 						totalNotes += 1;
 					}
 					if (!gottaHitNote) {
@@ -3974,13 +3974,13 @@ class PlayState extends MusicBeatState
 						prevNote: oldNote,
 						strum: null,
 						hitHealth: 0.023,
-						missHealth: 0.0475,
+						missHealth: songNotes[3] != 'Hurt Note' ? 0.0475 : 0.3,
 						wasHit: false,
 						hitCausesMiss: songNotes[3] == 'Hurt Note',
 						multSpeed: 1,
 						wasSpawned: false,
 						wasMissed: false,
-						ignoreNote: songNotes[3] == 'Hurt Note'
+						ignoreNote: songNotes[3] == 'Hurt Note' && gottaHitNote
 					};
 					if (swagNote.noteskin.length > 0 && !Paths.noteSkinFramesMap.exists(swagNote.noteskin)) inline Paths.initNote(4, swagNote.noteskin);
 
@@ -4018,14 +4018,14 @@ class PlayState extends MusicBeatState
 								prevNote: oldNote,
 								strum: null,
 								hitHealth: 0.023,
-								missHealth: 0.0475,
+								missHealth: songNotes[3] != 'Hurt Note' ? 0.0475 : 0.1,
 								wasHit: false,
 								multSpeed: 1,
 								hitCausesMiss: songNotes[3] == 'Hurt Note',
 								wasSpawned: false,
 								canBeHit:false,
 								wasMissed: false,
-								ignoreNote: songNotes[3] == 'Hurt Note'
+								ignoreNote: songNotes[3] == 'Hurt Note' && swagNote.mustPress
 							};
 							inline unspawnNotes.push(sustainNote);
 							//Sys.sleep(0.0001);
@@ -4048,14 +4048,15 @@ class PlayState extends MusicBeatState
 								parent: null,
 								prevNote: oldNote,
 								strum: null,
-								hitHealth: 0.023,
-								missHealth: 0.0475,
+								hitHealth: swagNote.hitHealth,
+								missHealth: swagNote.missHealth,
 								wasHit: false,
 								multSpeed: 1,
+								hitCausesMiss: swagNote.hitCausesMiss,
 								wasSpawned: false,
 								canBeHit:false,
 								wasMissed: false,
-								ignoreNote: false
+								ignoreNote: swagNote.ignoreNote
 							};
 							inline unspawnNotes.push(jackNote);
 							//Sys.sleep(0.0001);

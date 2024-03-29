@@ -728,6 +728,7 @@ class Note extends FlxSprite
 		hitHealth = chartNoteData.hitHealth;
 		missHealth = chartNoteData.missHealth;
 		hitCausesMiss = chartNoteData.hitCausesMiss;
+		ignoreNote = chartNoteData.ignoreNote;
 		multSpeed = chartNoteData.multSpeed;
 
 		if (PlayState.isPixelStage) reloadNote('', texture);
