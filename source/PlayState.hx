@@ -5246,7 +5246,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 								}
 						}
 
-						if(daNote.mustPress) {
 							if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
 							{
 								if (daNote.mustPress && (!cpuControlled || cpuControlled && ClientPrefs.communityGameBot) && !daNote.ignoreNote && !endingSong && !daNote.wasGoodHit) {
@@ -5261,7 +5260,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 								daNote.visible = false;
 								group.remove(daNote, true);
 							}
-							if(cpuControlled && daNote.strumTime + (ClientPrefs.communityGameBot ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition && !daNote.ignoreNote) {
+						if(daNote.mustPress) {
+							if(cpuControlled && daNote.strumTime + (ClientPrefs.communityGameBot && !daNote.isSustainNote ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition && !daNote.ignoreNote) {
 								if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) goodNoteHit(daNote);
 								if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
 								{
@@ -6565,7 +6565,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 
 		//tryna do MS based judgment due to popular demand
-		final daRating:Rating = Conductor.judgeNote(note, noteDiff, cpuControlled, miss);
+		final daRating:Rating = Conductor.judgeNote(note, noteDiff, cpuControlled && !ClientPrefs.communityGameBot, miss);
 
 		if (miss) daRating.image = 'miss';
 			else if (ratingsData[0].image == 'miss') ratingsData[0].image = !ClientPrefs.noMarvJudge ? 'perfect' : 'sick';

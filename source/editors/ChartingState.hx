@@ -2318,7 +2318,6 @@ class ChartingState extends MusicBeatState
 						}
 						else
 						{
-							selectNote(note, false);
 							selectionNote.playAnim('pressed' + selectionNote.noteData, true, 0.15);
 							//trace('tryin to delete note...');
 							deleteNote(note);
