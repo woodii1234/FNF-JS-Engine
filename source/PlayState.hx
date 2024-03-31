@@ -1437,6 +1437,8 @@ class PlayState extends MusicBeatState
 				gf.visible = false;
 		}
 
+		callOnLuas('onCreate', []);
+
 		switch(curStage)
 		{
 			case 'limo':
@@ -7925,7 +7927,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			daNote.hitByOpponent = true;
 
 
-			callOnLuas(opponentChart ? 'opponentNoteHit' : 'goodNoteHit', [notes.members.indexOf(daNote), Math.abs(daNote.noteData), daNote.noteType, daNote.isSustainNote]);
+			callOnLuas(!opponentChart ? 'opponentNoteHit' : 'goodNoteHit', [notes.members.indexOf(daNote), Math.abs(daNote.noteData), daNote.noteType, daNote.isSustainNote]);
 			callOnLuas((opponentChart ? 'goodNoteHitFix' : 'opponentNoteHitFix'), [notes.members.indexOf(daNote), Math.abs(daNote.noteData), daNote.noteType, daNote.isSustainNote]);
 
 			if (!daNote.isSustainNote)
