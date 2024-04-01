@@ -1,4 +1,4 @@
-1.22.0;
+1.22.4.01;
 
 Rendering Mode was reworked (Windows only) - The MP4 is now automatically made for you, using FFmpeg! (You must put the FFmpeg .exe in the same folder as the JSEngine.exe for it to work, adding it to the Environment variables does NOT work!)
 As well, you can customize the bitrate of your video! (also windows only)
