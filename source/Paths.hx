@@ -180,12 +180,11 @@ class Paths
 		if(defaultDirectory == null) defaultDirectory = getSharedPath();
 		defaultDirectory = defaultDirectory.trim();
 		if(!defaultDirectory.endsWith('/')) defaultDirectory += '/';
-		if(!defaultDirectory.startsWith('assets/')) defaultDirectory = 'assets/$defaultDirectory';
 
 		var mergedList:Array<String> = [];
 		var paths:Array<String> = directoriesWithFile(defaultDirectory, path);
 
-		var defaultPath:String = defaultDirectory + path;
+		var defaultPath:String = 'assets/$defaultDirectory' + path;
 		if(paths.contains(defaultPath))
 		{
 			paths.remove(defaultPath);
@@ -203,11 +202,13 @@ class Paths
 	}
 	inline public static function directoriesWithFile(path:String, fileToFind:String, mods:Bool = true)
 	{
+		var assetDirectory:String = 'assets/$path';
+		if (path.startsWith('assets/')) assetDirectory = path;
 		var foldersToCheck:Array<String> = [];
 		#if sys
-		if(FileSystem.exists(path + fileToFind))
+		if(FileSystem.exists(assetDirectory + fileToFind))
 		#end
-			foldersToCheck.push(path + fileToFind);
+			foldersToCheck.push(assetDirectory + fileToFind);
 
 		#if MODS_ALLOWED
 		if(mods)
@@ -215,13 +216,13 @@ class Paths
 			// Global mods first
 			for(mod in getGlobalMods())
 			{
-				var folder:String = Paths.mods(mod + '/' + fileToFind);
+				var folder:String = Paths.mods(mod + '/' + path + fileToFind);
 				if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(folder);
 			}
 
 			// Then "PsychEngine/mods/" main folder
-			var folder:String = Paths.mods(fileToFind);
-			if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(Paths.mods(fileToFind));
+			var folder:String = Paths.mods(path + fileToFind);
+			if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(Paths.mods(path + fileToFind));
 
 			// And lastly, the loaded mod's folder
 			if(currentModDirectory != null && currentModDirectory.length > 0)

@@ -995,7 +995,7 @@ class PlayState extends MusicBeatState
 			startCharacterLua(gf.curCharacter);
 		}
 
-	var ratingQuoteStuff:Array<Dynamic> = CoolUtil.coolTextFile(Paths.txt('ratingQuotes/' + ClientPrefs.rateNameStuff));
+	var ratingQuoteStuff:Array<Dynamic> = Paths.mergeAllTextsNamed('ratingQuotes/${ClientPrefs.rateNameStuff}.txt', 'data');
 	for (i in 0...ratingQuoteStuff.length)
 	{
 		var quotes:Array<Dynamic> = ratingQuoteStuff[i].split(',');

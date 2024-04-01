@@ -216,7 +216,7 @@ class VisualsUISubState extends BaseOptionsMenu
 		option.displayFormat = '%vX';
 		addOption(option);
 
-		var ratingQuoteList:Array<String> = Paths.mergeAllTextsNamed('ratingQuotes/list.txt', Paths.getPreloadPath() + 'data');
+		var ratingQuoteList:Array<String> = Paths.mergeAllTextsNamed('ratingQuotes/list.txt', 'data', false);
 		if (ratingQuoteList.length > 0)
 		{
 			if (!ratingQuoteList.contains(ClientPrefs.rateNameStuff))
