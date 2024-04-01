@@ -81,6 +81,10 @@ class MusicBeatState extends FlxUIState
 
 		FlxG.autoPause = ClientPrefs.autoPause;
 
+		stagesFunc(function(stage:BaseStage) {
+			stage.update(elapsed);
+		});
+
 		super.update(elapsed);
 		Application.current.window.title = windowNamePrefix + windowNameSuffix + windowNameSuffix2;
 	}
@@ -150,22 +154,48 @@ class MusicBeatState extends FlxUIState
 		onOutroComplete();
 	}
 
+	public var stages:Array<BaseStage> = [];
 	//runs whenever the game hits a step
 	public function stepHit():Void
 	{
 		//trace('Step: ' + curStep);
+		stagesFunc(function(stage:BaseStage) {
+			stage.curStep = curStep;
+			stage.curDecStep = curDecStep;
+			stage.stepHit();
+		});
 	}
 
 	//runs whenever the game hits a beat
 	public function beatHit():Void
 	{
 		//trace('Beat: ' + curBeat);
+		stagesFunc(function(stage:BaseStage) {
+			stage.curBeat = curBeat;
+			stage.curDecBeat = curDecBeat;
+			stage.beatHit();
+		});
 	}
 
 	//runs whenever the game hits a section
 	public function sectionHit():Void
 	{
 		//trace('Section: ' + curSection + ', Beat: ' + curBeat + ', Step: ' + curStep);
+		stagesFunc(function(stage:BaseStage) {
+			stage.curSection = curSection;
+			stage.sectionHit();
+		});
+	}
+
+	public static function getState():MusicBeatState {
+		return cast (FlxG.state, MusicBeatState);
+	}
+
+	function stagesFunc(func:BaseStage->Void)
+	{
+		for (stage in stages)
+			if(stage != null && stage.exists && stage.active)
+				func(stage);
 	}
 
 	function getBeatsOnSection()

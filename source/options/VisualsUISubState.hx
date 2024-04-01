@@ -316,12 +316,44 @@ class VisualsUISubState extends BaseOptionsMenu
 			['Time Left', 'Time Elapsed', 'Song Name', 'Modern Time', 'Song Name + Time', 'Time Left (No Bar)', 'Time Elapsed (No Bar)', 'Modern Time (No Bar)', 'Disabled']);
 		addOption(option);
 
-		var option:Option = new Option('HUD Type:',
-			"Which HUD would you like?",
-			'hudType',
+		var option:Option = new Option('ScoreTxt Style:',
+			"How would you like your scoreTxt to look like?",
+			'scoreStyle',
 			'string',
-			'VS Impostor',
-			['VS Impostor', 'Kade Engine', 'Tails Gets Trolled V4', 'Dave and Bambi', 'Doki Doki+', 'Psych Engine', 'Leather Engine', 'JS Engine']);
+			'Psych Engine',
+			['Psych Engine', 'VS Impostor', 'Kade Engine', 'Forever Engine', 'TGT V4', 'Dave Engine', 'Doki Doki+', 'Leather Engine', 'JS Engine']);
+		addOption(option);
+
+		var option:Option = new Option('Time Bar Style:',
+			"How would you like the Time Bar to look like?",
+			'timeBarStyle',
+			'string',
+			'Vanilla',
+			['Vanilla', 'VS Impostor', 'TGT V4', 'Dave Engine', 'Doki Doki+', 'Leather Engine', 'JS Engine']);
+		addOption(option);
+
+		var option:Option = new Option('Health Bar Style:',
+			"How would you like your Health Bar to look?",
+			'healthBarStyle',
+			'string',
+			'Vanilla',
+			['Vanilla', 'Dave Engine', 'Doki Doki+']);
+		addOption(option);
+
+		var option:Option = new Option('Watermark Style:',
+			"How would you like your Watermark to look?",
+			'watermarkStyle',
+			'string',
+			'Vanilla',
+			['Vanilla', 'Kade Engine', 'Dave Engine', 'JS Engine', 'Forever Engine', 'Hide']);
+		addOption(option);
+
+		var option:Option = new Option('Bot Txt Style:',
+			"How would you like your Botplay text to look?",
+			'botTxtStyle',
+			'string',
+			'Vanilla',
+			['Vanilla', 'JS Engine', 'Dave Engine', 'Doki Doki+', 'TGT V4', 'VS Impostor', 'Hide']);
 		addOption(option);
 
 		var option:Option = new Option('Strum Light Up Style:',
