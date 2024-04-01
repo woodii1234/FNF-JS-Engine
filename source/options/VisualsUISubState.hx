@@ -329,7 +329,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			'timeBarStyle',
 			'string',
 			'Vanilla',
-			['Vanilla', 'VS Impostor', 'TGT V4', 'Dave Engine', 'Doki Doki+', 'Leather Engine', 'JS Engine']);
+			['Vanilla', 'Kade Engine', 'VS Impostor', 'TGT V4', 'Dave Engine', 'Doki Doki+', 'Leather Engine', 'JS Engine']);
 		addOption(option);
 
 		var option:Option = new Option('Health Bar Style:',
@@ -345,7 +345,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			'watermarkStyle',
 			'string',
 			'Vanilla',
-			['Vanilla', 'Kade Engine', 'Dave Engine', 'JS Engine', 'Forever Engine', 'Hide']);
+			['Vanilla', 'Dave Engine', 'JS Engine', 'Forever Engine', 'Hide']);
 		addOption(option);
 
 		var option:Option = new Option('Bot Txt Style:',

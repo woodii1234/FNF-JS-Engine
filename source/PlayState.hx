@@ -2891,10 +2891,7 @@ class PlayState extends MusicBeatState
 				case "Forever Engine":
 					tempScore = 'Score: ' + formattedScore + ' $divider Accuracy: ' + Highscore.floorDecimal(ratingPercent * 100, 2) + '% ['  + fcString + ']' + ' $divider Combo Breaks: ' + formattedSongMisses + ' $divider Combo: ' + formattedCombo + npsString + ' $divider Rank: ' + ratingName;
 
-				case "Psych Engine", "Tails Gets Trolled V4":
-					tempScore = 'Score: ' + formattedScore + ' $divider Misses: ' + formattedSongMisses  + ' $divider Combo: ' + formattedCombo + npsString + ' $divider Rating: ' + ratingName + (ratingName != '?' ? ' (${accuracy}) - $fcString' : '');
-
-				case "JS Engine":
+				case "Psych Engine", "JS Engine", "Tails Gets Trolled V4":
 					tempScore = 'Score: ' + formattedScore + ' $divider Misses: ' + formattedSongMisses  + ' $divider Combo: ' + formattedCombo + npsString + ' $divider Rating: ' + ratingName + (ratingName != '?' ? ' (${accuracy}) - $fcString' : '');
 
 				case "Leather Engine":
@@ -7179,6 +7176,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 	}
 
 	var lastBeatHit:Int = -1;
+	var curBeatOffset:Float = 0;
 
 	override function beatHit()
 	{
@@ -7198,12 +7196,14 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			});
 		}
 
+		curBeatOffset += 1;
+
 		if (curBeat % 32 == 0 && randomSpeedThing)
 		{
 			var randomShit = FlxMath.roundDecimal(FlxG.random.float(0.4, 3), 2);
 			lerpSongSpeed(randomShit, 1);
 		}
-		if (camZooming && !endingSong && !startingSong && FlxG.camera.zoom < 1.35 && ClientPrefs.camZooms && curBeat % camBopInterval == 0)
+		if (camZooming && !endingSong && !startingSong && FlxG.camera.zoom < 1.35 && ClientPrefs.camZooms && curBeatOffset % camBopInterval == 0)
 		{
 			FlxG.camera.zoom += 0.015 * camBopIntensity;
 			camHUD.zoom += 0.03 * camBopIntensity;
@@ -7274,6 +7274,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			setOnLuas('mustHitSection', SONG.notes[curSection].mustHitSection);
 			setOnLuas('altAnim', SONG.notes[curSection].altAnim);
 			setOnLuas('gfSection', SONG.notes[curSection].gfSection);
+			if (SONG.notes[curSection].sectionBeats != 4)
+				curBeatOffset += (SONG.notes[curSection].sectionBeats - 4);
 		}
 
 		setOnLuas('curSection', curSection);
