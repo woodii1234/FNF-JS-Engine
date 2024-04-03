@@ -186,7 +186,7 @@ class PlayState extends MusicBeatState
 	public var healthDrainAmount:Float = 0.023;
 	public var healthDrainFloor:Float = 0.1;
 
-	public var strumAnimsPerFrame:Array<Int> = [0, 0];
+	var strumsHit:Array<Bool> = [false, false, false, false, false, false, false, false];
 	public var splashesPerFrame:Array<Int> = [0, 0];
 
 	public var vocals:FlxSound;
@@ -3491,7 +3491,7 @@ class PlayState extends MusicBeatState
 
 			strumLineNotes.add(babyArrow);
 			babyArrow.postAddedToGroup();
-			if (ClientPrefs.enableColorShader && ClientPrefs.noteColorStyle != 'Normal') 
+			if (ClientPrefs.enableColorShader && ClientPrefs.noteColorStyle != 'Normal' && ClientPrefs.noteStyleThing != 'TGT V4' && !PlayState.isPixelStage) 
 			{
 				var arrowAngle = switch(i)
 				{
@@ -3888,20 +3888,21 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		if (missRecalcsPerFrame > 0) missRecalcsPerFrame = 0;
 		if (charAnimsFrame > 0) charAnimsFrame = 0;
 		if (oppAnimsFrame > 0) oppAnimsFrame = 0;
-		if (strumAnimsPerFrame[0] > 0 || strumAnimsPerFrame[1] > 0) strumAnimsPerFrame = [0, 0];
+		strumsHit = [false, false, false, false, false, false, false, false];
 		if (splashesPerFrame[0] > 0 || splashesPerFrame[1] > 0) splashesPerFrame = [0, 0];
 
 		if (lerpingScore) updateScore();
 		if (shownScore != songScore && ClientPrefs.scoreStyle == 'JS Engine' && Math.abs(shownScore - songScore) >= 10) {
-			shownScore = FlxMath.lerp(shownScore, songScore, 0.4 / (ClientPrefs.framerate / 60));
+			shownScore = FlxMath.lerp(shownScore, songScore, 0.2 / ((!ffmpegMode ? ClientPrefs.framerate : targetFPS) / 60));
 				lerpingScore = true; // Indicate that lerping is in progress
 		} else {
 			shownScore = songScore;
 			lerpingScore = false;
+			updateScore(); //Update scoreTxt one last time
 		}
 
-			if (!opponentChart) displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, health, 0.1 / (ClientPrefs.framerate/60)) : health;
-			else displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, maxHealth - health, 0.1 / (ClientPrefs.framerate/60)) : maxHealth - health;
+			if (!opponentChart) displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, health, 0.1 / ((!ffmpegMode ? ClientPrefs.framerate : targetFPS) / 60)) : health;
+			else displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, maxHealth - health, 0.1 / ((!ffmpegMode ? ClientPrefs.framerate : targetFPS) / 60)) : maxHealth - health;
 		
 		setOnLuas('curDecStep', curDecStep);
 		setOnLuas('curDecBeat', curDecBeat);
@@ -4063,10 +4064,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		iconP2.setGraphicSize(Std.int(FlxMath.lerp(iconP2.width / iconP2.scale.x, iconP2.width, CoolUtil.boundTo(1 - (elapsed * 30 * playbackRate), 0, 1))), Std.int(FlxMath.lerp(iconP2.height / iconP2.scale.y, iconP2.height, CoolUtil.boundTo(1 - (elapsed * 30 * playbackRate), 0, 1))));
 		}
 		if (ClientPrefs.iconBounceType == 'Strident Crisis') {
-		iconP1.setGraphicSize(Std.int(FlxMath.lerp(iconP1.width / iconP1.scale.x, iconP1.width, 0.50 / playbackRate)), Std.int(FlxMath.lerp(iconP1.height / iconP1.scale.y, iconP1.height, 0.50 / playbackRate)));
+		iconP1.setGraphicSize(Std.int(FlxMath.lerp(iconP1.frameWidth, iconP1.width, 0.50 / playbackRate)), Std.int(FlxMath.lerp(iconP1.frameHeight, iconP1.height, 0.50 / playbackRate)));
+		iconP2.setGraphicSize(Std.int(FlxMath.lerp(iconP2.frameWidth, iconP2.width, 0.50 / playbackRate)), Std.int(FlxMath.lerp(iconP2.frameHeight, iconP1.height, 0.50 / playbackRate)));
 		iconP1.updateHitbox();
-
-		iconP2.setGraphicSize(Std.int(FlxMath.lerp(iconP2.width / iconP2.scale.x, iconP2.width, 0.50 / playbackRate)), Std.int(FlxMath.lerp(iconP2.height / iconP2.scale.y, iconP1.height, 0.50 / playbackRate)));
 		iconP2.updateHitbox();
 		}
 		if (ClientPrefs.iconBounceType == 'Dave and Bambi') {
@@ -4801,7 +4801,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 							boyfriend.alpha = 0.00001;
 							boyfriend = boyfriendMap.get(value2);
 							boyfriend.alpha = lastAlpha;
-							if (value2 != 'bf' || value2 != 'boyfriend') iconP1.changeIcon(boyfriend.healthIcon);
+							if (!value2.startsWith('bf') || !value2.startsWith('boyfriend')) iconP1.changeIcon(boyfriend.healthIcon);
 							else {
 								if (ClientPrefs.bfIconStyle == 'VS Nonsense V2') iconP1.changeIcon('bfnonsense');
 								if (ClientPrefs.bfIconStyle == 'Doki Doki+') iconP1.changeIcon('bfdoki');
@@ -6565,9 +6565,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				}
 
 				if(cpuControlled) {
-					if (ClientPrefs.botLightStrum && strumAnimsPerFrame[1] < 4)
+					if (ClientPrefs.botLightStrum && !strumsHit[(note.noteData % 4) + 4])
 					{
-						strumAnimsPerFrame[1] += 1;
+						strumsHit[(note.noteData % 4) + 4] = true;
 						var time:Float = 0;
 
 						if (ClientPrefs.strumLitStyle == 'Full Anim' && !ClientPrefs.communityGameBot) time = 0.15 / playbackRate;
@@ -6650,9 +6650,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				}
 			}
 			if(cpuControlled) {
-				if (ClientPrefs.botLightStrum && strumAnimsPerFrame[1] < 4)
+				if (ClientPrefs.botLightStrum && !strumsHit[(noteAlt.noteData % 4) + 4])
 				{
-					strumAnimsPerFrame[1] += 1;
+					strumsHit[(noteAlt.noteData % 4) + 4] = true;
 					var time:Float = 0;
 
 					if (ClientPrefs.strumLitStyle == 'Full Anim' && !ClientPrefs.communityGameBot) time = 0.15 / playbackRate;
@@ -6818,9 +6818,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 				if (polyphony > 1 && !daNote.isSustainNote) opponentNoteTotal += polyphony - 1;
 
-			if (ClientPrefs.opponentLightStrum && strumAnimsPerFrame[0] < 4)
+			if (ClientPrefs.opponentLightStrum && !strumsHit[daNote.noteData % 4])
 			{
-				strumAnimsPerFrame[0] += 1;
+				strumsHit[daNote.noteData % 4] = true;
 				var time:Float = 0;
 				if (ClientPrefs.strumLitStyle == 'Full Anim') time = 0.15 / playbackRate;
 				if (ClientPrefs.strumLitStyle == 'BPM Based') time = (Conductor.stepCrochet * 1.5 / 1000) / playbackRate;
@@ -6841,7 +6841,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 
 			callOnLuas(!opponentChart ? 'opponentNoteHit' : 'goodNoteHit', [notes.members.indexOf(daNote), Math.abs(daNote.noteData), daNote.noteType, daNote.isSustainNote]);
-			callOnLuas((opponentChart ? 'goodNoteHitFix' : 'opponentNoteHitFix'), [notes.members.indexOf(daNote), Math.abs(daNote.noteData), daNote.noteType, daNote.isSustainNote]);
 
 			if (!daNote.isSustainNote)
 			{
@@ -6901,9 +6900,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					dad.holdTimer = 0;
 				}
 			}
-			if (ClientPrefs.opponentLightStrum && strumAnimsPerFrame[0] < 4)
+			if (ClientPrefs.opponentLightStrum && !strumsHit[noteAlt.noteData % 4])
 			{
-				strumAnimsPerFrame[0] += 1;
+				strumsHit[noteAlt.noteData % 4] = true;
 				var time:Float = 0;
 
 				if (ClientPrefs.strumLitStyle == 'Full Anim' && !ClientPrefs.communityGameBot) time = 0.15 / playbackRate;
@@ -7196,6 +7195,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 
 		curBeatOffset += 1;
+		if (curBeatOffset < curBeat) curBeatOffset == curBeat;
 
 		if (curBeat % 32 == 0 && randomSpeedThing)
 		{
@@ -7273,8 +7273,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			setOnLuas('mustHitSection', SONG.notes[curSection].mustHitSection);
 			setOnLuas('altAnim', SONG.notes[curSection].altAnim);
 			setOnLuas('gfSection', SONG.notes[curSection].gfSection);
-			if (SONG.notes[curSection].sectionBeats != 4)
-				curBeatOffset += (SONG.notes[curSection].sectionBeats - 4);
+			if (curBeatOffset % camBopInterval != 0)
+				curBeatOffset += (curBeatOffset  % camBopInterval);
 		}
 
 		setOnLuas('curSection', curSection);
@@ -7316,8 +7316,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		FlxTween.angle(iconP1, -15, 0, Conductor.crochet / 1300 * gfSpeed, {ease: FlxEase.quadOut});
 		FlxTween.angle(iconP2, 15, 0, Conductor.crochet / 1300 * gfSpeed, {ease: FlxEase.quadOut});
 
-		FlxTween.tween(iconP1, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed, {ease: FlxEase.quadOut});
-		FlxTween.tween(iconP2, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed, {ease: FlxEase.quadOut});
+		FlxTween.tween(iconP1, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
+		FlxTween.tween(iconP2, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
 
 		iconP1.updateHitbox();
 		iconP2.updateHitbox();
@@ -7329,15 +7329,15 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		iconP2.scale.y = 0.75;
 		FlxTween.cancelTweensOf(iconP1);
 		FlxTween.cancelTweensOf(iconP2);
-		FlxTween.tween(iconP1, {"scale.x": 1, "scale.y": 1}, Conductor.crochet / 1000, {ease: FlxEase.backOut});
-		FlxTween.tween(iconP2, {"scale.x": 1, "scale.y": 1}, Conductor.crochet / 1000, {ease: FlxEase.backOut});
+		FlxTween.tween(iconP1, {"scale.x": 1, "scale.y": 1}, Conductor.crochet / 1000 / playbackRate, {ease: FlxEase.backOut});
+		FlxTween.tween(iconP2, {"scale.x": 1, "scale.y": 1}, Conductor.crochet / 1000 / playbackRate, {ease: FlxEase.backOut});
 		if (curBeat % 4 == 0) {
 			iconP1.offset.x = 10;
 			iconP2.offset.x = -10;
 			iconP1.angle = -15;
 			iconP2.angle = 15;
-			FlxTween.tween(iconP1, {"offset.x": 0, angle: 0}, Conductor.crochet / 1000, {ease: FlxEase.expoOut});
-			FlxTween.tween(iconP2, {"offset.x": 0, angle: 0}, Conductor.crochet / 1000, {ease: FlxEase.expoOut});
+			FlxTween.tween(iconP1, {"offset.x": 0, angle: 0}, Conductor.crochet / 1000 / playbackRate, {ease: FlxEase.expoOut});
+			FlxTween.tween(iconP2, {"offset.x": 0, angle: 0}, Conductor.crochet / 1000 / playbackRate, {ease: FlxEase.expoOut});
 		}
 		}
 		if (ClientPrefs.iconBounceType == 'New Psych') {
@@ -7394,20 +7394,20 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			{
 				iconP1.scale.set(1.1, 0.8);
 				iconP2.scale.set(1.1, 1.3);
-				//FlxTween.angle(iconP2, -15, 0, Conductor.crochet / 1300 * gfSpeed, {ease: FlxEase.quadOut});
-				//FlxTween.angle(iconP1, 15, 0, Conductor.crochet / 1300 * gfSpeed, {ease: FlxEase.quadOut});
+				//FlxTween.angle(iconP2, -15, 0, Conductor.crochet / 1300 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
+				//FlxTween.angle(iconP1, 15, 0, Conductor.crochet / 1300 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
 			}
 			:
 			{
 				iconP1.scale.set(1.1, 1.3);
 				iconP2.scale.set(1.1, 0.8);
-				FlxTween.angle(iconP1, -15, 0, Conductor.crochet / 1300 * gfSpeed, {ease: FlxEase.quadOut});
-				FlxTween.angle(iconP2, 15, 0, Conductor.crochet / 1300 * gfSpeed, {ease: FlxEase.quadOut});
+				FlxTween.angle(iconP1, -15, 0, Conductor.crochet / 1300 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
+				FlxTween.angle(iconP2, 15, 0, Conductor.crochet / 1300 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
 
 			}
 
-			FlxTween.tween(iconP1, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed, {ease: FlxEase.quadOut});
-			FlxTween.tween(iconP2, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed, {ease: FlxEase.quadOut});
+			FlxTween.tween(iconP1, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
+			FlxTween.tween(iconP2, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
 
 			iconP1.updateHitbox();
 			iconP2.updateHitbox();
@@ -7437,21 +7437,17 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		if (ClientPrefs.iconBounceType == 'Strident Crisis') {
 		final funny:Float = (healthBar.percent * 0.01) + 0.01;
 
-		//health icon bounce but epic
 		iconP1.setGraphicSize(Std.int(iconP1.width + (50 * (2 + funny))),Std.int(iconP2.height - (25 * (2 + funny))));
-		iconP1.scale.set(1.1, 0.8);
 		iconP2.setGraphicSize(Std.int(iconP2.width + (50 * (2 - funny))),Std.int(iconP2.height - (25 * (2 - funny))));
-
-		iconP2.scale.set(1.1, 0.8);
 
 		FlxTween.cancelTweensOf(iconP1);
 		FlxTween.cancelTweensOf(iconP2);
 
-		FlxTween.angle(iconP1, -15, 0, Conductor.crochet / 1300 * gfSpeed, {ease: FlxEase.quadOut});
-		FlxTween.angle(iconP2, 15, 0, Conductor.crochet / 1300 * gfSpeed, {ease: FlxEase.quadOut});
+		FlxTween.angle(iconP1, -15, 0, Conductor.crochet / 1300 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
+		FlxTween.angle(iconP2, 15, 0, Conductor.crochet / 1300 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
 
-		FlxTween.tween(iconP1, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed, {ease: FlxEase.quadOut});
-		FlxTween.tween(iconP2, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed, {ease: FlxEase.quadOut});
+		FlxTween.tween(iconP1, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
+		FlxTween.tween(iconP2, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
 
 		iconP1.updateHitbox();
 		iconP2.updateHitbox();
@@ -7460,18 +7456,18 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		iconP1.scale.x = 1.3;
 		iconP1.scale.y = 0.75;
 		FlxTween.cancelTweensOf(iconP1);
-		FlxTween.tween(iconP1, {"scale.x": 1, "scale.y": 1}, Conductor.crochet / 1000, {ease: FlxEase.backOut});
+		FlxTween.tween(iconP1, {"scale.x": 1, "scale.y": 1}, Conductor.crochet / 1000 / playbackRate, {ease: FlxEase.backOut});
 		iconP2.scale.x = 1.3;
 		iconP2.scale.y = 0.75;
 		FlxTween.cancelTweensOf(iconP2);
-		FlxTween.tween(iconP2, {"scale.x": 1, "scale.y": 1}, Conductor.crochet / 1000, {ease: FlxEase.backOut});
+		FlxTween.tween(iconP2, {"scale.x": 1, "scale.y": 1}, Conductor.crochet / 1000 / playbackRate, {ease: FlxEase.backOut});
 		if (iconBopsTotal % 4 == 0) {
 			iconP1.offset.x = 10;
 			iconP1.angle = -15;
-			FlxTween.tween(iconP1, {"offset.x": 0, angle: 0}, Conductor.crochet / 1000, {ease: FlxEase.expoOut});
+			FlxTween.tween(iconP1, {"offset.x": 0, angle: 0}, Conductor.crochet / 1000 / playbackRate, {ease: FlxEase.expoOut});
 			iconP2.offset.x = -10;
 			iconP2.angle = 15;
-			FlxTween.tween(iconP2, {"offset.x": 0, angle: 0}, Conductor.crochet / 1000, {ease: FlxEase.expoOut});
+			FlxTween.tween(iconP2, {"offset.x": 0, angle: 0}, Conductor.crochet / 1000 / playbackRate, {ease: FlxEase.expoOut});
 		}
 		}
 		if (ClientPrefs.iconBounceType == 'New Psych') {
@@ -7532,20 +7528,20 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			{
 				iconP1.scale.set(1.1, 0.8);
 				iconP2.scale.set(1.1, 1.3);
-				//FlxTween.angle(iconP2, -15, 0, Conductor.crochet / 1300 * gfSpeed, {ease: FlxEase.quadOut});
-				//FlxTween.angle(iconP1, 15, 0, Conductor.crochet / 1300 * gfSpeed, {ease: FlxEase.quadOut});
+				//FlxTween.angle(iconP2, -15, 0, Conductor.crochet / 1300 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
+				//FlxTween.angle(iconP1, 15, 0, Conductor.crochet / 1300 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
 			}
 			:
 			{
 				iconP1.scale.set(1.1, 1.3);
 				iconP2.scale.set(1.1, 0.8);
-				FlxTween.angle(iconP1, -15, 0, Conductor.crochet / 1300 * gfSpeed, {ease: FlxEase.quadOut});
-				FlxTween.angle(iconP2, 15, 0, Conductor.crochet / 1300 * gfSpeed, {ease: FlxEase.quadOut});
+				FlxTween.angle(iconP1, -15, 0, Conductor.crochet / 1300 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
+				FlxTween.angle(iconP2, 15, 0, Conductor.crochet / 1300 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
 
 			}
 
-			FlxTween.tween(iconP1, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed, {ease: FlxEase.quadOut});
-			FlxTween.tween(iconP2, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed, {ease: FlxEase.quadOut});
+			FlxTween.tween(iconP1, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
+			FlxTween.tween(iconP2, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
 
 			iconP1.updateHitbox();
 			iconP2.updateHitbox();

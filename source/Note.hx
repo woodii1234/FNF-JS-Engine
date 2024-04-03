@@ -384,8 +384,11 @@ class Note extends FlxSprite
 			if (ClientPrefs.noteStyleThing != 'VS Nonsense V2' && ClientPrefs.noteStyleThing != 'DNB 3D' && ClientPrefs.noteStyleThing != 'VS AGOTI' && ClientPrefs.noteStyleThing != 'Doki Doki+' && ClientPrefs.noteStyleThing != 'TGT V4' && ClientPrefs.noteStyleThing != 'Default') {
 				texture = 'NOTE_assets_' + ClientPrefs.noteStyleThing.toLowerCase();
 			}
-			if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && inEditor) {
+			if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && (inEditor || PlayState.isPixelStage)) {
 				texture = ClientPrefs.noteStyleThing == 'TGT V4' ? 'RED_TGTNOTE_assets' : 'RED_NOTE_assets';
+			}
+			if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && ClientPrefs.noteStyleThing == 'TGT V4') {
+				texture = 'RED_TGTNOTE_assets';
 			}
 			if(ClientPrefs.noteColorStyle == 'Char-Based') {
 				texture = 'NOTE_assets_colored';
@@ -732,8 +735,8 @@ class Note extends FlxSprite
 		multSpeed = chartNoteData.multSpeed;
 
 		if (PlayState.isPixelStage) reloadNote('', texture);
-		animation.play((ClientPrefs.noteColorStyle == 'Normal' ? colArray[noteData % 4] : 'red') + 'Scroll');
-		if (isSustainNote) animation.play((ClientPrefs.noteColorStyle == 'Normal' ? colArray[noteData % 4] : 'red') + (chartNoteData.isSustainEnd ? 'holdend' : 'hold'));
+		animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? colArray[noteData % 4] : 'red') + 'Scroll');
+		if (isSustainNote) animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? colArray[noteData % 4] : 'red') + (chartNoteData.isSustainEnd ? 'holdend' : 'hold'));
 
 		if (ClientPrefs.showNotes && ClientPrefs.enableColorShader)
 		{
