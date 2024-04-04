@@ -1250,7 +1250,7 @@ class ChartingState extends MusicBeatState
 			if(value == 0) {
 			return;
 			} 
-			if(_song.notes[curSection] != null && _song.notes[curSection].sectionNotes.length < 1 || Math.isNaN(_song.notes[curSection].sectionNotes.length)) {
+			if(_song.notes[curSec] == null || _song.notes[curSec] != null && _song.notes[curSec].sectionNotes.length < 1 || Math.isNaN(_song.notes[curSec].sectionNotes.length) || _song.notes[curSec].sectionNotes == null) {
 			trace ("HEY! your section doesn't have any notes! please place at least 1 note then try using this.");
 			return; //prevent a crash if the section doesn't have any notes
 			}
@@ -1266,11 +1266,6 @@ class ChartingState extends MusicBeatState
 				var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
 				_song.notes[curSec].sectionNotes.push(copiedNote);
 			}
-				if (_song.notes[curSec+1] == null)
-				{
-				trace ("UH OH! looks like we've hit a null section! we're gonna have to stop this to prevent it from crashing the engine!");
-				break;
-				}
 			}
 			updateGrid(false);
 		});

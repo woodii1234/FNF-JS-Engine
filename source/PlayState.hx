@@ -6257,7 +6257,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			{
 				if(!ffmpegMode && cpuControlled && (note.ignoreNote || note.hitCausesMiss)) return;
 
-				if (ClientPrefs.hitsoundVolume > 0 && !note.hitsoundDisabled)
+				if (ClientPrefs.hitsoundVolume > 0 && !note.hitsoundDisabled && !note.isSustainNote)
 				{
 					hitsound.play(true);
 					hitsound.pitch = playbackRate;
