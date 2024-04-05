@@ -4651,6 +4651,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 				camBopIntensity = _intensity;
 				camBopInterval = _interval;
+				if (_intensity != 4) usingBopIntervalEvent = true;
+					else usingBopIntervalEvent = false;
 
 			case 'Camera Twist':
 				camTwist = true;
@@ -7174,7 +7176,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 	}
 
 	var lastBeatHit:Int = -1;
-	var curBeatOffset:Float = 0;
 
 	override function beatHit()
 	{
@@ -7194,15 +7195,12 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			});
 		}
 
-		curBeatOffset += 1;
-		if (curBeatOffset < curBeat) curBeatOffset == curBeat;
-
 		if (curBeat % 32 == 0 && randomSpeedThing)
 		{
 			var randomShit = FlxMath.roundDecimal(FlxG.random.float(0.4, 3), 2);
 			lerpSongSpeed(randomShit, 1);
 		}
-		if (camZooming && !endingSong && !startingSong && FlxG.camera.zoom < 1.35 && ClientPrefs.camZooms && curBeatOffset % camBopInterval == 0)
+		if (camZooming && !endingSong && !startingSong && FlxG.camera.zoom < 1.35 && ClientPrefs.camZooms && (curBeat % camBopInterval == 0))
 		{
 			FlxG.camera.zoom += 0.015 * camBopIntensity;
 			camHUD.zoom += 0.03 * camBopIntensity;
@@ -7248,6 +7246,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		callOnLuas('onBeatHit', []);
 	}
 
+	var usingBopIntervalEvent = false;
 	override function sectionHit()
 	{
 		super.sectionHit();
@@ -7273,8 +7272,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			setOnLuas('mustHitSection', SONG.notes[curSection].mustHitSection);
 			setOnLuas('altAnim', SONG.notes[curSection].altAnim);
 			setOnLuas('gfSection', SONG.notes[curSection].gfSection);
-			if (curBeatOffset % camBopInterval != 0)
-				curBeatOffset += (curBeatOffset  % camBopInterval);
+			if (!usingBopIntervalEvent) camBopInterval = SONG.notes[curSection].sectionBeats;
 		}
 
 		setOnLuas('curSection', curSection);
