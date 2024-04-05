@@ -268,7 +268,7 @@ class PlayState extends MusicBeatState
 
 	var endingTimeLimit:Int = 20;
 
-	var camBopInterval:Int = 4;
+	var camBopInterval:Float = 4;
 	var camBopIntensity:Float = 1;
 
 	var twistShit:Float = 1;
