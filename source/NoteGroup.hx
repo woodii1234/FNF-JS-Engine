@@ -12,11 +12,6 @@ class NoteGroup extends FlxTypedGroup<Note> {
 	var __time:Float = -1.0;
 
 	/**
-	 * How many ms it should show a note before it should be hit
-	 **/
-	public var limit:Float = 2000;
-
-	/**
 	 * Preallocates the members array with nulls, but if theres anything in the array already it clears it
 	 **/
 	public inline function preallocate(len:Int) {

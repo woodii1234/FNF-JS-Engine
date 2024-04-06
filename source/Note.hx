@@ -749,6 +749,14 @@ class Note extends FlxSprite
 			copyAngle = false;
 		}
 
+		if (ClientPrefs.doubleGhost && !isSustainNote)
+		{
+			row = Conductor.secsToRow(strumTime);
+			if(PlayState.instance.noteRows[mustPress?0:1][row] == null)
+				PlayState.instance.noteRows[mustPress?0:1][row] = [];
+				PlayState.instance.noteRows[mustPress ? 0 : 1][row].push(this);
+		}
+
 		return this;
 	}
 }

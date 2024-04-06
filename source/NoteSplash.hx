@@ -93,7 +93,10 @@ class NoteSplash extends FlxSprite
 
 		var splashToPlay:Int = note;
 		if (ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Char-Based' || ClientPrefs.noteColorStyle == 'Rainbow')
+		{
 			splashToPlay = config.redAnim;
+			if (Math.isNaN(config.redAnim)) splashToPlay = 3; //Incase the red anim wasn't specified
+		}
 
 		animation.play('note' + splashToPlay + '-' + (animNum), true);
 
