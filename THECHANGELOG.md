@@ -1,5 +1,11 @@
-1.23.0;
+1.23.1;
 
+Note Splashes won't be stuck on frame 1 anymore if the config file doesn't have a Red animation
+TGT v4 and Dave Engine Score and Time Bar Styles now actually work
+Hurt Note sustains no longer look weird
+The engine no longer crashes if you set the rating type to either "Doki Doki", "VS Impostor", or "FIRE IN THE HOLE"
+
+1.23.0:
 You can now add additional note splashes and rating quotes
 Separated the HUD Styles into multiple options
 1 new Hitsound
