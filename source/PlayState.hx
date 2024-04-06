@@ -758,7 +758,7 @@ class PlayState extends MusicBeatState
 				'No Play', 'Perfect Full Combo', 'Sick Full Combo', 'Great Full Combo', 'Bad Full Combo', 'Full Combo', 'Single Digit Misses', 'Clear', 'TDCB', 'QDCB'
 			];
 		else if (map != null && map.exists(ClientPrefs.ratingType))
-			fcStrings = (map != null && map.exists(ClientPrefs.ratingType)) ? map.get(ClientPrefs.ratingType).fc : [
+			fcStrings = (map != null && map.exists(ClientPrefs.ratingType) && map.get(ClientPrefs.ratingType).fc != null) ? map.get(ClientPrefs.ratingType).fc : [
 				'No Play', 'PFC', 'SFC', 'GFC', 'BFC', 'FC', 'SDCB', 'Clear', 'TDCB', 'QDCB'
 			];
 		if (map != null && map.exists(ClientPrefs.ratingType)) hitStrings = map.get(ClientPrefs.ratingType).hit;
