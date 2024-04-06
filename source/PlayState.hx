@@ -673,13 +673,6 @@ class PlayState extends MusicBeatState
 		screenshader.shader.uTime.value[0] = new flixel.math.FlxRandom().float(-100000, 100000);
 		screenshader.shader.uampmul.value[0] = 0;
 
-		#if windows
-		screenshader.waveAmplitude = 1;
-	   		screenshader.waveFrequency = 2;
-			screenshader.waveSpeed = 1;
-			screenshader.shader.uTime.value[0] = new flixel.math.FlxRandom().float(-100000, 100000);
-		#end
-
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 

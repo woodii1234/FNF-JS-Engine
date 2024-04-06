@@ -152,4 +152,9 @@ class ResultsScreenSubState extends MusicBeatSubstate {
 				PlayState.instance.endSong();
 		}
 	}
+
+	override function destroy(){
+		checker = FlxDestroyUtil.destroy(checker);
+		super.destroy();
+	}
 }
