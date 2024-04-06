@@ -4130,6 +4130,18 @@ class ChartingState extends MusicBeatState
 
 		    super.onFocus();
 	    }
+
+	override public function destroy():Void
+	    {
+			Paths.noteSkinFramesMap.clear();
+			Paths.noteSkinAnimsMap.clear();
+			Paths.splashSkinFramesMap.clear();
+			Paths.splashSkinAnimsMap.clear();
+			Paths.splashConfigs.clear();
+			Paths.splashAnimCountMap.clear();
+
+		    super.destroy();
+	    }
 }
 
 class AttachedFlxText extends FlxText

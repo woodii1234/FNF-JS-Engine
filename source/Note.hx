@@ -309,7 +309,7 @@ class Note extends FlxSprite
 			switch(value) {
 				case 'Hurt Note':
 					ignoreNote = mustPress;
-					reloadNote('HURT');
+					texture = 'HURTNOTE_assets';
 					noteSplashTexture = 'HURTnoteSplashes';
 					if (ClientPrefs.enableColorShader)
 					{
