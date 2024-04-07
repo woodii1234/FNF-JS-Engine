@@ -44,6 +44,8 @@ class Paths
 	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
 	inline public static var VIDEO_EXT = "mp4";
 
+	public static var defaultNoteStuff:Array<Dynamic> = [];
+
 	private static var noteFrames:FlxFramesCollection;
 	private static var noteAnimation:FlxAnimationController;
 
@@ -80,6 +82,58 @@ class Paths
 	#end
 
 	//Function that initializes the first note. This way, we can recycle the notes
+	public static function initDefaultNote(keys:Int = 4, noteSkin:String, inEditor:Bool = false)
+	{
+		var defaultSkin = 'NOTE_assets'; 
+		if(ClientPrefs.noteStyleThing == 'VS Nonsense V2') {
+			defaultSkin = 'Nonsense_NOTE_assets';
+		}
+		if(ClientPrefs.noteStyleThing == 'DNB 3D') {
+			defaultSkin = 'NOTE_assets_3D';
+		}
+		if(ClientPrefs.noteStyleThing == 'VS AGOTI') {
+			defaultSkin = 'AGOTINOTE_assets';
+		}
+		if(ClientPrefs.noteStyleThing == 'Doki Doki+') {
+			defaultSkin = 'NOTE_assets_doki';
+		}
+		if(ClientPrefs.noteStyleThing == 'TGT V4') {
+			defaultSkin = 'TGTNOTE_assets';
+		}
+		if (ClientPrefs.noteStyleThing != 'VS Nonsense V2' && ClientPrefs.noteStyleThing != 'DNB 3D' && ClientPrefs.noteStyleThing != 'VS AGOTI' && ClientPrefs.noteStyleThing != 'Doki Doki+' && ClientPrefs.noteStyleThing != 'TGT V4' && ClientPrefs.noteStyleThing != 'Default') {
+			defaultSkin = 'NOTE_assets_' + ClientPrefs.noteStyleThing.toLowerCase();
+		}
+		if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && (inEditor || PlayState.isPixelStage)) {
+			defaultSkin = ClientPrefs.noteStyleThing == 'TGT V4' ? 'RED_TGTNOTE_assets' : 'RED_NOTE_assets';
+		}
+		if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && ClientPrefs.noteStyleThing == 'TGT V4') {
+			defaultSkin = 'RED_TGTNOTE_assets';
+		}
+		if(ClientPrefs.noteColorStyle == 'Char-Based') {
+			defaultSkin = 'NOTE_assets_colored';
+		}
+		if(ClientPrefs.noteColorStyle == 'Grayscale') {
+			defaultSkin = 'GRAY_NOTE_assets';
+		}
+		if (noteSkin.length > 1) defaultSkin = noteSkin;
+		defaultNoteStuff[0] = getSparrowAtlas(defaultSkin.length > 1 ? defaultSkin : 'NOTE_assets');
+
+		// Do this to be able to just copy over the note animations and not reallocate it
+
+		var spr:FlxSprite = new FlxSprite();
+		spr.frames = defaultNoteStuff[0];
+		defaultNoteStuff[1] = new FlxAnimationController(spr);
+
+		// Use a for loop for adding all of the animations in the note spritesheet, otherwise it won't find the animations for the next recycle
+		for (d in 0...keys)
+		{
+			defaultNoteStuff[1].addByPrefix('purpleholdend', 'pruple end hold'); // ?????
+			defaultNoteStuff[1].addByPrefix(Note.colArray[d] + 'holdend', Note.colArray[d] + ' hold end');
+			defaultNoteStuff[1].addByPrefix(Note.colArray[d] + 'hold', Note.colArray[d] + ' hold piece');
+			defaultNoteStuff[1].addByPrefix(Note.colArray[d] + 'Scroll', Note.colArray[d] + '0');
+		}
+	}
+
 	public static function initNote(keys:Int = 4, noteSkin:String = 'NOTE_assets')
 	{
 		noteFrames = getSparrowAtlas(noteSkin.length > 1 ? noteSkin : 'NOTE_assets');

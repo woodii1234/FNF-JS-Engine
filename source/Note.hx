@@ -64,7 +64,6 @@ class Note extends FlxSprite
 	public var ignoreNote:Bool = false;
 	public var hitByOpponent:Bool = false; //For Opponent notes
 	public var prevNote:Note;
-	public var nextNote:Note;
 
 	public var spawned:Bool = false;
 
@@ -151,7 +150,7 @@ class Note extends FlxSprite
 		return value;
 	}
 
-	public function resizeByRatio(ratio:Float) //haha funny twitter shit
+	inline public function resizeByRatio(ratio:Float) //haha funny twitter shit
 	{
 		if(isSustainNote && animation != null && animation.curAnim != null && !animation.curAnim.name.endsWith('end'))
 		{
@@ -160,7 +159,7 @@ class Note extends FlxSprite
 		}
 	}
 
-	private function set_texture(value:String):String {
+	inline private function set_texture(value:String):String {
 		if (!PlayState.isPixelStage)
 		{
 			if (!Paths.noteSkinFramesMap.exists(value)) Paths.initNote(4, value);
@@ -348,100 +347,26 @@ class Note extends FlxSprite
 		return value;
 	}
 
-	public function new(?noteskinToLoad:String, ?inEditor:Bool = false, ?loadSprite:Bool = true)
+	public function new(?noteskinToLoad:String, ?inEditor:Bool = false)
 	{
 		super();
 
 		if (prevNote == null)
 			prevNote = this;
 
-		this.loadSprite = loadSprite;
+		this.loadSprite = ClientPrefs.showNotes;
 		if (PlayState.instance != null && PlayState.instance.isEkSong) inEkSong = true;
 		this.inEditor = inEditor;
-
-		y -= 2000;
 
 		if(noteData > -1) {
 			if (ClientPrefs.showNotes && loadSprite)
 			{
-			texture = 'NOTE_assets'; 
-			if (noteskinToLoad.length > 1) texture = "noteskins/" + noteskinToLoad;
-			if(ClientPrefs.noteStyleThing == 'VS Nonsense V2') {
-				texture = 'Nonsense_NOTE_assets';
+				frames = @:privateAccess Paths.defaultNoteStuff[0];
+				animation.copyFrom(@:privateAccess Paths.defaultNoteStuff[1]);
+				antialiasing = ClientPrefs.globalAntialiasing;
+				scale.set(0.7, 0.7);
+				updateHitbox();
 			}
-			if(ClientPrefs.noteStyleThing == 'DNB 3D') {
-				texture = 'NOTE_assets_3D';
-			}
-			if(ClientPrefs.noteStyleThing == 'VS AGOTI') {
-				texture = 'AGOTINOTE_assets';
-			}
-			if(ClientPrefs.noteStyleThing == 'Doki Doki+') {
-				texture = 'NOTE_assets_doki';
-			}
-			if(ClientPrefs.noteStyleThing == 'TGT V4') {
-				texture = 'TGTNOTE_assets';
-			}
-			if (ClientPrefs.noteStyleThing != 'VS Nonsense V2' && ClientPrefs.noteStyleThing != 'DNB 3D' && ClientPrefs.noteStyleThing != 'VS AGOTI' && ClientPrefs.noteStyleThing != 'Doki Doki+' && ClientPrefs.noteStyleThing != 'TGT V4' && ClientPrefs.noteStyleThing != 'Default') {
-				texture = 'NOTE_assets_' + ClientPrefs.noteStyleThing.toLowerCase();
-			}
-			if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && (inEditor || PlayState.isPixelStage)) {
-				texture = ClientPrefs.noteStyleThing == 'TGT V4' ? 'RED_TGTNOTE_assets' : 'RED_NOTE_assets';
-			}
-			if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && ClientPrefs.noteStyleThing == 'TGT V4') {
-				texture = 'RED_TGTNOTE_assets';
-			}
-			if(ClientPrefs.noteColorStyle == 'Char-Based') {
-				texture = 'NOTE_assets_colored';
-			}
-			if(ClientPrefs.noteColorStyle == 'Grayscale') {
-				texture = 'GRAY_NOTE_assets';
-			}
-
-			if (ClientPrefs.enableColorShader)
-			{
-					colorSwap = new ColorSwap();
-					shader = colorSwap.shader;
-					if (ClientPrefs.noteColorStyle == 'Normal' && noteData < ClientPrefs.arrowHSV.length)
-					{
-						colorSwap.hue = ClientPrefs.arrowHSV[noteData][0] / 360;
-						colorSwap.saturation = ClientPrefs.arrowHSV[noteData][1] / 100;
-						colorSwap.brightness = ClientPrefs.arrowHSV[noteData][2] / 100;
-					}
-					if (ClientPrefs.noteColorStyle == 'Rainbow')
-					{
-						colorSwap.hue = ((strumTime / 5000 * 360) / 360) % 1;
-					}
-					if (ClientPrefs.noteColorStyle == 'Char-Based')
-					{
-						if (PlayState.instance != null) {
- 							if (!mustPress) !PlayState.opponentChart ? this.shader = new ColoredNoteShader(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2], false, 10) : this.shader = new ColoredNoteShader(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2], false, 10);
-							if (mustPress) {
-								!PlayState.opponentChart ? this.shader = new ColoredNoteShader(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2], false, 10) : this.shader = new ColoredNoteShader(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2], false, 10);
-							}
-							if (gfNote) {
-								if (PlayState.instance.gf != null) this.shader = new ColoredNoteShader(PlayState.instance.gf.healthColorArray[0], PlayState.instance.gf.healthColorArray[1], PlayState.instance.gf.healthColorArray[2], false, 10);
-							}
-						}
-					}
-				}
-			}
-		}
-
-		if(prevNote!=null)
-			prevNote.nextNote = this;
-
-		switch (ClientPrefs.healthGainType)
-		{
-			case 'Leather Engine':
-				missHealth = 0.07;
-			case 'Kade (1.4.2 to 1.6)':
-				missHealth = 0.075;
-			case 'Kade (1.6+)':
-				missHealth = 0.075;
-			case 'Doki Doki+':
-				missHealth = 0.04;
-			default:
-				missHealth = 0.0475;
 		}
 	}
 
@@ -612,11 +537,10 @@ class Note extends FlxSprite
 		}
 	}
 
-	public function followStrum(strum:StrumNote, fakeCrochet:Float, songSpeed:Float = 1):Void
+	inline public function followStrum(strum:StrumNote, fakeCrochet:Float, songSpeed:Float = 1):Void
 	{
 		if (isSustainNote) 
 		{
-			
 			flipY = strum.downScroll;
 			if (ClientPrefs.noteStyleThing == 'Chip' || ClientPrefs.noteStyleThing == 'Future') scale.set(0.7, animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? 0.7 : Conductor.stepCrochet * 0.0105 * (0.58 * songSpeed / multSpeed) * sustainScale);
 			else 
@@ -636,14 +560,14 @@ class Note extends FlxSprite
 		distance = (0.45 * (Conductor.songPosition - strumTime) * songSpeed * multSpeed);
 		if (!strum.downScroll) distance *= -1;
 
-						if(animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end'))
-						{
-							y -= height-2;
-							if (!prevNoteIsSustainNote) //only for really short sustains that only have an end and no regular parts
-							{
-								y += height*0.25; //move back down slightly into the note
-							}
-						}
+		if(animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end'))
+		{
+			y -= height-2;
+			if (!prevNoteIsSustainNote) //only for really short sustains that only have an end and no regular parts
+			{
+				y += height*0.25; //move back down slightly into the note
+			}
+		}
 
 		if(copyScale && isSustainNote)
 			if (!dumbHitboxThing)
@@ -709,8 +633,13 @@ class Note extends FlxSprite
 		}
 	}
 	// this is used for note recycling
-	public function setupNoteData(chartNoteData:PreloadedChartNote):Note
+	inline public function setupNoteData(chartNoteData:PreloadedChartNote):Note
 	{
+		if (ClientPrefs.enableColorShader)
+		{
+			colorSwap = new ColorSwap();
+			shader = colorSwap.shader;
+		}
 		wasGoodHit = hitByOpponent = tooLate = false; // Don't make an update call of this for the note group
 
 		strumTime = chartNoteData.strumTime;
@@ -734,16 +663,37 @@ class Note extends FlxSprite
 		ignoreNote = chartNoteData.ignoreNote;
 		multSpeed = chartNoteData.multSpeed;
 
+		if (ClientPrefs.enableColorShader)
+		{
+			if (ClientPrefs.noteColorStyle == 'Normal' && noteData < ClientPrefs.arrowHSV.length)
+			{
+				colorSwap.hue = ClientPrefs.arrowHSV[noteData][0] / 360;
+				colorSwap.saturation = ClientPrefs.arrowHSV[noteData][1] / 100;
+				colorSwap.brightness = ClientPrefs.arrowHSV[noteData][2] / 100;
+			}
+			if (ClientPrefs.noteColorStyle == 'Quant-Based') quantCheck(isSustainNote ? chartNoteData.parent.strumTime : chartNoteData.strumTime);
+			if (ClientPrefs.noteColorStyle == 'Rainbow')
+			{
+				colorSwap.hue = ((strumTime / 5000 * 360) / 360) % 1;
+			}
+			if (ClientPrefs.noteColorStyle == 'Char-Based')
+			{
+				if (PlayState.instance != null) {
+					if (!mustPress) !PlayState.opponentChart ? this.shader = new ColoredNoteShader(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2], false, 10) : this.shader = new ColoredNoteShader(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2], false, 10);
+					if (mustPress) {
+						!PlayState.opponentChart ? this.shader = new ColoredNoteShader(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2], false, 10) : this.shader = new ColoredNoteShader(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2], false, 10);
+					}
+					if (gfNote) {
+						if (PlayState.instance.gf != null) this.shader = new ColoredNoteShader(PlayState.instance.gf.healthColorArray[0], PlayState.instance.gf.healthColorArray[1], PlayState.instance.gf.healthColorArray[2], false, 10);
+					}
+				}
+			}
+		}
+
 		if (PlayState.isPixelStage) reloadNote('', texture);
 		animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? colArray[noteData % 4] : 'red') + 'Scroll');
 		if (isSustainNote) animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? colArray[noteData % 4] : 'red') + (chartNoteData.isSustainEnd ? 'holdend' : 'hold'));
 
-		if (ClientPrefs.showNotes && ClientPrefs.enableColorShader)
-		{
-			if (ClientPrefs.noteColorStyle == 'Quant-Based') quantCheck(isSustainNote ? chartNoteData.parent.strumTime : chartNoteData.strumTime);
-			if (ClientPrefs.noteColorStyle == 'Char-Based') updateRGBColors();
-			if (ClientPrefs.noteColorStyle == 'Rainbow') colorSwap.hue = ((strumTime / 5000 * 360) / 360) % 1;
-		}
 		if (isSustainNote) {
 			correctionOffset = ClientPrefs.downScroll ? 0 : 55;
 			copyAngle = false;

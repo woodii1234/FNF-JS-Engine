@@ -122,13 +122,6 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
-		var option:Option = new Option('Hold Note Hits',
-			"If checked, each piece of a hold note will also count as a note hit.",
-			'holdNoteHits',
-			'bool',
-			false);
-		addOption(option);
-
 		var option:Option = new Option('CommunityGame Mode',
 			"What do you think this does?",
 			'communityGameMode',

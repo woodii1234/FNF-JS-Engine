@@ -48,7 +48,7 @@ class EditorPlayState extends MusicBeatState
 		Conductor.songPosition = startPos - startOffset;
 
 		startOffset = Conductor.crochet;
-		timerToStart = startOffset;
+		timerToStart = startPos;
 		super();
 	}
 
@@ -110,6 +110,8 @@ class EditorPlayState extends MusicBeatState
 		var splash:NoteSplash = new NoteSplash(100, 100, 0);
 		grpNoteSplashes.add(splash);
 		splash.alpha = 0.0;
+
+		Paths.initDefaultNote(4, PlayState.SONG.arrowSkin);
 		
 		if (PlayState.SONG.needsVoices)
 			vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song));

@@ -19,7 +19,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var comboMultiType:String = 'osu!';
 	public static var comboMultLimit:Float = 5;
 	public static var complexAccuracy:Bool = false;
-	public static var holdNoteHits:Bool = false;
 	public static var communityGameMode:Bool = false;
 	public static var communityGameBot:Bool = false;
 	public static var startingSync:Bool = false;
@@ -262,7 +261,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.comboMultiType = comboMultiType;
 		FlxG.save.data.comboMultLimit = comboMultLimit;
 		FlxG.save.data.complexAccuracy = complexAccuracy;
-		FlxG.save.data.holdNoteHits = holdNoteHits;
 		FlxG.save.data.communityGameMode = communityGameMode;
 		FlxG.save.data.communityGameBot = communityGameBot;
 		FlxG.save.data.maxCGBMS = maxCGBMS;
@@ -475,9 +473,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.complexAccuracy != null) {
 			complexAccuracy = FlxG.save.data.complexAccuracy;
-		}
-		if(FlxG.save.data.holdNoteHits != null) {
-			holdNoteHits = FlxG.save.data.holdNoteHits;
 		}
 		if(FlxG.save.data.communityGameMode != null) {
 			communityGameMode = FlxG.save.data.communityGameMode;

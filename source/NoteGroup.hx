@@ -34,7 +34,6 @@ class NoteGroup extends FlxTypedGroup<Note> {
 	public override function update(elapsed:Float) {
 		i = length-1;
 		__loopSprite = null;
-		__time = Conductor.songPosition;
 		while(i >= 0) {
 			__loopSprite = members[i--];
 			if (__loopSprite == null || !__loopSprite.exists || !__loopSprite.active) {
