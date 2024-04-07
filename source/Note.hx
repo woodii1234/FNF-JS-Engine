@@ -367,7 +367,35 @@ class Note extends FlxSprite
 				scale.set(0.7, 0.7);
 				updateHitbox();
 			}
+			if (ClientPrefs.enableColorShader && inEditor)
+			{
+				colorSwap = new ColorSwap();
+				shader = colorSwap.shader;
+				if (ClientPrefs.noteColorStyle == 'Normal' && noteData < ClientPrefs.arrowHSV.length)
+				{
+					colorSwap.hue = ClientPrefs.arrowHSV[noteData][0] / 360;
+					colorSwap.saturation = ClientPrefs.arrowHSV[noteData][1] / 100;
+					colorSwap.brightness = ClientPrefs.arrowHSV[noteData][2] / 100;
+				}
+				if (ClientPrefs.noteColorStyle == 'Rainbow')
+				{
+					colorSwap.hue = ((strumTime / 5000 * 360) / 360) % 1;
+				}
+				if (ClientPrefs.noteColorStyle == 'Char-Based')
+				{
+					if (PlayState.instance != null) {
+						if (!mustPress) !PlayState.opponentChart ? this.shader = new ColoredNoteShader(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2], false, 10) : this.shader = new ColoredNoteShader(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2], false, 10);
+						if (mustPress) {
+							!PlayState.opponentChart ? this.shader = new ColoredNoteShader(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2], false, 10) : this.shader = new ColoredNoteShader(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2], false, 10);
+						}
+						if (gfNote) {
+							if (PlayState.instance.gf != null) this.shader = new ColoredNoteShader(PlayState.instance.gf.healthColorArray[0], PlayState.instance.gf.healthColorArray[1], PlayState.instance.gf.healthColorArray[2], false, 10);
+						}
+					}
+				}
+			}
 		}
+		
 	}
 
 	var lastNoteOffsetXForPixelAutoAdjusting:Float = 0;

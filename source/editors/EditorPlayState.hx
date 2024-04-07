@@ -48,7 +48,7 @@ class EditorPlayState extends MusicBeatState
 		Conductor.songPosition = startPos - startOffset;
 
 		startOffset = Conductor.crochet;
-		timerToStart = startPos;
+		timerToStart = startOffset;
 		super();
 	}
 
