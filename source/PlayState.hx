@@ -7751,6 +7751,16 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			return;
 		}
 
+		if(!sys.FileSystem.exists('assets/gameRenders/')) { //In case you delete the gameRenders folder
+			trace ('gameRenders folder not found! Creating the gameRenders folder...');
+            FileSystem.createDirectory('assets/gameRenders');
+        }
+		else
+		if(!FileSystem.isDirectory('assets/gameRenders/')) {
+			FileSystem.deleteFile('assets/gameRenders/');
+			FileSystem.createDirectory('assets/gameRenders/');
+		} 
+
 		ffmpegExists = true;
 
 		process = new sys.io.Process('ffmpeg', ['-v', 'quiet', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', lime.app.Application.current.window.width + 'x' + lime.app.Application.current.window.height, '-r', Std.string(targetFPS), '-i', '-', '-c:v', 'libx264', '-b', Std.string(ClientPrefs.renderBitrate * 1000000),  'assets/gameRenders/' + Paths.formatToSongPath(SONG.song) + '.mp4']);

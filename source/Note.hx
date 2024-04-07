@@ -358,6 +358,8 @@ class Note extends FlxSprite
 		if (PlayState.instance != null && PlayState.instance.isEkSong) inEkSong = true;
 		this.inEditor = inEditor;
 
+		y -= 2000;
+
 		if(noteData > -1) {
 			if (ClientPrefs.showNotes && loadSprite)
 			{
