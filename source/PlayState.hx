@@ -7772,9 +7772,12 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		if (!ClientPrefs.ffmpegMode)
 			return;
 
-		process.stdin.close();
-		process.close();
-		process.kill();
+		if (process != null){
+			if (process.stdin != null)
+			        process.stdin.close();
+			process.close();
+		        process.kill();
+		}
 
 		FlxG.autoPause = ClientPrefs.autoPause;
 	}
