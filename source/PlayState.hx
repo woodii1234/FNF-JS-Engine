@@ -5169,7 +5169,13 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 				if (chartingMode)
 				{
-					openChartEditor();
+					if (!ffmpegMode) openChartEditor();
+					else 
+					{
+						endingTime = Sys.time();
+						FlxG.switchState(new RenderingDoneSubState(endingTime - startingTime));
+						chartingMode = true;
+					}
 					return;
 				}
 
@@ -6791,7 +6797,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				health -= (opponentDrain ? daNote.hitHealth : healthDrainAmount) * hpDrainLevel * polyphony;
 				if (ClientPrefs.healthDisplay && !ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 			}
-			if ((!daNote.gfNote ? !opponentChart ? dad : boyfriend : gf).shakeScreen)
+			if ((!daNote.gfNote ? !opponentChart ? dad : boyfriend : (gf != null ? gf : dad)).shakeScreen)
 			{
 				final char:Character = !daNote.gfNote ? !opponentChart ? dad : boyfriend : gf;
 				camGame.shake(char.shakeIntensity, char.shakeDuration / playbackRate);

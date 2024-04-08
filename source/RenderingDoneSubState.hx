@@ -96,7 +96,12 @@ class RenderingDoneSubState extends MusicBeatSubstate {
 			FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
 			if (PlayState.isStoryMode)
 				FlxG.switchState(StoryMenuState.new);
-			else
+			if (PlayState.chartingMode)
+			{
+				FlxG.switchState(new editors.ChartingState());
+				PlayState.chartingMode = true;
+			}
+			else if (!PlayState.isStoryMode)
 				FlxG.switchState(FreeplayState.new);
 		}
 	}
