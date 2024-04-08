@@ -4139,6 +4139,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		else {
 			if (healthBar.percent < (ClientPrefs.longHPBar ? 15 : 20))
 				iconP1.animation.curAnim.curFrame = 1;
+			else
+				iconP1.animation.curAnim.curFrame = 0;
 		}
 		if (iconP2.animation.numFrames == 3) {
 			if (healthBar.percent > (ClientPrefs.longHPBar ? 85 : 80))
