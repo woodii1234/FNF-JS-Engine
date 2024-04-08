@@ -207,8 +207,7 @@ class Character extends FlxSprite
 					updateHitbox();
 				}
 
-				trace(character.startsWith('bf'));
-				usePlayerOffsets = json.isPlayer != null ? json.isPlayer : character.startsWith('bf');
+				usePlayerOffsets = json.isPlayer != null ? json.isPlayer : (character.startsWith('bf') || character.endsWith('-player') || character.endsWith('-playable'));
 				positionArray = json.position;
 				cameraPosition = json.camera_position;
 
