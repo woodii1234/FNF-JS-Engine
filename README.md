@@ -38,7 +38,14 @@ A: You do it here the same way you'd do it in Psych Engine.
 ## Installation:
 You must have [the most up-to-date version of Haxe](https://haxe.org/download/), seriously, stop using 4.1.5, it misses some stuff.
 
+If you don't have Microsoft Visual Studio Community installed, install it. While running the installer, make sure to check the following two:
+MSVC v142 - VS 2019 C++ x64/x86 build tools (Version doesn't matter)
+Windows 10/11 SDK (Any version)
+
 The source code should come with a "Quick SETUP" batch file. Run it in order to install all the needed libraries for *JS Engine!*
+
+If you get an error related to hxCodec, run `haxelib set hxCodec 2.5.1`
+If graphics are all white and don't have color, run `haxelib set hxcpp 4.2.1`
 
 ## Customization:
 
