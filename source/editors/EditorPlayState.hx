@@ -246,7 +246,6 @@ class EditorPlayState extends MusicBeatState
 						sustainScale: 0,
 						parent: null,
 						prevNote: oldNote,
-						strum: null,
 						hitHealth: 0.023,
 						missHealth: 0.0475,
 						wasHit: false,
@@ -285,7 +284,6 @@ class EditorPlayState extends MusicBeatState
 								sustainScale: 1 / ratio,
 								parent: swagNote,
 								prevNote: oldNote,
-								strum: null,
 								hitHealth: 0.023,
 								missHealth: 0.0475,
 								wasHit: false,
@@ -318,9 +316,6 @@ class EditorPlayState extends MusicBeatState
 		openfl.system.System.gc();
 
 		var elapsedTime = endTime - startTime;
-
-			for (swagNote in unspawnNotes)
-				swagNote.strum = (swagNote.mustPress ? playerStrums : opponentStrums).members[swagNote.noteData];
 
 		trace('Done! The chart was loaded in ' + elapsedTime + " seconds.");
 	}
@@ -398,10 +393,11 @@ class EditorPlayState extends MusicBeatState
 		{
 			notes.forEachAlive(function(daNote:Note)
 			{
-						if (ClientPrefs.showNotes && daNote != null && daNote.strum != null)
+						if (ClientPrefs.showNotes && daNote != null)
 						{
-							inline daNote.followStrum(daNote.strum, (60 / PlayState.SONG.bpm) * 1000, PlayState.SONG.speed);
-							if(daNote.isSustainNote && daNote.strum != null && daNote.strum.sustainReduce) inline daNote.clipToStrumNote(daNote.strum);
+							inline daNote.followStrum((daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData], (60 / PlayState.SONG.bpm) * 1000, PlayState.SONG.speed);
+							final strum = (daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData];
+							if(daNote.isSustainNote && strum != null && strum.sustainReduce) inline daNote.clipToStrumNote(strum);
 						}
 
 				if (!daNote.mustPress && daNote.strumTime <= Conductor.songPosition)

@@ -3591,13 +3591,13 @@ class ChartingState extends MusicBeatState
 		#end
 	}
 
-	function setupNoteData(i:Array<Dynamic>, isNextSection:Bool):Note
+	inline function setupNoteData(i:Array<Dynamic>, isNextSection:Bool):Note
 	{
 		var daNoteInfo = i[1];
 		var daStrumTime = i[0];
 		var daSus:Dynamic = i[2];
 
-		var note:Note = new Note('', true);
+		var note:Note = new Note();
 		note.strumTime = daStrumTime;
 		note.noteData = daNoteInfo % 4;
 		if(daSus != null) { //Common note
@@ -3612,7 +3612,8 @@ class ChartingState extends MusicBeatState
 			}
 			note.sustainLength = daSus;
 			note.noteType = i[3];
-			if (ClientPrefs.noteColorStyle == 'Quant-Based') note.quantCheck(note.strumTime);
+			if (note.noteType == 'Hurt Note') note.texture = 'HURTNOTE_assets';
+			if (ClientPrefs.noteColorStyle == 'Quant-Based') CoolUtil.checkNoteQuant(note, note.strumTime);
 		} else { //Event note
 			note.loadGraphic(Paths.image('eventArrow'));
 			note.eventName = getEventName(i[1]);

@@ -226,6 +226,129 @@ class CoolUtil
 			return str.substr(0, str.length-prec) + '.'+str.substr(str.length-prec);
 		}
 	}
+
+	static final beats:Array<Int> = [4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192,256,384,512,768,1024,1536,2048,3072,6144];
+
+	public static function checkNoteQuant(note:Note, timeToCheck:Float):Void 
+	{
+		if (note.colorSwap != null && ClientPrefs.noteColorStyle == 'Quant-Based' && (ClientPrefs.showNotes && ClientPrefs.enableColorShader))
+		{
+			var theCurBPM = Conductor.bpm;
+			var stepCrochet:Float = (60 / theCurBPM) * 1000;
+			var latestBpmChangeIndex = -1;
+			var latestBpmChange = null;
+
+			for (i in 0...Conductor.bpmChangeMap.length) {
+				var bpmchange = Conductor.bpmChangeMap[i];
+				if (timeToCheck >= bpmchange.songTime) {
+					latestBpmChangeIndex = i; // Update index of latest change
+					latestBpmChange = bpmchange;
+				}
+			}
+			if (latestBpmChangeIndex >= 0) {
+				theCurBPM = latestBpmChange.bpm;
+				timeToCheck -= latestBpmChange.songTime;
+				stepCrochet = (60 / theCurBPM) * 1000;
+			}
+
+			var beat = Math.round((timeToCheck / stepCrochet) * 48);
+			for (i in 0...beats.length)
+			{
+				if (beat % (192 / beats[i]) == 0)
+				{
+					beat = beats[i];
+					break;
+				}			
+			}
+			switch (beat)
+			{
+				case 4: //red
+					note.colorSwap.hue = 0;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = 0;
+				case 8: //blue
+					note.colorSwap.hue = -0.34;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = 0;
+				case 12: //purple
+					note.colorSwap.hue = 0.8;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = 0;
+				case 16: //yellow
+					note.colorSwap.hue = 0.16;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = 0;
+				case 24: //pink
+					note.colorSwap.hue = 0.91;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = 0;
+				case 32: //orange
+					note.colorSwap.hue = 0.06;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = 0;
+				case 48: //cyan
+					note.colorSwap.hue = -0.53;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = 0;
+				case 64: //green
+					note.colorSwap.hue = -0.7;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = 0;
+				case 96: //salmon lookin ass
+					note.colorSwap.hue = 0;
+					note.colorSwap.saturation = -0.33;
+					note.colorSwap.brightness = 0;
+				case 128: //light purple shit
+					note.colorSwap.hue = -0.24;
+					note.colorSwap.saturation = -0.33;
+					note.colorSwap.brightness = 0;
+				case 192: //turquioe i cant spell
+					note.colorSwap.hue = 0.44;
+					note.colorSwap.saturation = 0.31;
+					note.colorSwap.brightness = 0;
+				case 256: //shit (the color of it)
+					note.colorSwap.hue = 0.03;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = -0.63;
+				case 384: //dark green ugly shit
+					note.colorSwap.hue = 0.29;
+					note.colorSwap.saturation = 1;
+					note.colorSwap.brightness = -0.89;
+				case 512: //darj blue
+					note.colorSwap.hue = -0.33;
+					note.colorSwap.saturation = 0.29;
+					note.colorSwap.brightness = -0.7;
+				case 768: //gray ok
+					note.colorSwap.hue = 0.04;
+					note.colorSwap.saturation = -0.86;
+					note.colorSwap.brightness = -0.23;
+				case 1024: //turqyuarfhiouhifueaig but dark
+					note.colorSwap.hue = 0.46;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = -0.46;
+				case 1536: //pure death
+					note.colorSwap.hue = 0;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = -1;
+				case 2048: //piss and shit color
+					note.colorSwap.hue = 0.2;
+					note.colorSwap.saturation = -0.36;
+					note.colorSwap.brightness = -0.74;
+				case 3072: //boring ass color
+					note.colorSwap.hue = 0.17;
+					note.colorSwap.saturation = -0.57;
+					note.colorSwap.brightness = -0.27;
+				case 6144: //why did i do this? idk tbh, it just funni
+					note.colorSwap.hue = 0.23;
+					note.colorSwap.saturation = 0.76;
+					note.colorSwap.brightness = -0.83;
+				default: // white/gray
+					note.colorSwap.hue = 0.04;
+					note.colorSwap.saturation = -0.86;
+					note.colorSwap.brightness = -0.23;
+			}
+		}
+	}
 	
 	public static function getDifficultyFilePath(num:Null<Int> = null)
 	{

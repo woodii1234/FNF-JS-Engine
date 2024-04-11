@@ -89,6 +89,8 @@ import vlc.MP4Handler;
 #end
 #end
 
+import Note;
+
 using StringTools;
 
 class PlayState extends MusicBeatState
@@ -1962,32 +1964,14 @@ class PlayState extends MusicBeatState
 	}
 	#end
 
-	function set_songSpeed(value:Float):Float
+	inline function set_songSpeed(value:Float):Float
 	{
-		prevSongSpeed = songSpeed;
-		if(generatedMusic)
-		{
-			var ratio:Float = value / songSpeed; //funny word huh
-			if (ratio != 1)
-			{
-				for (note in notes){
-				 	if (note == null)
-						continue;
-					note.resizeByRatio(ratio);
-				}
-				for (note in sustainNotes){
-				 	if (note == null)
-						continue;
-					note.resizeByRatio(ratio);
-				}
-			}
-		}
 		songSpeed = value;
 		noteKillOffset = 350 / songSpeed;
 		return value;
 	}
 
-	function set_playbackRate(value:Float):Float
+	inline function set_playbackRate(value:Float):Float
 	{
 		if(generatedMusic)
 		{
@@ -2002,7 +1986,7 @@ class PlayState extends MusicBeatState
 		return value;
 	}
 
-	function set_polyphony(value:Float):Float
+	inline function set_polyphony(value:Float):Float
 	{
 		polyphony = value;
 		setOnLuas('polyphony', value);
@@ -3210,8 +3194,6 @@ class PlayState extends MusicBeatState
 						charChangeTypes.shift();
 					}
 		
-					var oldNote:PreloadedChartNote = unspawnNotes[unspawnNotes.length - 1];
-		
 					final swagNote:PreloadedChartNote = cast {
 						strumTime: daStrumTime,
 						noteData: daNoteData,
@@ -3226,8 +3208,6 @@ class PlayState extends MusicBeatState
 						sustainLength: songNotes[2],
 						sustainScale: 0,
 						parent: null,
-						prevNote: oldNote,
-						strum: null,
 						hitHealth: 0.023,
 						missHealth: songNotes[3] != 'Hurt Note' ? 0.0475 : 0.3,
 						wasHit: false,
@@ -3254,7 +3234,6 @@ class PlayState extends MusicBeatState
 					final floorSus:Int = Math.floor(swagNote.sustainLength / Conductor.stepCrochet);
 					if (floorSus > 0) {
 						for (susNote in 0...floorSus + 1) {
-							oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 		
 							final sustainNote:PreloadedChartNote = cast {
 								strumTime: daStrumTime + (Conductor.stepCrochet * susNote),
@@ -3270,8 +3249,6 @@ class PlayState extends MusicBeatState
 								sustainLength: 0,
 								sustainScale: 1 / ratio,
 								parent: swagNote,
-								prevNote: oldNote,
-								strum: null,
 								hitHealth: 0.023,
 								missHealth: songNotes[3] != 'Hurt Note' ? 0.0475 : 0.1,
 								wasHit: false,
@@ -3301,8 +3278,6 @@ class PlayState extends MusicBeatState
 								sustainLength: swagNote.sustainLength,
 								sustainScale: 0,
 								parent: null,
-								prevNote: oldNote,
-								strum: null,
 								hitHealth: swagNote.hitHealth,
 								missHealth: swagNote.missHealth,
 								wasHit: false,
@@ -3351,7 +3326,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		unspawnNotes.sort(sortByTime);
+		unspawnNotes.sort((b, a) -> Std.int(a.strumTime - b.strumTime));
 		eventNotes.sort(sortByTime);
 		unspawnNotesCopy = unspawnNotes.copy();
 		eventNotesCopy = eventNotes.copy();
@@ -3478,9 +3453,6 @@ class PlayState extends MusicBeatState
 				if (!opponentChart || opponentChart && ClientPrefs.middleScroll) opponentStrums.add(babyArrow);
 				else playerStrums.add(babyArrow);
 			}
-
-			for (swagNote in unspawnNotes)
-				if (swagNote.noteData == i) swagNote.strum = (swagNote.mustPress ? playerStrums : opponentStrums).members[swagNote.noteData];
 
 			strumLineNotes.add(babyArrow);
 			babyArrow.postAddedToGroup();
@@ -3680,10 +3652,7 @@ class PlayState extends MusicBeatState
 	public var postElapsed:Float = 1 / ClientPrefs.targetFPS;
 	public var takenTime:Float = haxe.Timer.stamp();
 
-	var trollModeSongLengthTotal:Float = 0;
-	var readyToTriggerTrollMode:Bool = false;
-
-	override public function update(elapsed:Float)
+	override inline public function update(elapsed:Float)
 	{
 		if (ClientPrefs.ffmpegMode) elapsed = 1 / ClientPrefs.targetFPS;
 		if (screenshader.Enabled)
@@ -4233,35 +4202,24 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 		doDeathCheck();
 
-	if (unspawnNotes.length > 0 && (unspawnNotes[0] != null))
+	if(unspawnNotes[unspawnNotes.length-1] != null)
 	{
-		notesAddedCount = 0;
-
-		if (notesAddedCount > unspawnNotes.length)
-			notesAddedCount -= (notesAddedCount - unspawnNotes.length);
-
-		if (!ClientPrefs.showNotes && cpuControlled && unspawnNotes[notesAddedCount] != null && !unspawnNotes[notesAddedCount].wasHit)
+		if (!ClientPrefs.showNotes && cpuControlled && unspawnNotes[unspawnNotes.length-1] != null && !unspawnNotes[unspawnNotes.length-1].wasHit)
 		{
-			while (unspawnNotes.length > 0 && unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime <= Conductor.songPosition) {
-				unspawnNotes[notesAddedCount].wasHit = true; //Set this to true so the game doesn't do a double hit and crash the game
-				unspawnNotes[notesAddedCount].mustPress ? goodNoteHit(null, unspawnNotes[notesAddedCount]) : opponentNoteHit(null, unspawnNotes[notesAddedCount]);
-				notesAddedCount++;
+			while (unspawnNotes[unspawnNotes.length-1] != null && unspawnNotes[unspawnNotes.length-1].strumTime <= Conductor.songPosition) {
+				unspawnNotes[unspawnNotes.length-1].wasHit = true; //Set this to true so the game doesn't do a double hit and crash the game
+				unspawnNotes[unspawnNotes.length-1].mustPress ? goodNoteHit(null, inline unspawnNotes.pop()) : opponentNoteHit(null, inline unspawnNotes.pop());
 			}
 		}
 		else if (ClientPrefs.showNotes || !ClientPrefs.showNotes && !cpuControlled)
 		{
-			while (unspawnNotes.length > 0 && unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < (NOTE_SPAWN_TIME / unspawnNotes[notesAddedCount].multSpeed)) {
+			while (unspawnNotes[unspawnNotes.length-1] != null && unspawnNotes[unspawnNotes.length-1].strumTime - Conductor.songPosition < (NOTE_SPAWN_TIME / unspawnNotes[unspawnNotes.length-1].multSpeed)) {
 				{
-					inline (unspawnNotes[notesAddedCount].isSustainNote ? sustainNotes : notes).recycle(Note).setupNoteData(unspawnNotes[notesAddedCount]);
-
-						unspawnNotes[notesAddedCount].wasSpawned = true;
-					inline callOnLuas('onSpawnNote', [(!unspawnNotes[notesAddedCount].isSustainNote ? notes.members.indexOf(notes.members[notes.length-1]) : sustainNotes.members.indexOf(sustainNotes.members[sustainNotes.length-1])), unspawnNotes[notesAddedCount].noteData, unspawnNotes[notesAddedCount].noteType, unspawnNotes[notesAddedCount].isSustainNote]);
-					notesAddedCount++;
+					final dunceNote:Note = inline (unspawnNotes[unspawnNotes.length-1].isSustainNote ? sustainNotes : notes).recycle(Note).setupNoteData(inline unspawnNotes.pop());
+					inline callOnLuas('onSpawnNote', [(!dunceNote.isSustainNote ? notes.members.indexOf(dunceNote) : sustainNotes.members.indexOf(dunceNote)), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);
 				}
 			}
 		}
-				if (notesAddedCount > 0)
-					unspawnNotes.splice(0, notesAddedCount);
 	}
 
 		if (generatedMusic)
@@ -4283,63 +4241,71 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 				if(startedCountdown)
 				{
-					for (group in [notes, sustainNotes]) group.forEachAlive(function(daNote:Note)
+					for (group in [notes, sustainNotes])
 					{
-						if (ClientPrefs.showNotes && daNote.exists)
+						var noteIndex:Int = group.members.length;
+						while (noteIndex >= 0)
 						{
-							inline daNote.followStrum((daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData], (60 / SONG.bpm) * 1000, songSpeed);
-							if(daNote.isSustainNote && daNote.strum.sustainReduce) inline daNote.clipToStrumNote(daNote.strum);
-						}
-
-						if (!daNote.mustPress && !daNote.hitByOpponent && !daNote.ignoreNote && daNote.strumTime <= Conductor.songPosition)
-						{
-							if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) opponentNoteHit(daNote);
-								if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
-								{
-									if (!daNote.isSustainNote) {
-										enemyHits += 1 * polyphony;
-										if (ClientPrefs.showNPS) {
-											inline oppNotesHitArray.push(1 * polyphony);
-											inline oppNotesHitDateArray.push(Conductor.songPosition);
-										}
-									}
-									if (!daNote.isSustainNote) {
-										inline notes.remove(daNote, true);
-									}
-								}
-						}
-
-							if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
+							var daNote:Note = group.members[noteIndex--];
+							if (daNote != null)
 							{
-								if (daNote.mustPress && (!cpuControlled || cpuControlled && ClientPrefs.communityGameBot) && !daNote.ignoreNote && !endingSong && !daNote.wasGoodHit) {
-									noteMiss(daNote);
-									if (ClientPrefs.missSoundShit)
-									{
-										FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
-									}
+								if (ClientPrefs.showNotes && daNote.exists)
+								{
+									inline daNote.followStrum((daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData], (60 / SONG.bpm) * 1000, songSpeed);
+									final strum = (daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData];
+									if(daNote.isSustainNote && strum != null && strum.sustainReduce) inline daNote.clipToStrumNote(strum);
 								}
 
-								daNote.active = false;
-								daNote.visible = false;
-								group.remove(daNote, true);
-							}
-						if(daNote.mustPress) {
-							if(cpuControlled && daNote.strumTime + (ClientPrefs.communityGameBot && !daNote.isSustainNote ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition && !daNote.ignoreNote) {
-								if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) goodNoteHit(daNote);
-								if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
+								if (!daNote.mustPress && !daNote.hitByOpponent && !daNote.ignoreNote && daNote.strumTime <= Conductor.songPosition)
 								{
-									if (!daNote.isSustainNote) {
-										totalNotesPlayed += 1 * polyphony;
-										if (ClientPrefs.showNPS) {
-											inline notesHitArray.push(1 * polyphony);
-											inline notesHitDateArray.push(Conductor.songPosition);
+									if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) opponentNoteHit(daNote);
+										if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
+										{
+											if (!daNote.isSustainNote) {
+												enemyHits += 1 * polyphony;
+												if (ClientPrefs.showNPS) {
+													inline oppNotesHitArray.push(1 * polyphony);
+													inline oppNotesHitDateArray.push(Conductor.songPosition);
+												}
+											}
+											if (!daNote.isSustainNote) {
+												inline notes.remove(daNote, true);
+											}
 										}
-										inline notes.remove(daNote, true);
+								}
+
+									if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
+									{
+										if (daNote.mustPress && (!cpuControlled || cpuControlled && ClientPrefs.communityGameBot) && !daNote.ignoreNote && !endingSong && !daNote.wasGoodHit) {
+											noteMiss(daNote);
+											if (ClientPrefs.missSoundShit)
+											{
+												FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
+											}
+										}
+
+										daNote.active = daNote.visible = false;
+										group.remove(daNote, true);
+									}
+								if(daNote.mustPress) {
+									if(cpuControlled && daNote.strumTime + (ClientPrefs.communityGameBot && !daNote.isSustainNote ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition && !daNote.ignoreNote) {
+										if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) goodNoteHit(daNote);
+										if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
+										{
+											if (!daNote.isSustainNote) {
+												totalNotesPlayed += 1 * polyphony;
+												if (ClientPrefs.showNPS) {
+													inline notesHitArray.push(1 * polyphony);
+													inline notesHitDateArray.push(Conductor.songPosition);
+												}
+												inline notes.remove(daNote, true);
+											}
+										}
 									}
 								}
 							}
 						}
-					});
+					}
 				}
 				else
 				{
@@ -4422,6 +4388,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			i(elapsed);
 		}
 		if (!ffmpegMode) return;
+
+		for (group in [notes, sustainNotes]) inline group.members.sort((b:Note, a:Note) -> inline Std.int(a.y - b.y)); // Psych engine display note sorting moment
 
 		#if !mac pipeFrame();
 		#else
@@ -5081,10 +5049,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			if (playbackRate >= TROLL_MAX_SPEED && ClientPrefs.trollMaxSpeed != 'Disabled') { // Limit playback rate to the troll mode max speed
 				playbackRate = TROLL_MAX_SPEED;
 			}
-
-			readyToTriggerTrollMode = false;
-
-			songWasLooped = true;
 	}
 
 	function calculateTrollModeStuff(pb:Float):Float {
@@ -6558,6 +6522,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		   			if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 				if (ClientPrefs.iconBopWhen == 'Every Note Hit' && (iconBopsThisFrame <= 2 || ClientPrefs.noBopLimit) && !note.isSustainNote && iconP1.visible) bopIcons(!opponentChart);
 			}
+			return;
 		}
 		if (noteAlt != null)
 		{
@@ -6630,6 +6595,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			}
 			if (ClientPrefs.songLoading && !ffmpegMode) vocals.volume = 1;
 		}
+		return;
 	}
 	function opponentNoteHit(daNote:Note, noteAlt:PreloadedChartNote = null):Void
 	{
@@ -6868,7 +6834,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		   		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 
 				if (shouldDrainHealth && health > healthDrainFloor && !practiceMode || opponentDrain && practiceMode) {
-					health -= (opponentDrain ? daNote.hitHealth : healthDrainAmount) * hpDrainLevel * polyphony;
+					health -= (opponentDrain ? noteAlt.hitHealth : healthDrainAmount) * hpDrainLevel * polyphony;
 					if (ClientPrefs.healthDisplay && !ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 				}
 			}
@@ -7178,6 +7144,9 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 		lastBeatHit = curBeat;
 
+		if (!ffmpegMode)
+			for (group in [notes, sustainNotes]) group.members.sort((a:Note, b:Note) -> Std.int(a.strumTime - b.strumTime));
+
 		setOnLuas('curBeat', curBeat); //DAWGG?????
 		callOnLuas('onBeatHit', []);
 	}
@@ -7208,7 +7177,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			setOnLuas('mustHitSection', SONG.notes[curSection].mustHitSection);
 			setOnLuas('altAnim', SONG.notes[curSection].altAnim);
 			setOnLuas('gfSection', SONG.notes[curSection].gfSection);
-			if (!usingBopIntervalEvent) camBopInterval = SONG.notes[curSection].sectionBeats;
+			if (!usingBopIntervalEvent) camBopInterval = getBeatsOnSection();
 		}
 
 		setOnLuas('curSection', curSection);
