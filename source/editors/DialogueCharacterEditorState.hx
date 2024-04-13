@@ -74,16 +74,14 @@ class DialogueCharacterEditorState extends MusicBeatState
 
 	override function create() {
 		persistentUpdate = persistentDraw = true;
-		camGame = new FlxCamera();
+		camGame = initPsychCamera();
 		camHUD = new FlxCamera();
 		camGame.bgColor = FlxColor.fromHSL(0, 0, 0.5);
 		camHUD.bgColor.alpha = 0;
 
 		music = new EditingMusic();
 
-		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD, false);
-		FlxG.cameras.setDefaultDrawTarget(camGame, true);
 		
 		mainGroup = new FlxSpriteGroup();
 		mainGroup.cameras = [camGame];

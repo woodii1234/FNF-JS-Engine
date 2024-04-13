@@ -15,6 +15,7 @@ import flixel.util.FlxGradient;
 import flixel.FlxState;
 import flixel.FlxCamera;
 import flixel.FlxBasic;
+import backend.PsychCamera;
 
 class MusicBeatState extends FlxUIState
 {
@@ -35,6 +36,8 @@ class MusicBeatState extends FlxUIState
 	inline function get_controls():Controls
 		return PlayerSettings.player1.controls;
 
+	var _psychCameraInitialized:Bool = false;
+
 	public static var windowNameSuffix:String = "";
 	public static var windowNameSuffix2:String = ""; //changes to "Outdated!" if the version of the engine is outdated
 	public static var windowNamePrefix:String = "Friday Night Funkin': JS Engine";
@@ -48,10 +51,22 @@ class MusicBeatState extends FlxUIState
 		var skip:Bool = FlxTransitionableState.skipNextTransOut;
 		super.create();
 
+		if(!_psychCameraInitialized && Type.getClassName(Type.getClass(FlxG.state)) != 'PlayState') initPsychCamera();
+		
 		if(!skip) {
 			openSubState(new CustomFadeTransition(0.7, true));
 		}
 		FlxTransitionableState.skipNextTransOut = false;
+	}
+
+	public function initPsychCamera():PsychCamera
+	{
+		var camera = new PsychCamera();
+		FlxG.cameras.reset(camera);
+		FlxG.cameras.setDefaultDrawTarget(camera, true);
+		_psychCameraInitialized = true;
+		//trace('initialized psych camera ' + Sys.cpuTime());
+		return camera;
 	}
 
 	override function update(elapsed:Float)

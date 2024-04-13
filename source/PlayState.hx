@@ -592,9 +592,9 @@ class PlayState extends MusicBeatState
 
 		randomBotplayText = theListBotplay[FlxG.random.int(0, theListBotplay.length - 1)];
 		//trace('Playback Rate: ' + playbackRate);
-
-			cpp.vm.Gc.enable(ClientPrefs.enableGC || ffmpegMode); //lagspike prevention
-			Paths.clearStoredMemory();
+		
+			inline cpp.vm.Gc.enable(ClientPrefs.enableGC || ffmpegMode); //lagspike prevention
+			inline Paths.clearStoredMemory();
 
 			#if sys
 			openfl.system.System.gc();
@@ -3326,7 +3326,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		unspawnNotes.sort((b, a) -> Std.int(a.strumTime - b.strumTime));
+		unspawnNotes.sort(sortByTime);
 		eventNotes.sort(sortByTime);
 		unspawnNotesCopy = unspawnNotes.copy();
 		eventNotesCopy = eventNotes.copy();
@@ -3652,7 +3652,7 @@ class PlayState extends MusicBeatState
 	public var postElapsed:Float = 1 / ClientPrefs.targetFPS;
 	public var takenTime:Float = haxe.Timer.stamp();
 
-	override inline public function update(elapsed:Float)
+	override public function update(elapsed:Float)
 	{
 		if (ClientPrefs.ffmpegMode) elapsed = 1 / ClientPrefs.targetFPS;
 		if (screenshader.Enabled)
@@ -3698,8 +3698,8 @@ class PlayState extends MusicBeatState
 			botplayTxt.text = 'NPS: ${FlxStringUtil.formatMoney(nps, false)}/${FlxStringUtil.formatMoney(maxNPS, false)}\nOpp NPS: ${FlxStringUtil.formatMoney(oppNPS, false)}/${FlxStringUtil.formatMoney(maxOppNPS, false)}';
 		}
 
-			if (ClientPrefs.showRendered)
-			renderedTxt.text = 'Rendered Notes: ' + FlxStringUtil.formatMoney(notes.length, false);
+		if (ClientPrefs.showRendered)
+		renderedTxt.text = 'Rendered Notes: ' + FlxStringUtil.formatMoney(notes.length, false);
 
 		if (iconsShouldGoUp) iconP1.y = iconP2.y = healthBarBG.y - 75;
 
@@ -4202,24 +4202,35 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		}
 		doDeathCheck();
 
-	if(unspawnNotes[unspawnNotes.length-1] != null)
+	if (unspawnNotes[0] != null)
 	{
-		if (!ClientPrefs.showNotes && cpuControlled && unspawnNotes[unspawnNotes.length-1] != null && !unspawnNotes[unspawnNotes.length-1].wasHit)
+		notesAddedCount = 0;
+
+		if (notesAddedCount > unspawnNotes.length)
+			notesAddedCount -= (notesAddedCount - unspawnNotes.length);
+
+		if (!ClientPrefs.showNotes && cpuControlled && unspawnNotes[notesAddedCount] != null && !unspawnNotes[notesAddedCount].wasHit)
 		{
-			while (unspawnNotes[unspawnNotes.length-1] != null && unspawnNotes[unspawnNotes.length-1].strumTime <= Conductor.songPosition) {
-				unspawnNotes[unspawnNotes.length-1].wasHit = true; //Set this to true so the game doesn't do a double hit and crash the game
-				unspawnNotes[unspawnNotes.length-1].mustPress ? goodNoteHit(null, inline unspawnNotes.pop()) : opponentNoteHit(null, inline unspawnNotes.pop());
+			while (unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime <= Conductor.songPosition) {
+				unspawnNotes[notesAddedCount].wasHit = true; //Set this to true so the game doesn't do a double hit and crash the game
+				unspawnNotes[notesAddedCount].mustPress ? goodNoteHit(null, unspawnNotes[notesAddedCount]) : opponentNoteHit(null, unspawnNotes[notesAddedCount]);
+				notesAddedCount++;
 			}
 		}
 		else if (ClientPrefs.showNotes || !ClientPrefs.showNotes && !cpuControlled)
 		{
-			while (unspawnNotes[unspawnNotes.length-1] != null && unspawnNotes[unspawnNotes.length-1].strumTime - Conductor.songPosition < (NOTE_SPAWN_TIME / unspawnNotes[unspawnNotes.length-1].multSpeed)) {
+			while (unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < (NOTE_SPAWN_TIME / unspawnNotes[notesAddedCount].multSpeed)) {
 				{
-					final dunceNote:Note = inline (unspawnNotes[unspawnNotes.length-1].isSustainNote ? sustainNotes : notes).recycle(Note).setupNoteData(inline unspawnNotes.pop());
-					inline callOnLuas('onSpawnNote', [(!dunceNote.isSustainNote ? notes.members.indexOf(dunceNote) : sustainNotes.members.indexOf(dunceNote)), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);
+					inline (unspawnNotes[notesAddedCount].isSustainNote ? sustainNotes : notes).recycle(Note).setupNoteData(unspawnNotes[notesAddedCount]);
+
+						unspawnNotes[notesAddedCount].wasSpawned = true;
+					inline callOnLuas('onSpawnNote', [(!unspawnNotes[notesAddedCount].isSustainNote ? notes.members.indexOf(notes.members[notes.length-1]) : sustainNotes.members.indexOf(sustainNotes.members[sustainNotes.length-1])), unspawnNotes[notesAddedCount].noteData, unspawnNotes[notesAddedCount].noteType, unspawnNotes[notesAddedCount].isSustainNote]);
+					notesAddedCount++;
 				}
 			}
 		}
+		if (notesAddedCount > 0)
+			inline unspawnNotes.splice(0, notesAddedCount);
 	}
 
 		if (generatedMusic)
@@ -4388,8 +4399,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			i(elapsed);
 		}
 		if (!ffmpegMode) return;
-
-		for (group in [notes, sustainNotes]) inline group.members.sort((b:Note, a:Note) -> inline Std.int(a.y - b.y)); // Psych engine display note sorting moment
 
 		#if !mac pipeFrame();
 		#else
@@ -6537,20 +6546,19 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			}
 			if(!noteAlt.noAnimation && ClientPrefs.charsAndBG && charAnimsFrame < 4) {
 				charAnimsFrame += 1;
-				final animToPlay:String = singAnimations[Std.int(Math.abs(noteAlt.noteData))] + noteAlt.animSuffix;
 				if (noteAlt.gfNote)
 				{
-					inline gf.playAnim(animToPlay, true);
+					inline gf.playAnim(singAnimations[(noteAlt.noteData)] + noteAlt.animSuffix, true);
 					gf.holdTimer = 0;
 				}
 				if (!noteAlt.gfNote && !opponentChart)
 				{
-					inline boyfriend.playAnim(animToPlay, true);
+					inline boyfriend.playAnim(singAnimations[(noteAlt.noteData)] + noteAlt.animSuffix, true);
 					boyfriend.holdTimer = 0;
 				}
 				if (!noteAlt.gfNote && opponentChart)
 				{
-					inline dad.playAnim(animToPlay, true);
+					inline dad.playAnim(singAnimations[(noteAlt.noteData)] + noteAlt.animSuffix, true);
 					dad.holdTimer = 0;
 				}
 			}
@@ -7143,9 +7151,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			}
 		}
 		lastBeatHit = curBeat;
-
-		if (!ffmpegMode)
-			for (group in [notes, sustainNotes]) group.members.sort((a:Note, b:Note) -> Std.int(a.strumTime - b.strumTime));
 
 		setOnLuas('curBeat', curBeat); //DAWGG?????
 		callOnLuas('onBeatHit', []);

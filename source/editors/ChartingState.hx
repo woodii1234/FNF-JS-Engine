@@ -141,8 +141,6 @@ class ChartingState extends MusicBeatState
 
 	public static inline var GRID_SIZE:Int = 40;
 	var CAM_OFFSET:Int = 360;
-
-	var dummyArrow:FlxSprite;
 	
 	var selectionNote:SelectionNote;
 	var selectionEvent:FlxSprite;
@@ -434,9 +432,6 @@ class ChartingState extends MusicBeatState
 
 		camPos = new FlxObject(0, 0, 1, 1);
 		camPos.setPosition(strumLine.x + CAM_OFFSET, strumLine.y);
-
-		dummyArrow = new FlxSprite().makeGraphic(GRID_SIZE, GRID_SIZE);
-		add(dummyArrow);
 
 		var tabs = [
 			{name: "Song", label: 'Song'},
@@ -833,7 +828,7 @@ class ChartingState extends MusicBeatState
 
 		UI_box.addGroup(tab_group_song);
 
-		FlxG.camera.follow(camPos);
+		initPsychCamera().follow(camPos, null, 999);
 	}
 
 		function songJsonPopup() { //you tried reloading the json, but it doesn't exist
@@ -3829,7 +3824,7 @@ class ChartingState extends MusicBeatState
 
 	private function addNote(strum:Null<Float> = null, data:Null<Int> = null, type:Null<Int> = null, ?gridUpdate:Bool = true):Void
 	{
-		var noteStrum = getStrumTime(selectionNote.y, false) + sectionStartTime();
+		var noteStrum = getStrumTime(selectionNote.y * (getSectionBeats() / 4), false) + sectionStartTime();
 		var noteData:Int = Math.floor((FlxG.mouse.x - GRID_SIZE) / GRID_SIZE);
 		var noteSus = 0;
 		var daAlt = false;

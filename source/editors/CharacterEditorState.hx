@@ -83,16 +83,14 @@ class CharacterEditorState extends MusicBeatState
 	{	
 		music = new EditingMusic();
 
-		camEditor = new FlxCamera();
+		camEditor = initPsychCamera();
 		camHUD = new FlxCamera();
 		camHUD.bgColor.alpha = 0;
 		camMenu = new FlxCamera();
 		camMenu.bgColor.alpha = 0;
 
-		FlxG.cameras.reset(camEditor);
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camMenu, false);
-		FlxG.cameras.setDefaultDrawTarget(camEditor, true);
 
 		bgLayer = new FlxTypedGroup<FlxSprite>();
 		add(bgLayer);
@@ -162,7 +160,7 @@ class CharacterEditorState extends MusicBeatState
 			add(tipText);
 		}
 
-		FlxG.camera.follow(camFollow);
+		FlxG.camera.follow(camFollow, null, 999);
 
 		var tabs = [
 			{name: 'Settings', label: 'Settings'},

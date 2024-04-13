@@ -207,9 +207,13 @@ class Character extends FlxSprite
 					updateHitbox();
 				}
 
+				var jsonPlayerWasNull = false;
+
 				usePlayerOffsets = json.isPlayer != null ? json.isPlayer : (character.contains('bf') || character.endsWith('-player') || character.endsWith('playable'));
 				positionArray = json.position;
 				cameraPosition = json.camera_position;
+
+				if (json.isPlayer == null) jsonPlayerWasNull = true;
 
 				healthIcon = json.healthicon;
 				singDuration = json.sing_duration;
@@ -264,7 +268,7 @@ class Character extends FlxSprite
 						if(anim.offsets != null && anim.offsets.length > 1) {
 							addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
 						}
-						if (!usePlayerOffsets && curCharacter != 'pico' && anim.anim.length > 0 && anim.name.length > 0 && (anim.anim == 'singRIGHT' && anim.name.toLowerCase().contains('left') || anim.anim == 'singLEFT' && animName.toLowerCase().contains('right'))) usePlayerOffsets = true;
+						if (!jsonPlayerWasNull && anim.anim.length > 0 && anim.name.length > 0 && (anim.anim == 'singRIGHT' && anim.name.toLowerCase().contains('left') || anim.anim == 'singLEFT' && animName.toLowerCase().contains('right'))) usePlayerOffsets = true;
 					}
 				} else {
 					quickAnimAdd('idle', 'BF idle dance');

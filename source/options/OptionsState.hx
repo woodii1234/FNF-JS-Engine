@@ -78,24 +78,22 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 	override function create() {
 		Paths.clearStoredMemory();
 		Paths.clearUnusedMemory();
-		mainCamera = new FlxCamera();
+		mainCamera = initPsychCamera();
 		subCamera = new FlxCamera();
 		otherCamera = new FlxCamera();
 		subCamera.bgColor.alpha = 0;
 		otherCamera.bgColor.alpha = 0;
 
-		FlxG.cameras.reset(mainCamera);
 		FlxG.cameras.add(subCamera, false);
 		FlxG.cameras.add(otherCamera, false);
 
-		FlxG.cameras.setDefaultDrawTarget(mainCamera, true);
 		CustomFadeTransition.nextCamera = otherCamera;
 
 		camFollow = new FlxObject(0, 0, 1, 1);
 		camFollowPos = new FlxObject(0, 0, 1, 1);
 		add(camFollow);
 		add(camFollowPos);
-		FlxG.cameras.list[FlxG.cameras.list.indexOf(subCamera)].follow(camFollowPos, null, 1);
+		FlxG.cameras.list[FlxG.cameras.list.indexOf(subCamera)].follow(camFollowPos);
 
 		#if desktop
 		DiscordClient.changePresence("Options Menu", null);
@@ -148,15 +146,15 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		var lerpVal:Float = CoolUtil.clamp(elapsed * 7.5, 0, 1);
-		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
-
 		if (controls.UI_UP_P) {
 			changeSelection(-1);
 		}
 		if (controls.UI_DOWN_P) {
 			changeSelection(1);
 		}
+
+		var lerpVal:Float = CoolUtil.clamp(elapsed * 7.5, 0, 1);
+		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
 
 		if (controls.BACK && !isEnteringKonamiCode) {
 			CustomFadeTransition.nextCamera = otherCamera;
@@ -171,6 +169,7 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 			else FlxG.switchState(MainMenuState.new);
 		}
 		if (controls.ACCEPT && !isEnteringKonamiCode) {
+			CustomFadeTransition.nextCamera = otherCamera;
 			if (isEnteringKonamiCode) return;
 			openSelectedSubstate(options[curSelected]);
 		}
