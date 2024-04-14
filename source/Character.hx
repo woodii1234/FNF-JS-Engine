@@ -442,12 +442,12 @@ class Character extends FlxSprite
 				danced = !danced;
 
 				if (danced)
-					playAnim('danceRight' + idleSuffix);
+					inline playAnim('danceRight' + idleSuffix);
 				else
-					playAnim('danceLeft' + idleSuffix);
+					inline playAnim('danceLeft' + idleSuffix);
 			}
 			else if(animation.getByName('idle' + idleSuffix) != null) {
-					playAnim('idle' + idleSuffix);
+					inline playAnim('idle' + idleSuffix);
 			}
 		}
 	}
@@ -457,7 +457,7 @@ class Character extends FlxSprite
 		specialAnim = false;
 		animation.play(AnimName, Force, Reversed, Frame);
 
-		var daOffset = animOffsets.get(AnimName);
+		final daOffset = animOffsets.get(AnimName);
 		if (animOffsets.exists(AnimName))
 		{
 			offset.set(daOffset[0] * (isPlayer != usePlayerOffsets ? -1 : 1), daOffset[1]);

@@ -44,7 +44,7 @@ class Paths
 	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
 	inline public static var VIDEO_EXT = "mp4";
 
-	public static var defaultNoteStuff:Array<Dynamic> = [];
+	public static var defaultNoteSprite:FlxSprite;
 
 	private static var noteFrames:FlxFramesCollection;
 	private static var noteAnimation:FlxAnimationController;
@@ -116,50 +116,46 @@ class Paths
 			defaultSkin = 'GRAY_NOTE_assets';
 		}
 		if (noteSkin.length > 1) defaultSkin = noteSkin;
-		defaultNoteStuff[0] = getSparrowAtlas(defaultSkin.length > 1 ? defaultSkin : 'NOTE_assets');
 
 		// Do this to be able to just copy over the note animations and not reallocate it
 
-		var spr:FlxSprite = new FlxSprite();
-		spr.frames = defaultNoteStuff[0];
-		defaultNoteStuff[1] = new FlxAnimationController(spr);
+		defaultNoteSprite = new FlxSprite();
+		defaultNoteSprite.frames = getSparrowAtlas(defaultSkin.length > 1 ? defaultSkin : 'NOTE_assets');
 
 		// Use a for loop for adding all of the animations in the note spritesheet, otherwise it won't find the animations for the next recycle
 		for (d in 0...keys)
 		{
-			defaultNoteStuff[1].addByPrefix('purpleholdend', 'pruple end hold'); // ?????
-			defaultNoteStuff[1].addByPrefix(Note.colArray[d] + 'holdend', Note.colArray[d] + ' hold end');
-			defaultNoteStuff[1].addByPrefix(Note.colArray[d] + 'hold', Note.colArray[d] + ' hold piece');
-			defaultNoteStuff[1].addByPrefix(Note.colArray[d] + 'Scroll', Note.colArray[d] + '0');
+			defaultNoteSprite.animation.addByPrefix('purpleholdend', 'pruple end hold'); // ?????
+			defaultNoteSprite.animation.addByPrefix(Note.colArray[d] + 'holdend', Note.colArray[d] + ' hold end');
+			defaultNoteSprite.animation.addByPrefix(Note.colArray[d] + 'hold', Note.colArray[d] + ' hold piece');
+			defaultNoteSprite.animation.addByPrefix(Note.colArray[d] + 'Scroll', Note.colArray[d] + '0');
 		}
 	}
 
 	public static function initNote(keys:Int = 4, noteSkin:String = 'NOTE_assets')
 	{
-		noteFrames = getSparrowAtlas(noteSkin.length > 1 ? noteSkin : 'NOTE_assets');
-
 		// Do this to be able to just copy over the note animations and not reallocate it
 
 		var spr:FlxSprite = new FlxSprite();
-		spr.frames = noteFrames;
-		noteAnimation = new FlxAnimationController(spr);
+		spr.frames = getSparrowAtlas(noteSkin.length > 1 ? noteSkin : 'NOTE_assets');
 
 		// Use a for loop for adding all of the animations in the note spritesheet, otherwise it won't find the animations for the next recycle
 		for (d in 0...keys)
 		{
-			noteAnimation.addByPrefix('purpleholdend', 'pruple end hold'); // ?????
-			noteAnimation.addByPrefix(Note.colArray[d] + 'holdend', Note.colArray[d] + ' hold end');
-			noteAnimation.addByPrefix(Note.colArray[d] + 'hold', Note.colArray[d] + ' hold piece');
-			noteAnimation.addByPrefix(Note.colArray[d] + 'Scroll', Note.colArray[d] + '0');
+			spr.animation.addByPrefix('purpleholdend', 'pruple end hold'); // ?????
+			spr.animation.addByPrefix(Note.colArray[d] + 'holdend', Note.colArray[d] + ' hold end');
+			spr.animation.addByPrefix(Note.colArray[d] + 'hold', Note.colArray[d] + ' hold piece');
+			spr.animation.addByPrefix(Note.colArray[d] + 'Scroll', Note.colArray[d] + '0');
 		}
-		noteSkinFramesMap.set(noteSkin, noteFrames);
-		noteSkinAnimsMap.set(noteSkin, noteAnimation);
+		noteSkinFramesMap.set(noteSkin, spr.frames);
+		noteSkinAnimsMap.set(noteSkin, spr.animation);
 	}
 
 	//Note Splash initialization
 	public static function initSplash(keys:Int = 4, splashSkin:String = 'noteSplashes')
 	{
 		splashFrames = getSparrowAtlas(splashSkin.length > 1 ? 'noteSplashes/' + splashSkin : 'noteSplashes/noteSplashes');
+		if (splashFrames == null) splashFrames = getSparrowAtlas(splashSkin.length > 1 ? splashSkin : 'noteSplashes/noteSplashes');
 
 		// Do this to be able to just copy over the splash animations and not reallocate it
 

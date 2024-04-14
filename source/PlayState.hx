@@ -66,6 +66,7 @@ import Shaders;
 import openfl.display.BitmapData;
 import openfl.utils.ByteArray;
 import Note.PreloadedChartNote;
+import backend.NoteSignalStuff;
 
 #if !flash
 import flixel.addons.display.FlxRuntimeShader;
@@ -108,6 +109,7 @@ class PlayState extends MusicBeatState
 
 	public var shader_chromatic_abberation:ChromaticAberrationEffect;
 	public var camGameShaders:Array<ShaderEffect> = [];
+	public var camHUDBelowShaders:Array<ShaderEffect> = [];
 	public var camHUDShaders:Array<ShaderEffect> = [];
 	public var camOtherShaders:Array<ShaderEffect> = [];
 
@@ -213,8 +215,7 @@ class PlayState extends MusicBeatState
 	public var isEkSong:Bool = false; //we'll use this so that the game doesn't load all notes twice?
 	public var usingEkFile:Bool = false; //we'll also use this so that the game doesn't load all notes twice?
 
-	public var notes:NoteGroup;
-	public var sustainNotes:NoteGroup;
+	public var notes:FlxTypedGroup<Note>;
 	public var unspawnNotes:Array<PreloadedChartNote> = [];
 	public var unspawnNotesCopy:Array<PreloadedChartNote> = [];
 	public var eventNotes:Array<EventNote> = [];
@@ -252,7 +253,6 @@ class PlayState extends MusicBeatState
 	public var health:Float;
 	private var displayedHealth:Float;
 	public var maxHealth:Float = 2;
-
 
 	public var totalNotesPlayed:Float = 0;
 	public var combo:Float = 0;
@@ -375,6 +375,7 @@ class PlayState extends MusicBeatState
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
 	public var camHUD:FlxCamera;
+	public var camHUDBelow:FlxCamera;
 	public var camGame:FlxCamera;
 	public var camOther:FlxCamera;
 	public var cameraSpeed:Float = 1;
@@ -555,6 +556,8 @@ class PlayState extends MusicBeatState
 	public var startCallback:Void->Void = null;
 	public var endCallback:Void->Void = null;
 
+	public var emitter:Emitter = new Emitter();
+
 	override public function create()
 	{
 		//Stops playing on a height that isn't divisible by 2
@@ -592,7 +595,7 @@ class PlayState extends MusicBeatState
 
 		randomBotplayText = theListBotplay[FlxG.random.int(0, theListBotplay.length - 1)];
 		//trace('Playback Rate: ' + playbackRate);
-		
+
 			inline cpp.vm.Gc.enable(ClientPrefs.enableGC || ffmpegMode); //lagspike prevention
 			inline Paths.clearStoredMemory();
 
@@ -705,12 +708,13 @@ class PlayState extends MusicBeatState
 
 		// var gameCam:FlxCamera = FlxG.camera;
 		camGame = new FlxCamera();
+		camHUDBelow = new FlxCamera();
 		camHUD = new FlxCamera();
 		camOther = new FlxCamera();
-		camHUD.bgColor.alpha = 0;
-		camOther.bgColor.alpha = 0;
+		camHUD.bgColor.alpha = camHUDBelow.bgColor.alpha = camOther.bgColor.alpha = 0;
 
 		FlxG.cameras.reset(camGame);
+		FlxG.cameras.add(camHUDBelow, false);
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camOther, false);
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>((ClientPrefs.maxSplashLimit != 0 ? ClientPrefs.maxSplashLimit : 10000));
@@ -722,8 +726,6 @@ class PlayState extends MusicBeatState
 		persistentDraw = true;
 		if (SONG == null)
 			SONG = Song.loadFromJson('tutorial');
-
-		Paths.initDefaultNote(4, SONG.arrowSkin);
 
 		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);
@@ -856,6 +858,8 @@ class PlayState extends MusicBeatState
 			case 'stress':
 				GameOverSubstate.characterName = 'bf-holding-gf-dead';
 		}
+
+		Paths.initDefaultNote(4, SONG.arrowSkin);
 
 		if(isPixelStage) {
 			introSoundsSuffix = '-pixel';
@@ -1298,13 +1302,10 @@ class PlayState extends MusicBeatState
 
 		timeBarBG.visible = showTime && !ClientPrefs.timeBarType.contains('(No Bar)');
 
-		sustainNotes = new NoteGroup();
-		add(sustainNotes);
-
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		add(strumLineNotes);
 
-		notes = new NoteGroup();
+		notes = new FlxTypedGroup<Note>();
 		add(notes);
 		notes.visible = ClientPrefs.showNotes; //that was easier than expected
 
@@ -1762,7 +1763,6 @@ class PlayState extends MusicBeatState
 		strumLineNotes.cameras = [camHUD];
 		grpNoteSplashes.cameras = [camHUD];
 		notes.cameras = [camHUD];
-		sustainNotes.cameras = [camHUD];
 		healthBar.cameras = [camHUD];
 		healthBarBG.cameras = [camHUD];
 		iconP1.cameras = [camHUD];
@@ -1889,6 +1889,11 @@ class PlayState extends MusicBeatState
 
 		startingTime = Sys.time();
 
+		emitter.on(NoteSignalStuff.NOTE_UPDATE, updateNote);
+		emitter.on(NoteSignalStuff.NOTE_SETUP, setupNoteData);
+		emitter.on(NoteSignalStuff.NOTE_HIT_BF, goodNoteHit);
+		emitter.on(NoteSignalStuff.NOTE_HIT_OPP, opponentNoteHit);
+
 		CustomFadeTransition.nextCamera = camOther;
 	}
 
@@ -1913,7 +1918,7 @@ class PlayState extends MusicBeatState
 		#end
 	}
 
-	public function initLuaShader(name:String, ?glslVersion:Int = 120)
+	public function initLuaShader(name:String, ?glslVersion:Int = 110)
 	{
 		if(!ClientPrefs.shaders) return false;
 
@@ -2088,31 +2093,32 @@ class PlayState extends MusicBeatState
 	}
 
 	public function addShaderToCamera(cam:String,effect:Dynamic){//STOLE FROM ANDROMEDA	// actually i got it from old psych engine
-
-
-
 		switch(cam.toLowerCase()) {
 			case 'camhud' | 'hud':
-					camHUDShaders.push(effect);
-					var newCamEffects:Array<BitmapFilter>=[]; // IT SHUTS HAXE UP IDK WHY BUT WHATEVER IDK WHY I CANT JUST ARRAY<SHADERFILTER>
-					for(i in camHUDShaders){
-					  newCamEffects.push(new ShaderFilter(i.shader));
-					}
-					camHUD.filters = newCamEffects;
+				camHUDShaders.push(effect);
+				camHUDBelowShaders.push(effect);
+				var newCamEffects:Array<BitmapFilter>=[]; // IT SHUTS HAXE UP IDK WHY BUT WHATEVER IDK WHY I CANT JUST ARRAY<SHADERFILTER>
+				for(i in camHUDBelowShaders){
+					newCamEffects.push(new ShaderFilter(i.shader));
+				}
+				for(i in camHUDShaders){
+					newCamEffects.push(new ShaderFilter(i.shader));
+				}
+				camHUD.filters = camHUDBelow.filters = newCamEffects;
 			case 'camother' | 'other':
-					camOtherShaders.push(effect);
-					var newCamEffects:Array<BitmapFilter>=[]; // IT SHUTS HAXE UP IDK WHY BUT WHATEVER IDK WHY I CANT JUST ARRAY<SHADERFILTER>
-					for(i in camOtherShaders){
-					  newCamEffects.push(new ShaderFilter(i.shader));
-					}
-					camOther.filters = newCamEffects;
+				camOtherShaders.push(effect);
+				var newCamEffects:Array<BitmapFilter>=[]; // IT SHUTS HAXE UP IDK WHY BUT WHATEVER IDK WHY I CANT JUST ARRAY<SHADERFILTER>
+				for(i in camOtherShaders){
+					newCamEffects.push(new ShaderFilter(i.shader));
+				}
+				camOther.filters = newCamEffects;
 			case 'camgame' | 'game':
-					camGameShaders.push(effect);
-					var newCamEffects:Array<BitmapFilter>=[]; // IT SHUTS HAXE UP IDK WHY BUT WHATEVER IDK WHY I CANT JUST ARRAY<SHADERFILTER>
-					for(i in camGameShaders){
-					  newCamEffects.push(new ShaderFilter(i.shader));
-					}
-					camGame.filters = newCamEffects;
+				camGameShaders.push(effect);
+				var newCamEffects:Array<BitmapFilter>=[]; // IT SHUTS HAXE UP IDK WHY BUT WHATEVER IDK WHY I CANT JUST ARRAY<SHADERFILTER>
+				for(i in camGameShaders){
+					newCamEffects.push(new ShaderFilter(i.shader));
+				}
+				camGame.filters = newCamEffects;
 			default:
 				if(modchartSprites.exists(cam)) {
 					Reflect.setProperty(modchartSprites.get(cam),"shader",effect.shader);
@@ -2122,75 +2128,59 @@ class PlayState extends MusicBeatState
 					var OBJ = Reflect.getProperty(PlayState.instance,cam);
 					Reflect.setProperty(OBJ,"shader", effect.shader);
 				}
-
-
-
-
 		}
-
-
-
-
   }
 
   public function removeShaderFromCamera(cam:String,effect:ShaderEffect){
-
-
-		switch(cam.toLowerCase()) {
-			case 'camhud' | 'hud':
-	camHUDShaders.remove(effect);
-	var newCamEffects:Array<BitmapFilter>=[];
-	for(i in camHUDShaders){
-	  newCamEffects.push(new ShaderFilter(i.shader));
-	}
-	camHUD.filters = newCamEffects;
-			case 'camother' | 'other':
-					camOtherShaders.remove(effect);
-					var newCamEffects:Array<BitmapFilter>=[];
-					for(i in camOtherShaders){
-					  newCamEffects.push(new ShaderFilter(i.shader));
-					}
-					camOther.filters = newCamEffects;
-			default:
-				if(modchartSprites.exists(cam)) {
-					Reflect.setProperty(modchartSprites.get(cam),"shader",null);
-				} else if(modchartTexts.exists(cam)) {
-					Reflect.setProperty(modchartTexts.get(cam),"shader",null);
-				} else {
-					var OBJ = Reflect.getProperty(PlayState.instance,cam);
-					Reflect.setProperty(OBJ,"shader", null);
-				}
-
+	switch(cam.toLowerCase()) {
+		case 'camhud' | 'hud':
+			camHUDShaders.remove(effect);
+			camHUDBelowShaders.remove(effect);
+			var newCamEffects:Array<BitmapFilter>=[];
+			for(i in camHUDShaders){
+				newCamEffects.push(new ShaderFilter(i.shader));
+			}
+			for(i in camHUDBelowShaders){
+				newCamEffects.push(new ShaderFilter(i.shader));
+			}
+			camHUD.filters = camHUDBelow.filters = newCamEffects;
+		case 'camother' | 'other':
+			camOtherShaders.remove(effect);
+			var newCamEffects:Array<BitmapFilter>=[];
+			for(i in camOtherShaders){
+				newCamEffects.push(new ShaderFilter(i.shader));
+			}
+			camOther.filters = newCamEffects;
+		default:
+			if(modchartSprites.exists(cam)) {
+				Reflect.setProperty(modchartSprites.get(cam),"shader",null);
+			} else if(modchartTexts.exists(cam)) {
+				Reflect.setProperty(modchartTexts.get(cam),"shader",null);
+			} else {
+				var OBJ = Reflect.getProperty(PlayState.instance,cam);
+				Reflect.setProperty(OBJ,"shader", null);
+			}
 		}
-
-
   }
-
-
-
   public function clearShaderFromCamera(cam:String){
-
-
-		switch(cam.toLowerCase()) {
-			case 'camhud' | 'hud':
-				camHUDShaders = [];
-				var newCamEffects:Array<BitmapFilter>=[];
-				camHUD.filters = newCamEffects;
-			case 'camother' | 'other':
-				camOtherShaders = [];
-				var newCamEffects:Array<BitmapFilter>=[];
-				camOther.filters = newCamEffects;
-			case 'camgame' | 'game':
-				camGameShaders = [];
-				var newCamEffects:Array<BitmapFilter>=[];
-				camGame.filters = newCamEffects;
-			default:
-				camGameShaders = [];
-				var newCamEffects:Array<BitmapFilter>=[];
-				camGame.filters = newCamEffects;
-		}
-
-
+	switch(cam.toLowerCase()) {
+		case 'camhud' | 'hud':
+			camHUDShaders = camHUDBelowShaders = [];
+			var newCamEffects:Array<BitmapFilter>=[];
+			camHUD.filters = camHUDBelow.filters = newCamEffects;
+		case 'camother' | 'other':
+			camOtherShaders = [];
+			var newCamEffects:Array<BitmapFilter>=[];
+			camOther.filters = newCamEffects;
+		case 'camgame' | 'game':
+			camGameShaders = [];
+			var newCamEffects:Array<BitmapFilter>=[];
+			camGame.filters = newCamEffects;
+		default:
+			camGameShaders = [];
+			var newCamEffects:Array<BitmapFilter>=[];
+			camGame.filters = newCamEffects;
+	}
   }
 
 	public function getLuaObject(tag:String, text:Bool=true):FlxSprite {
@@ -2734,7 +2724,7 @@ class PlayState extends MusicBeatState
 					}
 				}
 
-				for (group in [notes, sustainNotes]) group.forEachAlive(function(note:Note) {
+				notes.forEachAlive(function(note:Note) {
 					if(ClientPrefs.opponentStrums || !ClientPrefs.opponentStrums || ClientPrefs.middleScroll || !note.mustPress)
 					{
 							note.alpha *= 0.35;
@@ -2805,19 +2795,6 @@ class PlayState extends MusicBeatState
 				daNote.visible = false;
 				daNote.ignoreNote = true;
 				notes.remove(daNote, true);
-			}
-			--i;
-		}
-
-		i = sustainNotes.length - 1;
-		while (i >= 0) {
-			var daNote:Note = sustainNotes.members[i];
-			if(daNote.strumTime - 350 < time)
-			{
-				daNote.active = false;
-				daNote.visible = false;
-				daNote.ignoreNote = true;
-				sustainNotes.remove(daNote, true);
 			}
 			--i;
 		}
@@ -3319,11 +3296,6 @@ class PlayState extends MusicBeatState
 					continue;
 				note.updateRGBColors();
 			}
-			for (note in sustainNotes){
-				if (note == null)
-					continue;
-				note.updateRGBColors();
-			}
 		}
 
 		unspawnNotes.sort(sortByTime);
@@ -3654,6 +3626,12 @@ class PlayState extends MusicBeatState
 
 	override public function update(elapsed:Float)
 	{
+		// Don't remove this.
+		camHUDBelow.x = camHUD.x;
+		camHUDBelow.y = camHUD.y;
+		camHUDBelow.angle = camHUD.angle;
+		camHUDBelow.alpha = camHUD.alpha;
+		camHUDBelow.zoom = camHUD.zoom;
 		if (ClientPrefs.ffmpegMode) elapsed = 1 / ClientPrefs.targetFPS;
 		if (screenshader.Enabled)
 		{
@@ -3732,7 +3710,7 @@ class PlayState extends MusicBeatState
 		}
 
 			//That says / songSpeed. If it's less than 1 it'll multiply instead of divide.
-		var NOTE_SPAWN_TIME = (ClientPrefs.dynamicSpawnTime ? (1600 / songSpeed) : 1600 * ClientPrefs.noteSpawnTime) / camHUD.zoom;
+		final NOTE_SPAWN_TIME = (ClientPrefs.dynamicSpawnTime ? (1600 / songSpeed) : 1600 * ClientPrefs.noteSpawnTime) / camHUD.zoom;
 
 		if(!inCutscene && ClientPrefs.charsAndBG) {
 			final lerpVal:Float = CoolUtil.boundTo(elapsed * 2.4 * cameraSpeed * playbackRate, 0, 1);
@@ -4213,7 +4191,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		{
 			while (unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime <= Conductor.songPosition) {
 				unspawnNotes[notesAddedCount].wasHit = true; //Set this to true so the game doesn't do a double hit and crash the game
-				unspawnNotes[notesAddedCount].mustPress ? goodNoteHit(null, unspawnNotes[notesAddedCount]) : opponentNoteHit(null, unspawnNotes[notesAddedCount]);
+				unspawnNotes[notesAddedCount].mustPress ? emitter.emit(NoteSignalStuff.NOTE_HIT_BF, null, unspawnNotes[notesAddedCount]): emitter.emit(NoteSignalStuff.NOTE_HIT_OPP, null, unspawnNotes[notesAddedCount]);
 				notesAddedCount++;
 			}
 		}
@@ -4221,10 +4199,8 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		{
 			while (unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < (NOTE_SPAWN_TIME / unspawnNotes[notesAddedCount].multSpeed)) {
 				{
-					inline (unspawnNotes[notesAddedCount].isSustainNote ? sustainNotes : notes).recycle(Note).setupNoteData(unspawnNotes[notesAddedCount]);
-
-						unspawnNotes[notesAddedCount].wasSpawned = true;
-					inline callOnLuas('onSpawnNote', [(!unspawnNotes[notesAddedCount].isSustainNote ? notes.members.indexOf(notes.members[notes.length-1]) : sustainNotes.members.indexOf(sustainNotes.members[sustainNotes.length-1])), unspawnNotes[notesAddedCount].noteData, unspawnNotes[notesAddedCount].noteType, unspawnNotes[notesAddedCount].isSustainNote]);
+					emitter.emit(NoteSignalStuff.NOTE_SETUP, unspawnNotes[notesAddedCount]);
+					inline callOnLuas('onSpawnNote', [notes.members.indexOf(notes.members[notes.length-1]), unspawnNotes[notesAddedCount].noteData, unspawnNotes[notesAddedCount].noteType, unspawnNotes[notesAddedCount].isSustainNote]);
 					notesAddedCount++;
 				}
 			}
@@ -4252,77 +4228,19 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 				if(startedCountdown)
 				{
-					for (group in [notes, sustainNotes])
+					var noteIndex:Int = notes.members.length;
+					while (noteIndex >= 0)
 					{
-						var noteIndex:Int = group.members.length;
-						while (noteIndex >= 0)
-						{
-							var daNote:Note = group.members[noteIndex--];
-							if (daNote != null)
-							{
-								if (ClientPrefs.showNotes && daNote.exists)
-								{
-									inline daNote.followStrum((daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData], (60 / SONG.bpm) * 1000, songSpeed);
-									final strum = (daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData];
-									if(daNote.isSustainNote && strum != null && strum.sustainReduce) inline daNote.clipToStrumNote(strum);
-								}
-
-								if (!daNote.mustPress && !daNote.hitByOpponent && !daNote.ignoreNote && daNote.strumTime <= Conductor.songPosition)
-								{
-									if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) opponentNoteHit(daNote);
-										if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
-										{
-											if (!daNote.isSustainNote) {
-												enemyHits += 1 * polyphony;
-												if (ClientPrefs.showNPS) {
-													inline oppNotesHitArray.push(1 * polyphony);
-													inline oppNotesHitDateArray.push(Conductor.songPosition);
-												}
-											}
-											if (!daNote.isSustainNote) {
-												inline notes.remove(daNote, true);
-											}
-										}
-								}
-
-									if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
-									{
-										if (daNote.mustPress && (!cpuControlled || cpuControlled && ClientPrefs.communityGameBot) && !daNote.ignoreNote && !endingSong && !daNote.wasGoodHit) {
-											noteMiss(daNote);
-											if (ClientPrefs.missSoundShit)
-											{
-												FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
-											}
-										}
-
-										daNote.active = daNote.visible = false;
-										group.remove(daNote, true);
-									}
-								if(daNote.mustPress) {
-									if(cpuControlled && daNote.strumTime + (ClientPrefs.communityGameBot && !daNote.isSustainNote ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition && !daNote.ignoreNote) {
-										if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) goodNoteHit(daNote);
-										if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
-										{
-											if (!daNote.isSustainNote) {
-												totalNotesPlayed += 1 * polyphony;
-												if (ClientPrefs.showNPS) {
-													inline notesHitArray.push(1 * polyphony);
-													inline notesHitDateArray.push(Conductor.songPosition);
-												}
-												inline notes.remove(daNote, true);
-											}
-										}
-									}
-								}
-							}
-						}
+						var daNote:Note = notes.members[noteIndex--];
+						emitter.emit(NoteSignalStuff.NOTE_UPDATE, daNote);
 					}
+					inline notes.members.sort((b:Note, a:Note) -> inline Std.int(a.y - b.y));
 				}
 				else
 				{
-					for (group in [notes, sustainNotes]) group.forEachAlive(function(daNote:Note)
+					notes.forEachAlive(function(daNote:Note)
 					{
-						group.remove(daNote, true);
+						daNote.exists = false;
 					});
 				}
 			}
@@ -4845,11 +4763,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 						continue;
 					note.updateRGBColors();
 				}
-				for (note in sustainNotes){
-				 	if (note == null)
-						continue;
-					note.updateRGBColors();
-				}
 				for (note in playerStrums.members){
 				 	if (note == null)
 						continue;
@@ -5171,7 +5084,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 						}
 						FlxG.switchState(new StoryMenuState()); //removed results screen from story mode because for some reason it opens the screen after the first song even if the story playlist's length is greater than 0??
 
-						// if ()
 						if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false)) {
 							StoryMenuState.weekCompleted.set(WeekData.weeksList[storyWeek], true);
 
@@ -5857,7 +5769,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				var notesStopped:Bool = false;
 
 				var sortedNotesList:Array<Dynamic> = [];
-				for (group in [notes, sustainNotes]) group.forEachAlive(function(daNote:Note)
+				notes.forEachAlive(function(daNote:Note)
 				{
 					if (daNote.canBeHit && !daNote.tooLate && !daNote.wasGoodHit && !daNote.isSustainNote && !daNote.blockHit)
 					{
@@ -5876,14 +5788,14 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					{
 						for (doubleNote in pressNotes) {
 							if (Math.abs(doubleNote.strumTime - epicNote.strumTime) < 1) {
-								notes.remove(doubleNote, true);
+								doubleNote.exists = false;
 							} else
 								notesStopped = true;
 						}
 
 						// eee jack detection before was not super good
 						if (!notesStopped) {
-							goodNoteHit(epicNote);
+							emitter.emit(NoteSignalStuff.NOTE_HIT_BF, epicNote, null);
 							pressNotes.push(epicNote);
 						}
 					if (sortedNotesList.length > 2 && ClientPrefs.ezSpam) //literally all you need to allow you to spam though impossiblely hard jacks
@@ -5891,7 +5803,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 						var notesThatCanBeHit = sortedNotesList.length;
 						for (i in 1...Std.int(notesThatCanBeHit)) //i may consider making this hit half the notes instead
 						{
-							goodNoteHit(sortedNotesList[i]);
+							emitter.emit(NoteSignalStuff.NOTE_HIT_BF, sortedNotesList[i], null);
 						}
 
 					}
@@ -6009,12 +5921,12 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		if (startedCountdown && !char.stunned && generatedMusic)
 		{
 			// rewritten inputs???
-			for (group in [notes, sustainNotes]) group.forEachAlive(function(daNote:Note)
+			notes.forEachAlive(function(daNote:Note)
 			{
 				// hold note functions
 				if (strumsBlocked[daNote.noteData] != true && daNote.isSustainNote && parsedHoldArray[daNote.noteData] && daNote.canBeHit
 				&& daNote.mustPress && !daNote.tooLate && !daNote.wasGoodHit && !daNote.blockHit) {
-				goodNoteHit(daNote);
+				emitter.emit(NoteSignalStuff.NOTE_HIT_BF, daNote, null);
 				}
 			});
 
@@ -6212,6 +6124,159 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		callOnLuas('noteMissPress', [direction]);
 	}
 
+	// this is used for note recycling
+	inline public function setupNoteData(chartNoteData:PreloadedChartNote)
+	{
+		var noteMade:Note = notes.recycle(Note);
+		if (ClientPrefs.enableColorShader)
+		{
+			noteMade.colorSwap = new ColorSwap();
+			noteMade.shader = noteMade.colorSwap.shader;
+		}
+		noteMade.wasGoodHit = noteMade.hitByOpponent = noteMade.tooLate = noteMade.canBeHit = false; // Don't make an update call of this for the note group
+
+		noteMade.strumTime = chartNoteData.strumTime;
+		if(!noteMade.inEditor) noteMade.strumTime += ClientPrefs.noteOffset;
+		noteMade.noteData = inline Std.int(chartNoteData.noteData % 4);
+		noteMade.noteType = chartNoteData.noteType;
+		noteMade.animSuffix = chartNoteData.animSuffix;
+		noteMade.noAnimation = noteMade.noMissAnimation = chartNoteData.noAnimation;
+		noteMade.mustPress = chartNoteData.mustPress;
+		noteMade.gfNote = chartNoteData.gfNote;
+		noteMade.isSustainNote = chartNoteData.isSustainNote;
+		if (chartNoteData.noteskin.length > 0 && chartNoteData.noteskin != '' && chartNoteData.noteskin != noteMade.texture) noteMade.texture = 'noteskins/' + chartNoteData.noteskin;
+		if (chartNoteData.texture.length > 0 && chartNoteData.texture != noteMade.texture) noteMade.texture = chartNoteData.texture;
+		noteMade.sustainLength = chartNoteData.sustainLength;
+		noteMade.sustainScale = chartNoteData.sustainScale;
+		noteMade.lowPriority = chartNoteData.lowPriority;
+
+		noteMade.hitHealth = chartNoteData.hitHealth;
+		noteMade.missHealth = chartNoteData.missHealth;
+		noteMade.hitCausesMiss = chartNoteData.hitCausesMiss;
+		noteMade.ignoreNote = chartNoteData.ignoreNote;
+		noteMade.multSpeed = chartNoteData.multSpeed;
+
+		if (ClientPrefs.enableColorShader)
+		{
+			if (ClientPrefs.noteColorStyle == 'Normal' && noteMade.noteData < ClientPrefs.arrowHSV.length)
+			{
+				noteMade.colorSwap.hue = ClientPrefs.arrowHSV[noteMade.noteData][0] / 360;
+				noteMade.colorSwap.saturation = ClientPrefs.arrowHSV[noteMade.noteData][1] / 100;
+				noteMade.colorSwap.brightness = ClientPrefs.arrowHSV[noteMade.noteData][2] / 100;
+			}
+			if (ClientPrefs.noteColorStyle == 'Quant-Based') CoolUtil.checkNoteQuant(noteMade, noteMade.isSustainNote ? chartNoteData.parent.strumTime : chartNoteData.strumTime);
+			if (ClientPrefs.noteColorStyle == 'Rainbow')
+			{
+				noteMade.colorSwap.hue = ((noteMade.strumTime / 5000 * 360) / 360) % 1;
+			}
+			if (ClientPrefs.noteColorStyle == 'Char-Based')
+			{
+				if (PlayState.instance != null) {
+					if (!noteMade.mustPress) !opponentChart ? noteMade.shader = new NoteShader.ColoredNoteShader(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2], false, 10) : noteMade.shader = new NoteShader.ColoredNoteShader(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2], false, 10);
+					if (noteMade.mustPress)
+						!opponentChart ? noteMade.shader = new NoteShader.ColoredNoteShader(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2], false, 10) : noteMade.shader = new NoteShader.ColoredNoteShader(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2], false, 10);
+					if (noteMade.gfNote && gf != null) noteMade.shader = new NoteShader.ColoredNoteShader(gf.healthColorArray[0], gf.healthColorArray[1], gf.healthColorArray[2], false, 10);
+				}
+			}
+		}
+
+		if (noteMade.noteType == 'Hurt Note')
+		{
+			noteMade.texture = 'HURTNOTE_assets';
+			noteMade.noteSplashTexture = 'HURTnoteSplashes';
+			if (ClientPrefs.enableColorShader)
+			{
+				noteMade.colorSwap.hue = noteMade.colorSwap.saturation = noteMade.colorSwap.brightness = 0;
+			}
+		}
+
+		if (PlayState.isPixelStage) @:privateAccess noteMade.reloadNote('', noteMade.texture);
+		if (!noteMade.isSustainNote) noteMade.animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? Note.colArray[noteMade.noteData % 4] : 'red') + 'Scroll');
+		else noteMade.animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? Note.colArray[noteMade.noteData % 4] : 'red') + (chartNoteData.isSustainEnd ? 'holdend' : 'hold'));
+
+		if (!isPixelStage) noteMade.scale.set(0.7, 0.7);
+		else noteMade.scale.set(noteMade.width * PlayState.daPixelZoom, noteMade.height * PlayState.daPixelZoom);
+		noteMade.updateHitbox();
+
+		if (noteMade.isSustainNote) {
+			noteMade.offsetX = 36.5 * switch (ClientPrefs.noteStyleThing)
+			{
+				case 'TGT V4': 1.03;
+				case 'Chip': 0.15;
+				case 'Future': 0;
+				default: 1;
+			};
+			noteMade.copyAngle = false;
+		}
+		else noteMade.offsetX = 0; //Juuuust in case we recycle a sustain note to a regular note
+
+		if (ClientPrefs.doubleGhost && !noteMade.isSustainNote)
+		{
+			noteMade.row = inline Conductor.secsToRow(noteMade.strumTime);
+			if(noteRows[noteMade.mustPress?0:1][noteMade.row] == null)
+				noteRows[noteMade.mustPress?0:1][noteMade.row] = [];
+				noteRows[noteMade.mustPress ? 0 : 1][noteMade.row].push(noteMade);
+		}
+		noteMade.cameras = [noteMade.isSustainNote ? camHUDBelow : camHUD];
+		noteMade.clipRect = null;
+		noteMade.alpha = 1;
+		notes.insert(0, noteMade);
+	}
+
+	inline function updateNote(daNote:Note):Void
+	{
+		if (daNote != null && daNote.exists)
+		{
+			inline daNote.followStrum((daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData], (60 / SONG.bpm) * 1000, songSpeed);
+			final strum = (daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData];
+			if(daNote.isSustainNote && strum != null && strum.sustainReduce) inline daNote.clipToStrumNote(strum);
+
+			if (!daNote.mustPress && !daNote.hitByOpponent && !daNote.ignoreNote && daNote.strumTime <= Conductor.songPosition)
+			{
+				if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) emitter.emit(NoteSignalStuff.NOTE_HIT_OPP, daNote, null);
+					if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
+					{
+						if (!daNote.isSustainNote) {
+							enemyHits += 1 * polyphony;
+							if (ClientPrefs.showNPS) {
+								inline oppNotesHitArray.push(1 * polyphony);
+								inline oppNotesHitDateArray.push(Conductor.songPosition);
+							}
+						}
+						daNote.exists = false;
+					}
+			}
+
+				if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
+				{
+					if (daNote.mustPress && (!cpuControlled || cpuControlled && ClientPrefs.communityGameBot) && !daNote.ignoreNote && !endingSong && !daNote.wasGoodHit) {
+						noteMiss(daNote);
+						if (ClientPrefs.missSoundShit)
+						{
+							FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
+						}
+					}
+					daNote.exists = false;
+				}
+			if(daNote.mustPress) {
+				if(cpuControlled && daNote.strumTime + (ClientPrefs.communityGameBot && !daNote.isSustainNote ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition && !daNote.ignoreNote) {
+					if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) emitter.emit(NoteSignalStuff.NOTE_HIT_BF, daNote, null);
+					if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
+					{
+						if (!daNote.isSustainNote) {
+							totalNotesPlayed += 1 * polyphony;
+							if (ClientPrefs.showNPS) {
+								inline notesHitArray.push(1 * polyphony);
+								inline notesHitDateArray.push(Conductor.songPosition);
+							}
+							daNote.exists = false;
+						}
+					}
+				}
+			}
+		}
+	}
+
 	function goodNoteHit(note:Note, noteAlt:PreloadedChartNote = null):Void
 	{
 		if (note != null)
@@ -6273,10 +6338,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					}
 
 					note.wasGoodHit = true;
-					if (!note.isSustainNote)
-					{
-						if (ClientPrefs.showNotes) notes.remove(note, true);
-					}
+					if (!note.isSustainNote) note.exists = false;
 					return;
 				}
 					if (ClientPrefs.comboScoreEffect && ClientPrefs.comboMultiType == 'Voiid Chronicles' && comboMultiplier < ClientPrefs.comboMultLimit)
@@ -6525,7 +6587,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 				inline callOnLuas((opponentChart ? 'opponentNoteHit' : 'goodNoteHit'), [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
 
-					if (ClientPrefs.showNotes) inline notes.remove(note, true);
+					if (ClientPrefs.showNotes && !note.isSustainNote) note.exists = false;
 				if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
 				if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
 		   			if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
@@ -6761,7 +6823,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					inline oppNotesHitDateArray.push(Conductor.songPosition);
 				}
 				enemyHits += 1 * polyphony;
-				if (ClientPrefs.showNotes) inline notes.remove(daNote, true);
+				daNote.exists = false;
 			}
 			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
 			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
@@ -6933,13 +6995,17 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			}
 		}
 
-		Paths.defaultNoteStuff = [];
 		Paths.noteSkinFramesMap.clear();
 		Paths.noteSkinAnimsMap.clear();
 		Paths.splashSkinFramesMap.clear();
 		Paths.splashSkinAnimsMap.clear();
 		Paths.splashConfigs.clear();
 		Paths.splashAnimCountMap.clear();
+
+		emitter.off(NoteSignalStuff.NOTE_UPDATE, updateNote);
+		emitter.off(NoteSignalStuff.NOTE_SETUP, setupNoteData);
+		emitter.off(NoteSignalStuff.NOTE_HIT_BF, goodNoteHit);
+		emitter.off(NoteSignalStuff.NOTE_HIT_OPP, opponentNoteHit);
 
 		super.destroy();
 	}

@@ -20,7 +20,7 @@ import flixel.input.keyboard.FlxKey;
 import openfl.events.KeyboardEvent;
 import FunkinLua;
 import Note.PreloadedChartNote;
-
+import backend.NoteSignalStuff;
 
 using StringTools;
 
@@ -65,6 +65,8 @@ class EditorPlayState extends MusicBeatState
 
 	public static var instance:EditorPlayState;
 
+	public var emitter:Emitter = new Emitter();
+
 	override function create()
 	{
 		instance = this;
@@ -95,11 +97,6 @@ class EditorPlayState extends MusicBeatState
 
 		generateStaticArrows(0);
 		generateStaticArrows(1);
-		/*if(ClientPrefs.middleScroll) {
-			opponentStrums.forEachAlive(function (note:StrumNote) {
-				note.visible = false;
-			});
-		}*/
 
 		notes = new FlxTypedGroup<Note>();
 		add(notes);
@@ -172,6 +169,10 @@ class EditorPlayState extends MusicBeatState
 			FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 			FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		}
+
+		emitter.on(NoteSignalStuff.NOTE_UPDATE, updateNote);
+		emitter.on(NoteSignalStuff.NOTE_SETUP, setupNoteData);
+		emitter.on(NoteSignalStuff.NOTE_HIT_BF_EDITOR, goodNoteHit);
 
 		super.create();
 	}
@@ -377,12 +378,7 @@ class EditorPlayState extends MusicBeatState
 				notesAddedCount -= (notesAddedCount - unspawnNotes.length);
 
 			while (unspawnNotes.length > 0 && unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < (1500 / PlayState.SONG.speed / unspawnNotes[notesAddedCount].multSpeed)) {
-				final dunceNote:Note = notes.recycle(Note).setupNoteData(unspawnNotes[notesAddedCount]);
-
-				dunceNote.scrollFactor.set();
-
-					unspawnNotes[notesAddedCount].wasSpawned = true;
-					notes.insert(0, dunceNote);
+				emitter.emit(NoteSignalStuff.NOTE_SETUP, unspawnNotes[notesAddedCount]);
 				notesAddedCount++;
 			}
 				if (notesAddedCount > 0)
@@ -391,63 +387,12 @@ class EditorPlayState extends MusicBeatState
 		
 		if (generatedMusic)
 		{
-			notes.forEachAlive(function(daNote:Note)
+			var noteIndex:Int = notes.members.length;
+			while (noteIndex >= 0)
 			{
-						if (ClientPrefs.showNotes && daNote != null)
-						{
-							inline daNote.followStrum((daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData], (60 / PlayState.SONG.bpm) * 1000, PlayState.SONG.speed);
-							final strum = (daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData];
-							if(daNote.isSustainNote && strum != null && strum.sustainReduce) inline daNote.clipToStrumNote(strum);
-						}
-
-				if (!daNote.mustPress && daNote.strumTime <= Conductor.songPosition)
-				{
-					if (PlayState.SONG.needsVoices)
-						vocals.volume = 1;
-
-					var time:Float = 0.15;
-					if(daNote.isSustainNote && !daNote.animation.curAnim.name.endsWith('end')) {
-						time += 0.15;
-					}
-					StrumPlayAnim(true, Std.int(Math.abs(daNote.noteData)) % 4, time);
-					daNote.hitByOpponent = true;
-
-					if (!daNote.isSustainNote)
-					{
-						notes.remove(daNote, true);
-					}
-				}
-
-				if (Conductor.songPosition > (noteKillOffset / PlayState.SONG.speed) + daNote.strumTime)
-				{
-					if (daNote.mustPress)
-					{
-						if (daNote.tooLate || !daNote.wasGoodHit)
-						{
-							//Dupe note remove
-							notes.forEachAlive(function(note:Note) {
-								if (daNote != note && daNote.mustPress && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 10) {
-									note.kill();
-									notes.remove(note, true);
-									note.destroy();
-								}
-							});
-
-							if(!daNote.ignoreNote) {
-								songMisses++;
-								vocals.volume = 0;
-							}
-						}
-					}
-
-					daNote.active = false;
-					daNote.visible = false;
-
-					daNote.kill();
-					notes.remove(daNote, true);
-					daNote.destroy();
-				}
-			});
+				var daNote:Note = notes.members[noteIndex--];
+				emitter.emit(NoteSignalStuff.NOTE_UPDATE, daNote);
+			}
 			if (Conductor.songPosition >= FlxG.sound.music.length) endSong();
 		}
 
@@ -543,16 +488,14 @@ class EditorPlayState extends MusicBeatState
 					{
 						for (doubleNote in pressNotes) {
 							if (Math.abs(doubleNote.strumTime - epicNote.strumTime) < 1) {
-								doubleNote.kill();
-								notes.remove(doubleNote, true);
-								doubleNote.destroy();
+								doubleNote.exists = false;
 							} else
 								notesStopped = true;
 						}
 
 						// eee jack detection before was not super good
 						if (!notesStopped) {
-							goodNoteHit(epicNote);
+							emitter.emit(NoteSignalStuff.NOTE_HIT_BF_EDITOR, epicNote);
 							pressNotes.push(epicNote);
 						}
 
@@ -651,7 +594,7 @@ class EditorPlayState extends MusicBeatState
 				// hold note functions
 				if (daNote.isSustainNote && controlHoldArray[daNote.noteData] && daNote.canBeHit 
 				&& daNote.mustPress && !daNote.tooLate && !daNote.wasGoodHit) {
-					goodNoteHit(daNote);
+					emitter.emit(NoteSignalStuff.NOTE_HIT_BF_EDITOR, daNote);
 				}
 			});
 		}
@@ -667,6 +610,140 @@ class EditorPlayState extends MusicBeatState
 					if(controlArray[i])
 						onKeyRelease(new KeyboardEvent(KeyboardEvent.KEY_UP, true, true, -1, keysArray[i][0]));
 				}
+			}
+		}
+	}
+
+	// this is used for note recycling
+	inline public function setupNoteData(chartNoteData:PreloadedChartNote)
+	{
+		var noteMade:Note = notes.recycle(Note);
+		if (ClientPrefs.enableColorShader)
+		{
+			noteMade.colorSwap = new ColorSwap();
+			noteMade.shader = noteMade.colorSwap.shader;
+		}
+		noteMade.wasGoodHit = noteMade.hitByOpponent = noteMade.tooLate = noteMade.canBeHit = false; // Don't make an update call of this for the note group
+
+		noteMade.strumTime = chartNoteData.strumTime;
+		if(!noteMade.inEditor) noteMade.strumTime += ClientPrefs.noteOffset;
+		noteMade.noteData = inline Std.int(chartNoteData.noteData % 4);
+		noteMade.noteType = chartNoteData.noteType;
+		noteMade.animSuffix = chartNoteData.animSuffix;
+		noteMade.noAnimation = noteMade.noMissAnimation = chartNoteData.noAnimation;
+		noteMade.mustPress = chartNoteData.mustPress;
+		noteMade.gfNote = chartNoteData.gfNote;
+		noteMade.isSustainNote = chartNoteData.isSustainNote;
+		if (chartNoteData.noteskin.length > 0 && chartNoteData.noteskin != '' && chartNoteData.noteskin != noteMade.texture) noteMade.texture = 'noteskins/' + chartNoteData.noteskin;
+		if (chartNoteData.texture.length > 0 && chartNoteData.texture != noteMade.texture) noteMade.texture = chartNoteData.texture;
+		noteMade.sustainLength = chartNoteData.sustainLength;
+		noteMade.sustainScale = chartNoteData.sustainScale;
+		noteMade.lowPriority = chartNoteData.lowPriority;
+
+		noteMade.hitHealth = chartNoteData.hitHealth;
+		noteMade.missHealth = chartNoteData.missHealth;
+		noteMade.hitCausesMiss = chartNoteData.hitCausesMiss;
+		noteMade.ignoreNote = chartNoteData.ignoreNote;
+		noteMade.multSpeed = chartNoteData.multSpeed;
+
+		if (ClientPrefs.enableColorShader)
+		{
+			if (ClientPrefs.noteColorStyle == 'Normal' && noteMade.noteData < ClientPrefs.arrowHSV.length)
+			{
+				noteMade.colorSwap.hue = ClientPrefs.arrowHSV[noteMade.noteData][0] / 360;
+				noteMade.colorSwap.saturation = ClientPrefs.arrowHSV[noteMade.noteData][1] / 100;
+				noteMade.colorSwap.brightness = ClientPrefs.arrowHSV[noteMade.noteData][2] / 100;
+			}
+			if (ClientPrefs.noteColorStyle == 'Quant-Based') CoolUtil.checkNoteQuant(noteMade, noteMade.isSustainNote ? chartNoteData.parent.strumTime : chartNoteData.strumTime);
+			if (ClientPrefs.noteColorStyle == 'Rainbow')
+			{
+				noteMade.colorSwap.hue = ((noteMade.strumTime / 5000 * 360) / 360) % 1;
+			}
+		}
+
+		if (noteMade.noteType == 'Hurt Note')
+		{
+			noteMade.texture = 'HURTNOTE_assets';
+			noteMade.noteSplashTexture = 'HURTnoteSplashes';
+			if (ClientPrefs.enableColorShader)
+			{
+				noteMade.colorSwap.hue = noteMade.colorSwap.saturation = noteMade.colorSwap.brightness = 0;
+			}
+		}
+
+		if (PlayState.isPixelStage) @:privateAccess noteMade.reloadNote('', noteMade.texture);
+		if (!noteMade.isSustainNote) noteMade.animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? Note.colArray[noteMade.noteData % 4] : 'red') + 'Scroll');
+		else noteMade.animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? Note.colArray[noteMade.noteData % 4] : 'red') + (chartNoteData.isSustainEnd ? 'holdend' : 'hold'));
+
+		if (!PlayState.isPixelStage) noteMade.scale.set(0.7, 0.7);
+		else noteMade.scale.set(noteMade.width * PlayState.daPixelZoom, noteMade.height * PlayState.daPixelZoom);
+		noteMade.updateHitbox();
+
+		if (noteMade.isSustainNote) {
+			noteMade.offsetX = 36.5 * switch (ClientPrefs.noteStyleThing)
+			{
+				case 'TGT V4': 1.03;
+				case 'Chip': 0.15;
+				case 'Future': 0;
+				default: 1;
+			};
+			noteMade.copyAngle = false;
+		}
+		else noteMade.offsetX = 0; //Juuuust in case we recycle a sustain note to a regular note
+
+		noteMade.clipRect = null;
+		noteMade.alpha = 1;
+		notes.insert(0, noteMade);
+	}
+
+
+	function updateNote(daNote:Note):Void
+	{
+		if (daNote != null && daNote.exists)
+		{
+			inline daNote.followStrum((daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData], (60 / PlayState.SONG.bpm) * 1000, PlayState.SONG.speed);
+			final strum = (daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData];
+			if(daNote.isSustainNote && strum != null && strum.sustainReduce) inline daNote.clipToStrumNote(strum);
+
+			if (!daNote.mustPress && daNote.strumTime <= Conductor.songPosition)
+			{
+				if (PlayState.SONG.needsVoices)
+					vocals.volume = 1;
+
+				var time:Float = 0.15;
+				if(daNote.isSustainNote && !daNote.animation.curAnim.name.endsWith('end')) {
+					time += 0.15;
+				}
+				StrumPlayAnim(true, Std.int(Math.abs(daNote.noteData)) % 4, time);
+				daNote.hitByOpponent = true;
+
+				if (!daNote.isSustainNote)
+				{
+					daNote.exists = false;
+				}
+			}
+
+			if (Conductor.songPosition > (noteKillOffset / PlayState.SONG.speed) + daNote.strumTime)
+			{
+				if (daNote.mustPress)
+				{
+					if (daNote.tooLate || !daNote.wasGoodHit)
+					{
+						//Dupe note remove
+						notes.forEachAlive(function(note:Note) {
+							if (daNote != note && daNote.mustPress && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 10) {
+								daNote.exists = false;
+							}
+						});
+
+						if(!daNote.ignoreNote) {
+							songMisses++;
+							vocals.volume = 0;
+						}
+					}
+				}
+
+				daNote.exists = false;
 			}
 		}
 	}
@@ -691,9 +768,7 @@ class EditorPlayState extends MusicBeatState
 
 					if (!note.isSustainNote)
 					{
-						note.kill();
-						notes.remove(note, true);
-						note.destroy();
+						note.exists = false;
 					}
 					return;
 			}
@@ -719,9 +794,7 @@ class EditorPlayState extends MusicBeatState
 
 			if (!note.isSustainNote)
 			{
-				note.kill();
-				notes.remove(note, true);
-				note.destroy();
+				note.exists = false;
 			}
 		}
 	}
@@ -777,15 +850,6 @@ class EditorPlayState extends MusicBeatState
 		{
 			spawnNoteSplashOnNote(note);
 		}
-		//songScore += score;
-
-		/* if (combo > 60)
-				daRating = 'sick';
-			else if (combo > 12)
-				daRating = 'good'
-			else if (combo > 4)
-				daRating = 'bad';
-			*/
 
 		var pixelShitPart1:String = "";
 		var pixelShitPart2:String = '';
@@ -883,13 +947,8 @@ class EditorPlayState extends MusicBeatState
 
 			daLoop++;
 		}
-		/* 
-			trace(combo);
-			trace(seperatedScore);
-			*/
 
 		coolText.text = Std.string(seperatedScore);
-		// comboGroup.add(coolText);
 
 		FlxTween.tween(rating, {alpha: 0}, 0.2, {
 			startDelay: Conductor.crochet * 0.001
@@ -911,7 +970,6 @@ class EditorPlayState extends MusicBeatState
 	{
 		for (i in 0...4)
 		{
-			// FlxG.log.add(i);
 			var targetAlpha:Float = 1;
 			if (player < 1)
 			{
@@ -999,6 +1057,9 @@ class EditorPlayState extends MusicBeatState
 			FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 			FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		}
+		emitter.off(NoteSignalStuff.NOTE_UPDATE, updateNote);
+		emitter.off(NoteSignalStuff.NOTE_SETUP, setupNoteData);
+		emitter.off(NoteSignalStuff.NOTE_HIT_BF_EDITOR, goodNoteHit);
 		super.destroy();
 	}
 }

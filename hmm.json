@@ -41,6 +41,11 @@
       "version": "2.5.1"
     },
     {
+      "name": "emitter",
+      "type": "haxelib",
+      "version": "0.9.0"
+    },
+    {
       "name": "hscript",
       "type": "haxelib",
       "version": null
