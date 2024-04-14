@@ -149,7 +149,7 @@
 	<!-- <haxelib name="HtmlParser" /> -->
 
 	<!--Emitter-->
-	<haxelib name="emitter" />
+	<haxelib name="Emitter" />
 
 	<!--In case you want to use nape with flixel-->
 	<!--<haxelib name="nape-haxe4" />-->
