@@ -6124,10 +6124,12 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		callOnLuas('noteMissPress', [direction]);
 	}
 
+	var noteMade:Note;
+
 	// this is used for note recycling
 	inline public function setupNoteData(chartNoteData:PreloadedChartNote)
 	{
-		var noteMade:Note = notes.recycle(Note);
+		noteMade = inline notes.recycle(Note);
 		if (ClientPrefs.enableColorShader)
 		{
 			noteMade.colorSwap = new ColorSwap();
