@@ -6149,6 +6149,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		noteMade.gfNote = chartNoteData.gfNote;
 		noteMade.isSustainNote = chartNoteData.isSustainNote;
 		if (chartNoteData.noteskin.length > 0 && chartNoteData.noteskin != '' && chartNoteData.noteskin != noteMade.texture) noteMade.texture = 'noteskins/' + chartNoteData.noteskin;
+		if (chartNoteData.noteskin.length < 0) noteMade.texture = Paths.defaultSkin;
 		if (chartNoteData.texture.length > 0 && chartNoteData.texture != noteMade.texture) noteMade.texture = chartNoteData.texture;
 		noteMade.sustainLength = chartNoteData.sustainLength;
 		noteMade.sustainScale = chartNoteData.sustainScale;

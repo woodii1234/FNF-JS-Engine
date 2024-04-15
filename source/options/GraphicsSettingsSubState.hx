@@ -69,10 +69,10 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 
 		var option:Option = new Option('Progressive Audio Loading', //Name
-			"If checked, audio will load as it's played instead of loading the entire audio.", //Description
+			"If checked, audio will load as a stream, instead of the whole thing at once.\nThis can be really useful if you need to load a LONG song.", //Description
 			'progAudioLoad',
 			'bool',
-			false); //Don't turn this on by default
+			false); 
 		addOption(option);
 
 		var option:Option = new Option('Automatic Note Spawn Time', //Name
