@@ -4231,8 +4231,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					var noteIndex:Int = notes.members.length;
 					while (noteIndex >= 0)
 					{
-						var daNote:Note = notes.members[noteIndex--];
-						emitter.emit(NoteSignalStuff.NOTE_UPDATE, daNote);
+						emitter.emit(NoteSignalStuff.NOTE_UPDATE, notes.members[noteIndex--]);
 					}
 					inline notes.members.sort((b:Note, a:Note) -> inline Std.int(a.y - b.y));
 				}
@@ -4547,9 +4546,12 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 				camTwistIntensity2 = _intensity2;
 				if (_intensity2 == 0)
 				{
+					FlxTween.cancelTweensOf(camHUD);
+					FlxTween.cancelTweensOf(camGame);
 					camTwist = false;
-					FlxTween.tween(camHUD, {angle: 0}, 1, {ease: FlxEase.sineInOut});
-					FlxTween.tween(camGame, {angle: 0}, 1, {ease: FlxEase.sineInOut});
+					FlxTween.tween(camHUD, {angle: 0, x: 0, y: 0}, 1, {ease: FlxEase.sineInOut});
+					FlxTween.tween(camGame, {angle: 0, x: 0, y: 0}, 1, {ease: FlxEase.sineInOut});
+					FlxTween.tween(camGame.scroll, {y: 0}, 1, {ease: FlxEase.sineInOut});
 				}
 			case 'Change Note Multiplier':
 				var noteMultiplier:Float = Std.parseFloat(value1);
@@ -7189,7 +7191,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			{
 				twistShit = twistAmount;
 			}
-			if (curBeat % (gfSpeed * 2) == 2)
+			else
 			{
 				twistShit = -twistAmount;
 			}

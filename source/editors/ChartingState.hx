@@ -1253,7 +1253,7 @@ class ChartingState extends MusicBeatState
 			saveUndo(_song); //I don't even know why.
 
 			for(i in 0...value) {
-			if (_song.notes[curSec+1].sectionNotes != null) changeSection(curSec+1);
+			changeSection(curSec+1);
 			for (note in _song.notes[curSec-1].sectionNotes)
 			{
 				var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(curSec-1) * 4);
