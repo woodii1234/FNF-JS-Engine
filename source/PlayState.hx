@@ -6192,12 +6192,12 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			}
 		}
 
-		if (PlayState.isPixelStage) @:privateAccess noteMade.reloadNote('', noteMade.texture);
+		if (isPixelStage) @:privateAccess noteMade.reloadNote('', noteMade.texture);
+
 		if (!noteMade.isSustainNote) noteMade.animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? Note.colArray[noteMade.noteData % 4] : 'red') + 'Scroll');
 		else noteMade.animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? Note.colArray[noteMade.noteData % 4] : 'red') + (chartNoteData.isSustainEnd ? 'holdend' : 'hold'));
 
 		if (!isPixelStage) noteMade.scale.set(0.7, 0.7);
-		else noteMade.scale.set(noteMade.width * PlayState.daPixelZoom, noteMade.height * PlayState.daPixelZoom);
 		noteMade.updateHitbox();
 
 		if (noteMade.isSustainNote) {
@@ -6222,7 +6222,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		noteMade.cameras = [noteMade.isSustainNote ? camHUDBelow : camHUD];
 		noteMade.clipRect = null;
 		noteMade.alpha = 1;
-		notes.insert(0, noteMade);
 	}
 
 	inline function updateNote(daNote:Note):Void

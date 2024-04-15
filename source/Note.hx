@@ -109,7 +109,7 @@ class Note extends FlxSprite
 
 	public var hitsoundDisabled:Bool = false;
 
-	inline private function set_texture(value:String):String {
+	private function set_texture(value:String):String {
 		if (!PlayState.isPixelStage)
 		{
 			if (!Paths.noteSkinFramesMap.exists(value)) Paths.initNote(4, value);
@@ -132,11 +132,47 @@ class Note extends FlxSprite
 		if(noteData > -1) {
 			if (ClientPrefs.showNotes)
 			{
-				frames = @:privateAccess Paths.defaultNoteSprite.frames;
-				animation.copyFrom(@:privateAccess Paths.defaultNoteSprite.animation);
-				antialiasing = ClientPrefs.globalAntialiasing;
-				scale.set(0.7, 0.7);
-				updateHitbox();
+				if (!PlayState.isPixelStage)
+				{
+					frames = @:privateAccess Paths.defaultNoteSprite.frames;
+					animation.copyFrom(@:privateAccess Paths.defaultNoteSprite.animation);
+					antialiasing = ClientPrefs.globalAntialiasing;
+					scale.set(0.7, 0.7);
+					updateHitbox();
+				}
+				else if (PlayState.isPixelStage)
+				{
+					if(ClientPrefs.noteStyleThing == 'VS Nonsense V2') {
+						texture = 'Nonsense_NOTE_assets';
+					}
+					if(ClientPrefs.noteStyleThing == 'DNB 3D') {
+						texture = 'NOTE_assets_3D';
+					}
+					if(ClientPrefs.noteStyleThing == 'VS AGOTI') {
+						texture = 'AGOTINOTE_assets';
+					}
+					if(ClientPrefs.noteStyleThing == 'Doki Doki+') {
+						texture = 'NOTE_assets_doki';
+					}
+					if(ClientPrefs.noteStyleThing == 'TGT V4') {
+						texture = 'TGTNOTE_assets';
+					}
+					if (ClientPrefs.noteStyleThing != 'VS Nonsense V2' && ClientPrefs.noteStyleThing != 'DNB 3D' && ClientPrefs.noteStyleThing != 'VS AGOTI' && ClientPrefs.noteStyleThing != 'Doki Doki+' && ClientPrefs.noteStyleThing != 'TGT V4' && ClientPrefs.noteStyleThing != 'Default') {
+						texture = 'NOTE_assets_' + ClientPrefs.noteStyleThing.toLowerCase();
+					}
+					if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && (inEditor || PlayState.isPixelStage)) {
+						texture = ClientPrefs.noteStyleThing == 'TGT V4' ? 'RED_TGTNOTE_assets' : 'RED_NOTE_assets';
+					}
+					if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && ClientPrefs.noteStyleThing == 'TGT V4') {
+						texture = 'RED_TGTNOTE_assets';
+					}
+					if(ClientPrefs.noteColorStyle == 'Char-Based') {
+						texture = 'NOTE_assets_colored';
+					}
+					if(ClientPrefs.noteColorStyle == 'Grayscale') {
+						texture = 'GRAY_NOTE_assets';
+					}
+				}
 			}
 			if (ClientPrefs.enableColorShader && inEditor)
 			{
@@ -171,7 +207,7 @@ class Note extends FlxSprite
 	var lastNoteOffsetXForPixelAutoAdjusting:Float = 0;
 	var lastNoteScaleToo:Float = 1;
 	public var originalHeightForCalcs:Float = 6;
-	function reloadNote(?prefix:String = '', ?texture:String = '', ?suffix:String = '') {
+	private function reloadNote(?prefix:String = '', ?texture:String = '', ?suffix:String = '') {
 		if(prefix == null) prefix = '';
 		if(texture == null) texture = '';
 		if(suffix == null) suffix = '';

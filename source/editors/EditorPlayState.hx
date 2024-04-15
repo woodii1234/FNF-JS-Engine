@@ -614,10 +614,12 @@ class EditorPlayState extends MusicBeatState
 		}
 	}
 
+	var noteMade:Note;
+
 	// this is used for note recycling
 	inline public function setupNoteData(chartNoteData:PreloadedChartNote)
 	{
-		var noteMade:Note = notes.recycle(Note);
+		noteMade = inline notes.recycle(Note);
 		if (ClientPrefs.enableColorShader)
 		{
 			noteMade.colorSwap = new ColorSwap();
@@ -672,11 +674,11 @@ class EditorPlayState extends MusicBeatState
 		}
 
 		if (PlayState.isPixelStage) @:privateAccess noteMade.reloadNote('', noteMade.texture);
+
 		if (!noteMade.isSustainNote) noteMade.animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? Note.colArray[noteMade.noteData % 4] : 'red') + 'Scroll');
 		else noteMade.animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? Note.colArray[noteMade.noteData % 4] : 'red') + (chartNoteData.isSustainEnd ? 'holdend' : 'hold'));
 
 		if (!PlayState.isPixelStage) noteMade.scale.set(0.7, 0.7);
-		else noteMade.scale.set(noteMade.width * PlayState.daPixelZoom, noteMade.height * PlayState.daPixelZoom);
 		noteMade.updateHitbox();
 
 		if (noteMade.isSustainNote) {
@@ -690,10 +692,8 @@ class EditorPlayState extends MusicBeatState
 			noteMade.copyAngle = false;
 		}
 		else noteMade.offsetX = 0; //Juuuust in case we recycle a sustain note to a regular note
-
 		noteMade.clipRect = null;
 		noteMade.alpha = 1;
-		notes.insert(0, noteMade);
 	}
 
 

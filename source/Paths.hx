@@ -81,10 +81,10 @@ class Paths
 	];
 	#end
 
+	public static var defaultSkin = 'NOTE_assets'; 
 	//Function that initializes the first note. This way, we can recycle the notes
 	public static function initDefaultNote(keys:Int = 4, noteSkin:String, inEditor:Bool = false)
 	{
-		var defaultSkin = 'NOTE_assets'; 
 		if(ClientPrefs.noteStyleThing == 'VS Nonsense V2') {
 			defaultSkin = 'Nonsense_NOTE_assets';
 		}
@@ -121,6 +121,11 @@ class Paths
 
 		defaultNoteSprite = new FlxSprite();
 		defaultNoteSprite.frames = getSparrowAtlas(defaultSkin.length > 1 ? defaultSkin : 'NOTE_assets');
+		if (defaultNoteSprite.frames == null) 
+		{
+			defaultSkin = 'NOTE_assets';
+			defaultNoteSprite.frames = getSparrowAtlas(defaultSkin.length > 1 ? defaultSkin : 'NOTE_assets');
+		}
 
 		// Use a for loop for adding all of the animations in the note spritesheet, otherwise it won't find the animations for the next recycle
 		for (d in 0...keys)

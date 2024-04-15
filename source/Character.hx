@@ -268,7 +268,6 @@ class Character extends FlxSprite
 						if(anim.offsets != null && anim.offsets.length > 1) {
 							addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
 						}
-						if (!jsonPlayerWasNull && anim.anim.length > 0 && anim.name.length > 0 && (anim.anim == 'singRIGHT' && anim.name.toLowerCase().contains('left') || anim.anim == 'singLEFT' && animName.toLowerCase().contains('right'))) usePlayerOffsets = true;
 					}
 				} else {
 					quickAnimAdd('idle', 'BF idle dance');
