@@ -15,6 +15,9 @@ class HealthIcon extends FlxSprite
 	private var isPlayer:Bool = false;
 	private var char:String = '';
 
+	var initialWidth:Float = 0;
+	var initialHeight:Float = 0;
+
 	public function new(char:String = 'bf', isPlayer:Bool = false, ?allowGPU:Bool = true)
 	{
 		super();
@@ -59,6 +62,8 @@ class HealthIcon extends FlxSprite
 			}
 
 			loadGraphic(file); //Load stupidly first for getting the file size
+			initialWidth = width;
+			initialHeight = height;
 			var width2 = width;
 			if (width == 450) {
 				loadGraphic(file, true, Math.floor(width / 3), Math.floor(height)); //Then load it fr // winning icons go br
@@ -103,7 +108,12 @@ class HealthIcon extends FlxSprite
 		offset.x = iconOffsets[0];
 		offset.y = iconOffsets[1];
 		} else {
-		super.updateHitbox();
+			super.updateHitbox();
+			if (initialWidth != (150 * animation.numFrames) || initialHeight != 150) //Fixes weird icon offsets when they're HUMONGUS (sussy)
+			{
+				offset.x = iconOffsets[0];
+				offset.y = iconOffsets[1];
+			}
 		}
 	}
 

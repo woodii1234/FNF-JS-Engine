@@ -109,6 +109,9 @@ class Note extends FlxSprite
 
 	public var hitsoundDisabled:Bool = false;
 
+	public var endOfLife:Bool = false;
+	public var nonexistentTimer:Float = 0;
+
 	private function set_texture(value:String):String {
 		if (!PlayState.isPixelStage)
 		{
@@ -309,7 +312,12 @@ class Note extends FlxSprite
 	{
 		super.update(elapsed);
 
-		if (!exists) return;
+		if (!exists) 
+		{
+			nonexistentTimer += elapsed;
+			if (nonexistentTimer >= 5) endOfLife = true;
+			return;
+		}
 
 		if (mustPress)
 		{

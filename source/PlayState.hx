@@ -1754,7 +1754,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 			if (ClientPrefs.showRendered)
-			renderedTxt.text = 'Rendered Notes: ' + FlxStringUtil.formatMoney(notes.length, false);
+			renderedTxt.text = 'Rendered Notes: 0' + FlxStringUtil.formatMoney(notes.length, false);
 
 		if (ClientPrefs.communityGameBot && botplayTxt != null) botplayTxt.destroy();
 
@@ -3624,6 +3624,8 @@ class PlayState extends MusicBeatState
 	public var postElapsed:Float = 1 / ClientPrefs.targetFPS;
 	public var takenTime:Float = haxe.Timer.stamp();
 
+	public var amountOfRenderedNotes:Int = 0;
+
 	override public function update(elapsed:Float)
 	{
 		// Don't remove this.
@@ -3677,7 +3679,7 @@ class PlayState extends MusicBeatState
 		}
 
 		if (ClientPrefs.showRendered)
-		renderedTxt.text = 'Rendered Notes: ' + FlxStringUtil.formatMoney(notes.length, false);
+		renderedTxt.text = 'Rendered Notes: ' + FlxStringUtil.formatMoney(amountOfRenderedNotes, false);
 
 		if (iconsShouldGoUp) iconP1.y = iconP2.y = healthBarBG.y - 75;
 
@@ -4228,6 +4230,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 				if(startedCountdown)
 				{
+					amountOfRenderedNotes = 0;
 					var noteIndex:Int = notes.members.length;
 					while (noteIndex >= 0)
 					{
@@ -6229,8 +6232,17 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 	inline function updateNote(daNote:Note):Void
 	{
+		if (daNote != null && !daNote.exists)
+		{
+			if (daNote.endOfLife)
+			{
+				notes.remove(daNote, true);
+				return;
+			}
+		}
 		if (daNote != null && daNote.exists)
 		{
+			amountOfRenderedNotes += 1;
 			inline daNote.followStrum((daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData], (60 / SONG.bpm) * 1000, songSpeed);
 			final strum = (daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData];
 			if(daNote.isSustainNote && strum != null && strum.sustainReduce) inline daNote.clipToStrumNote(strum);
