@@ -253,7 +253,7 @@ class EditorPlayState extends MusicBeatState
 						multSpeed: 1,
 						wasSpawned: false
 					};
-					if (swagNote.noteskin.length > 0 && !Paths.noteSkinFramesMap.exists(swagNote.noteskin)) inline Paths.initNote(4, swagNote.noteskin);
+					if (swagNote.noteskin.length > 0 && !Paths.noteSkinFramesMap.exists(swagNote.noteskin)) Paths.initNote(4, swagNote.noteskin);
 
 					if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 		
@@ -617,9 +617,9 @@ class EditorPlayState extends MusicBeatState
 	var noteMade:Note;
 
 	// this is used for note recycling
-	inline public function setupNoteData(chartNoteData:PreloadedChartNote)
+	public function setupNoteData(chartNoteData:PreloadedChartNote)
 	{
-		noteMade = inline notes.recycle(Note);
+		noteMade = notes.recycle(Note);
 		if (ClientPrefs.enableColorShader)
 		{
 			noteMade.colorSwap = new ColorSwap();
@@ -629,7 +629,7 @@ class EditorPlayState extends MusicBeatState
 
 		noteMade.strumTime = chartNoteData.strumTime;
 		if(!noteMade.inEditor) noteMade.strumTime += ClientPrefs.noteOffset;
-		noteMade.noteData = inline Std.int(chartNoteData.noteData % 4);
+		noteMade.noteData = Std.int(chartNoteData.noteData % 4);
 		noteMade.noteType = chartNoteData.noteType;
 		noteMade.animSuffix = chartNoteData.animSuffix;
 		noteMade.noAnimation = noteMade.noMissAnimation = chartNoteData.noAnimation;

@@ -4237,7 +4237,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					{
 						emitter.emit(NoteSignalStuff.NOTE_UPDATE, notes.members[noteIndex--]);
 					}
-					inline notes.members.sort((b:Note, a:Note) -> inline Std.int(a.y - b.y));
+					inline notes.members.sort((b:Note, a:Note) -> Std.int(a.y - b.y));
 				}
 				else
 				{
@@ -6135,7 +6135,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 	// this is used for note recycling
 	public function setupNoteData(chartNoteData:PreloadedChartNote)
 	{
-		noteMade = inline notes.recycle(Note);
+		noteMade = notes.recycle(Note);
 		if (ClientPrefs.enableColorShader)
 		{
 			noteMade.colorSwap = new ColorSwap();
@@ -6221,7 +6221,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 		if (ClientPrefs.doubleGhost && !noteMade.isSustainNote)
 		{
-			noteMade.row = inline Conductor.secsToRow(noteMade.strumTime);
+			noteMade.row = Conductor.secsToRow(noteMade.strumTime);
 			if(noteRows[noteMade.mustPress?0:1][noteMade.row] == null)
 				noteRows[noteMade.mustPress?0:1][noteMade.row] = [];
 				noteRows[noteMade.mustPress ? 0 : 1][noteMade.row].push(noteMade);
@@ -6231,7 +6231,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		noteMade.alpha = 1;
 	}
 
-	inline function updateNote(daNote:Note):Void
+	function updateNote(daNote:Note):Void
 	{
 		if (daNote != null && !daNote.exists)
 		{
@@ -6420,7 +6420,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					{
 						spawnNoteSplashOnNote(false, note, note.gfNote);
 					}
-					inline RecalculateRating();
+					RecalculateRating();
 				}
 
 				if (combo > maxCombo)
