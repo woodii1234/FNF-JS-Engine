@@ -108,7 +108,7 @@ class EditorPlayState extends MusicBeatState
 		grpNoteSplashes.add(splash);
 		splash.alpha = 0.0;
 
-		Paths.initDefaultNote(4, PlayState.SONG.arrowSkin);
+		Paths.initDefaultSkin(4, PlayState.SONG.arrowSkin);
 		
 		if (PlayState.SONG.needsVoices)
 			vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song));
@@ -701,7 +701,7 @@ class EditorPlayState extends MusicBeatState
 	{
 		if (daNote != null && daNote.exists)
 		{
-			inline daNote.followStrum((daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData], (60 / PlayState.SONG.bpm) * 1000, PlayState.SONG.speed);
+			inline daNote.followStrum((daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData], PlayState.SONG.speed);
 			final strum = (daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData];
 			if(daNote.isSustainNote && strum != null && strum.sustainReduce) inline daNote.clipToStrumNote(strum);
 

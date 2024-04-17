@@ -113,7 +113,7 @@ class Note extends FlxSprite
 	public var nonexistentTimer:Float = 0;
 
 	private function set_texture(value:String):String {
-		if (!PlayState.isPixelStage)
+		if (!PlayState.isPixelStage && texture != value)
 		{
 			if (!Paths.noteSkinFramesMap.exists(value)) Paths.initNote(4, value);
 			frames = @:privateAccess Paths.noteSkinFramesMap.get(value);
@@ -122,6 +122,7 @@ class Note extends FlxSprite
 			scale.set(0.7, 0.7);
 			updateHitbox();
 		}
+		else if (!PlayState.isPixelStage) return value;
 		texture = value;
 		return value;
 	}
@@ -135,46 +136,36 @@ class Note extends FlxSprite
 		if(noteData > -1) {
 			if (ClientPrefs.showNotes)
 			{
-				if (!PlayState.isPixelStage)
-				{
-					frames = @:privateAccess Paths.defaultNoteSprite.frames;
-					animation.copyFrom(@:privateAccess Paths.defaultNoteSprite.animation);
-					antialiasing = ClientPrefs.globalAntialiasing;
-					scale.set(0.7, 0.7);
-					updateHitbox();
+				texture = 'NOTE_assets';
+				if(ClientPrefs.noteStyleThing == 'VS Nonsense V2') {
+					texture = 'Nonsense_NOTE_assets';
 				}
-				else if (PlayState.isPixelStage)
-				{
-					if(ClientPrefs.noteStyleThing == 'VS Nonsense V2') {
-						texture = 'Nonsense_NOTE_assets';
-					}
-					if(ClientPrefs.noteStyleThing == 'DNB 3D') {
-						texture = 'NOTE_assets_3D';
-					}
-					if(ClientPrefs.noteStyleThing == 'VS AGOTI') {
-						texture = 'AGOTINOTE_assets';
-					}
-					if(ClientPrefs.noteStyleThing == 'Doki Doki+') {
-						texture = 'NOTE_assets_doki';
-					}
-					if(ClientPrefs.noteStyleThing == 'TGT V4') {
-						texture = 'TGTNOTE_assets';
-					}
-					if (ClientPrefs.noteStyleThing != 'VS Nonsense V2' && ClientPrefs.noteStyleThing != 'DNB 3D' && ClientPrefs.noteStyleThing != 'VS AGOTI' && ClientPrefs.noteStyleThing != 'Doki Doki+' && ClientPrefs.noteStyleThing != 'TGT V4' && ClientPrefs.noteStyleThing != 'Default') {
-						texture = 'NOTE_assets_' + ClientPrefs.noteStyleThing.toLowerCase();
-					}
-					if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && (inEditor || PlayState.isPixelStage)) {
-						texture = ClientPrefs.noteStyleThing == 'TGT V4' ? 'RED_TGTNOTE_assets' : 'RED_NOTE_assets';
-					}
-					if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && ClientPrefs.noteStyleThing == 'TGT V4') {
-						texture = 'RED_TGTNOTE_assets';
-					}
-					if(ClientPrefs.noteColorStyle == 'Char-Based') {
-						texture = 'NOTE_assets_colored';
-					}
-					if(ClientPrefs.noteColorStyle == 'Grayscale') {
-						texture = 'GRAY_NOTE_assets';
-					}
+				if(ClientPrefs.noteStyleThing == 'DNB 3D') {
+					texture = 'NOTE_assets_3D';
+				}
+				if(ClientPrefs.noteStyleThing == 'VS AGOTI') {
+					texture = 'AGOTINOTE_assets';
+				}
+				if(ClientPrefs.noteStyleThing == 'Doki Doki+') {
+					texture = 'NOTE_assets_doki';
+				}
+				if(ClientPrefs.noteStyleThing == 'TGT V4') {
+					texture = 'TGTNOTE_assets';
+				}
+				if (ClientPrefs.noteStyleThing != 'VS Nonsense V2' && ClientPrefs.noteStyleThing != 'DNB 3D' && ClientPrefs.noteStyleThing != 'VS AGOTI' && ClientPrefs.noteStyleThing != 'Doki Doki+' && ClientPrefs.noteStyleThing != 'TGT V4' && ClientPrefs.noteStyleThing != 'Default') {
+					texture = 'NOTE_assets_' + ClientPrefs.noteStyleThing.toLowerCase();
+				}
+				if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && (inEditor || PlayState.isPixelStage)) {
+					texture = ClientPrefs.noteStyleThing == 'TGT V4' ? 'RED_TGTNOTE_assets' : 'RED_NOTE_assets';
+				}
+				if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && ClientPrefs.noteStyleThing == 'TGT V4') {
+					texture = 'RED_TGTNOTE_assets';
+				}
+				if(ClientPrefs.noteColorStyle == 'Char-Based') {
+					texture = 'NOTE_assets_colored';
+				}
+				if(ClientPrefs.noteColorStyle == 'Grayscale') {
+					texture = 'GRAY_NOTE_assets';
 				}
 			}
 			if (ClientPrefs.enableColorShader && inEditor)
@@ -208,8 +199,6 @@ class Note extends FlxSprite
 	}
 
 	var lastNoteOffsetXForPixelAutoAdjusting:Float = 0;
-	var lastNoteScaleToo:Float = 1;
-	public var originalHeightForCalcs:Float = 6;
 	private function reloadNote(?prefix:String = '', ?texture:String = '', ?suffix:String = '') {
 		if(prefix == null) prefix = '';
 		if(texture == null) texture = '';
@@ -235,36 +224,33 @@ class Note extends FlxSprite
 		var blahblah:String = arraySkin.join('/');
 		if(PlayState.isPixelStage) {
 			if(isSustainNote) {
-				loadGraphic(Paths.image('pixelUI/' + blahblah + 'ENDS'));
-				width = width / 4;
-				height = height / 2;
-				originalHeightForCalcs = height;
-				loadGraphic(Paths.image('pixelUI/' + blahblah + 'ENDS'), true, Math.floor(width), Math.floor(height));
+				loadGraphic(Paths.image('pixelUI/' + blahblah + 'ENDS'), true, 7, 6);
 			} else {
-				loadGraphic(Paths.image('pixelUI/' + blahblah));
-				width = width / 4;
-				height = height / 5;
-				loadGraphic(Paths.image('pixelUI/' + blahblah), true, Math.floor(width), Math.floor(height));
+				loadGraphic(Paths.image('pixelUI/' + blahblah), true, 17, 17);
 			}
 			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
-			loadPixelNoteAnims();
+			if(isSustainNote)
+			{
+				animation.add(colArray[noteData] + 'holdend', [noteData + 4], 24, true);
+				animation.add(colArray[noteData] + 'hold', [noteData], 24, true);
+			} else animation.add(colArray[noteData] + 'Scroll', [noteData + 4], 24, true);
 			antialiasing = false;
 
 			if(isSustainNote) {
 				offsetX += lastNoteOffsetXForPixelAutoAdjusting;
 				lastNoteOffsetXForPixelAutoAdjusting = (width - 7) * (PlayState.daPixelZoom / 2);
 				offsetX -= lastNoteOffsetXForPixelAutoAdjusting;
-
-				/*if(animName != null && !animName.endsWith('end'))
-				{
-					lastScaleY /= lastNoteScaleToo;
-					lastNoteScaleToo = (6 / height);
-					lastScaleY *= lastNoteScaleToo;
-				}*/
 			}
 		} else {
 			frames = Paths.getSparrowAtlas(blahblah);
-			loadNoteAnims();
+			animation.addByPrefix(colArray[noteData] + 'Scroll', colArray[noteData] + '0');
+			if (isSustainNote)
+			{
+				animation.addByPrefix('purpleholdend', 'pruple end hold'); // ?????
+				animation.addByPrefix(colArray[noteData] + 'holdend', colArray[noteData] + ' hold end');
+				animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + ' hold piece');
+			}
+			setGraphicSize(Std.int(width * 0.7));
 			if(!isSustainNote)
 			{
 				centerOffsets();
@@ -286,36 +272,17 @@ class Note extends FlxSprite
 		}
 	}
 
-	function loadNoteAnims() {
-		animation.addByPrefix(colArray[noteData] + 'Scroll', colArray[noteData] + '0');
-
-		if (isSustainNote)
-		{
-			animation.addByPrefix('purpleholdend', 'pruple end hold'); // ?????
-			animation.addByPrefix(colArray[noteData] + 'holdend', colArray[noteData] + ' hold end');
-			animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + ' hold piece');
-		}
-
-		setGraphicSize(Std.int(width * 0.7));
-		updateHitbox();
-	}
-
-	function loadPixelNoteAnims() {
-		if(isSustainNote)
-		{
-			animation.add(colArray[noteData] + 'holdend', [noteData + 4], 24, true);
-			animation.add(colArray[noteData] + 'hold', [noteData], 24, true);
-		} else animation.add(colArray[noteData] + 'Scroll', [noteData + 4], 24, true);
-	}
-
+	var timerMult:Float = 1.0;
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 
 		if (!exists) 
 		{
-			nonexistentTimer += elapsed;
-			if (nonexistentTimer >= 5) endOfLife = true;
+			try { timerMult = PlayState.instance.playbackRate; }
+			catch (e:Dynamic) { timerMult = 1.0; }
+			nonexistentTimer += elapsed / timerMult;
+			if (nonexistentTimer >= 3) endOfLife = true;
 			return;
 		}
 
@@ -350,7 +317,7 @@ class Note extends FlxSprite
 		}
 	}
 
-	inline public function followStrum(strum:StrumNote, fakeCrochet:Float, songSpeed:Float = 1):Void
+	inline public function followStrum(strum:StrumNote, songSpeed:Float = 1):Void
 	{
 		if (isSustainNote) 
 		{

@@ -83,7 +83,7 @@ class Paths
 
 	public static var defaultSkin = 'NOTE_assets'; 
 	//Function that initializes the first note. This way, we can recycle the notes
-	public static function initDefaultNote(keys:Int = 4, noteSkin:String, inEditor:Bool = false)
+	public static function initDefaultSkin(keys:Int = 4, noteSkin:String, inEditor:Bool = false)
 	{
 		if(ClientPrefs.noteStyleThing == 'VS Nonsense V2') {
 			defaultSkin = 'Nonsense_NOTE_assets';
@@ -116,25 +116,6 @@ class Paths
 			defaultSkin = 'GRAY_NOTE_assets';
 		}
 		if (noteSkin.length > 1) defaultSkin = noteSkin;
-
-		// Do this to be able to just copy over the note animations and not reallocate it
-
-		defaultNoteSprite = new FlxSprite();
-		defaultNoteSprite.frames = getSparrowAtlas(defaultSkin.length > 1 ? defaultSkin : 'NOTE_assets');
-		if (defaultNoteSprite.frames == null) 
-		{
-			defaultSkin = 'NOTE_assets';
-			defaultNoteSprite.frames = getSparrowAtlas(defaultSkin.length > 1 ? defaultSkin : 'NOTE_assets');
-		}
-
-		// Use a for loop for adding all of the animations in the note spritesheet, otherwise it won't find the animations for the next recycle
-		for (d in 0...keys)
-		{
-			defaultNoteSprite.animation.addByPrefix('purpleholdend', 'pruple end hold'); // ?????
-			defaultNoteSprite.animation.addByPrefix(Note.colArray[d] + 'holdend', Note.colArray[d] + ' hold end');
-			defaultNoteSprite.animation.addByPrefix(Note.colArray[d] + 'hold', Note.colArray[d] + ' hold piece');
-			defaultNoteSprite.animation.addByPrefix(Note.colArray[d] + 'Scroll', Note.colArray[d] + '0');
-		}
 	}
 
 	public static function initNote(keys:Int = 4, noteSkin:String = 'NOTE_assets')

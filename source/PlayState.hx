@@ -859,7 +859,8 @@ class PlayState extends MusicBeatState
 				GameOverSubstate.characterName = 'bf-holding-gf-dead';
 		}
 
-		Paths.initDefaultNote(4, SONG.arrowSkin);
+		Paths.initNote(4, SONG.arrowSkin);
+		Paths.initDefaultSkin(4, SONG.arrowSkin);
 
 		if(isPixelStage) {
 			introSoundsSuffix = '-pixel';
@@ -6132,7 +6133,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 	var noteMade:Note;
 
 	// this is used for note recycling
-	inline public function setupNoteData(chartNoteData:PreloadedChartNote)
+	public function setupNoteData(chartNoteData:PreloadedChartNote)
 	{
 		noteMade = inline notes.recycle(Note);
 		if (ClientPrefs.enableColorShader)
@@ -6144,7 +6145,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 		noteMade.strumTime = chartNoteData.strumTime;
 		if(!noteMade.inEditor) noteMade.strumTime += ClientPrefs.noteOffset;
-		noteMade.noteData = inline Std.int(chartNoteData.noteData % 4);
+		noteMade.noteData = chartNoteData.noteData % 4;
 		noteMade.noteType = chartNoteData.noteType;
 		noteMade.animSuffix = chartNoteData.animSuffix;
 		noteMade.noAnimation = noteMade.noMissAnimation = chartNoteData.noAnimation;
@@ -6152,7 +6153,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		noteMade.gfNote = chartNoteData.gfNote;
 		noteMade.isSustainNote = chartNoteData.isSustainNote;
 		if (chartNoteData.noteskin.length > 0 && chartNoteData.noteskin != '' && chartNoteData.noteskin != noteMade.texture) noteMade.texture = 'noteskins/' + chartNoteData.noteskin;
-		if (chartNoteData.noteskin.length < 0) noteMade.texture = Paths.defaultSkin;
+		if (chartNoteData.noteskin.length < 1 && noteMade.texture != Paths.defaultSkin) noteMade.texture = Paths.defaultSkin;
 		if (chartNoteData.texture.length > 0 && chartNoteData.texture != noteMade.texture) noteMade.texture = chartNoteData.texture;
 		noteMade.sustainLength = chartNoteData.sustainLength;
 		noteMade.sustainScale = chartNoteData.sustainScale;
@@ -6237,13 +6238,13 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			if (daNote.endOfLife)
 			{
 				notes.remove(daNote, true);
-				return;
 			}
+			return;
 		}
 		if (daNote != null && daNote.exists)
 		{
 			amountOfRenderedNotes += 1;
-			inline daNote.followStrum((daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData], (60 / SONG.bpm) * 1000, songSpeed);
+			inline daNote.followStrum((daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData], songSpeed);
 			final strum = (daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData];
 			if(daNote.isSustainNote && strum != null && strum.sustainReduce) inline daNote.clipToStrumNote(strum);
 
