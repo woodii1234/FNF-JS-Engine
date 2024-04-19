@@ -1891,7 +1891,6 @@ class PlayState extends MusicBeatState
 		startingTime = Sys.time();
 
 		emitter.on(NoteSignalStuff.NOTE_UPDATE, updateNote);
-		emitter.on(NoteSignalStuff.NOTE_SETUP, setupNoteData);
 		emitter.on(NoteSignalStuff.NOTE_HIT_BF, goodNoteHit);
 		emitter.on(NoteSignalStuff.NOTE_HIT_OPP, opponentNoteHit);
 
@@ -2433,8 +2432,8 @@ class PlayState extends MusicBeatState
 		final dadCanPan:Bool = !SONG.notes[curSection].mustHitSection;
 		var clear:Bool = false;
 		switch (who) {
-			case 'bf': clear = bfCanPan;
-			case 'oppt': clear = dadCanPan;
+			case 'bf' | 'boyfriend': clear = bfCanPan;
+			case 'oppt' | 'dad': clear = dadCanPan;
 		}
 		//FlxG.elapsed is stinky poo poo for this, it just makes it look jank as fuck
 		if (clear) {
@@ -4202,7 +4201,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		{
 			while (unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < (NOTE_SPAWN_TIME / unspawnNotes[notesAddedCount].multSpeed)) {
 				{
-					emitter.emit(NoteSignalStuff.NOTE_SETUP, unspawnNotes[notesAddedCount]);
+					inline notes.recycle(Note).setupNoteData(unspawnNotes[notesAddedCount]);
 					inline callOnLuas('onSpawnNote', [notes.members.indexOf(notes.members[notes.length-1]), unspawnNotes[notesAddedCount].noteData, unspawnNotes[notesAddedCount].noteType, unspawnNotes[notesAddedCount].isSustainNote]);
 					notesAddedCount++;
 				}
@@ -6130,115 +6129,10 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		callOnLuas('noteMissPress', [direction]);
 	}
 
-	var noteMade:Note;
-
-	// this is used for note recycling
-	public function setupNoteData(chartNoteData:PreloadedChartNote)
-	{
-		noteMade = notes.recycle(Note);
-		if (ClientPrefs.enableColorShader)
-		{
-			noteMade.colorSwap = new ColorSwap();
-			noteMade.shader = noteMade.colorSwap.shader;
-		}
-		noteMade.wasGoodHit = noteMade.hitByOpponent = noteMade.tooLate = noteMade.canBeHit = false; // Don't make an update call of this for the note group
-
-		noteMade.strumTime = chartNoteData.strumTime;
-		if(!noteMade.inEditor) noteMade.strumTime += ClientPrefs.noteOffset;
-		noteMade.noteData = chartNoteData.noteData % 4;
-		noteMade.noteType = chartNoteData.noteType;
-		noteMade.animSuffix = chartNoteData.animSuffix;
-		noteMade.noAnimation = noteMade.noMissAnimation = chartNoteData.noAnimation;
-		noteMade.mustPress = chartNoteData.mustPress;
-		noteMade.gfNote = chartNoteData.gfNote;
-		noteMade.isSustainNote = chartNoteData.isSustainNote;
-		if (chartNoteData.noteskin.length > 0 && chartNoteData.noteskin != '' && chartNoteData.noteskin != noteMade.texture) noteMade.texture = 'noteskins/' + chartNoteData.noteskin;
-		if (chartNoteData.noteskin.length < 1 && noteMade.texture != Paths.defaultSkin) noteMade.texture = Paths.defaultSkin;
-		if (chartNoteData.texture.length > 0 && chartNoteData.texture != noteMade.texture) noteMade.texture = chartNoteData.texture;
-		noteMade.sustainLength = chartNoteData.sustainLength;
-		noteMade.sustainScale = chartNoteData.sustainScale;
-		noteMade.lowPriority = chartNoteData.lowPriority;
-
-		noteMade.hitHealth = chartNoteData.hitHealth;
-		noteMade.missHealth = chartNoteData.missHealth;
-		noteMade.hitCausesMiss = chartNoteData.hitCausesMiss;
-		noteMade.ignoreNote = chartNoteData.ignoreNote;
-		noteMade.multSpeed = chartNoteData.multSpeed;
-
-		if (ClientPrefs.enableColorShader)
-		{
-			if (ClientPrefs.noteColorStyle == 'Normal' && noteMade.noteData < ClientPrefs.arrowHSV.length)
-			{
-				noteMade.colorSwap.hue = ClientPrefs.arrowHSV[noteMade.noteData][0] / 360;
-				noteMade.colorSwap.saturation = ClientPrefs.arrowHSV[noteMade.noteData][1] / 100;
-				noteMade.colorSwap.brightness = ClientPrefs.arrowHSV[noteMade.noteData][2] / 100;
-			}
-			if (ClientPrefs.noteColorStyle == 'Quant-Based') CoolUtil.checkNoteQuant(noteMade, noteMade.isSustainNote ? chartNoteData.parent.strumTime : chartNoteData.strumTime);
-			if (ClientPrefs.noteColorStyle == 'Rainbow')
-			{
-				noteMade.colorSwap.hue = ((noteMade.strumTime / 5000 * 360) / 360) % 1;
-			}
-			if (ClientPrefs.noteColorStyle == 'Char-Based')
-			{
-				if (PlayState.instance != null) {
-					if (!noteMade.mustPress) !opponentChart ? noteMade.shader = new NoteShader.ColoredNoteShader(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2], false, 10) : noteMade.shader = new NoteShader.ColoredNoteShader(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2], false, 10);
-					if (noteMade.mustPress)
-						!opponentChart ? noteMade.shader = new NoteShader.ColoredNoteShader(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2], false, 10) : noteMade.shader = new NoteShader.ColoredNoteShader(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2], false, 10);
-					if (noteMade.gfNote && gf != null) noteMade.shader = new NoteShader.ColoredNoteShader(gf.healthColorArray[0], gf.healthColorArray[1], gf.healthColorArray[2], false, 10);
-				}
-			}
-		}
-
-		if (noteMade.noteType == 'Hurt Note')
-		{
-			noteMade.texture = 'HURTNOTE_assets';
-			noteMade.noteSplashTexture = 'HURTnoteSplashes';
-			if (ClientPrefs.enableColorShader)
-			{
-				noteMade.colorSwap.hue = noteMade.colorSwap.saturation = noteMade.colorSwap.brightness = 0;
-			}
-		}
-
-		if (isPixelStage) @:privateAccess noteMade.reloadNote('', noteMade.texture);
-
-		if (!noteMade.isSustainNote) noteMade.animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? Note.colArray[noteMade.noteData % 4] : 'red') + 'Scroll');
-		else noteMade.animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? Note.colArray[noteMade.noteData % 4] : 'red') + (chartNoteData.isSustainEnd ? 'holdend' : 'hold'));
-
-		if (!isPixelStage) noteMade.scale.set(0.7, 0.7);
-		noteMade.updateHitbox();
-
-		if (noteMade.isSustainNote) {
-			noteMade.offsetX = 36.5 * switch (ClientPrefs.noteStyleThing)
-			{
-				case 'TGT V4': 1.03;
-				case 'Chip': 0.15;
-				case 'Future': 0;
-				default: 1;
-			};
-			noteMade.copyAngle = false;
-		}
-		else noteMade.offsetX = 0; //Juuuust in case we recycle a sustain note to a regular note
-
-		if (ClientPrefs.doubleGhost && !noteMade.isSustainNote)
-		{
-			noteMade.row = Conductor.secsToRow(noteMade.strumTime);
-			if(noteRows[noteMade.mustPress?0:1][noteMade.row] == null)
-				noteRows[noteMade.mustPress?0:1][noteMade.row] = [];
-				noteRows[noteMade.mustPress ? 0 : 1][noteMade.row].push(noteMade);
-		}
-		noteMade.cameras = [noteMade.isSustainNote ? camHUDBelow : camHUD];
-		noteMade.clipRect = null;
-		noteMade.alpha = 1;
-	}
-
 	function updateNote(daNote:Note):Void
 	{
 		if (daNote != null && !daNote.exists)
 		{
-			if (daNote.endOfLife)
-			{
-				notes.remove(daNote, true);
-			}
 			return;
 		}
 		if (daNote != null && daNote.exists)
@@ -6374,7 +6268,24 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					inline notesHitArray.push(1 * polyphony);
 					inline notesHitDateArray.push(Conductor.songPosition);
 					}
-					popUpScore(note);
+					if (!ClientPrefs.lessBotLag) popUpScore(note);
+					else
+					{
+						final noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset) / playbackRate;
+						final daRating:Rating = Conductor.judgeNote(note, noteDiff);
+
+						totalNotesHit += daRating.ratingMod;
+						note.ratingMod = daRating.ratingMod;
+						if(!note.ratingDisabled) daRating.increase();
+						note.rating = daRating.name;
+						songScore += daRating.score * comboMultiplier * polyphony;
+						totalPlayed++;
+						if(daRating.noteSplash && !note.noteSplashDisabled && ClientPrefs.noteSplashes && splashesPerFrame[1] <= 4)
+						{
+							spawnNoteSplashOnNote(false, note, note.gfNote);
+						}
+						RecalculateRating();
+					}
 				}
 				if (!note.isSustainNote && cpuControlled && ClientPrefs.lessBotLag && !ClientPrefs.communityGameBot)
 				{
@@ -6388,39 +6299,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					if(!note.noteSplashDisabled && !note.isSustainNote && ClientPrefs.noteSplashes && splashesPerFrame[1] <= 4) {
 						spawnNoteSplashOnNote(false, note, note.gfNote);
 					}
-				}
-				if (!note.isSustainNote && cpuControlled && !ClientPrefs.lessBotLag && !ClientPrefs.communityGameBot)
-				{
-					combo += 1 * polyphony;
-					totalNotesPlayed += 1 * polyphony;
-					if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
-						inline notesHitArray.push(1 * polyphony);
-						inline notesHitDateArray.push(Conductor.songPosition);
-					}
-					popUpScore(note);
-				}
-				if (!note.isSustainNote && !cpuControlled && ClientPrefs.lessBotLag && !ClientPrefs.communityGameBot)
-				{
-					combo += 1 * polyphony;
-					totalNotesPlayed += 1 * polyphony;
-					if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
-						inline notesHitArray.push(1 * polyphony);
-						inline notesHitDateArray.push(Conductor.songPosition);
-					}
-					final noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset) / playbackRate;
-					final daRating:Rating = Conductor.judgeNote(note, noteDiff);
-
-					totalNotesHit += daRating.ratingMod;
-					note.ratingMod = daRating.ratingMod;
-					if(!note.ratingDisabled) daRating.increase();
-					note.rating = daRating.name;
-					songScore += daRating.score * comboMultiplier * polyphony;
-					totalPlayed++;
-					if(daRating.noteSplash && !note.noteSplashDisabled && ClientPrefs.noteSplashes && splashesPerFrame[1] <= 4)
-					{
-						spawnNoteSplashOnNote(false, note, note.gfNote);
-					}
-					RecalculateRating();
+					if (!ClientPrefs.lessBotLag) popUpScore(note);
 				}
 
 				if (combo > maxCombo)
@@ -6473,75 +6352,34 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 							}
 						}
 					}
-					if (!opponentChart && !note.gfNote && ClientPrefs.charsAndBG)
+					if (!note.gfNote && ClientPrefs.charsAndBG)
 					{
+						var char = (!opponentChart ? boyfriend : dad);
 						if (!ClientPrefs.doubleGhost) {
-							inline boyfriend.playAnim(animToPlay + note.animSuffix, true);
+							inline char.playAnim(animToPlay + note.animSuffix, true);
 						}
-						if (ClientPrefs.cameraPanning) inline camPanRoutine(animToPlay, 'bf');
-						boyfriend.holdTimer = 0;
+						if (ClientPrefs.cameraPanning) inline camPanRoutine(animToPlay, (!opponentChart ? 'bf' : 'oppt'));
+						char.holdTimer = 0;
 						if (ClientPrefs.doubleGhost)
 						{
-						if (!note.isSustainNote && noteRows[note.mustPress?0:1][note.row].length > 1)
+							if (!note.isSustainNote && noteRows[note.mustPress?0:1][note.row].length > 1)
 							{
-								// potentially have jump anims?
 								final chord = noteRows[note.mustPress?0:1][note.row];
 								final animNote = chord[0];
 								final realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
-								if (boyfriend.mostRecentRow != note.row)
+								if (char.mostRecentRow != note.row)
 								{
-									inline boyfriend.playAnim(realAnim, true);
+									inline char.playAnim(realAnim, true);
 								}
 
-								boyfriend.mostRecentRow = note.row;
-								inline doGhostAnim('bf', animToPlay);
+								char.mostRecentRow = note.row;
+								inline doGhostAnim((!opponentChart ? 'bf' : 'dad'), animToPlay);
 							}
-							else{
-								inline boyfriend.playAnim(animToPlay + note.animSuffix, true);
-								// dad.angle = 0;
-							}
-						}
-					}
-					if (opponentChart && !note.gfNote && ClientPrefs.charsAndBG)
-					{
-						if (!ClientPrefs.doubleGhost) {
-						inline dad.playAnim(animToPlay, true);
-						}
-						dad.holdTimer = 0;
-						if (ClientPrefs.cameraPanning) inline camPanRoutine(animToPlay, 'oppt');
-						if (ClientPrefs.doubleGhost)
+							else
 							{
-							if (!note.isSustainNote && noteRows[note.mustPress?0:1][note.row].length > 1)
-								{
-									// potentially have jump anims?
-									final chord = noteRows[note.mustPress?0:1][note.row];
-									final animNote = chord[0];
-									final realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
-									if (dad.mostRecentRow != note.row)
-									{
-										inline dad.playAnim(realAnim, true);
-									}
-
-											if (!note.noAnimation && !note.gfNote)
-											{
-												if(dad.mostRecentRow != note.row)
-													inline doGhostAnim('dad', animToPlay);
-													dadGhost.color = FlxColor.fromRGB(dad.healthColorArray[0] + 50, dad.healthColorArray[1] + 50, dad.healthColorArray[2] + 50);
-													dadGhostTween = FlxTween.tween(dadGhost, {alpha: 0}, 0.75, {
-														ease: FlxEase.linear,
-														onComplete: function(twn:FlxTween)
-														{
-															dadGhostTween = null;
-														}
-													});
-											}
-											dad.mostRecentRow = note.row;
-								}
-								else{
-									inline dad.playAnim(animToPlay + note.animSuffix, true);
-									// dad.angle = 0;
-								}
+								inline char.playAnim(animToPlay + note.animSuffix, true);
 							}
+						}
 					}
 
 					if(note.noteType == 'Hey!') {
@@ -6706,76 +6544,35 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 				final animToPlay:String = singAnimations[Std.int(Math.abs(daNote.noteData))] + daNote.animSuffix;
 				if(daNote.gfNote && ClientPrefs.charsAndBG) {
-						if (ClientPrefs.doubleGhost && gf != null)
-						{
+					if (ClientPrefs.doubleGhost && gf != null)
+					{
 						if (!daNote.isSustainNote && noteRows[daNote.mustPress?0:1][daNote.row].length > 1)
-							{
-								// potentially have jump anims?
-								final chord = noteRows[daNote.mustPress?0:1][daNote.row];
-								final animNote = chord[0];
-								final realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
-								if (gf.mostRecentRow != daNote.row)
-								{
-									inline gf.playAnim(realAnim, true);
-								}
-
-								gf.mostRecentRow = daNote.row;
-								inline doGhostAnim('gf', animToPlay);
-								}
-							}
-							else if (gf != null) {
-								inline gf.playAnim(animToPlay, true);
-								gf.holdTimer = 0;
-							}
-				}
-				if(opponentChart && ClientPrefs.charsAndBG && !daNote.gfNote) {
-					inline boyfriend.playAnim(animToPlay, true);
-					boyfriend.holdTimer = 0;
-				}
-				else if(dad != null && !opponentChart && ClientPrefs.charsAndBG && !daNote.gfNote)
-				{
-						inline dad.playAnim(animToPlay, true);
-						dad.holdTimer = 0;
-						if (ClientPrefs.cameraPanning) inline camPanRoutine(animToPlay, 'oppt');
-						if (ClientPrefs.doubleGhost)
 						{
-						if (!daNote.isSustainNote && noteRows[daNote.mustPress?0:1][daNote.row].length > 1)
+							// potentially have jump anims?
+							final chord = noteRows[daNote.mustPress?0:1][daNote.row];
+							final animNote = chord[0];
+							final realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
+							if (gf.mostRecentRow != daNote.row)
 							{
-								// potentially have jump anims?
-								final chord = noteRows[daNote.mustPress?0:1][daNote.row];
-								final animNote = chord[0];
-								final realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
-								if (dad.mostRecentRow != daNote.row)
-								{
-									inline dad.playAnim(realAnim, true);
-								}
+								inline gf.playAnim(realAnim, true);
+							}
 
-									if (!daNote.noAnimation && !daNote.gfNote)
-									{
-										if(dad.mostRecentRow != daNote.row)
-											inline doGhostAnim('dad', animToPlay);
-											dadGhost.color = FlxColor.fromRGB(dad.healthColorArray[0] + 50, dad.healthColorArray[1] + 50, dad.healthColorArray[2] + 50);
-											dadGhostTween = FlxTween.tween(dadGhost, {alpha: 0}, 0.75, {
-												ease: FlxEase.linear,
-												onComplete: function(twn:FlxTween)
-												{
-													dadGhostTween = null;
-												}
-											});
-									}
-									dad.mostRecentRow = daNote.row;
-								}
+							gf.mostRecentRow = daNote.row;
+							inline doGhostAnim('gf', animToPlay);
 							}
-							else{
-								inline dad.playAnim(animToPlay, true);
-								// dad.angle = 0;
-							}
+						}
+						else if (gf != null) {
+							inline gf.playAnim(animToPlay, true);
+							gf.holdTimer = 0;
+						}
 				}
-				if (opponentChart && ClientPrefs.charsAndBG && !daNote.gfNote)
+				else if(ClientPrefs.charsAndBG && !daNote.gfNote)
 				{
-					inline boyfriend.playAnim(animToPlay, true);
-					boyfriend.holdTimer = 0;
-					if (ClientPrefs.cameraPanning) inline camPanRoutine(animToPlay, 'bf');
+					var char = (!opponentChart ? dad : boyfriend);
+
+					inline char.playAnim(animToPlay, true);
+					char.holdTimer = 0;
+					if (ClientPrefs.cameraPanning) inline camPanRoutine(animToPlay, (!opponentChart ? 'dad' : 'bf'));
 					if (ClientPrefs.doubleGhost)
 					{
 					if (!daNote.isSustainNote && noteRows[daNote.mustPress?0:1][daNote.row].length > 1)
@@ -6784,18 +6581,22 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 							final chord = noteRows[daNote.mustPress?0:1][daNote.row];
 							final animNote = chord[0];
 							final realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
-							if (boyfriend.mostRecentRow != daNote.row)
+							if (char.mostRecentRow != daNote.row)
 							{
-								inline boyfriend.playAnim(realAnim, true);
+								inline char.playAnim(realAnim, true);
 							}
 
-							boyfriend.mostRecentRow = daNote.row;
-							inline doGhostAnim('bf', animToPlay);
+								if (!daNote.noAnimation && !daNote.gfNote)
+								{
+									if(char.mostRecentRow != daNote.row)
+										inline doGhostAnim((!opponentChart ? 'dad' : 'bf'), animToPlay);
+								}
+								char.mostRecentRow = daNote.row;
+							}
 						}
 						else{
-							inline boyfriend.playAnim(animToPlay, true);
+							inline char.playAnim(animToPlay, true);
 						}
-					}
 				}
 			}
 
@@ -7020,7 +6821,6 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 		Paths.splashAnimCountMap.clear();
 
 		emitter.off(NoteSignalStuff.NOTE_UPDATE, updateNote);
-		emitter.off(NoteSignalStuff.NOTE_SETUP, setupNoteData);
 		emitter.off(NoteSignalStuff.NOTE_HIT_BF, goodNoteHit);
 		emitter.off(NoteSignalStuff.NOTE_HIT_OPP, opponentNoteHit);
 

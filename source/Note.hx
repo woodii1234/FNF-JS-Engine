@@ -394,4 +394,92 @@ class Note extends FlxSprite
 	    		else if (gfNote && PlayState.instance.gf != null) cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.gf.healthColorArray[0], PlayState.instance.gf.healthColorArray[1], PlayState.instance.gf.healthColorArray[2]);
 		}
 	}
+
+	// this is used for note recycling
+	public inline function setupNoteData(chartNoteData:PreloadedChartNote):Note
+	{
+		if (ClientPrefs.enableColorShader && colorSwap == null)
+		{
+			colorSwap = new ColorSwap();
+			shader = colorSwap.shader;
+		}
+		wasGoodHit = hitByOpponent = tooLate = canBeHit = false; // Don't make an update call of this for the note group
+
+		strumTime = chartNoteData.strumTime;
+		if(!inEditor) strumTime += ClientPrefs.noteOffset;
+		noteData = Std.int(chartNoteData.noteData % 4);
+		noteType = chartNoteData.noteType;
+		animSuffix = chartNoteData.animSuffix;
+		noAnimation = noMissAnimation = chartNoteData.noAnimation;
+		mustPress = chartNoteData.mustPress;
+		gfNote = chartNoteData.gfNote;
+		isSustainNote = chartNoteData.isSustainNote;
+		if (chartNoteData.noteskin.length > 0 && chartNoteData.noteskin != '' && chartNoteData.noteskin != texture) texture = 'noteskins/' + chartNoteData.noteskin;
+		if (chartNoteData.texture.length > 0 && chartNoteData.texture != texture) texture = chartNoteData.texture;
+		sustainLength = chartNoteData.sustainLength;
+		sustainScale = chartNoteData.sustainScale;
+		lowPriority = chartNoteData.lowPriority;
+
+		hitHealth = chartNoteData.hitHealth;
+		missHealth = chartNoteData.missHealth;
+		hitCausesMiss = chartNoteData.hitCausesMiss;
+		ignoreNote = chartNoteData.ignoreNote;
+		multSpeed = chartNoteData.multSpeed;
+
+		if (ClientPrefs.enableColorShader)
+		{
+			if (ClientPrefs.noteColorStyle == 'Normal' && noteData < ClientPrefs.arrowHSV.length)
+			{
+				colorSwap.hue = ClientPrefs.arrowHSV[noteData][0] / 360;
+				colorSwap.saturation = ClientPrefs.arrowHSV[noteData][1] / 100;
+				colorSwap.brightness = ClientPrefs.arrowHSV[noteData][2] / 100;
+			}
+			if (ClientPrefs.noteColorStyle == 'Quant-Based') CoolUtil.checkNoteQuant(this, isSustainNote ? chartNoteData.parent.strumTime : chartNoteData.strumTime);
+			if (ClientPrefs.noteColorStyle == 'Rainbow')
+			{
+				colorSwap.hue = ((strumTime / 5000 * 360) / 360) % 1;
+			}
+		}
+
+		if (noteType == 'Hurt Note')
+		{
+			texture = 'HURTNOTE_assets';
+			noteSplashTexture = 'HURTnoteSplashes';
+			if (ClientPrefs.enableColorShader)
+			{
+				colorSwap.hue = colorSwap.saturation = colorSwap.brightness = 0;
+			}
+		}
+
+		if (PlayState.isPixelStage) @:privateAccess reloadNote('', texture);
+
+		if (!isSustainNote) animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? Note.colArray[noteData % 4] : 'red') + 'Scroll');
+		else animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? Note.colArray[noteData % 4] : 'red') + (chartNoteData.isSustainEnd ? 'holdend' : 'hold'));
+
+		if (!PlayState.isPixelStage) scale.set(0.7, 0.7);
+		updateHitbox();
+
+		if (isSustainNote) {
+			offsetX = 36.5 * switch (ClientPrefs.noteStyleThing)
+			{
+				case 'TGT V4': 1.03;
+				case 'Chip': 0.15;
+				case 'Future': 0;
+				default: 1;
+			};
+			copyAngle = false;
+		}
+		else offsetX = 0; //Juuuust in case we recycle a sustain note to a regular note
+
+		if (ClientPrefs.doubleGhost && !isSustainNote && PlayState.instance != null)
+		{
+			row = Conductor.secsToRow(strumTime);
+			if(PlayState.instance.noteRows[mustPress?0:1][row] == null)
+				PlayState.instance.noteRows[mustPress?0:1][row] = [];
+				PlayState.instance.noteRows[mustPress ? 0 : 1][row].push(this);
+		}
+		clipRect = null;
+		alpha = 1;
+		return this;
+	}
 }

@@ -56,6 +56,7 @@ class EditorPlayState extends MusicBeatState
 	var stepTxt:FlxText;
 	var beatTxt:FlxText;
 	var sectionTxt:FlxText;
+	var botplayTxt:FlxText;
 	
 	var timerToStart:Float = 0;
 	private var noteTypeMap:Map<String, Bool> = new Map<String, Bool>();
@@ -64,6 +65,8 @@ class EditorPlayState extends MusicBeatState
 	private var keysArray:Array<Dynamic>;
 
 	public static var instance:EditorPlayState;
+
+	public static var cpuControlled:Bool = false;
 
 	public var emitter:Emitter = new Emitter();
 
@@ -138,7 +141,7 @@ class EditorPlayState extends MusicBeatState
 		scoreTxt.visible = !ClientPrefs.hideHud;
 		add(scoreTxt);
 		
-		sectionTxt = new FlxText(10, 580, FlxG.width - 20, "Section: 0", 20);
+		sectionTxt = new FlxText(10, 550, FlxG.width - 20, "Section: 0", 20);
 		sectionTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		sectionTxt.scrollFactor.set();
 		sectionTxt.borderSize = 1.25;
@@ -156,14 +159,19 @@ class EditorPlayState extends MusicBeatState
 		stepTxt.borderSize = 1.25;
 		add(stepTxt);
 
-		var tipText:FlxText = new FlxText(10, FlxG.height - 24, 0, 'Press ESC to Go Back to Chart Editor', 16);
+		botplayTxt = new FlxText(10, stepTxt.y + 30, FlxG.width - 20, "Botplay: OFF", 20);
+		botplayTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		botplayTxt.scrollFactor.set();
+		botplayTxt.borderSize = 1.25;
+		add(botplayTxt);
+
+		var tipText:FlxText = new FlxText(10, FlxG.height - 44, 0, 'Press ESC to Go Back to Chart Editor\nPress SIX to turn on Botplay', 16);
 		tipText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		tipText.borderSize = 2;
 		tipText.scrollFactor.set();
 		add(tipText);
 		FlxG.mouse.visible = false;
 
-		//sayGo();
 		if(!ClientPrefs.controllerMode)
 		{
 			FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
@@ -171,29 +179,9 @@ class EditorPlayState extends MusicBeatState
 		}
 
 		emitter.on(NoteSignalStuff.NOTE_UPDATE, updateNote);
-		emitter.on(NoteSignalStuff.NOTE_SETUP, setupNoteData);
 		emitter.on(NoteSignalStuff.NOTE_HIT_BF_EDITOR, goodNoteHit);
 
 		super.create();
-	}
-
-	function sayGo() {
-		var go:FlxSprite = new FlxSprite().loadGraphic(Paths.image('go'));
-		go.scrollFactor.set();
-
-		go.updateHitbox();
-
-		go.screenCenter();
-		go.antialiasing = ClientPrefs.globalAntialiasing;
-		add(go);
-		FlxTween.tween(go, {y: go.y += 100, alpha: 0}, Conductor.crochet / 1000, {
-			ease: FlxEase.cubeInOut,
-			onComplete: function(twn:FlxTween)
-			{
-				go.destroy();
-			}
-		});
-		FlxG.sound.play(Paths.sound('introGo'), 0.6);
 	}
 
 	//var songScore:Int = 0;
@@ -359,6 +347,10 @@ class EditorPlayState extends MusicBeatState
 			vocals.pause();
 			LoadingState.loadAndSwitchState(editors.ChartingState.new);
 		}
+		if (FlxG.keys.justPressed.SIX)
+		{
+			cpuControlled = !cpuControlled;
+		}
 
 		if (startingSong) {
 			timerToStart -= elapsed * 1000;
@@ -378,7 +370,7 @@ class EditorPlayState extends MusicBeatState
 				notesAddedCount -= (notesAddedCount - unspawnNotes.length);
 
 			while (unspawnNotes.length > 0 && unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < (1500 / PlayState.SONG.speed / unspawnNotes[notesAddedCount].multSpeed)) {
-				emitter.emit(NoteSignalStuff.NOTE_SETUP, unspawnNotes[notesAddedCount]);
+				inline notes.recycle(Note).setupNoteData(unspawnNotes[notesAddedCount]);
 				notesAddedCount++;
 			}
 				if (notesAddedCount > 0)
@@ -396,11 +388,12 @@ class EditorPlayState extends MusicBeatState
 			if (Conductor.songPosition >= FlxG.sound.music.length) endSong();
 		}
 
-		keyShit();
+		if (!cpuControlled) keyShit();
 		scoreTxt.text = 'Hits: ' + songHits + ' | Misses: ' + songMisses;
-		sectionTxt.text = 'Beat: ' + curSection;
+		sectionTxt.text = 'Section: ' + curSection;
 		beatTxt.text = 'Beat: ' + curBeat;
 		stepTxt.text = 'Step: ' + curStep;
+		botplayTxt.text = 'Botplay: ' + (cpuControlled ? 'ON' : 'OFF');
 		super.update(elapsed);
 	}
 	
@@ -614,89 +607,6 @@ class EditorPlayState extends MusicBeatState
 		}
 	}
 
-	var noteMade:Note;
-
-	// this is used for note recycling
-	public function setupNoteData(chartNoteData:PreloadedChartNote)
-	{
-		noteMade = notes.recycle(Note);
-		if (ClientPrefs.enableColorShader)
-		{
-			noteMade.colorSwap = new ColorSwap();
-			noteMade.shader = noteMade.colorSwap.shader;
-		}
-		noteMade.wasGoodHit = noteMade.hitByOpponent = noteMade.tooLate = noteMade.canBeHit = false; // Don't make an update call of this for the note group
-
-		noteMade.strumTime = chartNoteData.strumTime;
-		if(!noteMade.inEditor) noteMade.strumTime += ClientPrefs.noteOffset;
-		noteMade.noteData = Std.int(chartNoteData.noteData % 4);
-		noteMade.noteType = chartNoteData.noteType;
-		noteMade.animSuffix = chartNoteData.animSuffix;
-		noteMade.noAnimation = noteMade.noMissAnimation = chartNoteData.noAnimation;
-		noteMade.mustPress = chartNoteData.mustPress;
-		noteMade.gfNote = chartNoteData.gfNote;
-		noteMade.isSustainNote = chartNoteData.isSustainNote;
-		if (chartNoteData.noteskin.length > 0 && chartNoteData.noteskin != '' && chartNoteData.noteskin != noteMade.texture) noteMade.texture = 'noteskins/' + chartNoteData.noteskin;
-		if (chartNoteData.texture.length > 0 && chartNoteData.texture != noteMade.texture) noteMade.texture = chartNoteData.texture;
-		noteMade.sustainLength = chartNoteData.sustainLength;
-		noteMade.sustainScale = chartNoteData.sustainScale;
-		noteMade.lowPriority = chartNoteData.lowPriority;
-
-		noteMade.hitHealth = chartNoteData.hitHealth;
-		noteMade.missHealth = chartNoteData.missHealth;
-		noteMade.hitCausesMiss = chartNoteData.hitCausesMiss;
-		noteMade.ignoreNote = chartNoteData.ignoreNote;
-		noteMade.multSpeed = chartNoteData.multSpeed;
-
-		if (ClientPrefs.enableColorShader)
-		{
-			if (ClientPrefs.noteColorStyle == 'Normal' && noteMade.noteData < ClientPrefs.arrowHSV.length)
-			{
-				noteMade.colorSwap.hue = ClientPrefs.arrowHSV[noteMade.noteData][0] / 360;
-				noteMade.colorSwap.saturation = ClientPrefs.arrowHSV[noteMade.noteData][1] / 100;
-				noteMade.colorSwap.brightness = ClientPrefs.arrowHSV[noteMade.noteData][2] / 100;
-			}
-			if (ClientPrefs.noteColorStyle == 'Quant-Based') CoolUtil.checkNoteQuant(noteMade, noteMade.isSustainNote ? chartNoteData.parent.strumTime : chartNoteData.strumTime);
-			if (ClientPrefs.noteColorStyle == 'Rainbow')
-			{
-				noteMade.colorSwap.hue = ((noteMade.strumTime / 5000 * 360) / 360) % 1;
-			}
-		}
-
-		if (noteMade.noteType == 'Hurt Note')
-		{
-			noteMade.texture = 'HURTNOTE_assets';
-			noteMade.noteSplashTexture = 'HURTnoteSplashes';
-			if (ClientPrefs.enableColorShader)
-			{
-				noteMade.colorSwap.hue = noteMade.colorSwap.saturation = noteMade.colorSwap.brightness = 0;
-			}
-		}
-
-		if (PlayState.isPixelStage) @:privateAccess noteMade.reloadNote('', noteMade.texture);
-
-		if (!noteMade.isSustainNote) noteMade.animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? Note.colArray[noteMade.noteData % 4] : 'red') + 'Scroll');
-		else noteMade.animation.play((ClientPrefs.noteColorStyle == 'Normal' || (ClientPrefs.noteStyleThing == 'TGT V4' || PlayState.isPixelStage) ? Note.colArray[noteMade.noteData % 4] : 'red') + (chartNoteData.isSustainEnd ? 'holdend' : 'hold'));
-
-		if (!PlayState.isPixelStage) noteMade.scale.set(0.7, 0.7);
-		noteMade.updateHitbox();
-
-		if (noteMade.isSustainNote) {
-			noteMade.offsetX = 36.5 * switch (ClientPrefs.noteStyleThing)
-			{
-				case 'TGT V4': 1.03;
-				case 'Chip': 0.15;
-				case 'Future': 0;
-				default: 1;
-			};
-			noteMade.copyAngle = false;
-		}
-		else noteMade.offsetX = 0; //Juuuust in case we recycle a sustain note to a regular note
-		noteMade.clipRect = null;
-		noteMade.alpha = 1;
-	}
-
-
 	function updateNote(daNote:Note):Void
 	{
 		if (daNote != null && daNote.exists)
@@ -719,6 +629,26 @@ class EditorPlayState extends MusicBeatState
 
 				if (!daNote.isSustainNote)
 				{
+					daNote.exists = false;
+				}
+			}
+
+			if (daNote.mustPress && cpuControlled && daNote.strumTime <= Conductor.songPosition)
+			{
+				if (PlayState.SONG.needsVoices)
+					vocals.volume = 1;
+
+				var time:Float = 0.15;
+				if(daNote.isSustainNote && !daNote.animation.curAnim.name.endsWith('end')) {
+					time += 0.15;
+				}
+				StrumPlayAnim(false, Std.int(Math.abs(daNote.noteData)) % 4, time);
+				daNote.wasGoodHit = true;
+
+				if (!daNote.isSustainNote)
+				{
+					combo += 1;
+					songHits++;
 					daNote.exists = false;
 				}
 			}
@@ -1058,7 +988,6 @@ class EditorPlayState extends MusicBeatState
 			FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		}
 		emitter.off(NoteSignalStuff.NOTE_UPDATE, updateNote);
-		emitter.off(NoteSignalStuff.NOTE_SETUP, setupNoteData);
 		emitter.off(NoteSignalStuff.NOTE_HIT_BF_EDITOR, goodNoteHit);
 		super.destroy();
 	}
