@@ -1,22 +1,12 @@
-1.23.1;
+1.24.0;
 
-Note Splashes won't be stuck on frame 1 anymore if the config file doesn't have a Red animation
-TGT v4 and Dave Engine Score and Time Bar Styles now actually work
-Hurt Note sustains no longer look weird
-The engine no longer crashes if you set the rating type to either "Doki Doki", "VS Impostor", or "FIRE IN THE HOLE"
-
-1.23.0:
-You can now add additional note splashes and rating quotes
-Separated the HUD Styles into multiple options
-1 new Hitsound
-You can no longer die to health drain (I might add it back, as an option)
-The new Rendering Mode is now supported on Linux
-Enabling Rendering Mode will now display "Rendering" on the time bar if "Show Playback Rate on Time Bar" is enabled
-When One Key mode is enabled the notes will now disappear
-All noteskins now support Quantized & Rainbow Notes (as long as the 3rd strum is the red note..)
-Ratings are now judged if CommunityGame Botplay is enabled
-Fixed Alt Animations not playing correctly
-Fixed Hurt Notes behaving the same as regular notes
-Fixed vocals playing if you had Rendering Mode turned on and popUpScore triggered
-Fixed opponent note hits calling opponentNoteHit instead of goodNoteHit
-Fixed a bug where you could abuse Complex Accuracy by slowing down the song
+The Chart Editor now has a button that saves your song JSON as a single line.
+Removed the idle music in the chart editor :(
+The game will now automatically recreate the gameRenders folder if you delete it
+The game will now notify you that a crash log does exist so that you can provide it when making a GitHub issue
+If your player icon has only 2 icons, triggering the losing icon will no longer force it to stay as the losing icon
+The game can now automatically flip the Left and Right anims if your character is a player character
+The game now properly ends rendering if you use Rendering Mode and Charting Mode at the same time
+In most cases, the camera no longer goes berserk at framerates under 31
+The "Copy to the next..." button will no longer crash the engine if the next section is null
+Bigger icons will no longer be pushed down if you use the Golden Apple or D&B icon bounces
