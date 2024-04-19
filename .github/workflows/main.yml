@@ -53,6 +53,7 @@ jobs:
           haxelib install hmm --quiet
           haxelib run hmm install
           haxelib git hxCodec https://github.com/polybiusproxy/hxCodec
+          haxelib set flixel 5.6.2
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
       - name: Compile
@@ -124,6 +125,7 @@ jobs:
           haxelib install hxcpp > /dev/null --quiet
           haxelib install hmm --quiet
           haxelib run hmm install
+          haxelib set flixel 5.6.2
         shell: cmd
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
@@ -196,6 +198,7 @@ jobs:
           haxelib install hmm --quiet
           haxelib run hmm install
           haxelib git hxCodec https://github.com/polybiusproxy/hxCodec
+          haxelib set flixel 5.6.2
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
       - name: Compile
