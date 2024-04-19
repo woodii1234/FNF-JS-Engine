@@ -206,6 +206,7 @@ class ChartingState extends MusicBeatState
 		32,
 		48,
 		64,
+		96,
 		128,
 		192
 	];
@@ -633,6 +634,10 @@ class ChartingState extends MusicBeatState
 		{
 			saveEvents();
 		});
+		var saveCompressed:FlxButton = new FlxButton(110, reloadSongJson.y + 30, 'Save Compressed', function ()
+		{
+			saveLevel(true);
+		});
 		var autosaveButton:FlxButton = new FlxButton(saveEvents.x, reloadSongJson.y + 60, "Save to Autosave", function()
 		{
 			autosaveSong();
@@ -797,6 +802,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(clear_notes);
 		tab_group_song.add(saveButton);
 		tab_group_song.add(saveEvents);
+		tab_group_song.add(saveCompressed);
 		tab_group_song.add(reloadSong);
 		tab_group_song.add(reloadSongJson);
 		tab_group_song.add(loadAutosaveBtn);
@@ -808,7 +814,6 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(noteSkinInputText);
 		tab_group_song.add(noteSplashesInputText);
 		tab_group_song.add(new FlxText(stepperBPM.x, stepperBPM.y - 15, 0, 'Song BPM:'));
-		tab_group_song.add(new FlxText(stepperBPM.x + 100, stepperBPM.y - 15, 0, 'Song Offset:'));
 		tab_group_song.add(new FlxText(stepperSpeed.x, stepperSpeed.y - 15, 0, 'Song Speed:'));
 		tab_group_song.add(new FlxText(player2DropDown.x, player2DropDown.y - 15, 0, 'Opponent:'));
 		tab_group_song.add(new FlxText(gfVersionDropDown.x, gfVersionDropDown.y - 15, 0, 'Girlfriend:'));
@@ -1230,7 +1235,6 @@ class ChartingState extends MusicBeatState
 					trace ('Loops Remaining: ' + (value2 - i) + ', current note count: ' + FlxStringUtil.formatMoney(CoolUtil.getNoteAmount(_song), false) + ' Notes');
 				}
 			}
-			updateGrid(false);
 		});
 		copyMultiSectButton.color = FlxColor.BLUE;
 		copyMultiSectButton.label.color = FlxColor.WHITE;
@@ -4001,7 +4005,7 @@ class ChartingState extends MusicBeatState
 		updateGrid();
 	}
 
-	private function saveLevel()
+	private function saveLevel(?compressed:Bool = false)
 	{
 		Paths.gc(true);
 		if (CoolUtil.getNoteAmount(_song) > 1000000) 
@@ -4013,7 +4017,7 @@ class ChartingState extends MusicBeatState
 			"song": _song
 		};
 
-		var data:String = Json.stringify(json, "\t");
+		var data:String = !compressed ? Json.stringify(json, "\t") : Json.stringify(json);
 
 		if ((data != null) && (data.length > 0))
 		{

@@ -480,12 +480,12 @@ class Paths
 			var songKey:String = '${formatToSongPath(song)}/Voices-$difficulty';
 			if (FileSystem.exists(Paths.modFolders('songs/' + songKey + '.$SOUND_EXT')) || FileSystem.exists('assets/songs/' + songKey + '.$SOUND_EXT')) 
 			{
-				var voices = returnSound('songs', songKey, null, ClientPrefs.progAudioLoad);
+				var voices = returnSound('songs', songKey);
 				return voices;
 			}
 		}
 		var songKey:String = '${formatToSongPath(song)}/Voices';
-		var voices = returnSound('songs', songKey, null, ClientPrefs.progAudioLoad);
+		var voices = returnSound('songs', songKey);
 		return voices;
 		#end
 	}
@@ -500,12 +500,12 @@ class Paths
 			var songKey:String = '${formatToSongPath(song)}/Inst-$difficulty';
 			if (FileSystem.exists(Paths.modFolders('songs/' + songKey + '.$SOUND_EXT')) || FileSystem.exists('assets/songs/' + songKey + '.$SOUND_EXT')) 
 			{
-				var inst = returnSound('songs', songKey, null, ClientPrefs.progAudioLoad);
+				var inst = returnSound('songs', songKey);
 				return inst;
 			}
 		}
 		var songKey:String = '${formatToSongPath(song)}/Inst';
-		var inst = returnSound('songs', songKey, null, ClientPrefs.progAudioLoad);
+		var inst = returnSound('songs', songKey);
 		return inst;
 		#end
 	}

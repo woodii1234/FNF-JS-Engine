@@ -125,7 +125,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var globalAntialiasing:Bool = true;
 	public static var shaders:Bool = true;
 	public static var cacheOnGPU:Bool = false;
-	public static var progAudioLoad:Bool = false;
 	public static var dynamicSpawnTime:Bool = false;
 	public static var noteSpawnTime:Float = 1;
 	public static var resolution:String = '1280x720';
@@ -367,7 +366,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.globalAntialiasing = globalAntialiasing;
 		FlxG.save.data.shaders = shaders;
 		FlxG.save.data.cacheOnGPU = cacheOnGPU;
-		FlxG.save.data.progAudioLoad = progAudioLoad;
 		FlxG.save.data.dynamicSpawnTime = dynamicSpawnTime;
 		FlxG.save.data.noteSpawnTime = noteSpawnTime;
 		FlxG.save.data.resolution = resolution;
@@ -787,9 +785,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.cacheOnGPU != null) {
 			cacheOnGPU = FlxG.save.data.cacheOnGPU;
-		}
-		if(FlxG.save.data.progAudioLoad != null) {
-			progAudioLoad = FlxG.save.data.progAudioLoad;
 		}
 		if(FlxG.save.data.dynamicSpawnTime != null) {
 			dynamicSpawnTime = FlxG.save.data.dynamicSpawnTime;
