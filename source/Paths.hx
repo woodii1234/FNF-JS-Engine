@@ -115,7 +115,8 @@ class Paths
 		if(ClientPrefs.noteColorStyle == 'Grayscale') {
 			defaultSkin = 'GRAY_NOTE_assets';
 		}
-		if (noteSkin.length > 1) defaultSkin = noteSkin;
+		if (noteSkin != null && noteSkin.length > 1) defaultSkin = noteSkin;
+		trace(defaultSkin);
 	}
 
 	public static function initNote(keys:Int = 4, noteSkin:String = 'NOTE_assets')
@@ -123,7 +124,7 @@ class Paths
 		// Do this to be able to just copy over the note animations and not reallocate it
 
 		var spr:FlxSprite = new FlxSprite();
-		spr.frames = getSparrowAtlas(noteSkin.length > 1 ? noteSkin : 'NOTE_assets');
+		spr.frames = getSparrowAtlas(noteSkin != null && noteSkin.length > 1 ? noteSkin : defaultSkin);
 
 		// Use a for loop for adding all of the animations in the note spritesheet, otherwise it won't find the animations for the next recycle
 		for (d in 0...keys)

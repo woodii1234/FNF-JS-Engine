@@ -15,9 +15,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var healthGainType:String = 'Psych Engine';
 	public static var ghostTapping:Bool = true;
 	public static var autoPause:Bool = true;
-	public static var comboScoreEffect:Bool = false;
-	public static var comboMultiType:String = 'osu!';
-	public static var comboMultLimit:Float = 5;
 	public static var complexAccuracy:Bool = false;
 	public static var communityGameMode:Bool = false;
 	public static var communityGameBot:Bool = false;
@@ -256,9 +253,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.healthGainType = healthGainType;
 		FlxG.save.data.ghostTapping = ghostTapping;
 		FlxG.save.data.autoPause = autoPause;
-		FlxG.save.data.comboScoreEffect = comboScoreEffect;
-		FlxG.save.data.comboMultiType = comboMultiType;
-		FlxG.save.data.comboMultLimit = comboMultLimit;
 		FlxG.save.data.complexAccuracy = complexAccuracy;
 		FlxG.save.data.communityGameMode = communityGameMode;
 		FlxG.save.data.communityGameBot = communityGameBot;
@@ -459,15 +453,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.autoPause != null) {
 			autoPause = FlxG.save.data.autoPause;
-		}
-		if(FlxG.save.data.comboScoreEffect != null) {
-			comboScoreEffect = FlxG.save.data.comboScoreEffect;
-		}
-		if(FlxG.save.data.comboMultiType != null) {
-			comboMultiType = FlxG.save.data.comboMultiType;
-		}
-		if(FlxG.save.data.comboMultLimit != null) {
-			comboMultLimit = FlxG.save.data.comboMultLimit;
 		}
 		if(FlxG.save.data.complexAccuracy != null) {
 			complexAccuracy = FlxG.save.data.complexAccuracy;

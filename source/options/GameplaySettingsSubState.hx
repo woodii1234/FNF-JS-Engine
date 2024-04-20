@@ -85,36 +85,6 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			true);
 		addOption(option);
 
-		var option:Option = new Option('Score Affected by Combo',
-			"Should the score be affected by the combo?",
-			'comboScoreEffect',
-			'bool',
-			false);
-		addOption(option);
-
-	if (ClientPrefs.comboScoreEffect)
-	{
-		var option:Option = new Option('Combo Mult Type:',
-			"What type of combo multiplier do you want?",
-			'comboMultiType',
-			'string',
-			'osu!',
-			['osu!', 'Voiid Chronicles']);
-		addOption(option);
-
-		var option:Option = new Option('Combo Mult Limit: ', //Name
-			'What should the Combo Multiplier Limit be? \n(Values over 10 will not have score saving)', //Description
-			'comboMultLimit', //Save data variable name
-			'float', //Variable type
-			5); //Default value
-		option.scrollSpeed = 2;
-		option.minValue = 1;
-		option.maxValue = 100;
-		option.changeValue = 0.1;
-		option.displayFormat = '%vX';
-		addOption(option);
-	}
-
 		var option:Option = new Option('Complex Accuracy',
 			"If checked, accuracy is MS-based instead of rating-based.",
 			'complexAccuracy',

@@ -178,8 +178,10 @@ class EditorPlayState extends MusicBeatState
 			FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		}
 
+		Paths.initNote(4, PlayState.SONG.arrowSkin);
+		Paths.initDefaultSkin(4, PlayState.SONG.arrowSkin);
+
 		emitter.on(NoteSignalStuff.NOTE_UPDATE, updateNote);
-		emitter.on(NoteSignalStuff.NOTE_HIT_BF_EDITOR, goodNoteHit);
 
 		super.create();
 	}
@@ -607,7 +609,9 @@ class EditorPlayState extends MusicBeatState
 		}
 	}
 
-	function updateNote(daNote:Note):Void
+
+	var note:Note = new Note();
+	inline function updateNote(daNote:Note):Void
 	{
 		if (daNote != null && daNote.exists)
 		{
@@ -638,19 +642,8 @@ class EditorPlayState extends MusicBeatState
 				if (PlayState.SONG.needsVoices)
 					vocals.volume = 1;
 
-				var time:Float = 0.15;
-				if(daNote.isSustainNote && !daNote.animation.curAnim.name.endsWith('end')) {
-					time += 0.15;
-				}
-				StrumPlayAnim(false, Std.int(Math.abs(daNote.noteData)) % 4, time);
-				daNote.wasGoodHit = true;
-
-				if (!daNote.isSustainNote)
-				{
-					combo += 1;
-					songHits++;
-					daNote.exists = false;
-				}
+				note = daNote;
+					goodNoteHit();
 			}
 
 			if (Conductor.songPosition > (noteKillOffset / PlayState.SONG.speed) + daNote.strumTime)
@@ -666,7 +659,7 @@ class EditorPlayState extends MusicBeatState
 							}
 						});
 
-						if(!daNote.ignoreNote) {
+						if(!daNote.ignoreNote && !daNote.canBeHit) {
 							songMisses++;
 							vocals.volume = 0;
 						}
@@ -679,7 +672,7 @@ class EditorPlayState extends MusicBeatState
 	}
 
 	var combo:Int = 0;
-	function goodNoteHit(note:Note):Void
+	function goodNoteHit():Void
 	{
 		if (!note.wasGoodHit)
 		{
@@ -707,10 +700,19 @@ class EditorPlayState extends MusicBeatState
 			{
 				combo += 1;
 				if(combo > 9999) combo = 9999;
-				popUpScore(note);
+				if (!cpuControlled) popUpScore(note);
 				songHits++;
 			}
 
+			if (cpuControlled)
+			{
+				var time:Float = 0.15;
+				if(note.isSustainNote && !note.animation.curAnim.name.endsWith('end')) {
+					time += 0.15;
+				}
+				StrumPlayAnim(false, Std.int(Math.abs(note.noteData)) % 4, time);
+			}
+			else
 			playerStrums.forEach(function(spr:StrumNote)
 			{
 				if (Math.abs(note.noteData) == spr.ID)
@@ -988,7 +990,6 @@ class EditorPlayState extends MusicBeatState
 			FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		}
 		emitter.off(NoteSignalStuff.NOTE_UPDATE, updateNote);
-		emitter.off(NoteSignalStuff.NOTE_HIT_BF_EDITOR, goodNoteHit);
 		super.destroy();
 	}
 }

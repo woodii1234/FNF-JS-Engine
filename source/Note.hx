@@ -109,15 +109,12 @@ class Note extends FlxSprite
 
 	public var hitsoundDisabled:Bool = false;
 
-	public var endOfLife:Bool = false;
-	public var nonexistentTimer:Float = 0;
-
 	private function set_texture(value:String):String {
 		if (!PlayState.isPixelStage && texture != value)
 		{
 			if (!Paths.noteSkinFramesMap.exists(value)) Paths.initNote(4, value);
-			frames = @:privateAccess Paths.noteSkinFramesMap.get(value);
-			animation.copyFrom(@:privateAccess Paths.noteSkinAnimsMap.get(value));
+			if (frames != @:privateAccess Paths.noteSkinFramesMap.get(value)) frames = @:privateAccess Paths.noteSkinFramesMap.get(value);
+			if (animation != @:privateAccess Paths.noteSkinAnimsMap.get(value)) inline animation.copyFrom(@:privateAccess Paths.noteSkinAnimsMap.get(value));
 			antialiasing = ClientPrefs.globalAntialiasing;
 			scale.set(0.7, 0.7);
 			updateHitbox();
@@ -131,7 +128,7 @@ class Note extends FlxSprite
 	{
 		super();
 
-		//y -= 2000;
+		y -= 2000;
 
 		if(noteData > -1) {
 			if (ClientPrefs.showNotes)
@@ -272,19 +269,9 @@ class Note extends FlxSprite
 		}
 	}
 
-	var timerMult:Float = 1.0;
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-
-		if (!exists) 
-		{
-			try { timerMult = PlayState.instance.playbackRate; }
-			catch (e:Dynamic) { timerMult = 1.0; }
-			nonexistentTimer += elapsed / timerMult;
-			if (nonexistentTimer >= 3) endOfLife = true;
-			return;
-		}
 
 		if (mustPress)
 		{
@@ -395,8 +382,15 @@ class Note extends FlxSprite
 		}
 	}
 
+	public override function destroy()
+	{
+		colorSwap = null;
+		shader = null;
+		super.destroy();
+	}
+
 	// this is used for note recycling
-	public inline function setupNoteData(chartNoteData:PreloadedChartNote):Note
+	public function setupNoteData(chartNoteData:PreloadedChartNote):Void 
 	{
 		if (ClientPrefs.enableColorShader && colorSwap == null)
 		{
@@ -407,7 +401,7 @@ class Note extends FlxSprite
 
 		strumTime = chartNoteData.strumTime;
 		if(!inEditor) strumTime += ClientPrefs.noteOffset;
-		noteData = Std.int(chartNoteData.noteData % 4);
+		noteData = chartNoteData.noteData % 4;
 		noteType = chartNoteData.noteType;
 		animSuffix = chartNoteData.animSuffix;
 		noAnimation = noMissAnimation = chartNoteData.noAnimation;
@@ -479,6 +473,7 @@ class Note extends FlxSprite
 				PlayState.instance.noteRows[mustPress?0:1][row] = [];
 				PlayState.instance.noteRows[mustPress ? 0 : 1][row].push(this);
 		}
+		clipRect = null;
 		if (!mustPress) 
 		{
 			visible = !ClientPrefs.opponentStrums ? false : true;
@@ -489,9 +484,7 @@ class Note extends FlxSprite
 			if (!visible) visible = true;
 			if (alpha != 1) alpha = 1;
 		}
+		if (PlayState.instance != null && Type.getClassName(Type.getClass(FlxG.state)) != 'editors.EditorPlayState') cameras = [isSustainNote ? PlayState.instance.camHUDBelow : PlayState.instance.camHUD];
 		if (flipY) flipY = false;
-		if (PlayState != null) cameras = [isSustainNote ? PlayState.instance.camHUDBelow : PlayState.instance.camHUD];
-		clipRect = null;
-		return this;
 	}
 }

@@ -516,7 +516,7 @@ class FunkinLua {
 			if(exclusions==null)exclusions=[];
 
 			Lua.getglobal(lua, 'scriptName');
-			var daScriptName = Lua.tostring(lua, -1);
+			final daScriptName = Lua.tostring(lua, -1);
 			Lua.pop(lua, 1);
 			if(ignoreSelf && !exclusions.contains(daScriptName))exclusions.push(daScriptName);
 			PlayState.instance.callOnLuas(funcName, args, ignoreStops, exclusions);
