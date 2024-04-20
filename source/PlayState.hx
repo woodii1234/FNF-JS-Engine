@@ -310,6 +310,9 @@ class PlayState extends MusicBeatState
 		var pixelShitPart1:String = "";
 		var pixelShitPart2:String = '';
 
+	public var oldNPS:Float = 0;
+	public var oldOppNPS:Float = 0;
+
 	private var lerpingScore:Bool = false;
 
 	private var generatedMusic:Bool = false;
@@ -3758,6 +3761,29 @@ class PlayState extends MusicBeatState
 			}
 			if (nps > maxNPS) {
 				maxNPS = nps;
+			}
+			if (nps > oldNPS)
+				npsIncreased = true;
+
+			if (nps < oldNPS)
+				npsDecreased = true;
+
+			if (oppNPS > oldOppNPS)
+				oppNpsIncreased = true;
+
+			if (oppNPS < oldOppNPS)
+				oppNpsDecreased = true;
+
+			if (npsIncreased || npsDecreased || oppNpsIncreased || oppNpsDecreased) {
+				if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 8 && judgementCounter != null) updateRatingCounter();
+				if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 8 && scoreTxt != null) updateScore();
+					if (ClientPrefs.compactNumbers && compactUpdateFrame <= 8) updateCompactNumbers();
+				if (npsIncreased) npsIncreased = false;
+				if (npsDecreased) npsDecreased = false;
+				if (oppNpsIncreased) oppNpsIncreased = false;
+				if (oppNpsDecreased) oppNpsDecreased = false;
+				oldNPS = nps;
+				oldOppNPS = oppNPS;
 			}
 		}
 
