@@ -6287,7 +6287,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 						RecalculateRating();
 					}
 				}
-				if (!note.isSustainNote && cpuControlled && !ClientPrefs.communityGameBot)
+				if (!note.isSustainNote && cpuControlled && ClientPrefs.lessBotLag && !ClientPrefs.communityGameBot)
 				{
 					combo += 1 * polyphony;
 					songScore += (ClientPrefs.noMarvJudge ? 350 : 500) * comboMultiplier * polyphony;
