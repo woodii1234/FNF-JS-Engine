@@ -478,6 +478,17 @@ class Note extends FlxSprite
 				PlayState.instance.noteRows[mustPress?0:1][row] = [];
 				PlayState.instance.noteRows[mustPress ? 0 : 1][row].push(this);
 		}
+		if (!mustPress) 
+		{
+			visible = !ClientPrefs.opponentStrums ? false : true;
+			alpha = ClientPrefs.middleScroll ? ClientPrefs.oppNoteAlpha : 1;
+		}
+		else
+		{
+			if (!visible) visible = true;
+			if (alpha != 1) alpha = 1;
+		}
+		if (flipY) flipY = false;
 		clipRect = null;
 		alpha = 1;
 		return this;
