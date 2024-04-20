@@ -6259,7 +6259,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 
 					if (combo < 0) combo = 0;
 					if (polyphony > 1 && !note.isSustainNote) totalNotes += polyphony - 1;
-				if (!note.isSustainNote && !cpuControlled && !ClientPrefs.lessBotLag || !note.isSustainNote && cpuControlled && ClientPrefs.communityGameBot)
+				if (!note.isSustainNote && !cpuControlled || !note.isSustainNote && cpuControlled && ClientPrefs.communityGameBot)
 				{
 					combo += 1 * polyphony;
 					totalNotesPlayed += 1 * polyphony;
@@ -6268,7 +6268,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 					inline notesHitArray.push(1 * polyphony);
 					inline notesHitDateArray.push(Conductor.songPosition);
 					}
-					if (!ClientPrefs.lessBotLag) popUpScore(note);
+					if (!ClientPrefs.lessBotLag || ClientPrefs.communityGameBot) popUpScore(note);
 					else
 					{
 						final noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset) / playbackRate;

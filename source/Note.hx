@@ -416,6 +416,7 @@ class Note extends FlxSprite
 		isSustainNote = chartNoteData.isSustainNote;
 		if (chartNoteData.noteskin.length > 0 && chartNoteData.noteskin != '' && chartNoteData.noteskin != texture) texture = 'noteskins/' + chartNoteData.noteskin;
 		if (chartNoteData.texture.length > 0 && chartNoteData.texture != texture) texture = chartNoteData.texture;
+		if (chartNoteData.noteskin.length < 1 && chartNoteData.texture != Paths.defaultSkin) texture = Paths.defaultSkin;
 		sustainLength = chartNoteData.sustainLength;
 		sustainScale = chartNoteData.sustainScale;
 		lowPriority = chartNoteData.lowPriority;
@@ -489,6 +490,7 @@ class Note extends FlxSprite
 			if (alpha != 1) alpha = 1;
 		}
 		if (flipY) flipY = false;
+		if (PlayState != null) cameras = [isSustainNote ? PlayState.instance.camHUDBelow : PlayState.instance.camHUD];
 		clipRect = null;
 		alpha = 1;
 		return this;
