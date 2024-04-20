@@ -7005,7 +7005,7 @@ if (ClientPrefs.showNPS && (notesHitDateArray.length > 0 || oppNotesHitDateArray
 			{
 				twistShit = twistAmount;
 			}
-			else
+			if (curBeat % (gfSpeed * 2) == 2)
 			{
 				twistShit = -twistAmount;
 			}
