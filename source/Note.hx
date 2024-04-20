@@ -492,7 +492,6 @@ class Note extends FlxSprite
 		if (flipY) flipY = false;
 		if (PlayState != null) cameras = [isSustainNote ? PlayState.instance.camHUDBelow : PlayState.instance.camHUD];
 		clipRect = null;
-		alpha = 1;
 		return this;
 	}
 }
