@@ -1,10 +1,14 @@
+1.24.2;
+Fixed note skins not appearing as the note skin you're using
+Fixed sustain notes appearing above strums
+Fixed note hits not counting anything if you used just the right settings
+
 1.24.1;
 Arrows should no longer flip sometimes if you're on downscroll (Except for sustain notes they'll still flip)
 Fixed notes not becoming visible on BF's side if you either turned on middle scroll or turned off the Opponent strums
 Fixed that camera pointer in the Character Editor not showing
 
 1.24.0;
-
 The Chart Editor now has a button that saves your song JSON as a single line.
 Removed the idle music in the chart editor :(
 The game will now automatically recreate the gameRenders folder if you delete it
