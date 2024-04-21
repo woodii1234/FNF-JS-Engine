@@ -490,7 +490,8 @@ class EditorPlayState extends MusicBeatState
 
 						// eee jack detection before was not super good
 						if (!notesStopped) {
-							emitter.emit(NoteSignalStuff.NOTE_HIT_BF_EDITOR, epicNote);
+							note = epicNote;
+							emitter.emit(NoteSignalStuff.NOTE_HIT_BF_EDITOR);
 							pressNotes.push(epicNote);
 						}
 
@@ -589,7 +590,8 @@ class EditorPlayState extends MusicBeatState
 				// hold note functions
 				if (daNote.isSustainNote && controlHoldArray[daNote.noteData] && daNote.canBeHit 
 				&& daNote.mustPress && !daNote.tooLate && !daNote.wasGoodHit) {
-					emitter.emit(NoteSignalStuff.NOTE_HIT_BF_EDITOR, daNote);
+					note = daNote;
+					emitter.emit(NoteSignalStuff.NOTE_HIT_BF_EDITOR);
 				}
 			});
 		}
