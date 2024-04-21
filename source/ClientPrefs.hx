@@ -44,7 +44,8 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	//Visuals & UI
 	public static var noteSplashes:Bool = true;
 	public static var oppNoteSplashes:Bool = true;
-	public static var showNPS:Bool = false;
+	public static var showNPS:Bool = true;
+	public static var showComboInfo:Bool = true;
 	public static var maxSplashLimit:Int = 16;
 	public static var oppNoteAlpha:Float = 0.65;
 	public static var hideHud:Bool = false;
@@ -56,6 +57,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var timeBounce:Bool = true;
 	public static var lengthIntro:Bool = true;
 	public static var timebarShowSpeed:Bool = false;
+	public static var botWatermark:Bool = true;
 	public static var missRating:Bool = false;
 	public static var resultsScreen:Bool = true;
 	public static var compactNumbers:Bool = false;
@@ -283,6 +285,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.noteSplashes = noteSplashes;
 		FlxG.save.data.oppNoteSplashes = oppNoteSplashes;
 		FlxG.save.data.showNPS = showNPS;
+		FlxG.save.data.showComboInfo = showComboInfo;
 		FlxG.save.data.maxSplashLimit = maxSplashLimit;
 		FlxG.save.data.oppNoteAlpha = oppNoteAlpha;
 		FlxG.save.data.hideHud = hideHud;
@@ -294,6 +297,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.timeBounce = timeBounce;
 		FlxG.save.data.lengthIntro = lengthIntro;
 		FlxG.save.data.timebarShowSpeed = timebarShowSpeed;
+		FlxG.save.data.botWatermark = botWatermark;
 		FlxG.save.data.missRating = missRating;
 		FlxG.save.data.resultsScreen = resultsScreen;
 		FlxG.save.data.compactNumbers = compactNumbers;
@@ -540,6 +544,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		if(FlxG.save.data.showNPS != null) {
 			showNPS = FlxG.save.data.showNPS;
 		}
+		if(FlxG.save.data.showComboInfo != null) {
+			showComboInfo = FlxG.save.data.showComboInfo;
+		}
 		if(FlxG.save.data.maxSplashLimit != null) {
 			maxSplashLimit = FlxG.save.data.maxSplashLimit;
 		}
@@ -572,6 +579,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.timebarShowSpeed != null) {
 			timebarShowSpeed = FlxG.save.data.timebarShowSpeed;
+		}
+		if(FlxG.save.data.botWatermark != null) {
+			botWatermark = FlxG.save.data.botWatermark;
 		}
 		if(FlxG.save.data.missRating != null) {
 			missRating = FlxG.save.data.missRating;

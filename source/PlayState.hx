@@ -2827,33 +2827,33 @@ class PlayState extends MusicBeatState
 
 		botText = cpuControlled && !ClientPrefs.communityGameBot ? ' $divider Botplay Mode' : '';
 
-		if (cpuControlled && !ClientPrefs.communityGameBot)
+		if (cpuControlled && !ClientPrefs.communityGameBot && ClientPrefs.botWatermark)
 		{
-			tempScore = 'Bot Score: ' + formattedScore + ' $divider Bot Combo: ' + formattedCombo + npsString + botText;
+			tempScore = 'Bot Score: ' + formattedScore + (ClientPrefs.showComboInfo ? ' $divider Bot Combo: ' + formattedCombo : '') + npsString + botText;
 			if (ClientPrefs.healthDisplay) scoreTxt.text += ' $divider Health: ' + FlxMath.roundDecimal(health * 50, 2) + '%';
 		}
 		else switch (ClientPrefs.scoreStyle)
 			{
 				case 'Kade Engine':
-					tempScore = 'Score: ' + formattedScore + ' $divider Misses: ' + formattedSongMisses  + ' $divider Combo: ' + formattedCombo + npsString + ' $divider Accuracy: ' + accuracy + ' $divider (' + fcString + ') ' + ratingCool;
+					tempScore = 'Score: ' + formattedScore + ' $divider Combo Breaks: ' + formattedSongMisses  + (ClientPrefs.showComboInfo ? ' $divider Combo: ' + formattedCombo : '') + npsString + ' $divider Accuracy: ' + accuracy + ' $divider (' + fcString + ') ' + ratingCool;
 
 				case "Doki Doki+":
-					tempScore = 'Score: ' + formattedScore + ' $divider Breaks: ' + formattedSongMisses + ' $divider Combo: ' + formattedCombo + npsString + ' $divider Accuracy: ' + accuracy + ' $divider (' + fcString + ') ' + ratingCool;
+					tempScore = 'Score: ' + formattedScore + ' $divider Breaks: ' + formattedSongMisses + (ClientPrefs.showComboInfo ? ' $divider Combo: ' + formattedCombo : '') + npsString + ' $divider Accuracy: ' + accuracy + ' $divider (' + fcString + ') ' + ratingCool;
 
 				case "Dave Engine":
-					tempScore = 'Score: ' + formattedScore + ' $divider Misses: ' + formattedSongMisses + ' $divider Combo: ' + formattedCombo + npsString + ' $divider Accuracy: ' + accuracy + ' $divider ' + fcString;
+					tempScore = 'Score: ' + formattedScore + ' $divider Misses: ' + formattedSongMisses + (ClientPrefs.showComboInfo ? ' $divider Combo: ' + formattedCombo : '') + npsString + ' $divider Accuracy: ' + accuracy + ' $divider ' + fcString;
 
 				case "Forever Engine":
-					tempScore = 'Score: ' + formattedScore + ' $divider Accuracy: ' + Highscore.floorDecimal(ratingPercent * 100, 2) + '% ['  + fcString + ']' + ' $divider Combo Breaks: ' + formattedSongMisses + ' $divider Combo: ' + formattedCombo + npsString + ' $divider Rank: ' + ratingName;
+					tempScore = 'Score: ' + formattedScore + ' $divider Accuracy: ' + Highscore.floorDecimal(ratingPercent * 100, 2) + '% ['  + fcString + ']' + ' $divider Combo Breaks: ' + formattedSongMisses + (ClientPrefs.showComboInfo ? ' $divider Combo: ' + formattedCombo : '') + npsString + ' $divider Rank: ' + ratingName;
 
 				case "Psych Engine", "JS Engine", "TGT V4":
-					tempScore = 'Score: ' + formattedScore + ' $divider Misses: ' + formattedSongMisses  + ' $divider Combo: ' + formattedCombo + npsString + ' $divider Rating: ' + ratingName + (ratingName != '?' ? ' (${accuracy}) - $fcString' : '');
+					tempScore = 'Score: ' + formattedScore + ' $divider Misses: ' + formattedSongMisses  + (ClientPrefs.showComboInfo ? ' $divider Combo: ' + formattedCombo : '') + npsString + ' $divider Rating: ' + ratingName + (ratingName != '?' ? ' (${accuracy}) - $fcString' : '');
 
 				case "Leather Engine":
-					tempScore = '< Score: ' + formattedScore + ' $divider Misses: ' + formattedSongMisses + ' $divider Combo: ' + formattedCombo + npsString + ' $divider Rating: ' + ratingName + (ratingName != '?' ? ' (${accuracy}) - $fcString' : '');
+					tempScore = '< Score: ' + formattedScore + ' $divider Misses: ' + formattedSongMisses + (ClientPrefs.showComboInfo ? ' $divider Combo: ' + formattedCombo : '') + npsString + ' $divider Rating: ' + ratingName + (ratingName != '?' ? ' (${accuracy}) - $fcString' : '');
 
 				case 'VS Impostor':
-					tempScore = 'Score: ' + formattedScore + ' $divider Combo Breaks: ' + formattedSongMisses  + ' $divider Combo: ' + formattedCombo + npsString + ' $divider Accuracy: ' + Highscore.floorDecimal(ratingPercent * 100, 2) + '% ['  + fcString + ']';
+					tempScore = 'Score: ' + formattedScore + ' $divider Combo Breaks: ' + formattedSongMisses  + (ClientPrefs.showComboInfo ? ' $divider Combo: ' + formattedCombo : '') + npsString + ' $divider Accuracy: ' + Highscore.floorDecimal(ratingPercent * 100, 2) + '% ['  + fcString + ']';
 			}
 			if (ClientPrefs.healthDisplay && !cpuControlled) tempScore += ' $divider Health: ' + FlxMath.roundDecimal(health * 50, 2) + '%';
 
@@ -4125,8 +4125,8 @@ class PlayState extends MusicBeatState
 								timeTxt.text += ' (' + (!ffmpegMode ? playbackRateDecimal + 'x)' : 'Rendering)');
 							else timeTxt.text = SONG.song + ' (' + (!ffmpegMode ? playbackRateDecimal + 'x)' : 'Rendering)');
 						}
-						if (cpuControlled && ClientPrefs.timeBarType != 'Song Name' && !ClientPrefs.communityGameBot && !disableBotWatermark) timeTxt.text += ' (Bot)';
-						if(ClientPrefs.timebarShowSpeed && cpuControlled && ClientPrefs.timeBarType == 'Song Name' && !ClientPrefs.communityGameBot && !disableBotWatermark) timeTxt.text = SONG.song + ' (' + (!ffmpegMode ? FlxMath.roundDecimal(playbackRate, 2) + 'x)' : 'Rendering)') + ' (Bot)';
+						if (cpuControlled && ClientPrefs.timeBarType != 'Song Name' && !ClientPrefs.communityGameBot && ClientPrefs.botWatermark) timeTxt.text += ' (Bot)';
+						if(ClientPrefs.timebarShowSpeed && cpuControlled && ClientPrefs.timeBarType == 'Song Name' && !ClientPrefs.communityGameBot && ClientPrefs.botWatermark) timeTxt.text = SONG.song + ' (' + (!ffmpegMode ? FlxMath.roundDecimal(playbackRate, 2) + 'x)' : 'Rendering)') + ' (Bot)';
 					}
 				}
 				if(ffmpegMode) {
@@ -6232,17 +6232,20 @@ class PlayState extends MusicBeatState
 				}
 				if (!note.isSustainNote && cpuControlled && !ClientPrefs.communityGameBot)
 				{
-					combo += 1 * polyphony;
-					songScore += (ClientPrefs.noMarvJudge ? 350 : 500) * polyphony;
-					totalNotesPlayed += 1 * polyphony;
-					if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
-						inline notesHitArray.push(1 * polyphony);
-						inline notesHitDateArray.push(Conductor.songPosition);
+					if (ClientPrefs.lessBotLag)
+					{
+						combo += 1 * polyphony;
+						songScore += (ClientPrefs.noMarvJudge ? 350 : 500) * polyphony;
+						totalNotesPlayed += 1 * polyphony;
+						if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
+							inline notesHitArray.push(1 * polyphony);
+							inline notesHitDateArray.push(Conductor.songPosition);
+						}
+						if(!note.noteSplashDisabled && !note.isSustainNote && ClientPrefs.noteSplashes && splashesPerFrame[1] <= 4) {
+							spawnNoteSplashOnNote(false, note, note.gfNote);
+						}
 					}
-					if(!note.noteSplashDisabled && !note.isSustainNote && ClientPrefs.noteSplashes && splashesPerFrame[1] <= 4) {
-						spawnNoteSplashOnNote(false, note, note.gfNote);
-					}
-					if (!ClientPrefs.lessBotLag) popUpScore(note);
+					else popUpScore(note);
 				}
 
 				if (combo > maxCombo)
@@ -6720,9 +6723,7 @@ class PlayState extends MusicBeatState
 			if (isGfNote && gf != null) splashColor = FlxColor.fromRGB(gf.healthColorArray[0], gf.healthColorArray[1], gf.healthColorArray[2]);
 		}
 
-		var splash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
-		splash.setupNoteSplash(x, y, data, skin, hue, sat, brt, splashColor);
-		grpNoteSplashes.add(splash);
+		grpNoteSplashes.recycle(NoteSplash).setupNoteSplash(x, y, data, skin, hue, sat, brt, splashColor);
 	}
 
 	override function destroy() {
@@ -6969,7 +6970,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 		
-		notes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
+		notes.sort(FlxSort.byY, !ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 
 		setOnLuas('curBeat', curBeat); //DAWGG?????
 		callOnLuas('onBeatHit', []);
@@ -7365,7 +7366,7 @@ class PlayState extends MusicBeatState
 		formattedMaxOppNPS = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(maxOppNPS, false) : formatCompactNumber(maxOppNPS);
 		formattedEnemyHits = !ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(enemyHits, false) : formatCompactNumber(enemyHits);
 
-		final hittingStuff = (!ClientPrefs.lessBotLag ? 'Combo (Max): $formattedCombo ($formattedMaxCombo)\n' : '') + 'Hits: ' + (!ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(totalNotesPlayed, false) : compactTotalPlays) + ' / ' + FlxStringUtil.formatMoney(totalNotes, false) + ' (' + FlxMath.roundDecimal((totalNotesPlayed/totalNotes) * 100, 2) + '%)';
+		final hittingStuff = (!ClientPrefs.lessBotLag || ClientPrefs.showComboInfo ? 'Combo (Max): $formattedCombo ($formattedMaxCombo)\n' : '') + 'Hits: ' + (!ClientPrefs.compactNumbers ? FlxStringUtil.formatMoney(totalNotesPlayed, false) : compactTotalPlays) + ' / ' + FlxStringUtil.formatMoney(totalNotes, false) + ' (' + FlxMath.roundDecimal((totalNotesPlayed/totalNotes) * 100, 2) + '%)';
 		final ratingCountString = (!cpuControlled || cpuControlled && !ClientPrefs.lessBotLag ? '\n' + (!ClientPrefs.noMarvJudge ? judgeCountStrings[0] + '!!!: $perfects \n' : '') + judgeCountStrings[1] + '!!: $sicks \n' + judgeCountStrings[2] + '!: $goods \n' + judgeCountStrings[3] + ': $bads \n' + judgeCountStrings[4] + ': $shits \n' + judgeCountStrings[5] + ': $formattedSongMisses ' : '');
 		judgementCounter.text = hittingStuff + ratingCountString;
 		judgementCounter.text += (ClientPrefs.showNPS ? '\nNPS (Max): ' + formattedNPS + ' (' + formattedMaxNPS + ')' : '');

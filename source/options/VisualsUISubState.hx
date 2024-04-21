@@ -56,6 +56,13 @@ class VisualsUISubState extends BaseOptionsMenu
 			'bool',
 			true);
 		addOption(option);
+		
+		var option:Option = new Option('Show Combo',
+			'If checked, the game will show your current combo.',
+			'showComboInfo',
+			'bool',
+			true);
+		addOption(option);
 
 		var option:Option = new Option('Max Splashes: ',
 			"How many note splashes should be allowed on screen at the same time?\n(0 means no limit)",
@@ -141,6 +148,13 @@ class VisualsUISubState extends BaseOptionsMenu
 			'timebarShowSpeed',
 			'bool',
 			false);
+		addOption(option);
+		
+		var option:Option = new Option('Botplay Watermark',
+			'If checked, some texts will have a watermark if Botplay is enabled.',
+			'botWatermark',
+			'bool',
+			true);
 		addOption(option);
 
 		var option:Option = new Option('Miss Rating',
