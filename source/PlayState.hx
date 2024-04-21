@@ -6232,11 +6232,11 @@ class PlayState extends MusicBeatState
 				}
 				if (!note.isSustainNote && cpuControlled && !ClientPrefs.communityGameBot)
 				{
+					combo += 1 * polyphony;
+					totalNotesPlayed += 1 * polyphony;
 					if (ClientPrefs.lessBotLag)
 					{
-						combo += 1 * polyphony;
 						songScore += (ClientPrefs.noMarvJudge ? 350 : 500) * polyphony;
-						totalNotesPlayed += 1 * polyphony;
 						if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
 							inline notesHitArray.push(1 * polyphony);
 							inline notesHitDateArray.push(Conductor.songPosition);

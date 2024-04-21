@@ -34,7 +34,7 @@ class NoteSplash extends FlxSprite
 		
 		colorSwap = new ColorSwap();
 		shader = colorSwap.shader;
-			if (ClientPrefs.noteColorStyle == 'Normal')
+			if (ClientPrefs.noteColorStyle == 'Normal' && ClientPrefs.enableColorShader)
 			{
 				colorSwap.hue = ClientPrefs.arrowHSV[note][0] / 360;
 				colorSwap.saturation = ClientPrefs.arrowHSV[note][1] / 100;
@@ -67,14 +67,17 @@ class NoteSplash extends FlxSprite
 		if(textureLoaded != texture) {
 			loadAnims(texture);
 		}
-		if (ClientPrefs.noteColorStyle != 'Char-Based')
+		if (ClientPrefs.enableColorShader)
 		{
-			colorSwap.hue = hueColor;
-			colorSwap.saturation = satColor;
-			colorSwap.brightness = brtColor;
-		} else if (color != null && ClientPrefs.noteColorStyle == 'Char-Based') { //null check
-		        rgbShader.enabled.value = [true];
-       			rgbShader.setColors(color.red, color.green, color.blue);
+			if (ClientPrefs.noteColorStyle != 'Char-Based')
+			{
+				colorSwap.hue = hueColor;
+				colorSwap.saturation = satColor;
+				colorSwap.brightness = brtColor;
+			} else if (color != null && ClientPrefs.noteColorStyle == 'Char-Based') { //null check
+					rgbShader.enabled.value = [true];
+					rgbShader.setColors(color.red, color.green, color.blue);
+			}
 		}
 		offset.set(10, 10);
 
