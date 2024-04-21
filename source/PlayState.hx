@@ -1641,7 +1641,7 @@ class PlayState extends MusicBeatState
 			dadGroup.destroy();
 			boyfriendGroup.destroy();
 		}
-		if (ClientPrefs.scoreTxtSize > 0 && scoreTxt != null && !ClientPrefs.showcaseMode && !ClientPrefs.hideScore) scoreTxt.size = ClientPrefs.scoreTxtSize;
+		if (ClientPrefs.scoreTxtSize > 0 && scoreTxt != null && !ClientPrefs.showcaseMode && !ClientPrefs.hideScore && !ClientPrefs.hideHud) scoreTxt.size = ClientPrefs.scoreTxtSize;
 		if (!ClientPrefs.hideScore) updateScore();
 
 		renderedTxt = new FlxText(0, healthBarBG.y - 50, FlxG.width, "", 40);
@@ -3015,7 +3015,7 @@ class PlayState extends MusicBeatState
 				playbackRate = ting; //why cant i just tween a variable
 
 			if (ClientPrefs.songLoading) FlxG.sound.music.time = Conductor.songPosition;
-			if (ClientPrefs.songLoading && !ffmpegMode) resyncVocals();
+			if (ClientPrefs.songLoading && !ffmpegMode) resyncConductor();
 		}});
 	}
 
@@ -3490,7 +3490,7 @@ class PlayState extends MusicBeatState
 		{
 			if (FlxG.sound.music != null && !startingSong && !ffmpegMode)
 			{
-				resyncVocals();
+				resyncConductor();
 			}
 
 			if (startTimer != null && !startTimer.finished)
@@ -3562,7 +3562,7 @@ class PlayState extends MusicBeatState
 		super.onFocusLost();
 	}
 
-	function resyncVocals():Void
+	function resyncConductor():Void
 	{
 		if(finishTimer != null) return;
 
@@ -3602,15 +3602,10 @@ class PlayState extends MusicBeatState
 		}
 		else if (ClientPrefs.resyncType == 'Psych')
 		{
-		vocals.pause();
-		FlxG.sound.music.play();
+			FlxG.sound.music.play();
 
-		Conductor.songPosition = FlxG.sound.music.time;
-		if (Conductor.songPosition <= vocals.length)
-		{
-			vocals.time = Conductor.songPosition;
-		}
-		vocals.play();
+			Conductor.songPosition = FlxG.sound.music.time;
+			vocals.play();
 		}
 	}
 
@@ -4254,6 +4249,11 @@ class PlayState extends MusicBeatState
 								else unspawnNotes[noteIndex].wasHit = false;
 							noteIndex++;
 						}
+				}
+				if (FlxG.sound.music.time < 0 || Conductor.songPosition < 0)
+				{
+					FlxG.sound.music.time = 0;
+					resyncConductor();
 				}
 				SONG.song.toLowerCase() != 'anti-cheat-song' ? loopSongLol() : loopCallback(0);
 			}
@@ -6883,7 +6883,7 @@ class PlayState extends MusicBeatState
 				|| FlxG.sound.music.time < Conductor.songPosition - 20 * playbackRate
 				|| FlxG.sound.music.time < 500 && ClientPrefs.startingSync)
 			{
-				if (!paused) resyncVocals();
+				if (!paused) resyncConductor();
 			}
 		}
 
@@ -6970,7 +6970,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 		
-		notes.sort(FlxSort.byY, !ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
+		notes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 
 		setOnLuas('curBeat', curBeat); //DAWGG?????
 		callOnLuas('onBeatHit', []);

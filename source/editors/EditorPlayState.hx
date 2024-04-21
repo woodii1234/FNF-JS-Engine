@@ -385,6 +385,7 @@ class EditorPlayState extends MusicBeatState
 			while (noteIndex >= 0)
 			{
 				var daNote:Note = notes.members[noteIndex--];
+				if (daNote != null) daNote.update(elapsed);
 				emitter.emit(NoteSignalStuff.NOTE_UPDATE, daNote);
 			}
 			if (Conductor.songPosition >= FlxG.sound.music.length) endSong();
