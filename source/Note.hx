@@ -133,37 +133,7 @@ class Note extends FlxSprite
 		if(noteData > -1) {
 			if (ClientPrefs.showNotes)
 			{
-				texture = 'NOTE_assets';
-				if(ClientPrefs.noteStyleThing == 'VS Nonsense V2') {
-					texture = 'Nonsense_NOTE_assets';
-				}
-				if(ClientPrefs.noteStyleThing == 'DNB 3D') {
-					texture = 'NOTE_assets_3D';
-				}
-				if(ClientPrefs.noteStyleThing == 'VS AGOTI') {
-					texture = 'AGOTINOTE_assets';
-				}
-				if(ClientPrefs.noteStyleThing == 'Doki Doki+') {
-					texture = 'NOTE_assets_doki';
-				}
-				if(ClientPrefs.noteStyleThing == 'TGT V4') {
-					texture = 'TGTNOTE_assets';
-				}
-				if (ClientPrefs.noteStyleThing != 'VS Nonsense V2' && ClientPrefs.noteStyleThing != 'DNB 3D' && ClientPrefs.noteStyleThing != 'VS AGOTI' && ClientPrefs.noteStyleThing != 'Doki Doki+' && ClientPrefs.noteStyleThing != 'TGT V4' && ClientPrefs.noteStyleThing != 'Default') {
-					texture = 'NOTE_assets_' + ClientPrefs.noteStyleThing.toLowerCase();
-				}
-				if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && (inEditor || PlayState.isPixelStage)) {
-					texture = ClientPrefs.noteStyleThing == 'TGT V4' ? 'RED_TGTNOTE_assets' : 'RED_NOTE_assets';
-				}
-				if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && ClientPrefs.noteStyleThing == 'TGT V4') {
-					texture = 'RED_TGTNOTE_assets';
-				}
-				if(ClientPrefs.noteColorStyle == 'Char-Based') {
-					texture = 'NOTE_assets_colored';
-				}
-				if(ClientPrefs.noteColorStyle == 'Grayscale') {
-					texture = 'GRAY_NOTE_assets';
-				}
+				texture = Paths.defaultSkin;
 			}
 			if (ClientPrefs.enableColorShader && inEditor)
 			{
@@ -392,10 +362,17 @@ class Note extends FlxSprite
 	// this is used for note recycling
 	public function setupNoteData(chartNoteData:PreloadedChartNote):Void 
 	{
-		if (ClientPrefs.enableColorShader && colorSwap == null)
+		if (ClientPrefs.enableColorShader)
 		{
-			colorSwap = new ColorSwap();
-			shader = colorSwap.shader;
+			if (ClientPrefs.noteColorStyle != 'Char-Based' && colorSwap == null)
+			{
+				colorSwap = new ColorSwap();
+				shader = colorSwap.shader;
+			}
+			else
+			{
+				if (shader == null) this.shader = new ColoredNoteShader(255, 255, 255, false, 10);
+			}
 		}
 		wasGoodHit = hitByOpponent = tooLate = canBeHit = false; // Don't make an update call of this for the note group
 
@@ -434,6 +411,7 @@ class Note extends FlxSprite
 			{
 				colorSwap.hue = ((strumTime / 5000 * 360) / 360) % 1;
 			}
+			if (ClientPrefs.noteColorStyle == 'Char-Based') updateRGBColors();
 		}
 
 		if (noteType == 'Hurt Note')
@@ -464,7 +442,11 @@ class Note extends FlxSprite
 			};
 			copyAngle = false;
 		}
-		else offsetX = 0; //Juuuust in case we recycle a sustain note to a regular note
+		else {
+			if (!copyAngle) copyAngle = true;
+			offsetX = 0; //Juuuust in case we recycle a sustain note to a regular note
+		}
+		angle = 0;
 
 		if (ClientPrefs.doubleGhost && !isSustainNote && PlayState.instance != null)
 		{

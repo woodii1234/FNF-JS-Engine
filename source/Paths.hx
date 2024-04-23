@@ -85,6 +85,8 @@ class Paths
 	//Function that initializes the first note. This way, we can recycle the notes
 	public static function initDefaultSkin(keys:Int = 4, noteSkin:String, inEditor:Bool = false)
 	{
+		if (ClientPrefs.noteStyleThing == 'Default')
+			defaultSkin = 'NOTE_assets';
 		if(ClientPrefs.noteStyleThing == 'VS Nonsense V2') {
 			defaultSkin = 'Nonsense_NOTE_assets';
 		}

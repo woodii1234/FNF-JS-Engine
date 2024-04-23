@@ -1204,8 +1204,8 @@ class ChartingState extends MusicBeatState
 			return;
 			} 
 			if(_song.notes[curSection] != null && Math.isNaN(_song.notes[daSec].sectionNotes.length)) {
-			trace ("HEY! your section doesn't have any notes! please place at least 1 note then try using this.");
-			return; //prevent a crash if the section doesn't have any notes
+				trace ("HEY! your section doesn't have any notes! please place at least 1 note then try using this.");
+				return; //prevent a crash if the section doesn't have any notes
 			}
 			saveUndo(_song); //I don't even know why.
 
@@ -1218,7 +1218,7 @@ class ChartingState extends MusicBeatState
 
 
 					var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
-					_song.notes[daSec].sectionNotes.push(copiedNote);
+					inline _song.notes[daSec].sectionNotes.push(copiedNote);
 				}
 					if (curSection - value1 < 0)
 					{
@@ -4013,11 +4013,12 @@ class ChartingState extends MusicBeatState
 			cpp.vm.Gc.enable(false);
 		}
 		if(_song.events != null && _song.events.length > 1) _song.events.sort(sortByTime);
-		var json = {
+		
+		final json = {
 			"song": _song
 		};
 
-		var data:String = !compressed ? Json.stringify(json, "\t") : Json.stringify(json);
+		final data:String = !compressed ? Json.stringify(json, "\t") : Json.stringify(json);
 
 		if ((data != null) && (data.length > 0))
 		{
