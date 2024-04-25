@@ -2101,9 +2101,6 @@ class PlayState extends MusicBeatState
 				camHUDShaders.push(effect);
 				camHUDBelowShaders.push(effect);
 				var newCamEffects:Array<BitmapFilter>=[]; // IT SHUTS HAXE UP IDK WHY BUT WHATEVER IDK WHY I CANT JUST ARRAY<SHADERFILTER>
-				for(i in camHUDBelowShaders){
-					newCamEffects.push(new ShaderFilter(i.shader));
-				}
 				for(i in camHUDShaders){
 					newCamEffects.push(new ShaderFilter(i.shader));
 				}
@@ -2143,9 +2140,6 @@ class PlayState extends MusicBeatState
 			for(i in camHUDShaders){
 				newCamEffects.push(new ShaderFilter(i.shader));
 			}
-			for(i in camHUDBelowShaders){
-				newCamEffects.push(new ShaderFilter(i.shader));
-			}
 			camHUD.filters = camHUDBelow.filters = newCamEffects;
 		case 'camother' | 'other':
 			camOtherShaders.remove(effect);
@@ -2168,7 +2162,8 @@ class PlayState extends MusicBeatState
   public function clearShaderFromCamera(cam:String){
 	switch(cam.toLowerCase()) {
 		case 'camhud' | 'hud':
-			camHUDShaders = camHUDBelowShaders = [];
+			camHUDShaders = [];
+			camHUDBelowShaders = [];
 			var newCamEffects:Array<BitmapFilter>=[];
 			camHUD.filters = camHUDBelow.filters = newCamEffects;
 		case 'camother' | 'other':
@@ -3591,7 +3586,6 @@ class PlayState extends MusicBeatState
 			{
 				while(Conductor.songPosition > 20 && FlxG.sound.music.time < 20)
 				{
-
 					FlxG.sound.music.time = Conductor.songPosition;
 					vocals.time = Conductor.songPosition;
 
@@ -3605,7 +3599,7 @@ class PlayState extends MusicBeatState
 			FlxG.sound.music.play();
 
 			Conductor.songPosition = FlxG.sound.music.time;
-			if (Conductor.songPosition < vocals.length) vocals.time = Conductor.songPosition;
+			//if (Conductor.songPosition < vocals.length) vocals.time = Conductor.songPosition;
 			vocals.play();
 		}
 	}
@@ -4197,6 +4191,7 @@ class PlayState extends MusicBeatState
 				{
 					updateNote(notes.members[noteIndex--]);
 				}
+				if (ffmpegMode) inline notes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 			}
 
 			while(eventNotes.length > 0 && Conductor.songPosition > eventNotes[0].strumTime) {
@@ -6889,6 +6884,7 @@ class PlayState extends MusicBeatState
 			{
 				if (!paused) resyncConductor();
 			}
+			if (!paused && FlxG.sound.music.time - vocals.time > 20 && FlxG.sound.music.time < vocals.length) vocals.time = FlxG.sound.music.time;
 		}
 
 		if (camTwist)
@@ -6974,7 +6970,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 		
-		notes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
+		if (!ffmpegMode) inline notes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 
 		setOnLuas('curBeat', curBeat); //DAWGG?????
 		callOnLuas('onBeatHit', []);
