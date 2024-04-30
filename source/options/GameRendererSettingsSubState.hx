@@ -87,7 +87,7 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 			'vidEncoder',
 			'string',
 			'libx264',
-			['libx264', 'libx264rgb', 'libx265', 'libxvid', 'libsvtav1']);
+			['libx264', 'libx264rgb', 'libx265', 'libxvid', 'libsvtav1', 'mpeg2video']);
 		addOption(option);
 
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length-1]];
