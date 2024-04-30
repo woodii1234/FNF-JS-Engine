@@ -553,7 +553,6 @@ class PlayState extends MusicBeatState
 	var ffmpegInfo = ClientPrefs.ffmpegInfo;
 	var targetFPS = ClientPrefs.targetFPS;
 	var noCapture = ClientPrefs.noCapture;
-	static var capture:Screenshot = new Screenshot();
 
 	// Callbacks for stages
 	public var startCallback:Void->Void = null;
@@ -4266,12 +4265,7 @@ class PlayState extends MusicBeatState
 		super.update(elapsed);
 		if (!ffmpegMode) return;
 
-		#if !mac pipeFrame();
-		#else
-			var filename = CoolUtil.zeroFill(frameCaptured, 7);
-			capture.save(Paths.formatToSongPath(SONG.song) + #if linux '/' #else '\\' #end, filename);
-			if (ClientPrefs.renderGCRate > 0 && (frameCaptured / targetFPS) % ClientPrefs.renderGCRate == 0) openfl.system.System.gc();
-		#end
+		pipeFrame();
 		frameCaptured++;
 
 		if(botplayTxt != null && botplayTxt.visible) {
@@ -6230,13 +6224,13 @@ class PlayState extends MusicBeatState
 				{
 					combo += 1 * polyphony;
 					totalNotesPlayed += 1 * polyphony;
+					if (ClientPrefs.showNPS) {
+						inline notesHitArray.push(1 * polyphony);
+						inline notesHitDateArray.push(Conductor.songPosition);
+					}
 					if (ClientPrefs.lessBotLag)
 					{
 						songScore += (ClientPrefs.noMarvJudge ? 350 : 500) * polyphony;
-						if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
-							inline notesHitArray.push(1 * polyphony);
-							inline notesHitDateArray.push(Conductor.songPosition);
-						}
 						if(!note.noteSplashDisabled && !note.isSustainNote && ClientPrefs.noteSplashes && splashesPerFrame[1] <= 4) {
 							spawnNoteSplashOnNote(false, note, note.gfNote);
 						}
@@ -7565,7 +7559,7 @@ class PlayState extends MusicBeatState
 
 		ffmpegExists = true;
 
-		process = new sys.io.Process('ffmpeg', ['-v', 'quiet', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', lime.app.Application.current.window.width + 'x' + lime.app.Application.current.window.height, '-r', Std.string(targetFPS), '-i', '-', '-c:v', 'libx264', '-b', Std.string(ClientPrefs.renderBitrate * 1000000),  'assets/gameRenders/' + Paths.formatToSongPath(SONG.song) + '.mp4']);
+		process = new sys.io.Process('ffmpeg', ['-v', 'quiet', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', lime.app.Application.current.window.width + 'x' + lime.app.Application.current.window.height, '-r', Std.string(targetFPS), '-i', '-', '-c:v', ClientPrefs.vidEncoder, '-b', Std.string(ClientPrefs.renderBitrate * 1000000),  'assets/gameRenders/' + Paths.formatToSongPath(SONG.song) + '.mp4']);
 		FlxG.autoPause = false;
 	}
 

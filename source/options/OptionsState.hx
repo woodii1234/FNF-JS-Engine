@@ -37,7 +37,7 @@ class OptionsState extends MusicBeatState
 var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 	var konamiCode = [];
 	var isEnteringKonamiCode:Bool = false;
-	var options:Array<String> = ['Note Colors', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Optimization', 'Game Rendering', 'Visuals and UI', 'Gameplay', 'Misc'];
+	var options:Array<String> = ['Note Colors', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Optimization', #if !mac 'Game Rendering', #end 'Visuals and UI', 'Gameplay', 'Misc'];
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
@@ -61,8 +61,10 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 				openSubState(new options.GameplaySettingsSubState());
 			case 'Optimization':
 				openSubState(new options.OptimizationSubState());
-			case 'Game Rendering':
-				openSubState(new options.GameRendererSettingsSubState());
+			#if !mac 
+				case 'Game Rendering':
+					openSubState(new options.GameRendererSettingsSubState());
+			#end
 			case 'Adjust Delay and Combo':
 				LoadingState.loadAndSwitchState(() -> new options.NoteOffsetState());
 			case 'Misc':

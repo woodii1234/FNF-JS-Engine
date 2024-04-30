@@ -68,7 +68,6 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		option.onChange = onChangeFramerate;
 		fpsOption = option;
 
-		#if windows
 		var option:Option = new Option('Video Bitrate: ',
 			"Use this option to set your video's bitrate!",
 			'renderBitrate',
@@ -82,49 +81,14 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		option.changeValue = 0.01;
 		option.decimals = 2;
 		option.displayFormat = '%v Mbps';
-		#end
-		
-		#if !windows
-		var option:Option = new Option('Lossless Screenshots',
-			"If checked, screenshots will save as PNGs.\nOtherwise, It uses JPEG.",
-			'lossless',
-			'bool',
-			false);
+
+		var option:Option = new Option('Video Encoder: ',
+			"Which video encoder would you like?\nThey all have differences like rendering speed, quality, etc.",
+			'vidEncoder',
+			'string',
+			'libx264',
+			['libx264', 'libx264rgb', 'libx265', 'libxvid', 'libsvtav1']);
 		addOption(option);
-
-		var option:Option = new Option('JPEG Quality',
-			"Change the JPEG quality in here.\nThe recommended value is 50.",
-			'quality',
-			'int',
-			50);
-		addOption(option);
-
-		option.minValue = 1;
-		option.maxValue = 100;
-		option.scrollSpeed = 30;
-		option.decimals = 0;
-
-		var option:Option = new Option('Garbage Collection Rate',
-			"After how many seconds rendered should a garbage collection be performed?\nIf it's set to 0, the game will not garbage collect at all.",
-			'renderGCRate',
-			'float',
-			5.0);
-		addOption(option);
-
-		option.minValue = 1.0;
-		option.maxValue = 60.0;
-		option.scrollSpeed = 3;
-		option.changeValue = 0.1;
-		option.decimals = 1;
-		option.displayFormat = '%vs';
-
-       		var option:Option = new Option('No Screenshot',
-			"If checked, Skip taking of screenshot.\nIt's a function for debug.",
-			'noCapture',
-			'bool',
-			false);
-		addOption(option);
-		#end
 
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length-1]];
 		

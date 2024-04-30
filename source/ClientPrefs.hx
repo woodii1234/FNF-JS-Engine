@@ -164,6 +164,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var noCapture:Bool = false;
 	public static var renderGCRate:Float = 5.0;
 	public static var renderBitrate:Float = 5.0;
+	public static var vidEncoder:String = 'libx264';
 
 	//Misc
 	public static var JSEngineRecharts:Bool = false;
@@ -418,6 +419,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.noCapture = noCapture;
 		FlxG.save.data.renderGCRate = renderGCRate;
 		FlxG.save.data.renderBitrate = renderBitrate;
+		FlxG.save.data.vidEncoder = vidEncoder;
 
 		//Note HSV
 		FlxG.save.data.arrowHSV = arrowHSV;
@@ -948,6 +950,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.renderBitrate != null) {
 			renderBitrate = FlxG.save.data.renderBitrate;
+		}
+		if(FlxG.save.data.vidEncoder != null) {
+			vidEncoder = FlxG.save.data.vidEncoder;
 		}
 
 		//Misc Settings
