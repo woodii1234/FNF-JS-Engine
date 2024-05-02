@@ -10,6 +10,8 @@ class EditingMusic
 	public var music:FlxSound = new FlxSound();
 	public var startTimer:FlxTimer = null;
 
+	public var musicPaused:Bool = false;
+
 	public function new() {
 		playMusic(1);
 	}
@@ -22,6 +24,7 @@ class EditingMusic
 
 		public function pauseMusic() {
 			music.pause();
+			musicPaused = true;
 			if (startTimer != null) startTimer.cancel();
 			startTimer = null;
 		}

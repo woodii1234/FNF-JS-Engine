@@ -439,7 +439,7 @@ class EditorPlayState extends MusicBeatState
 
 		FlxG.sound.music.play();
 		Conductor.songPosition = FlxG.sound.music.time;
-		vocals.time = Conductor.songPosition;
+		vocals.time = FlxG.sound.music.time;
 		vocals.play();
 	}
 	private function onKeyPress(event:KeyboardEvent):Void
@@ -491,8 +491,7 @@ class EditorPlayState extends MusicBeatState
 
 						// eee jack detection before was not super good
 						if (!notesStopped) {
-							note = epicNote;
-							emitter.emit(NoteSignalStuff.NOTE_HIT_BF_EDITOR);
+							goodNoteHit(epicNote);
 							pressNotes.push(epicNote);
 						}
 
@@ -591,8 +590,7 @@ class EditorPlayState extends MusicBeatState
 				// hold note functions
 				if (daNote.isSustainNote && controlHoldArray[daNote.noteData] && daNote.canBeHit 
 				&& daNote.mustPress && !daNote.tooLate && !daNote.wasGoodHit) {
-					note = daNote;
-					emitter.emit(NoteSignalStuff.NOTE_HIT_BF_EDITOR);
+					goodNoteHit(daNote);
 				}
 			});
 		}
@@ -644,9 +642,7 @@ class EditorPlayState extends MusicBeatState
 			{
 				if (PlayState.SONG.needsVoices)
 					vocals.volume = 1;
-
-				note = daNote;
-					goodNoteHit();
+				goodNoteHit(daNote);
 			}
 
 			if (Conductor.songPosition > (noteKillOffset / PlayState.SONG.speed) + daNote.strumTime)
@@ -662,7 +658,7 @@ class EditorPlayState extends MusicBeatState
 							}
 						});
 
-						if(!daNote.ignoreNote && !daNote.canBeHit) {
+						if(!daNote.ignoreNote) {
 							songMisses++;
 							vocals.volume = 0;
 						}
@@ -675,9 +671,9 @@ class EditorPlayState extends MusicBeatState
 	}
 
 	var combo:Int = 0;
-	function goodNoteHit():Void
+	function goodNoteHit(?note:Note):Void
 	{
-		if (!note.wasGoodHit)
+		if (note != null && !note.wasGoodHit)
 		{
 			switch(note.noteType) {
 				case 'Hurt Note': //Hurt note
@@ -702,7 +698,6 @@ class EditorPlayState extends MusicBeatState
 			if (!note.isSustainNote)
 			{
 				combo += 1;
-				if(combo > 9999) combo = 9999;
 				if (!cpuControlled) popUpScore(note);
 				songHits++;
 			}

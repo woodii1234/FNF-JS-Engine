@@ -6253,50 +6253,50 @@ class PlayState extends MusicBeatState
 					{
 						if(gf != null)
 						{
-						if (!ClientPrefs.doubleGhost) {
-							inline gf.playAnim(animToPlay + note.animSuffix, true);
-						}
 							gf.holdTimer = 0;
-						if (ClientPrefs.doubleGhost)
-						{
-							if (!note.isSustainNote && noteRows[note.mustPress?0:1][note.row].length > 1)
-								{
-									// potentially have jump anims?
-									final chord = noteRows[note.mustPress?0:1][note.row];
-									final animNote = chord[0];
-									final realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
-									if (gf.mostRecentRow != note.row)
+							if (!ClientPrefs.doubleGhost) {
+								inline gf.playAnim(animToPlay + note.animSuffix, true);
+							}
+							else
+							{
+								if (!note.isSustainNote && noteRows[note.mustPress?0:1][note.row].length > 1)
 									{
-										inline gf.playAnim(realAnim, true);
-									}
-
-									gf.mostRecentRow = note.row;
-									doGhostAnim('gf', animToPlay);
-									gfGhost.color = FlxColor.fromRGB(gf.healthColorArray[0] + 50, gf.healthColorArray[1] + 50, gf.healthColorArray[2] + 50);
-									gfGhostTween = FlxTween.tween(gfGhost, {alpha: 0}, 0.75, {
-										ease: FlxEase.linear,
-										onComplete: function(twn:FlxTween)
+										// potentially have jump anims?
+										final chord = noteRows[note.mustPress?0:1][note.row];
+										final animNote = chord[0];
+										final realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
+										if (gf.mostRecentRow != note.row)
 										{
-											gfGhostTween = null;
+											inline gf.playAnim(realAnim, true);
 										}
-									});
-								}
+
+										gf.mostRecentRow = note.row;
+										doGhostAnim('gf', animToPlay);
+										gfGhost.color = FlxColor.fromRGB(gf.healthColorArray[0] + 50, gf.healthColorArray[1] + 50, gf.healthColorArray[2] + 50);
+										gfGhostTween = FlxTween.tween(gfGhost, {alpha: 0}, 0.75, {
+											ease: FlxEase.linear,
+											onComplete: function(twn:FlxTween)
+											{
+												gfGhostTween = null;
+											}
+										});
+									}
 								else{
-									inline gf.playAnim(animToPlay + note.animSuffix, true);
-									gf.holdTimer = 0;
+										inline gf.playAnim(animToPlay + note.animSuffix, true);
+										gf.holdTimer = 0;
 								}
 							}
 						}
 					}
-					if (!note.gfNote && ClientPrefs.charsAndBG)
+					else
 					{
-						var char = (!opponentChart ? boyfriend : dad);
+						final char = (!opponentChart ? boyfriend : dad);
+						char.holdTimer = 0;
+						if (ClientPrefs.cameraPanning) inline camPanRoutine(animToPlay, (!opponentChart ? 'bf' : 'oppt'));
 						if (!ClientPrefs.doubleGhost) {
 							inline char.playAnim(animToPlay + note.animSuffix, true);
 						}
-						if (ClientPrefs.cameraPanning) inline camPanRoutine(animToPlay, (!opponentChart ? 'bf' : 'oppt'));
-						char.holdTimer = 0;
-						if (ClientPrefs.doubleGhost)
+						else
 						{
 							if (!note.isSustainNote && noteRows[note.mustPress?0:1][note.row].length > 1)
 							{

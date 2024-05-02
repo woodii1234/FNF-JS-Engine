@@ -171,6 +171,8 @@ class ChartingState extends MusicBeatState
 
 	var vocals:FlxSound = null;
 
+	var idleMusic:EditingMusic;
+
 	var leftIcon:HealthIcon;
 	var rightIcon:HealthIcon;
 
@@ -238,13 +240,14 @@ class ChartingState extends MusicBeatState
 		768
 	];
 
-
+	public static var idleMusicAllow:Bool = true;
 
 	var text:String = "";
 	public static var vortex:Bool = false;
 	public var mouseQuant:Bool = false;
 	override function create()
 	{
+		idleMusic = new EditingMusic();
 		undos = [];
 		redos = [];
 		if (PlayState.SONG != null)
@@ -554,6 +557,8 @@ class ChartingState extends MusicBeatState
 		zoomTxt = new FlxText(10, 10, 0, "Zoom: 1 / 1", 16);
 		zoomTxt.scrollFactor.set();
 		add(zoomTxt);
+
+		if (idleMusicAllow) idleMusic.playMusic();
 
 		updateGrid();
 
@@ -1790,6 +1795,7 @@ class ChartingState extends MusicBeatState
 	var lilBuddiesBox:FlxUICheckBox;
 	var saveUndoCheck:FlxUICheckBox;
 	var soundEffectsCheck:FlxUICheckBox;
+	var idleMusicCheck:FlxUICheckBox;
 	var instVolume:FlxUINumericStepper;
 	var voicesVolume:FlxUINumericStepper;
 	var hitsoundVolume:FlxUINumericStepper;
@@ -1966,13 +1972,31 @@ class ChartingState extends MusicBeatState
 		tab_group_chart.add(sliderRate);
 		#end
 
-			soundEffectsCheck = new FlxUICheckBox(metronomeOffsetStepper.x + 70, metronomeOffsetStepper.y, null, null, "Sound Effects", 100);
-			if (FlxG.save.data.soundEffects == null) FlxG.save.data.soundEffects = true;
-			soundEffectsCheck.checked = FlxG.save.data.soundEffects;
-			soundEffectsCheck.callback = function()
+		soundEffectsCheck = new FlxUICheckBox(metronomeOffsetStepper.x + 70, metronomeOffsetStepper.y, null, null, "Sound Effects", 100);
+		if (FlxG.save.data.soundEffects == null) FlxG.save.data.soundEffects = true;
+		soundEffectsCheck.checked = FlxG.save.data.soundEffects;
+		soundEffectsCheck.callback = function()
+		{
+			FlxG.save.data.soundEffects = soundEffectsCheck.checked;
+		};
+		
+		idleMusicCheck = new FlxUICheckBox(metronomeOffsetStepper.x + 70, metronomeOffsetStepper.y - 20, null, null, "Idle Music", 100);
+		if (FlxG.save.data.idleMusicAllowed == null) FlxG.save.data.idleMusicAllowed = true;
+		idleMusicCheck.checked = FlxG.save.data.idleMusicAllowed;
+		idleMusicCheck.callback = function()
+		{
+			FlxG.save.data.idleMusicAllowed = idleMusicCheck.checked;
+			idleMusicAllow = FlxG.save.data.idleMusicAllowed;
+			if (!FlxG.sound.music.playing)
 			{
-				FlxG.save.data.soundEffects = soundEffectsCheck.checked;
-			};
+				if (idleMusicAllow) 
+				{
+					if (!idleMusic.musicPaused) idleMusic.playMusic();
+					else idleMusic.unpauseMusic(0.3);
+				}
+				else idleMusic.pauseMusic();
+			}
+		};
 
 		tab_group_chart.add(new FlxText(metronomeStepper.x, metronomeStepper.y - 15, 0, 'BPM:'));
 		tab_group_chart.add(new FlxText(metronomeOffsetStepper.x, metronomeOffsetStepper.y - 15, 0, 'Offset (ms):'));
@@ -1990,6 +2014,7 @@ class ChartingState extends MusicBeatState
 		tab_group_chart.add(lilBuddiesBox);
 		tab_group_chart.add(soundEffectsCheck);
 		tab_group_chart.add(saveUndoCheck);
+		tab_group_chart.add(idleMusicCheck);
 		tab_group_chart.add(instVolume);
 		tab_group_chart.add(voicesVolume);
 		tab_group_chart.add(hitsoundVolume);
@@ -2200,10 +2225,12 @@ class ChartingState extends MusicBeatState
 		curStep = recalculateSteps();
 
 		if(FlxG.sound.music.time < 0) {
+			if (idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.unpauseMusic(2);
 			FlxG.sound.music.pause();
 			FlxG.sound.music.time = 0;
 		}
 		else if(FlxG.sound.music.time > FlxG.sound.music.length) {
+			if (idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.unpauseMusic(2);
 			FlxG.sound.music.pause();
 			FlxG.sound.music.time = 0;
 			changeSection();
@@ -2211,6 +2238,8 @@ class ChartingState extends MusicBeatState
 		Conductor.songPosition = FlxG.sound.music.time;
 		_song.song = UI_songTitle.text;
 		difficulty = UI_songDiff.text.toLowerCase();
+
+		if (idleMusic != null && idleMusic.music != null && idleMusic.music.playing && !idleMusicAllow) idleMusic.pauseMusic();
 
 		_song.songCredit = creditInputText.text;
 		_song.songCreditIcon = creditIconInputText.text;
@@ -2390,6 +2419,7 @@ class ChartingState extends MusicBeatState
 				FlxG.sound.music.pause();
 				vocals.pause();
 				LoadingState.loadAndSwitchState(() -> new editors.EditorPlayState(sectionStartTime()));
+				if (idleMusic != null && idleMusic.music != null) idleMusic.destroy();
 				FlxG.sound.music.onComplete = null; //So that it doesn't crash when you reach the end
 			}
 			if (FlxG.keys.justPressed.ENTER)
@@ -2405,6 +2435,7 @@ class ChartingState extends MusicBeatState
 				CoolUtil.currentDifficulty = difficulty;
 				StageData.loadDirectory(_song);
 				LoadingState.loadAndSwitchState(PlayState.new);
+				if (idleMusic != null && idleMusic.music != null) idleMusic.destroy();
 			}
 
 			if(curSelectedNote != null && curSelectedNote[1] > -1) {
@@ -2434,6 +2465,7 @@ class ChartingState extends MusicBeatState
 				FlxG.switchState(editors.MasterEditorMenu.new);
 				FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
 				FlxG.mouse.visible = false;
+				if (idleMusic != null && idleMusic.music != null) idleMusic.destroy();
 				return;
 			}
 
@@ -2507,6 +2539,7 @@ class ChartingState extends MusicBeatState
 					if(vocals != null) vocals.pause();
 					lilBf.animation.play("idle");
 					lilOpp.animation.play("idle");
+					if (idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.unpauseMusic(2);
 				}
 				else
 				{
@@ -2517,6 +2550,7 @@ class ChartingState extends MusicBeatState
 						vocals.play();
 					}
 					FlxG.sound.music.play();
+					if (idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.pauseMusic();
 					lilBf.animation.play("idle");
 					lilOpp.animation.play("idle");
 				}
@@ -2553,6 +2587,7 @@ class ChartingState extends MusicBeatState
 
 			if (FlxG.mouse.wheel != 0 == !FlxG.keys.pressed.CONTROL)
 			{
+				if (idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.unpauseMusic(2);
 				FlxG.sound.music.pause();
 				lilBf.animation.play("idle");
 				lilOpp.animation.play("idle");
@@ -2581,6 +2616,7 @@ class ChartingState extends MusicBeatState
 
 			if (FlxG.keys.pressed.W || FlxG.keys.pressed.S)
 			{
+				if (idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.unpauseMusic(2);
 				lilBf.animation.play("idle");
 				lilOpp.animation.play("idle");
 				FlxG.sound.music.pause();
@@ -2607,6 +2643,7 @@ class ChartingState extends MusicBeatState
 			if(!vortex){
 				if (FlxG.keys.justPressed.UP || FlxG.keys.justPressed.DOWN  )
 				{
+					if (idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.unpauseMusic(2);
 					FlxG.sound.music.pause();
 					updateCurStep();
 					var time:Float = FlxG.sound.music.time;
@@ -2671,6 +2708,7 @@ class ChartingState extends MusicBeatState
 				{
 					FlxG.sound.music.pause();
 
+					if (idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.unpauseMusic(2);
 
 					updateCurStep();
 					//FlxG.sound.music.time = (Math.round(curStep/quants[curQuant])*quants[curQuant]) * Conductor.stepCrochet;
@@ -3253,6 +3291,8 @@ class ChartingState extends MusicBeatState
 	{
 		updateGrid((songBeginning ? true : false));
 
+			if (FlxG.sound.music.playing && idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.pauseMusic();
+
 		FlxG.sound.music.pause();
 		// Basically old shit from changeSection???
 		FlxG.sound.music.time = sectionStartTime();
@@ -3276,6 +3316,7 @@ class ChartingState extends MusicBeatState
 	{
 		if (_song.notes[sec] != null)
 		{
+			if (FlxG.sound.music.playing && idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.pauseMusic();
 				lilBf.animation.play("idle");
 				lilOpp.animation.play("idle");
 			curSec = sec;
@@ -3978,6 +4019,7 @@ class ChartingState extends MusicBeatState
 		}
 		CoolUtil.currentDifficulty = diff;
 		FlxG.resetState();
+		if (idleMusic != null && idleMusic.music != null) idleMusic.destroy();
 		}
 		else
 		{
@@ -4103,6 +4145,20 @@ class ChartingState extends MusicBeatState
 		if(_song.notes[section] != null) val = _song.notes[section].sectionBeats;
 		return val != null ? val : 4;
 	}
+
+	override public function onFocusLost():Void
+	    {
+		    if (idleMusic != null && idleMusic.music != null) idleMusic.pauseMusic();
+
+		    super.onFocusLost();
+	    }
+
+	override public function onFocus():Void
+	    {
+		    if (idleMusic != null && idleMusic.music != null) idleMusic.unpauseMusic();
+
+		    super.onFocus();
+	    }
 
 	override public function destroy():Void
 	    {
