@@ -559,6 +559,7 @@ class ChartingState extends MusicBeatState
 		add(zoomTxt);
 
 		if (idleMusicAllow) idleMusic.playMusic();
+		else idleMusic.pauseMusic();
 
 		updateGrid();
 
