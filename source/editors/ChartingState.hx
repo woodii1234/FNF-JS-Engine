@@ -240,7 +240,7 @@ class ChartingState extends MusicBeatState
 		768
 	];
 
-	public static var idleMusicAllow:Bool = true;
+	public static var idleMusicAllow:Bool = false;
 
 	var text:String = "";
 	public static var vortex:Bool = false;
@@ -293,6 +293,7 @@ class ChartingState extends MusicBeatState
 
 		vortex = FlxG.save.data.chart_vortex;
 		showTheGrid = FlxG.save.data.showGrid;
+		idleMusicAllow = FlxG.save.data.idleMusicAllowed;
 
 		ignoreWarnings = FlxG.save.data.ignoreWarnings;
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
@@ -2257,7 +2258,7 @@ class ChartingState extends MusicBeatState
 			}
 
 			copyMultiSectButton.text = "Copy from the last " + Std.int(CopyLastSectionCount.value) + " to the next " + Std.int(CopyFutureSectionCount.value) + " sections, " + Std.int(CopyLoopCount.value) + " times";
-
+			
 		strumLineUpdateY();
 		for (i in 0...8){
 			strumLineNotes.members[i].y = strumLine.y;
