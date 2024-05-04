@@ -4161,7 +4161,7 @@ class PlayState extends MusicBeatState
 		{
 			while (unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < (NOTE_SPAWN_TIME / unspawnNotes[notesAddedCount].multSpeed)) {
 				inline notes.recycle(Note).setupNoteData(unspawnNotes[notesAddedCount]);
-				callOnLuas('onSpawnNote', [notes.members.indexOf(notes.members[notes.length-1]), unspawnNotes[notesAddedCount].noteData, unspawnNotes[notesAddedCount].noteType, unspawnNotes[notesAddedCount].isSustainNote]);
+				if (!ClientPrefs.noSpawnFunc) callOnLuas('onSpawnNote', [notes.members.indexOf(notes.members[notes.length-1]), unspawnNotes[notesAddedCount].noteData, unspawnNotes[notesAddedCount].noteType, unspawnNotes[notesAddedCount].isSustainNote]);
 				notesAddedCount++;
 			}
 		}

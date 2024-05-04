@@ -138,6 +138,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var ratesAndCombo:Bool = false;
 	public static var comboPopup:Bool = false;
 	public static var songLoading:Bool = true;
+	public static var noSpawnFunc:Bool = false;
 	public static var lessBotLag:Bool = false;
 
 	//Secret Debug
@@ -379,6 +380,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.ratesAndCombo = ratesAndCombo;
 		FlxG.save.data.comboPopup = comboPopup;
 		FlxG.save.data.songLoading = songLoading;
+		FlxG.save.data.noSpawnFunc = noSpawnFunc;
 		FlxG.save.data.lessBotLag = lessBotLag;
 
 		//Secret Debug
@@ -846,6 +848,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.songLoading != null) {
 			songLoading = FlxG.save.data.songLoading;
+		}
+		if(FlxG.save.data.noSpawnFunc != null) {
+			noSpawnFunc = FlxG.save.data.noSpawnFunc;
 		}
 		if(FlxG.save.data.lessBotLag != null) {
 			lessBotLag = FlxG.save.data.lessBotLag;
