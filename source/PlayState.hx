@@ -4188,9 +4188,9 @@ class PlayState extends MusicBeatState
 				var noteIndex:Int = notes.members.length;
 				while (noteIndex >= 0)
 				{
-					updateNote(notes.members[noteIndex--]);
+					emitter.emit(NoteSignalStuff.NOTE_UPDATE, notes.members[noteIndex--]);
 				}
-				if (ffmpegMode) inline notes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
+				inline notes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 			}
 
 			while(eventNotes.length > 0 && Conductor.songPosition > eventNotes[0].strumTime) {
@@ -4263,10 +4263,12 @@ class PlayState extends MusicBeatState
 			i(elapsed);
 		}
 		super.update(elapsed);
-		if (!ffmpegMode) return;
 
-		pipeFrame();
-		frameCaptured++;
+		if (ffmpegMode)
+		{
+			pipeFrame();
+			frameCaptured++;
+		}
 
 		if(botplayTxt != null && botplayTxt.visible) {
 			if (ffmpegInfo)
@@ -6068,10 +6070,6 @@ class PlayState extends MusicBeatState
 
 	function updateNote(daNote:Note):Void
 	{
-		if (daNote != null && !daNote.exists)
-		{
-			return;
-		}
 		if (daNote != null && daNote.exists)
 		{
 			amountOfRenderedNotes += 1;
@@ -6964,8 +6962,6 @@ class PlayState extends MusicBeatState
 			}
 		}
 		
-		if (!ffmpegMode) inline notes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
-
 		setOnLuas('curBeat', curBeat); //DAWGG?????
 		callOnLuas('onBeatHit', []);
 	}

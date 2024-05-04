@@ -115,7 +115,6 @@ class Note extends FlxSprite
 			if (!Paths.noteSkinFramesMap.exists(value)) Paths.initNote(4, value);
 			if (frames != @:privateAccess Paths.noteSkinFramesMap.get(value)) frames = @:privateAccess Paths.noteSkinFramesMap.get(value);
 			if (animation != @:privateAccess Paths.noteSkinAnimsMap.get(value)) inline animation.copyFrom(@:privateAccess Paths.noteSkinAnimsMap.get(value));
-			antialiasing = ClientPrefs.globalAntialiasing;
 			scale.set(0.7, 0.7);
 			updateHitbox();
 		}
@@ -129,6 +128,7 @@ class Note extends FlxSprite
 		super();
 
 		y -= 2000;
+		antialiasing = ClientPrefs.globalAntialiasing && !PlayState.isPixelStage;
 
 		if(noteData > -1) {
 			if (ClientPrefs.showNotes)
