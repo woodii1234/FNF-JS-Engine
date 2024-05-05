@@ -894,6 +894,10 @@ class ChartingState extends MusicBeatState
 	var CopyLoopCount:FlxUINumericStepper;
 	var copyMultiSectButton:FlxButton;
 
+	var deleteSecStart:FlxUINumericStepper;
+	var deleteSecEnd:FlxUINumericStepper;
+	var deleteSections:FlxButton;
+
 	function addSectionUI():Void
 	{
 		var tab_group_section = new FlxUI(null, UI_box);
@@ -1276,6 +1280,46 @@ class ChartingState extends MusicBeatState
 		copyNextButton.color = FlxColor.CYAN;
 		copyNextButton.label.color = FlxColor.WHITE;
 
+		deleteSecStart = new FlxUINumericStepper(copyMultiSectButton.x + 80, CopyLastSectionCount.y, 1, 1, -16384, 16384, 0);
+		blockPressWhileTypingOnStepper.push(deleteSecStart);
+
+		deleteSecEnd = new FlxUINumericStepper(deleteSecStart.x + 60, CopyLastSectionCount.y, 1, 1, -16384, 16384, 0);
+		blockPressWhileTypingOnStepper.push(deleteSecEnd);
+
+		deleteSections = new FlxButton(deleteSecStart.x + 30, CopyLastSectionCount.y + 40, "Delete sections " + Std.int(deleteSecStart.value) + " to " + Std.int(deleteSecEnd.value), function()
+		{
+			var startSec:Int = Std.int(deleteSecStart.value);
+			var endSec:Int = Std.int(deleteSecEnd.value);
+			var sectionsToDelete:Int = endSec - startSec;
+			if(sectionsToDelete < 0) {
+			return;
+			} 
+			saveUndo(_song); //I don't even know why.
+
+			var deleteBfNotes:Bool = FlxG.keys.pressed.SHIFT;
+			var deleteOppNotes:Bool = FlxG.keys.pressed.CONTROL;
+
+			for(i in 0...sectionsToDelete) {
+				if (_song.notes[startSec + i].sectionNotes != null)
+					if (!deleteBfNotes && !deleteOppNotes) 
+						_song.notes[startSec + i].sectionNotes = [];
+					else {
+						var b = _song.notes[startSec + i].sectionNotes.length - 1;
+						while (b >= 0)
+						{
+							var note = _song.notes[startSec + i].sectionNotes[b];
+							if (note != null && deleteBfNotes && (note[1] < 4 ? _song.notes[startSec + i].mustHitSection : !_song.notes[startSec + i].mustHitSection)) _song.notes[startSec + i].sectionNotes.remove(note);
+							if (note != null && deleteOppNotes && (note[1] < 4 ? !_song.notes[startSec + i].mustHitSection : _song.notes[startSec + i].mustHitSection)) _song.notes[startSec + i].sectionNotes.remove(note);
+							b--;
+						}
+					}
+			}
+		});
+		deleteSections.color = FlxColor.YELLOW;
+		deleteSections.label.color = FlxColor.WHITE;
+		deleteSections.setGraphicSize(Std.int(deleteSections.width), Std.int(deleteSections.height));
+		deleteSections.updateHitbox();
+
 		tab_group_section.add(stepperSectionJump);
 		tab_group_section.add(jumpSection);
 		tab_group_section.add(new FlxText(stepperBeats.x, stepperBeats.y - 15, 0, 'Beats per Section:'));
@@ -1294,6 +1338,8 @@ class ChartingState extends MusicBeatState
 		tab_group_section.add(CopyLastSectionCount);
 		tab_group_section.add(CopyFutureSectionCount);
 		tab_group_section.add(CopyLoopCount);
+		tab_group_section.add(deleteSecStart);
+		tab_group_section.add(deleteSecEnd);
 		tab_group_section.add(clearSectionButton);
 		tab_group_section.add(check_notesSec);
 		tab_group_section.add(check_eventsSec);
@@ -1303,6 +1349,7 @@ class ChartingState extends MusicBeatState
 		tab_group_section.add(duetButton);
 		tab_group_section.add(mirrorButton);
 		tab_group_section.add(copyMultiSectButton);
+		tab_group_section.add(deleteSections);
 
 		UI_box.addGroup(tab_group_section);
 	}
@@ -2258,7 +2305,8 @@ class ChartingState extends MusicBeatState
 			}
 
 			copyMultiSectButton.text = "Copy from the last " + Std.int(CopyLastSectionCount.value) + " to the next " + Std.int(CopyFutureSectionCount.value) + " sections, " + Std.int(CopyLoopCount.value) + " times";
-			
+			deleteSections.text = "Delete sections " + Std.int(deleteSecStart.value) + " to " + Std.int(deleteSecEnd.value);
+
 		strumLineUpdateY();
 		for (i in 0...8){
 			strumLineNotes.members[i].y = strumLine.y;
