@@ -6244,7 +6244,7 @@ class PlayState extends MusicBeatState
 				if (ClientPrefs.healthGainType == 'Psych Engine' || ClientPrefs.healthGainType == 'Leather Engine' || ClientPrefs.healthGainType == 'Kade (1.2)' || ClientPrefs.healthGainType == 'Kade (1.6+)' || ClientPrefs.healthGainType == 'Doki Doki+' || ClientPrefs.healthGainType == 'VS Impostor') {
 					health += note.hitHealth * healthGain * polyphony;
 				}
-				if(!note.noAnimation && ClientPrefs.charsAndBG && charAnimsFrame < 4) {
+				if(!note.noAnimation && ClientPrefs.charsAndBG && charAnimsFrame < 4 && !note.isSustainNote) {
 					charAnimsFrame += 1;
 					final animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))];
 					if(note.gfNote)
@@ -6330,6 +6330,12 @@ class PlayState extends MusicBeatState
 							gf.heyTimer = 0.6;
 						}
 					}
+				}
+				else if (note.isSustainNote && charAnimsFrame < 4)
+				{
+					charAnimsFrame += 1;
+					final char = (note.gfNote ? gf : (!opponentChart ? boyfriend : dad));
+					if (char != null) char.holdTimer = 0;
 				}
 
 				if(cpuControlled && ClientPrefs.botLightStrum && !strumsHit[(note.noteData % 4) + 4]) {
@@ -6473,7 +6479,7 @@ class PlayState extends MusicBeatState
 					char.specialAnim = true;
 					char.heyTimer = 0.6;
 				}
-			} else if(!daNote.noAnimation && oppAnimsFrame < 4 && ClientPrefs.charsAndBG) {
+			} else if(!daNote.noAnimation && oppAnimsFrame < 4 && ClientPrefs.charsAndBG && !daNote.isSustainNote) {
 				oppAnimsFrame += 1;
 
 				final animToPlay:String = singAnimations[Std.int(Math.abs(daNote.noteData))] + daNote.animSuffix;
@@ -6532,6 +6538,12 @@ class PlayState extends MusicBeatState
 							inline char.playAnim(animToPlay, true);
 						}
 				}
+			}
+			else if (daNote.isSustainNote && oppAnimsFrame < 4)
+			{
+				oppAnimsFrame += 1;
+				final char = (daNote.gfNote ? gf : (opponentChart ? boyfriend : dad));
+				if (char != null) char.holdTimer = 0;
 			}
 
 			if(ClientPrefs.oppNoteSplashes && !daNote.isSustainNote && splashesPerFrame[0] <= 4)
@@ -6898,9 +6910,13 @@ class PlayState extends MusicBeatState
 		callOnLuas('onStepHit', []);
 	}
 
+	var lastBeatHit:Int = -1;
+
 	override function beatHit()
 	{
 		super.beatHit();
+
+		if (lastBeatHit == curBeat) return;
 
 		if(ClientPrefs.timeBounce)
 		{
@@ -6939,9 +6955,9 @@ class PlayState extends MusicBeatState
 			}
 			camHUD.angle = twistShit * camTwistIntensity2;
 			camGame.angle = twistShit * camTwistIntensity2;
-			FlxTween.tween(camHUD, {angle: twistShit * camTwistIntensity}, Conductor.stepCrochet * (0.002 * gfSpeed), {ease: FlxEase.circOut});
+			FlxTween.tween(camHUD, {angle: twistShit * camTwistIntensity}, Conductor.stepCrochet * (0.0015 * gfSpeed), {ease: FlxEase.circOut});
 			FlxTween.tween(camHUD, {x: -twistShit * camTwistIntensity}, Conductor.crochet * (0.001 * gfSpeed), {ease: FlxEase.linear});
-			FlxTween.tween(camGame, {angle: twistShit * camTwistIntensity}, Conductor.stepCrochet * 0.002, {ease: FlxEase.circOut});
+			FlxTween.tween(camGame, {angle: twistShit * camTwistIntensity}, Conductor.stepCrochet * 0.0015, {ease: FlxEase.circOut});
 			FlxTween.tween(camGame, {x: -twistShit * camTwistIntensity}, Conductor.crochet * (0.001 * gfSpeed), {ease: FlxEase.linear});
 		}
 
@@ -6961,7 +6977,8 @@ class PlayState extends MusicBeatState
 				dad.dance();
 			}
 		}
-		
+		lastBeatHit = curBeat;
+
 		setOnLuas('curBeat', curBeat); //DAWGG?????
 		callOnLuas('onBeatHit', []);
 	}
@@ -7036,9 +7053,6 @@ class PlayState extends MusicBeatState
 
 		FlxTween.tween(iconP1, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
 		FlxTween.tween(iconP2, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
-
-		iconP1.updateHitbox();
-		iconP2.updateHitbox();
 		}
 		if (ClientPrefs.iconBounceType == 'Plank Engine') {
 		iconP1.scale.x = 1.3;
@@ -7081,9 +7095,6 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		iconP1.updateHitbox();
-		iconP2.updateHitbox();
-
 		if (curBeat % gfSpeed == 0 && ClientPrefs.iconBounceType == 'Golden Apple') {
 		curBeat % (gfSpeed * 2) == 0 * playbackRate ? {
 		iconP1.scale.set(1.1, 0.8);
@@ -7101,9 +7112,6 @@ class PlayState extends MusicBeatState
 
 		FlxTween.tween(iconP1, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 / playbackRate * gfSpeed, {ease: FlxEase.quadOut});
 		FlxTween.tween(iconP2, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 / playbackRate * gfSpeed, {ease: FlxEase.quadOut});
-
-		iconP1.updateHitbox();
-		iconP2.updateHitbox();
 		}
 		if (ClientPrefs.iconBounceType == 'VS Steve') {
 		if (curBeat % gfSpeed == 0)
@@ -7126,9 +7134,6 @@ class PlayState extends MusicBeatState
 
 			FlxTween.tween(iconP1, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
 			FlxTween.tween(iconP2, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
-
-			iconP1.updateHitbox();
-			iconP2.updateHitbox();
 		}
 		}
 		}
@@ -7166,9 +7171,6 @@ class PlayState extends MusicBeatState
 
 		FlxTween.tween(iconP1, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
 		FlxTween.tween(iconP2, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
-
-		iconP1.updateHitbox();
-		iconP2.updateHitbox();
 		}
 		if (ClientPrefs.iconBounceType == 'Plank Engine') {
 		iconP1.scale.x = 1.3;
@@ -7210,10 +7212,6 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
-
-		iconP1.updateHitbox();
-		iconP2.updateHitbox();
-
 		if (ClientPrefs.iconBounceType == 'Golden Apple') {
 		FlxTween.cancelTweensOf(iconP1);
 		FlxTween.cancelTweensOf(iconP2);
@@ -7233,9 +7231,6 @@ class PlayState extends MusicBeatState
 
 		FlxTween.tween(iconP1, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 / playbackRate * gfSpeed, {ease: FlxEase.quadOut});
 		FlxTween.tween(iconP2, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 / playbackRate * gfSpeed, {ease: FlxEase.quadOut});
-
-		iconP1.updateHitbox();
-		iconP2.updateHitbox();
 		}
 		if (ClientPrefs.iconBounceType == 'VS Steve') {
 		FlxTween.cancelTweensOf(iconP1);
@@ -7260,12 +7255,11 @@ class PlayState extends MusicBeatState
 
 			FlxTween.tween(iconP1, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
 			FlxTween.tween(iconP2, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed / playbackRate, {ease: FlxEase.quadOut});
-
-			iconP1.updateHitbox();
-			iconP2.updateHitbox();
 		}
 		}
 		}
+		iconP1.updateHitbox();
+		iconP2.updateHitbox();
 	}
 
 	#if LUA_ALLOWED
