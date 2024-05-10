@@ -1392,7 +1392,8 @@ class FunkinLua {
 			PlayState.instance.nps += value;
 		});
 		Lua_helper.add_callback(lua, "setScore", function(value:Float = 0) {
-			PlayState.instance.songScore = value;
+			var newScore:Float = value;
+			PlayState.instance.songScore = newScore;
 			PlayState.instance.RecalculateRating();
 		});
 		Lua_helper.add_callback(lua, "setMisses", function(value:Int = 0) {
