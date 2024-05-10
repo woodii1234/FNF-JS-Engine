@@ -1185,7 +1185,7 @@ class ChartingState extends MusicBeatState
 		clearRightSectionButton.color = FlxColor.RED;
 		clearRightSectionButton.label.color = FlxColor.WHITE;
 
-		var stepperSectionJump:FlxUINumericStepper = new FlxUINumericStepper(clearSectionButton.x, clearSectionButton.y + 30, 1, 0, 0, 9999, 0);
+		var stepperSectionJump:FlxUINumericStepper = new FlxUINumericStepper(clearSectionButton.x, clearSectionButton.y + 30, 1, 0, 0, 999999, 0);
 		blockPressWhileTypingOnStepper.push(stepperSectionJump);
 
 		var jumpSection:FlxButton = new FlxButton(clearSectionButton.x, stepperSectionJump.y + 20, "Jump Section", function()

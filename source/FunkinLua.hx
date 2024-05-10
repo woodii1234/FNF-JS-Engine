@@ -1372,7 +1372,7 @@ class FunkinLua {
 		});*/
 
 		//stupid bietch ass functions
-		Lua_helper.add_callback(lua, "addScore", function(value:Int = 0) {
+		Lua_helper.add_callback(lua, "addScore", function(value:Float = 0) {
 			PlayState.instance.songScore += value;
 			PlayState.instance.RecalculateRating();
 		});
@@ -1389,12 +1389,9 @@ class FunkinLua {
 			PlayState.instance.RecalculateRating();
 		});
 		Lua_helper.add_callback(lua, "addNPS", function(value:Int = 0) {
-			for (i in 0...Std.int(value))
-			{
-				PlayState.instance.nps += value;
-			}
+			PlayState.instance.nps += value;
 		});
-		Lua_helper.add_callback(lua, "setScore", function(value:Int = 0) {
+		Lua_helper.add_callback(lua, "setScore", function(value:Float = 0) {
 			PlayState.instance.songScore = value;
 			PlayState.instance.RecalculateRating();
 		});

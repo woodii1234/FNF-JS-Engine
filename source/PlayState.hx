@@ -2971,6 +2971,9 @@ class PlayState extends MusicBeatState
 				if (healthBarElements[i] != null && i < yTweens.length) FlxTween.tween(healthBarElements[i], {y: (FlxG.height * (ClientPrefs.downScroll ? 0.11 : 0.89)) + yTweens[i]}, 1, {ease: FlxEase.expoOut, onComplete: function(tween:FlxTween) {iconsShouldGoUp = false;}});
 		}
 
+			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4 && judgementCounter != null) updateRatingCounter();
+			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
+			if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 
 		if (oneK)
 		{
