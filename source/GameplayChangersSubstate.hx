@@ -109,9 +109,13 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 		var option:GameplayOption = new GameplayOption('Botplay', 'botplay', 'bool', false);
 		optionsArray.push(option);
-		option.onChange = onChangeBotplay; //Changing onChange is only needed if you want to make a special interaction after it changes the value
+		option.onChange = onChangeBotplay; 
 
 		var option:GameplayOption = new GameplayOption('Play as Opponent', 'opponentplay', 'bool', false);
+		option.onChange = onChangeChartOption;
+		optionsArray.push(option);
+
+		var option:GameplayOption = new GameplayOption('Play Both Sides', 'bothsides', 'bool', false);
 		option.onChange = onChangeChartOption;
 		optionsArray.push(option);
 

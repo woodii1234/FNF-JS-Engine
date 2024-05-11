@@ -193,6 +193,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		'botplay' => false,
 		'randommode' => false,
 		'opponentplay' => false,
+		'bothSides' => false,
 		'opponentdrain' => false,
 		'drainlevel' => 1,
 		'flip' => false,
@@ -201,7 +202,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		'onekey' => false,
 		'jacks' => 0,
 		'randomspeed' => false,
-		'bothSides' => false,
 		'thetrollingever' => false
 	];
 
