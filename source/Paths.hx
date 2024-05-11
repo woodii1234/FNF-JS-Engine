@@ -448,12 +448,12 @@ class Paths
 	static public function video(key:String)
 	{
 		#if MODS_ALLOWED
-		var file:String = haxe.io.Path.normalize(modsVideo(key));
+		var file:String = modsVideo(key);
 		if(FileSystem.exists(file)) {
 			return file;
 		}
 		#end
-		return haxe.io.Path.normalize('assets/videos/$key.$VIDEO_EXT');
+		return 'assets/videos/$key.$VIDEO_EXT';
 	}
 	//Sound loading.
 	static public function sound(key:String, ?library:String):Sound
