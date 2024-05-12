@@ -3062,13 +3062,13 @@ class PlayState extends MusicBeatState
 		final noteData:Array<SwagSection> = SONG.notes;
 
 		final songName:String = Paths.formatToSongPath(SONG.song);
-		final file:String = Paths.json(songName + '/events');
+		final file:String = Paths.songEvents(songName, CoolUtil.difficultyString().toLowerCase());
 		#if MODS_ALLOWED
-		if (FileSystem.exists(Paths.modsJson(songName + '/events')) || FileSystem.exists(file)) {
+		if (FileSystem.exists(Paths.json(file)) || FileSystem.exists(Paths.modsJson(file))) {
 		#else
 		if (OpenFlAssets.exists(file)) {
 		#end
-			var eventsData:Array<Dynamic> = Song.loadFromJson('events', songName).events;
+			var eventsData:Array<Dynamic> = Song.loadFromJson(Paths.songEvents(songName, CoolUtil.difficultyString().toLowerCase(), true), songName).events;
 			for (event in eventsData) //Event Notes
 			{
 				for (i in 0...event[1].length)

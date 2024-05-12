@@ -33,6 +33,7 @@ typedef SwagSong =
 	var event7Value:String;
 
 	var windowName:String;
+	var specialAudioName:String;
 
 	var arrowSkin:String;
 	var splashSkin:String;
@@ -56,6 +57,7 @@ class Song
 	public var event7:String = 'None';
 	public var event7Value:String;
 	public var windowName:String;
+	public var specialAudioName:String;
 	public var validScore:Bool = true;
 	public var player1:String = 'bf';
 	public var player2:String = 'dad';
@@ -100,6 +102,19 @@ class Song
 		this.song = song;
 		this.notes = notes;
 		this.bpm = bpm;
+	}
+
+	public static function hasDifficulty(songName:String, difficulty:String):Bool
+	{
+		var formattedSong:String = Paths.formatToSongPath(songName);
+		var formDiff:String = Paths.formatToSongPath(difficulty);
+		var jsonToFind:String = Paths.json(formattedSong + '/' + formattedSong + '-' + formDiff);
+		#if MODS_ALLOWED
+			if (!CoolUtil.defaultSongs.contains(formattedSong)) 
+				jsonToFind = Paths.modsJson(formattedSong + '/' + formattedSong + '-' + formDiff); #end
+		if(FileSystem.exists(jsonToFind)) return true;
+
+		return false;
 	}
 
 	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong

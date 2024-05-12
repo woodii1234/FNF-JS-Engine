@@ -271,6 +271,7 @@ class ChartingState extends MusicBeatState
 				songCreditBarPath: '',
 				songCreditIcon: '',
 				windowName: '',
+				specialAudioName: '',
 				event7: '',
 				event7Value: '',
 				speed: 1,
@@ -621,17 +622,16 @@ class ChartingState extends MusicBeatState
 
 		var loadEventJson:FlxButton = new FlxButton(loadAutosaveBtn.x, loadAutosaveBtn.y + 30, 'Load Events', function()
 		{
-
 			var songName:String = Paths.formatToSongPath(_song.song);
-			var file:String = Paths.json(songName + '/events');
+			var file:String = Paths.songEvents(songName, difficulty.toLowerCase());
 			#if sys
-			if (#if MODS_ALLOWED FileSystem.exists(Paths.modsJson(songName + '/events')) || #end FileSystem.exists(file))
+			if (FileSystem.exists(Paths.json(file)) || FileSystem.exists(Paths.json(file)))
 			#else
 			if (OpenFlAssets.exists(file))
 			#end
 			{
 				clearEvents();
-				var events:SwagSong = Song.loadFromJson('events', songName);
+				var events:SwagSong = Song.loadFromJson(Paths.songEvents(songName, difficulty.toLowerCase(), true), songName);
 				_song.events = events.events;
 				changeSection(curSec);
 			}
@@ -2087,7 +2087,7 @@ class ChartingState extends MusicBeatState
 		if (vocals != null)
 			vocals.stop();
 
-		var file:Dynamic = Paths.voices(currentSongName, difficulty);
+		var file:Dynamic = Paths.voices(currentSongName, difficulty.toLowerCase());
 		vocals = new FlxSound();
 		if (Std.isOfType(file, Sound) || OpenFlAssets.exists(file)) {
 			vocals.loadEmbedded(file);
@@ -2109,7 +2109,7 @@ class ChartingState extends MusicBeatState
 	}
 
 	function generateSong() {
-		FlxG.sound.playMusic(Paths.inst(currentSongName, difficulty), 0.6/*, false*/);
+		FlxG.sound.playMusic(Paths.inst(currentSongName, difficulty.toLowerCase()), 0.6/*, false*/);
 		if (instVolume != null) FlxG.sound.music.volume = instVolume.value;
 		if (check_mute_inst != null && check_mute_inst.checked) FlxG.sound.music.volume = 0;
 

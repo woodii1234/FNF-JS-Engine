@@ -179,7 +179,8 @@ class FreeplayState extends MusicBeatState
 		{
 			lastDifficultyName = CoolUtil.defaultDifficulty;
 		}
-		curDifficulty = Math.round(Math.max(0, CoolUtil.defaultDifficulties.indexOf(lastDifficultyName)));
+		
+			curDifficulty = Math.round(Math.max(0, CoolUtil.defaultDifficulties.indexOf(lastDifficultyName)));
 
 		if(curPlaying)
 		{
@@ -755,6 +756,12 @@ class FreeplayState extends MusicBeatState
 		else
 		{
 			curDifficulty = 0;
+		}
+
+		if (CoolUtil.defaultSongs.contains(songs[curSelected].songName.toLowerCase()) && Song.hasDifficulty(songs[curSelected].songName, 'erect'))
+		{
+			CoolUtil.difficulties = CoolUtil.defaultDifficultiesFull.copy();
+			curDifficulty = Math.round(Math.max(0, CoolUtil.defaultDifficultiesFull.indexOf(CoolUtil.defaultDifficulty)));
 		}
 
 		var newPos:Int = CoolUtil.difficulties.indexOf(lastDifficultyName);
