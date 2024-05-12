@@ -111,7 +111,6 @@ class PlayState extends MusicBeatState
 
 	public var shader_chromatic_abberation:ChromaticAberrationEffect;
 	public var camGameShaders:Array<ShaderEffect> = [];
-	public var camHUDBelowShaders:Array<ShaderEffect> = [];
 	public var camHUDShaders:Array<ShaderEffect> = [];
 	public var camOtherShaders:Array<ShaderEffect> = [];
 
@@ -222,6 +221,7 @@ class PlayState extends MusicBeatState
 	public var usingEkFile:Bool = false; //we'll also use this so that the game doesn't load all notes twice?
 
 	public var notes:FlxTypedGroup<Note>;
+	public var sustainNotes:FlxTypedGroup<Note>;
 	public var unspawnNotes:Array<PreloadedChartNote> = [];
 	public var unspawnNotesCopy:Array<PreloadedChartNote> = [];
 	public var eventNotes:Array<EventNote> = [];
@@ -380,7 +380,6 @@ class PlayState extends MusicBeatState
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
 	public var camHUD:FlxCamera;
-	public var camHUDBelow:FlxCamera;
 	public var camGame:FlxCamera;
 	public var camOther:FlxCamera;
 	public var cameraSpeed:Float = 1;
@@ -716,13 +715,11 @@ class PlayState extends MusicBeatState
 
 		// var gameCam:FlxCamera = FlxG.camera;
 		camGame = new FlxCamera();
-		camHUDBelow = new FlxCamera();
 		camHUD = new FlxCamera();
 		camOther = new FlxCamera();
-		camHUD.bgColor.alpha = camHUDBelow.bgColor.alpha = camOther.bgColor.alpha = 0;
+		camHUD.bgColor.alpha = camOther.bgColor.alpha = 0;
 
 		FlxG.cameras.reset(camGame);
-		FlxG.cameras.add(camHUDBelow, false);
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camOther, false);
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>((ClientPrefs.maxSplashLimit != 0 ? ClientPrefs.maxSplashLimit : 10000));
@@ -1311,12 +1308,15 @@ class PlayState extends MusicBeatState
 
 		timeBarBG.visible = showTime && !ClientPrefs.timeBarType.contains('(No Bar)');
 
+		sustainNotes = new FlxTypedGroup<Note>();
+		add(sustainNotes);
+
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		add(strumLineNotes);
 
 		notes = new FlxTypedGroup<Note>();
 		add(notes);
-		notes.visible = ClientPrefs.showNotes; //that was easier than expected
+		notes.visible = sustainNotes.visible = ClientPrefs.showNotes; //that was easier than expected
 
 		add(grpNoteSplashes);
 
@@ -1771,6 +1771,7 @@ class PlayState extends MusicBeatState
 		laneunderlay.cameras = [camHUD];
 		strumLineNotes.cameras = [camHUD];
 		grpNoteSplashes.cameras = [camHUD];
+		sustainNotes.cameras = [camHUD];
 		notes.cameras = [camHUD];
 		healthBar.cameras = [camHUD];
 		healthBarBG.cameras = [camHUD];
@@ -2104,12 +2105,11 @@ class PlayState extends MusicBeatState
 		switch(cam.toLowerCase()) {
 			case 'camhud' | 'hud':
 				camHUDShaders.push(effect);
-				camHUDBelowShaders.push(effect);
 				var newCamEffects:Array<BitmapFilter>=[]; // IT SHUTS HAXE UP IDK WHY BUT WHATEVER IDK WHY I CANT JUST ARRAY<SHADERFILTER>
 				for(i in camHUDShaders){
 					newCamEffects.push(new ShaderFilter(i.shader));
 				}
-				camHUD.filters = camHUDBelow.filters = newCamEffects;
+				camHUD.filters = newCamEffects;
 			case 'camother' | 'other':
 				camOtherShaders.push(effect);
 				var newCamEffects:Array<BitmapFilter>=[]; // IT SHUTS HAXE UP IDK WHY BUT WHATEVER IDK WHY I CANT JUST ARRAY<SHADERFILTER>
@@ -2140,12 +2140,11 @@ class PlayState extends MusicBeatState
 	switch(cam.toLowerCase()) {
 		case 'camhud' | 'hud':
 			camHUDShaders.remove(effect);
-			camHUDBelowShaders.remove(effect);
 			var newCamEffects:Array<BitmapFilter>=[];
 			for(i in camHUDShaders){
 				newCamEffects.push(new ShaderFilter(i.shader));
 			}
-			camHUD.filters = camHUDBelow.filters = newCamEffects;
+			camHUD.filters = newCamEffects;
 		case 'camother' | 'other':
 			camOtherShaders.remove(effect);
 			var newCamEffects:Array<BitmapFilter>=[];
@@ -2168,9 +2167,8 @@ class PlayState extends MusicBeatState
 	switch(cam.toLowerCase()) {
 		case 'camhud' | 'hud':
 			camHUDShaders = [];
-			camHUDBelowShaders = [];
 			var newCamEffects:Array<BitmapFilter>=[];
-			camHUD.filters = camHUDBelow.filters = newCamEffects;
+			camHUD.filters = newCamEffects;
 		case 'camother' | 'other':
 			camOtherShaders = [];
 			var newCamEffects:Array<BitmapFilter>=[];
@@ -2725,7 +2723,7 @@ class PlayState extends MusicBeatState
 					}
 				}
 
-				notes.forEachAlive(function(note:Note) {
+				for (group in [notes, sustainNotes]) group.forEachAlive(function(note:Note) {
 					if(ClientPrefs.opponentStrums || !ClientPrefs.opponentStrums || middleScroll || !note.mustPress)
 					{
 							note.alpha *= 0.35;
@@ -2787,17 +2785,20 @@ class PlayState extends MusicBeatState
 
 	public function clearNotesBefore(time:Float)
 	{
-		var i:Int = notes.length - 1;
-		while (i >= 0) {
-			var daNote:Note = notes.members[i];
-			if(daNote.strumTime - 350 < time)
-			{
-				daNote.active = false;
-				daNote.visible = false;
-				daNote.ignoreNote = true;
-				notes.remove(daNote, true);
+		for (group in [notes, sustainNotes])
+		{
+			var i:Int = group.length - 1;
+			while (i >= 0) {
+				var daNote:Note = group.members[i];
+				if(daNote.strumTime - 350 < time)
+				{
+					daNote.active = false;
+					daNote.visible = false;
+					daNote.ignoreNote = true;
+					group.remove(daNote, true);
+				}
+				--i;
 			}
-			--i;
 		}
 	}
 
@@ -3630,12 +3631,6 @@ class PlayState extends MusicBeatState
 
 	override public function update(elapsed:Float)
 	{
-		// Don't remove this.
-		camHUDBelow.x = camHUD.x;
-		camHUDBelow.y = camHUD.y;
-		camHUDBelow.angle = camHUD.angle;
-		camHUDBelow.alpha = camHUD.alpha;
-		camHUDBelow.zoom = camHUD.zoom;
 		if (ffmpegMode) elapsed = 1 / ClientPrefs.targetFPS;
 		if (screenshader.Enabled)
 		{
@@ -4172,8 +4167,8 @@ class PlayState extends MusicBeatState
 		else if (ClientPrefs.showNotes || !ClientPrefs.showNotes && !cpuControlled)
 		{
 			while (unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < (NOTE_SPAWN_TIME / unspawnNotes[notesAddedCount].multSpeed)) {
-				inline notes.recycle(Note).setupNoteData(unspawnNotes[notesAddedCount]);
-				if (!ClientPrefs.noSpawnFunc) callOnLuas('onSpawnNote', [notes.members.indexOf(notes.members[notes.length-1]), unspawnNotes[notesAddedCount].noteData, unspawnNotes[notesAddedCount].noteType, unspawnNotes[notesAddedCount].isSustainNote]);
+				inline (unspawnNotes[notesAddedCount].isSustainNote ? sustainNotes : notes).recycle(Note).setupNoteData(unspawnNotes[notesAddedCount]);
+				if (!ClientPrefs.noSpawnFunc) callOnLuas('onSpawnNote', [(!unspawnNotes[notesAddedCount].isSustainNote ? notes.members.indexOf(notes.members[notes.length-1]) : sustainNotes.members.indexOf(sustainNotes.members[sustainNotes.length-1])), unspawnNotes[notesAddedCount].noteData, unspawnNotes[notesAddedCount].noteType, unspawnNotes[notesAddedCount].isSustainNote]);
 				notesAddedCount++;
 			}
 		}
@@ -4197,12 +4192,15 @@ class PlayState extends MusicBeatState
 					}
 				}
 				amountOfRenderedNotes = 0;
-				var noteIndex:Int = notes.members.length;
-				while (noteIndex >= 0)
+				for (group in [notes, sustainNotes])
 				{
-					emitter.emit(NoteSignalStuff.NOTE_UPDATE, notes.members[noteIndex--]);
+					var noteIndex:Int = group.members.length;
+					while (noteIndex >= 0)
+					{
+						emitter.emit(NoteSignalStuff.NOTE_UPDATE, group.members[noteIndex--]);
+					}
+					inline group.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 				}
-				inline notes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 			}
 
 			while(eventNotes.length > 0 && Conductor.songPosition > eventNotes[0].strumTime) {
@@ -4951,7 +4949,6 @@ class PlayState extends MusicBeatState
 	{
 		if (!endedTheSong && ClientPrefs.resultsScreen)
 		{
-			Conductor.songPosition = 0; //so that it doesnt skip the results screen
 				if (!isStoryMode || isStoryMode && storyPlaylist.length <= 0)
 				{
 					new FlxTimer().start(0.02, function(tmr:FlxTimer) {
@@ -4980,6 +4977,8 @@ class PlayState extends MusicBeatState
 			inCutscene = false;
 			updateTime = false;
 
+			startedCountdown = false;
+
 			deathCounter = 0;
 			seenCutscene = false;
 
@@ -4999,7 +4998,7 @@ class PlayState extends MusicBeatState
 			}
 			#end
 
-			var ret:Dynamic = callOnLuas('onEndSong', [], false);
+			var ret:Dynamic = callOnLuas('onEndSong', [], true);
 			if(ret != FunkinLua.Function_Stop && !transitioning) {
 				if (!cpuControlled && !playerIsCheating && ClientPrefs.safeFrames <= 10)
 				{
@@ -5106,8 +5105,8 @@ class PlayState extends MusicBeatState
 					FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
 					changedDifficulty = false;
 				}
+				transitioning = true;
 			}
-			transitioning = true;
 		}
 	}
 
@@ -5129,8 +5128,9 @@ class PlayState extends MusicBeatState
 	#end
 
 	public function KillNotes() {
-		while(notes.length > 0) {
-			notes.remove(notes.members[0], true);
+		for (group in [notes, sustainNotes])
+		while (group.length > 0) {
+			group.remove(group.members[0], true);
 		}
 		unspawnNotes = [];
 		eventNotes = [];
@@ -5729,7 +5729,7 @@ class PlayState extends MusicBeatState
 				var notesStopped:Bool = false;
 
 				var sortedNotesList:Array<Dynamic> = [];
-				notes.forEachAlive(function(daNote:Note)
+				for (group in [notes, sustainNotes]) group.forEachAlive(function(daNote:Note)
 				{
 					if (daNote.canBeHit && !daNote.tooLate && !daNote.wasGoodHit && !daNote.isSustainNote && !daNote.blockHit)
 					{
@@ -5880,7 +5880,7 @@ class PlayState extends MusicBeatState
 		if (startedCountdown && !char.stunned && generatedMusic)
 		{
 			// rewritten inputs???
-			notes.forEachAlive(function(daNote:Note)
+			for (group in [notes, sustainNotes]) group.forEachAlive(function(daNote:Note)
 			{
 				// hold note functions
 				if (strumsBlocked[daNote.noteData] != true && daNote.isSustainNote && parsedHoldArray[daNote.noteData] && daNote.canBeHit
@@ -6254,7 +6254,8 @@ class PlayState extends MusicBeatState
 
 				if (missCombo != 0) missCombo = 0;
 
-				oppTrigger = bothSides && note.doOppStuff;
+				if (bothSides) oppTrigger = bothSides && note.doOppStuff;
+				else if (opponentChart && !oppTrigger) oppTrigger = true;
 
 				if (ClientPrefs.healthGainType == 'Psych Engine' || ClientPrefs.healthGainType == 'Leather Engine' || ClientPrefs.healthGainType == 'Kade (1.2)' || ClientPrefs.healthGainType == 'Kade (1.6+)' || ClientPrefs.healthGainType == 'Doki Doki+' || ClientPrefs.healthGainType == 'VS Impostor') {
 					health += note.hitHealth * healthGain * polyphony;
@@ -7330,7 +7331,7 @@ class PlayState extends MusicBeatState
 			final myValue = script.call(event, args);
 			if(myValue == FunkinLua.Function_StopLua && !ignoreStops)
 				break;
-
+			
 			if(myValue != null && myValue != FunkinLua.Function_Continue) {
 				returnVal = myValue;
 			}

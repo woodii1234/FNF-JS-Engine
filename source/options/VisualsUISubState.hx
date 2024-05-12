@@ -168,7 +168,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			'If unchecked, the results screen will be skipped.',
 			'resultsScreen',
 			'bool',
-			true);
+			false);
 		addOption(option);
 
 		var option:Option = new Option('Compact UI Numbers',

@@ -59,7 +59,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var timebarShowSpeed:Bool = false;
 	public static var botWatermark:Bool = true;
 	public static var missRating:Bool = false;
-	public static var resultsScreen:Bool = true;
+	public static var resultsScreen:Bool = false;
 	public static var compactNumbers:Bool = false;
 	public static var scoreTxtSize:Int = 0;
 	public static var noteColorStyle:String = 'Normal';

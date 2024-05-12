@@ -348,9 +348,10 @@ class Note extends FlxSprite
 		{
 			if (mustPress)
 	    			!doOppStuff ? cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2]) : cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2]);
-	    		else if (!gfNote) 
+	    		else
 				doOppStuff ? cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2]) : cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2]);
-	    		else if (gfNote && PlayState.instance.gf != null) cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.gf.healthColorArray[0], PlayState.instance.gf.healthColorArray[1], PlayState.instance.gf.healthColorArray[2]);
+
+			if (gfNote && PlayState.instance.gf != null) cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.gf.healthColorArray[0], PlayState.instance.gf.healthColorArray[1], PlayState.instance.gf.healthColorArray[2]);
 		}
 	}
 
@@ -469,7 +470,6 @@ class Note extends FlxSprite
 			if (!visible) visible = true;
 			if (alpha != 1) alpha = 1;
 		}
-		if (PlayState.instance != null && Type.getClassName(Type.getClass(FlxG.state)) != 'editors.EditorPlayState') cameras = [isSustainNote ? PlayState.instance.camHUDBelow : PlayState.instance.camHUD];
 		if (flipY) flipY = false;
 	}
 }
