@@ -121,13 +121,16 @@ class Note extends FlxSprite
 			updateHitbox();
 		}
 		else if (!PlayState.isPixelStage) return value;
+		else if (PlayState.isPixelStage && inEditor) reloadNote('', value);
 		texture = value;
 		return value;
 	}
 
-	public function new()
+	public function new(?newNoteData:Int)
 	{
 		super();
+
+		if (!Math.isNaN(newNoteData) && PlayState.isPixelStage) noteData = newNoteData;
 
 		y -= 2000;
 		antialiasing = ClientPrefs.globalAntialiasing && !PlayState.isPixelStage;

@@ -466,6 +466,8 @@ class PlayState extends MusicBeatState
 
 	public var defaultCamZoom:Float = 1.05;
 
+	public var ogCamZoom:Float = 1.05;
+
 	// how big to stretch the pixel art assets
 	public static var daPixelZoom:Float = 6;
 
@@ -814,7 +816,7 @@ class PlayState extends MusicBeatState
 			};
 		}
 
-		defaultCamZoom = stageData.defaultZoom;
+		defaultCamZoom = ogCamZoom = stageData.defaultZoom;
 		isPixelStage = stageData.isPixelStage;
 		BF_X = stageData.boyfriend[0];
 		BF_Y = stageData.boyfriend[1];
@@ -2910,12 +2912,13 @@ class PlayState extends MusicBeatState
 		lastReportedPlayheadPosition = 0;
 		if (ClientPrefs.songLoading)
 		{
+			var diff:String = (SONG.specialAudioName.length > 1 ? SONG.specialAudioName : CoolUtil.difficultyString()).toLowerCase();
 			@:privateAccess
 			if (!ffmpegMode) {
-				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song, CoolUtil.difficultyString().toLowerCase()), 1, false);
+				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song, diff), 1, false);
 				FlxG.sound.music.onComplete = finishSong.bind();
 			} else {
-				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song, CoolUtil.difficultyString().toLowerCase()), 0, false);
+				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song, diff), 0, false);
 				vocals.volume = 0;
 			}
 			if (!ffmpegMode && (!trollingMode || SONG.song.toLowerCase() != 'anti-cheat-song'))
@@ -3047,28 +3050,32 @@ class PlayState extends MusicBeatState
 
 		curSong = SONG.song;
 
+		var diff:String = (SONG.specialAudioName.length > 1 ? SONG.specialAudioName : CoolUtil.difficultyString()).toLowerCase();
+
 		if (SONG.windowName != null && SONG.windowName != '')
 			MusicBeatState.windowNamePrefix = SONG.windowName;
 
 		if (SONG.needsVoices && ClientPrefs.songLoading)
-			vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song, CoolUtil.difficultyString().toLowerCase()));
+			vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song, diff));
 		else
 			vocals = new FlxSound();
 
 		if (ClientPrefs.songLoading) vocals.pitch = playbackRate;
 		if (ClientPrefs.songLoading) FlxG.sound.list.add(vocals);
-		if (ClientPrefs.songLoading) FlxG.sound.list.add(new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song, CoolUtil.difficultyString().toLowerCase())));
+		if (ClientPrefs.songLoading) FlxG.sound.list.add(new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song, diff)));
 
 		final noteData:Array<SwagSection> = SONG.notes;
 
+		var eventsToLoad:String = (SONG.specialEventsName.length > 1 ? SONG.specialEventsName : CoolUtil.difficultyString()).toLowerCase();
+
 		final songName:String = Paths.formatToSongPath(SONG.song);
-		final file:String = Paths.songEvents(songName, CoolUtil.difficultyString().toLowerCase());
+		final file:String = Paths.songEvents(songName, eventsToLoad);
 		#if MODS_ALLOWED
 		if (FileSystem.exists(Paths.json(file)) || FileSystem.exists(Paths.modsJson(file))) {
 		#else
 		if (OpenFlAssets.exists(file)) {
 		#end
-			var eventsData:Array<Dynamic> = Song.loadFromJson(Paths.songEvents(songName, CoolUtil.difficultyString().toLowerCase(), true), songName).events;
+			var eventsData:Array<Dynamic> = Song.loadFromJson(Paths.songEvents(songName, eventsToLoad, true), songName).events;
 			for (event in eventsData) //Event Notes
 			{
 				for (i in 0...event[1].length)
@@ -4513,6 +4520,13 @@ class PlayState extends MusicBeatState
 					noteMultiplier = 1;
 
 				polyphony = noteMultiplier;
+
+			case 'Set Camera Zoom':
+				var newZoom:Float = Std.parseFloat(value1);
+				if (Math.isNaN(newZoom))
+					newZoom = ogCamZoom;
+				defaultCamZoom = newZoom;
+
 			case 'Fake Song Length':
 				var fakelength:Float = Std.parseFloat(value1);
 				fakelength *= (Math.isNaN(fakelength) ? 1 : 1000); //don't multiply if value1 is null, but do if value1 is not null

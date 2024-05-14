@@ -86,6 +86,7 @@ class ChartingState extends MusicBeatState
 		['Dadbattle Spotlight', "Used in Dad Battle,\nValue 1: 0/1 = ON/OFF,\n2 = Target Dad\n3 = Target BF"],
 		['Hey!', "Plays the \"Hey!\" animation from Bopeebo,\nValue 1: BF = Only Boyfriend, GF = Only Girlfriend,\nSomething else = Both.\nValue 2: Custom animation duration,\nleave it blank for 0.6s"],
 		['Set GF Speed', "Sets GF head bopping speed,\nValue 1: 1 = Normal speed,\n2 = 1/2 speed, 4 = 1/4 speed etc.\nUsed on Fresh during the beatbox parts.\n\nWarning: Value must be integer!"],
+		['Set Camera Zoom', "Sets the camera zoom. Used in the Erect Remixes\nValue 1: New zoom value"],
 		['Philly Glow', "Exclusive to Week 3\nValue 1: 0/1/2 = OFF/ON/Reset Gradient\n \nNo, i won't add it to other weeks."],
 		['Kill Henchmen', "For Mom's songs, don't use this please, i love them :("],
 		['Add Camera Zoom', "Used on MILF on that one \"hard\" part\nValue 1: Camera zoom add (Default: 0.015)\nValue 2: UI zoom add (Default: 0.03)\nLeave the values blank if you want to use Default."],
@@ -125,6 +126,8 @@ class ChartingState extends MusicBeatState
 	private static var lastSong:String = '';
 
 	var difficulty:String = 'normal';
+	var specialAudioName:String = '';
+	var specialEventsName:String = '';
 
 	var bpmTxt:FlxText;
 	var songSlider:FlxUISlider;
@@ -272,6 +275,7 @@ class ChartingState extends MusicBeatState
 				songCreditIcon: '',
 				windowName: '',
 				specialAudioName: '',
+				specialEventsName: '',
 				event7: '',
 				event7Value: '',
 				speed: 1,
@@ -282,6 +286,8 @@ class ChartingState extends MusicBeatState
 			PlayState.SONG = _song;
 		}
 		difficulty = CoolUtil.currentDifficulty;
+		specialAudioName = _song.specialAudioName;
+		specialEventsName = _song.specialEventsName;
 		hitsound = FlxG.sound.load(Paths.sound("hitsounds/" + 'osu!mania'));
 		hitsound.volume = 1;
 
@@ -568,7 +574,6 @@ class ChartingState extends MusicBeatState
 		super.create();
 	}
 
-	var UI_songDiff:FlxUIInputText;
 	var check_mute_inst:FlxUICheckBox = null;
 	var check_vortex:FlxUICheckBox = null;
 	var check_showGrid:FlxUICheckBox = null;
@@ -576,6 +581,9 @@ class ChartingState extends MusicBeatState
 	var playSoundBf:FlxUICheckBox = null;
 	var playSoundDad:FlxUICheckBox = null;
 	var UI_songTitle:FlxUIInputText;
+	var UI_songDiff:FlxUIInputText;
+	var UI_specAudio:FlxUIInputText;
+	var UI_specEvents:FlxUIInputText;
 	var noteSkinInputText:FlxUIInputText;
 	var noteSplashesInputText:FlxUIInputText;
 	var stageDropDown:FlxUIDropDownMenuCustom;
@@ -622,8 +630,9 @@ class ChartingState extends MusicBeatState
 
 		var loadEventJson:FlxButton = new FlxButton(loadAutosaveBtn.x, loadAutosaveBtn.y + 30, 'Load Events', function()
 		{
+			var diff:String = (specialEventsName.length > 1 ? specialEventsName : difficulty).toLowerCase();
 			var songName:String = Paths.formatToSongPath(_song.song);
-			var file:String = Paths.songEvents(songName, difficulty.toLowerCase());
+			var file:String = Paths.songEvents(songName, diff);
 			#if sys
 			if (FileSystem.exists(Paths.json(file)) || FileSystem.exists(Paths.json(file)))
 			#else
@@ -631,7 +640,7 @@ class ChartingState extends MusicBeatState
 			#end
 			{
 				clearEvents();
-				var events:SwagSong = Song.loadFromJson(Paths.songEvents(songName, difficulty.toLowerCase(), true), songName);
+				var events:SwagSong = Song.loadFromJson(Paths.songEvents(songName, diff, true), songName);
 				_song.events = events.events;
 				changeSection(curSec);
 			}
@@ -779,8 +788,14 @@ class ChartingState extends MusicBeatState
 		stageDropDown.selectedLabel = _song.stage;
 		blockPressWhileScrolling.push(stageDropDown);
 
-		UI_songDiff = new FlxUIInputText(stageDropDown.x, stageDropDown.y + 50, 70, CoolUtil.currentDifficulty, 8);
+		UI_songDiff = new FlxUIInputText(stageDropDown.x, stageDropDown.y + 40, 70, CoolUtil.currentDifficulty, 8);
 		blockPressWhileTypingOn.push(UI_songDiff);
+
+		UI_specAudio = new FlxUIInputText(stageDropDown.x, stageDropDown.y + 70, 70, specialAudioName, 8);
+		blockPressWhileTypingOn.push(UI_specAudio);
+
+		UI_specEvents = new FlxUIInputText(stageDropDown.x, stageDropDown.y + 100, 70, specialEventsName, 8);
+		blockPressWhileTypingOn.push(UI_specEvents);
 
 		var skin = PlayState.SONG.arrowSkin;
 		if(skin == null) skin = '';
@@ -803,6 +818,8 @@ class ChartingState extends MusicBeatState
 		tab_group_song.name = "Song";
 		tab_group_song.add(UI_songTitle);
 		tab_group_song.add(UI_songDiff);
+		tab_group_song.add(UI_specAudio);
+		tab_group_song.add(UI_specEvents);
 
 		tab_group_song.add(check_voices);
 		tab_group_song.add(clear_events);
@@ -829,6 +846,8 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(new FlxText(noteSkinInputText.x, noteSkinInputText.y - 15, 0, 'Note Texture:'));
 		tab_group_song.add(new FlxText(noteSplashesInputText.x, noteSplashesInputText.y - 15, 0, 'Note Splashes Texture:'));
 		tab_group_song.add(new FlxText(UI_songDiff.x, UI_songDiff.y - 15, 0, "Difficulty:"));
+		tab_group_song.add(new FlxText(UI_specAudio.x, UI_specAudio.y - 15, 0, "Special Audio Name:"));
+		tab_group_song.add(new FlxText(UI_specEvents.x, UI_specEvents.y - 15, 0, "Special Events File:"));
 		tab_group_song.add(player2DropDown);
 		tab_group_song.add(gfVersionDropDown);
 		tab_group_song.add(player1DropDown);
@@ -2087,13 +2106,14 @@ class ChartingState extends MusicBeatState
 		if (vocals != null)
 			vocals.stop();
 
-		var file:Dynamic = Paths.voices(currentSongName, difficulty.toLowerCase());
+		var diff:String = (specialAudioName.length > 1 ? specialAudioName : difficulty).toLowerCase();
+		var file:Dynamic = Paths.voices(currentSongName, diff);
 		vocals = new FlxSound();
 		if (Std.isOfType(file, Sound) || OpenFlAssets.exists(file)) {
 			vocals.loadEmbedded(file);
 			FlxG.sound.list.add(vocals);
 		}
-		generateSong();
+		generateSong(diff);
 		FlxG.sound.music.pause();
 		FlxG.sound.music.onComplete = function()
 		{
@@ -2108,8 +2128,8 @@ class ChartingState extends MusicBeatState
 		FlxG.sound.music.time = Conductor.songPosition;
 	}
 
-	function generateSong() {
-		FlxG.sound.playMusic(Paths.inst(currentSongName, difficulty.toLowerCase()), 0.6/*, false*/);
+	function generateSong(?diff:String = '') {
+		FlxG.sound.playMusic(Paths.inst(currentSongName, diff), 0.6/*, false*/);
 		if (instVolume != null) FlxG.sound.music.volume = instVolume.value;
 		if (check_mute_inst != null && check_mute_inst.checked) FlxG.sound.music.volume = 0;
 
@@ -2287,6 +2307,8 @@ class ChartingState extends MusicBeatState
 		Conductor.songPosition = FlxG.sound.music.time;
 		_song.song = UI_songTitle.text;
 		difficulty = UI_songDiff.text.toLowerCase();
+		specialAudioName = _song.specialAudioName = UI_specAudio.text.toLowerCase();
+		specialEventsName = _song.specialEventsName = UI_specEvents.text.toLowerCase();
 
 		if (idleMusic != null && idleMusic.music != null && idleMusic.music.playing && !idleMusicAllow) idleMusic.pauseMusic();
 
@@ -3670,11 +3692,10 @@ class ChartingState extends MusicBeatState
 		var daStrumTime = i[0];
 		var daSus:Dynamic = i[2];
 
-		var note:Note = new Note();
+		var note:Note = new Note(daNoteInfo % 4);
 		note.strumTime = daStrumTime;
 		note.noteData = daNoteInfo % 4;
 		if(daSus != null) { //Common note
-			note.animation.play(Note.colArray[daNoteInfo % 4] + 'Scroll');
 			if(!Std.isOfType(i[3], String)) //Convert old note type to new note type format
 			{
 				i[3] = noteTypeIntMap.get(i[3]);
@@ -3687,6 +3708,7 @@ class ChartingState extends MusicBeatState
 			note.noteType = i[3];
 			if (note.noteType == 'Hurt Note') note.texture = 'HURTNOTE_assets';
 			if (ClientPrefs.noteColorStyle == 'Quant-Based') CoolUtil.checkNoteQuant(note, note.strumTime);
+			note.animation.play(Note.colArray[daNoteInfo % 4] + 'Scroll');
 		} else { //Event note
 			note.loadGraphic(Paths.image('eventArrow'));
 			note.eventName = getEventName(i[1]);

@@ -47,6 +47,7 @@ class CoolUtil
 	public static var currentDifficulty:String = 'Normal';
 
 	public static var defaultSongs:Array<String> = ['tutorial', 'bopeebo', 'fresh', 'dad battle', 'spookeez', 'south', 'monster', 'pico', 'philly nice', 'blammed', 'satin panties', 'high', 'milf', 'cocoa', 'eggnog', 'winter horrorland', 'senpai', 'roses', 'thorns', 'ugh', 'guns', 'stress'];
+	public static var defaultSongsFormatted:Array<String> = ['dad-battle', 'philly-nice', 'satin-panties', 'winter-horrorland'];
 
 	inline public static function quantize(f:Float, snap:Float){
 		// changed so this actually works lol

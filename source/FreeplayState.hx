@@ -467,8 +467,8 @@ class FreeplayState extends MusicBeatState
 		}
 		else if(space)
 		{
-		requiredRamLoad = 0;
-		noteCount = 0;
+			requiredRamLoad = 0;
+			noteCount = 0;
 				function playSong() {
 				#if PRELOAD_ALL
 				destroyFreeplayVocals();
@@ -481,14 +481,15 @@ class FreeplayState extends MusicBeatState
 					} else {
 				PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
 				}
-				
+				var diff:String = (PlayState.SONG.specialAudioName.length > 1 ? PlayState.SONG.specialAudioName : CoolUtil.difficulties[curDifficulty]).toLowerCase();
+
 				if (PlayState.SONG.needsVoices)
-					vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song, CoolUtil.difficulties[curDifficulty].toLowerCase()));
+					vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song, diff));
 				else
 					vocals = new FlxSound();
 
 				FlxG.sound.list.add(vocals);
-				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song, CoolUtil.difficulties[curDifficulty].toLowerCase()), 0.7);
+				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song, diff), 0.7);
 				vocals.play();
 				vocals.persist = true;
 				vocals.looped = true;
@@ -758,7 +759,7 @@ class FreeplayState extends MusicBeatState
 			curDifficulty = 0;
 		}
 
-		if (CoolUtil.defaultSongs.contains(songs[curSelected].songName.toLowerCase()) && Song.hasDifficulty(songs[curSelected].songName, 'erect'))
+		if (CoolUtil.defaultSongs.contains(songs[curSelected].songName.toLowerCase()) && Song.hasDifficulty(songs[curSelected].songName.toLowerCase(), 'erect'))
 		{
 			CoolUtil.difficulties = CoolUtil.defaultDifficultiesFull.copy();
 			curDifficulty = Math.round(Math.max(0, CoolUtil.defaultDifficultiesFull.indexOf(CoolUtil.defaultDifficulty)));
