@@ -1627,13 +1627,13 @@ class PlayState extends MusicBeatState
 			add(scoreTxt);
 		}
 		if (ClientPrefs.hideScore || ClientPrefs.showcaseMode) {
-			scoreTxt.destroy();
+			scoreTxt.visible = false;
 			healthBarBG.visible = false;
 			healthBar.visible = false;
 			iconP2.visible = iconP1.visible = false;
 		}
 		if (ClientPrefs.hideHud) {
-			scoreTxt.destroy();
+			scoreTxt.visible = false;
 			final daArray:Array<Dynamic> = [botplayTxt, healthBarBG, healthBar, iconP2, iconP1, timeBarBG, timeBar, timeTxt];
 						for (i in daArray){
 				if (i != null)
@@ -2807,7 +2807,7 @@ class PlayState extends MusicBeatState
 	public function updateScore(miss:Bool = false)
 	{
 		scoreTxtUpdateFrame++;
-		if (!scoreTxt.visible) return;
+		if (!scoreTxt.visible || scoreTxt == null) return;
 		//GAH DAYUM THIS IS MORE OPTIMIZED THAN BEFORE
 		var divider = switch (ClientPrefs.scoreStyle)
 		{
@@ -5316,7 +5316,7 @@ class PlayState extends MusicBeatState
 		if (!miss && !ffmpegMode) vocals.volume = 1;
 
 		final offset = FlxG.width * 0.35;
-		if(ClientPrefs.scoreZoom && !ClientPrefs.hideScore && !cpuControlled && !miss)
+		if(ClientPrefs.scoreZoom && !ClientPrefs.hideScore && scoreTxt != null && !cpuControlled && !miss)
 		{
 			if(scoreTxtTween != null) {
 				scoreTxtTween.cancel();
