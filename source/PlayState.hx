@@ -260,6 +260,9 @@ class PlayState extends MusicBeatState
 	private var displayedHealth:Float;
 	public var maxHealth:Float = 2;
 
+	public var botEnergy:Float = 1;
+	public var botEnergyLerp:Float;
+
 	public var totalNotesPlayed:Float = 0;
 	public var combo:Float = 0;
 	public var maxCombo:Float = 0;
@@ -293,6 +296,10 @@ class PlayState extends MusicBeatState
 
 	private var timeBarBG:AttachedSprite;
 	public var timeBar:FlxBar;
+
+	private var energyBarBG:AttachedSprite;
+	public var energyBar:FlxBar;
+	public var energyTxt:FlxText;
 
 	public var ratingsData:Array<Rating> = [];
 	public var perfects:Int = 0;
@@ -1312,6 +1319,38 @@ class PlayState extends MusicBeatState
 			add(timeTxt);
 
 		timeBarBG.visible = showTime && !ClientPrefs.timeBarType.contains('(No Bar)');
+
+		energyBarBG = new AttachedSprite('timeBar');
+		energyBarBG.x = FlxG.width * 0.81;
+		energyBarBG.y = FlxG.height / 2;  // Adjust y position if needed for specific timeBarTypes
+		energyBarBG.scrollFactor.set();
+		energyBarBG.alpha = 0;
+		energyBarBG.visible = false;
+		energyBarBG.xAdd = -4;
+		energyBarBG.yAdd = -4;
+		energyBarBG.angle = 90;
+		add(energyBarBG);
+
+		energyBar = new FlxBar(energyBarBG.x, energyBarBG.y, RIGHT_TO_LEFT, Std.int(energyBarBG.width - 8), Std.int(energyBarBG.height - 8), this,
+			'botEnergy', 0, 2);
+		energyBar.scrollFactor.set();
+		energyBar.numDivisions = 1000;
+		energyBar.alpha = 0;
+		energyBar.visible = false;
+		energyBar.angle = 90;
+		energyBar.createFilledBar(FlxColor.BLACK, FlxColor.WHITE);
+		add(energyBar);
+		energyBarBG.sprTracker = energyBar;
+
+		energyTxt = new FlxText(FlxG.width * 0.81, FlxG.height / 2, 400, "", 20);
+		energyTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
+		energyTxt.scrollFactor.set();
+		energyTxt.alpha = 0;
+		energyTxt.borderSize = 1.25;
+		energyTxt.visible = false;
+		add(energyTxt);
+
+		energyBarBG.cameras = energyBar.cameras = energyTxt.cameras = [camHUD];
 
 		sustainNotes = new FlxTypedGroup<Note>();
 		add(sustainNotes);
@@ -3678,14 +3717,23 @@ class PlayState extends MusicBeatState
 	public var canReset:Bool = true;
 	var startedCountdown:Bool = false;
 	var canPause:Bool = true;
-	var limoSpeed:Float = 0;
 	var pbRM:Float = 2.0;
 
-	public var preElapsed:Float = 0;
-	public var postElapsed:Float = 1 / ClientPrefs.targetFPS;
 	public var takenTime:Float = haxe.Timer.stamp();
 
 	public var amountOfRenderedNotes:Float = 0;
+
+	var canUseBotEnergy:Bool = false;
+	var usingBotEnergy:Bool = false;
+	var noEnergy:Bool = false;
+	var holdingBotEnergyBind:Bool = false;
+	var strumsHeld:Array<Bool> = [false, false, false, false];
+	var strumHeldAmount:Int = 0;
+	var notesBeingHit:Bool = false;
+	var hitResetTimer:Float = 0;
+	var botEnergyCooldown:Float = 0;
+	var energyDrainSpeed:Float = 1;
+	var energyRefillSpeed:Float = 1;
 
 	override public function update(elapsed:Float)
 	{
@@ -3721,6 +3769,53 @@ class PlayState extends MusicBeatState
 				if (FlxG.keys.justPressed.PERIOD)
 		   			playbackRate *= pbRM;
 		}
+		if (!cpuControlled && canUseBotEnergy) 
+		{
+			if (FlxG.keys.pressed.CONTROL && !noEnergy)
+			{
+				usingBotEnergy = true;
+			}
+			else
+			{
+				usingBotEnergy = false;
+			}
+			if (notesBeingHit && hitResetTimer >= 0)
+			{
+				health += elapsed / 2;
+				hitResetTimer -= elapsed;
+				if (hitResetTimer <= 0) notesBeingHit = false;
+			}
+			if (usingBotEnergy)
+				botEnergy -= (elapsed / ((!ffmpegMode ? ClientPrefs.framerate : targetFPS) / 60) / 4) * strumHeldAmount * energyDrainSpeed;
+			else
+				botEnergy += (elapsed / ((!ffmpegMode ? ClientPrefs.framerate : targetFPS) / 60) / 2) * energyRefillSpeed;
+
+			if (botEnergy > 2) botEnergy = 2;
+
+			if (botEnergy <= 0 && !noEnergy)
+			{
+				botEnergyCooldown = 1;
+				noEnergy = true;
+			}
+
+			if (noEnergy)
+			{
+				botEnergyCooldown -= elapsed;
+				if (botEnergyCooldown <= 0)
+				{
+					if (!FlxG.keys.pressed.CONTROL)
+						noEnergy = false;
+				}
+			}
+		}
+
+		if (botEnergy > 0.2 && botEnergy < 1.8) energyBar.color = energyTxt.color = 0xFF0094FF;
+		if (botEnergy < 0.2) energyBar.color = energyTxt.color = 0xFFC60000;
+		if (botEnergy > 1.8) energyBar.color = energyTxt.color = 0xFF00BC12;
+
+		energyTxt.text = (botEnergy < 2 ? FlxMath.roundDecimal(botEnergy * 50, 0) + '%' : 'Full');
+		energyTxt.y = (FlxG.height / 1.3) - (botEnergy * 50 * 4);
+
 		if (ClientPrefs.showcaseMode && botplayTxt != null)
 			botplayTxt.text = '${FlxStringUtil.formatMoney(Math.abs(totalNotesPlayed), false)}/${FlxStringUtil.formatMoney(Math.abs(enemyHits), false)}\nNPS: ${FlxStringUtil.formatMoney(nps, false)}/${FlxStringUtil.formatMoney(maxNPS, false)}\nOpp NPS: ${FlxStringUtil.formatMoney(oppNPS, false)}/${FlxStringUtil.formatMoney(maxOppNPS, false)}';
 
@@ -4512,6 +4607,31 @@ class PlayState extends MusicBeatState
 				camZooming = false;
 				FlxG.camera.zoom = defaultCamZoom;
 				camHUD.zoom = 1;
+
+			case 'Enable Bot Energy':
+				canUseBotEnergy = true;
+				energyBarBG.visible = energyBar.visible = energyTxt.visible = true;
+				var varsFadeIn:Array<Dynamic> = [energyBarBG, energyBar, energyTxt];
+				for (i in 0...varsFadeIn.length) FlxTween.tween(varsFadeIn[i], {alpha: 1}, 0.75, {ease: FlxEase.expoOut});
+
+			case 'Disable Bot Energy':
+				canUseBotEnergy = false;
+				var varsFadeIn:Array<Dynamic> = [energyBarBG, energyBar, energyTxt];
+				for (i in 0...varsFadeIn.length)
+					FlxTween.tween(varsFadeIn[i], {alpha: 0}, 0.75, {
+						ease: FlxEase.expoOut, 
+							onComplete: function(_){
+								varsFadeIn[i].visible = false;
+							}});
+
+			case 'Set Bot Energy Speeds':
+				var drainSpeed:Float = Std.parseFloat(value1);
+				if (Math.isNaN(drainSpeed)) drainSpeed = 1;
+				energyDrainSpeed = drainSpeed;
+
+				var refillSpeed:Float = Std.parseFloat(value2);
+				if (Math.isNaN(refillSpeed)) refillSpeed = 1;
+				energyRefillSpeed = refillSpeed;
 
 			case 'Credits Popup':
 			{
@@ -5419,7 +5539,7 @@ class PlayState extends MusicBeatState
 		{
 			noteMiss(note);
 		}
-			switch (ClientPrefs.healthGainType)
+			if (!usingBotEnergy) switch (ClientPrefs.healthGainType)
 			{
 				case 'Leather Engine':
 					switch(daRating.name)
@@ -5796,7 +5916,7 @@ class PlayState extends MusicBeatState
 				var sortedNotesList:Array<Dynamic> = [];
 				for (group in [notes, sustainNotes]) group.forEachAlive(function(daNote:Note)
 				{
-					if (daNote.canBeHit && !daNote.tooLate && !daNote.wasGoodHit && !daNote.isSustainNote && !daNote.blockHit)
+					if (!usingBotEnergy && daNote.canBeHit && !daNote.tooLate && !daNote.wasGoodHit && !daNote.isSustainNote && !daNote.blockHit)
 					{
 						if(daNote.noteData == key)
 						{
@@ -5924,6 +6044,8 @@ class PlayState extends MusicBeatState
 	{
 		// HOLDING
 		var parsedHoldArray:Array<Bool> = parseKeys();
+		strumsHeld = parsedHoldArray;
+		strumHeldAmount = strumsHeld.filter(function(value) return value).length;
 
 		// TO DO: Find a better way to handle controller inputs, this should work for now
 		if(ClientPrefs.controllerMode)
@@ -5948,7 +6070,7 @@ class PlayState extends MusicBeatState
 			for (group in [notes, sustainNotes]) group.forEachAlive(function(daNote:Note)
 			{
 				// hold note functions
-				if (strumsBlocked[daNote.noteData] != true && daNote.isSustainNote && parsedHoldArray[daNote.noteData] && daNote.canBeHit
+				if (!usingBotEnergy && strumsBlocked[daNote.noteData] != true && daNote.isSustainNote && parsedHoldArray[daNote.noteData] && daNote.canBeHit
 				&& daNote.mustPress && !daNote.tooLate && !daNote.wasGoodHit && !daNote.blockHit) {
 				emitter.emit(NoteSignalStuff.NOTE_HIT_BF, daNote, null);
 				}
@@ -6182,7 +6304,7 @@ class PlayState extends MusicBeatState
 					daNote.exists = false;
 				}
 			if(daNote.mustPress) {
-				if(cpuControlled && daNote.strumTime + (ClientPrefs.communityGameBot && !daNote.isSustainNote ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition && !daNote.ignoreNote) {
+				if((cpuControlled || usingBotEnergy && strumsHeld[daNote.noteData]) && daNote.strumTime + (ClientPrefs.communityGameBot && !daNote.isSustainNote ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition && !daNote.ignoreNote) {
 					if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) emitter.emit(NoteSignalStuff.NOTE_HIT_BF, daNote, null);
 					if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
 					{
@@ -6322,7 +6444,7 @@ class PlayState extends MusicBeatState
 				if (bothSides) oppTrigger = bothSides && note.doOppStuff;
 				else if (opponentChart && !oppTrigger) oppTrigger = true;
 
-				if (ClientPrefs.healthGainType == 'Psych Engine' || ClientPrefs.healthGainType == 'Leather Engine' || ClientPrefs.healthGainType == 'Kade (1.2)' || ClientPrefs.healthGainType == 'Kade (1.6+)' || ClientPrefs.healthGainType == 'Doki Doki+' || ClientPrefs.healthGainType == 'VS Impostor') {
+				if (!usingBotEnergy && (ClientPrefs.healthGainType == 'Psych Engine' || ClientPrefs.healthGainType == 'Leather Engine' || ClientPrefs.healthGainType == 'Kade (1.2)' || ClientPrefs.healthGainType == 'Kade (1.6+)' || ClientPrefs.healthGainType == 'Doki Doki+' || ClientPrefs.healthGainType == 'VS Impostor')) {
 					health += note.hitHealth * healthGain * polyphony;
 				}
 				if(!note.noAnimation && ClientPrefs.charsAndBG && (!oppTrigger ? charAnimsFrame : oppAnimsFrame) < 4 && !note.isSustainNote) {
@@ -6419,7 +6541,7 @@ class PlayState extends MusicBeatState
 					if (char != null) char.holdTimer = 0;
 				}
 
-				if(cpuControlled && ClientPrefs.botLightStrum && !strumsHit[(note.noteData % 4) + 4]) {
+				if((cpuControlled || usingBotEnergy && strumsHeld[note.noteData]) && ClientPrefs.botLightStrum && !strumsHit[(note.noteData % 4) + 4]) {
 					strumsHit[(note.noteData % 4) + 4] = true;
 					var time:Float = 0;
 
@@ -6463,6 +6585,12 @@ class PlayState extends MusicBeatState
 				}
 				note.wasGoodHit = true;
 				if (ClientPrefs.songLoading && !ffmpegMode) vocals.volume = 1;
+
+				if (!notesBeingHit && usingBotEnergy)
+				{
+					notesBeingHit = true;
+					hitResetTimer = 0.3 / playbackRate;
+				}
 
 				callOnLuas((oppTrigger ? 'opponentNoteHit' : 'goodNoteHit'), [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
 
@@ -6973,7 +7101,7 @@ class PlayState extends MusicBeatState
 			{
 				if (!paused) resyncConductor();
 			}
-			if (!paused && vocals.time - FlxG.sound.music.time > 20 && FlxG.sound.music.time < vocals.length) vocals.time = FlxG.sound.music.time;
+			if (!paused && FlxG.sound.music.time - vocals.time > 20 * playbackRate && FlxG.sound.music.time < vocals.length) vocals.time = FlxG.sound.music.time;
 		}
 
 		if (camTwist)
