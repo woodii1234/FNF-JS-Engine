@@ -33,6 +33,7 @@ typedef PreloadedChartNote = {
 	hitCausesMiss:Null<Bool>,
 	wasHit:Bool,
 	multSpeed:Float,
+	noteDensity:Float,
 	wasSpawned:Bool,
 	ignoreNote:Bool,
 	lowPriority:Bool,
@@ -53,6 +54,8 @@ class Note extends FlxSprite
 	public var hitByOpponent:Bool = false; //For Opponent notes
 
 	public var blockHit:Bool = false; // only works for player
+
+	public var noteDensity:Float = 1;
 
 	public var sustainLength:Float = 0;
 	public var isSustainNote:Bool = false;
@@ -404,6 +407,7 @@ class Note extends FlxSprite
 		hitCausesMiss = chartNoteData.hitCausesMiss;
 		ignoreNote = chartNoteData.ignoreNote;
 		multSpeed = chartNoteData.multSpeed;
+		noteDensity = chartNoteData.noteDensity;
 
 		if (ClientPrefs.enableColorShader)
 		{

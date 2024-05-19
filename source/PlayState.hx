@@ -337,6 +337,8 @@ class PlayState extends MusicBeatState
 	var charChangeNames:Array<String> = [];
 	var charChangeTypes:Array<Int> = [];
 
+	var multiChangeEvents:Array<Array<Float>> = [[], []];
+
 	//Gameplay settings
 	public var healthGain:Float = 1;
 	public var healthLoss:Float = 1;
@@ -376,6 +378,7 @@ class PlayState extends MusicBeatState
 	public var botplaySine:Float = 0;
 	public var botplayTxt:FlxText;
 	public var renderedTxt:FlxText;
+	public var ytWatermark:FlxText;
 
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
@@ -1650,6 +1653,24 @@ class PlayState extends MusicBeatState
 		}
 		if (ClientPrefs.scoreTxtSize > 0 && scoreTxt != null && !ClientPrefs.showcaseMode && !ClientPrefs.hideScore && !ClientPrefs.hideHud) scoreTxt.size = ClientPrefs.scoreTxtSize;
 		if (!ClientPrefs.hideScore) updateScore();
+
+		var ytWMPosition = switch(ClientPrefs.ytWatermarkPosition)
+		{
+			case 'Top': FlxG.height * 0.2;
+			case 'Middle': FlxG.height / 2;
+			case 'Bottom': FlxG.height * 0.8;
+			default: FlxG.height / 2;
+		}
+
+		var ytWatermarkText = Assets.getText(Paths.txt("ytWatermarkInfo", "preload"));
+		ytWatermark = new FlxText(0, ytWMPosition, FlxG.width, ytWatermarkText, 40);
+		ytWatermark.setFormat(Paths.font("vcr.ttf"), 25, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		ytWatermark.scrollFactor.set();
+		ytWatermark.borderSize = 1.25;
+		ytWatermark.alpha = 0.5;
+		ytWatermark.cameras = [camOther];
+		ytWatermark.visible = ClientPrefs.ytWatermarkPosition != 'Hidden';
+		add(ytWatermark);
 
 		renderedTxt = new FlxText(0, healthBarBG.y - 50, FlxG.width, "", 40);
 		renderedTxt.setFormat(Paths.font("vcr.ttf"), 40, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -3114,6 +3135,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 		var currentBPMLol:Float = Conductor.bpm;
+		var currentMultiplier:Float = 1;
 		for (section in noteData) {
 			if (section.changeBPM) currentBPMLol = section.bpm;
 
@@ -3182,6 +3204,13 @@ class PlayState extends MusicBeatState
 						charChangeNames.shift();
 						charChangeTypes.shift();
 					}
+
+					if (multiChangeEvents[0].length > 0 && daStrumTime >= multiChangeEvents[0][0])
+					{
+						currentMultiplier = multiChangeEvents[1][0];
+						multiChangeEvents[0].shift();
+						multiChangeEvents[1].shift();
+					}
 		
 					final swagNote:PreloadedChartNote = cast {
 						strumTime: daStrumTime,
@@ -3203,6 +3232,7 @@ class PlayState extends MusicBeatState
 						wasHit: false,
 						hitCausesMiss: songNotes[3] == 'Hurt Note',
 						multSpeed: 1,
+						noteDensity: currentMultiplier,
 						wasSpawned: false,
 						wasMissed: false,
 						ignoreNote: songNotes[3] == 'Hurt Note' && gottaHitNote
@@ -3244,6 +3274,7 @@ class PlayState extends MusicBeatState
 								missHealth: songNotes[3] != 'Hurt Note' ? 0.0475 : 0.1,
 								wasHit: false,
 								multSpeed: 1,
+								noteDensity: currentMultiplier,
 								hitCausesMiss: songNotes[3] == 'Hurt Note',
 								wasSpawned: false,
 								canBeHit:false,
@@ -3274,6 +3305,7 @@ class PlayState extends MusicBeatState
 								missHealth: swagNote.missHealth,
 								wasHit: false,
 								multSpeed: 1,
+								noteDensity: currentMultiplier,
 								hitCausesMiss: swagNote.hitCausesMiss,
 								wasSpawned: false,
 								canBeHit:false,
@@ -3281,7 +3313,6 @@ class PlayState extends MusicBeatState
 								ignoreNote: swagNote.ignoreNote
 							};
 							inline unspawnNotes.push(jackNote);
-							//Sys.sleep(0.0001);
 						}
 					}
 				} else {
@@ -3334,6 +3365,30 @@ class PlayState extends MusicBeatState
 
 	// called only once per different event (Used for precaching)
 	function eventPushed(event:EventNote) {
+		switch (event.event)
+		{
+			case 'Change Character':
+				var charType:Int = 0;
+				switch(event.value1.toLowerCase()) {
+					case 'gf' | 'girlfriend' | '1':
+						charType = 2;
+					case 'dad' | 'opponent' | '0':
+						charType = 1;
+					default:
+						charType = Std.parseInt(event.value1);
+						if(Math.isNaN(charType)) charType = 0;
+				}
+				charChangeTimes.push(event.strumTime);
+				charChangeNames.push(event.value2);
+				charChangeTypes.push(charType);
+			case 'Change Note Multiplier':
+				var noteMultiplier:Float = Std.parseFloat(event.value1);
+				if (Math.isNaN(noteMultiplier))
+					noteMultiplier = 1;
+
+				multiChangeEvents[0].push(event.strumTime);
+				multiChangeEvents[1].push(noteMultiplier);
+		}
 		eventPushedUnique(event);
 		if(eventPushedMap.exists(event.event)) {
 			return;
@@ -3363,10 +3418,6 @@ class PlayState extends MusicBeatState
 
 				var newCharacter:String = event.value2;
 				addCharacterToList(newCharacter, charType);
-
-				charChangeTimes.push(event.strumTime);
-				charChangeNames.push(event.value2);
-				charChangeTypes.push(charType);
 			}
 		}
 		stagesFunc(function(stage:BaseStage) stage.eventPushedUnique(event));
@@ -3634,7 +3685,7 @@ class PlayState extends MusicBeatState
 	public var postElapsed:Float = 1 / ClientPrefs.targetFPS;
 	public var takenTime:Float = haxe.Timer.stamp();
 
-	public var amountOfRenderedNotes:Int = 0;
+	public var amountOfRenderedNotes:Float = 0;
 
 	override public function update(elapsed:Float)
 	{
@@ -3673,7 +3724,7 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.showcaseMode && botplayTxt != null)
 			botplayTxt.text = '${FlxStringUtil.formatMoney(Math.abs(totalNotesPlayed), false)}/${FlxStringUtil.formatMoney(Math.abs(enemyHits), false)}\nNPS: ${FlxStringUtil.formatMoney(nps, false)}/${FlxStringUtil.formatMoney(maxNPS, false)}\nOpp NPS: ${FlxStringUtil.formatMoney(oppNPS, false)}/${FlxStringUtil.formatMoney(maxOppNPS, false)}';
 
-		if (ClientPrefs.showRendered) renderedTxt.text = 'Rendered Notes: ' + FlxStringUtil.formatMoney(amountOfRenderedNotes, false);
+		if (ClientPrefs.showRendered) renderedTxt.text = 'Rendered Notes: ${FlxStringUtil.formatMoney(amountOfRenderedNotes, false)}';
 
 		if (iconsShouldGoUp) iconP1.y = iconP2.y = healthBarBG.y - 75;
 
@@ -6098,7 +6149,7 @@ class PlayState extends MusicBeatState
 	{
 		if (daNote != null && daNote.exists)
 		{
-			amountOfRenderedNotes += 1;
+			amountOfRenderedNotes += daNote.noteDensity;
 			inline daNote.followStrum((daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData], songSpeed);
 			final strum = (daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData];
 			if(daNote.isSustainNote && strum != null && strum.sustainReduce) inline daNote.clipToStrumNote(strum);
@@ -6922,7 +6973,7 @@ class PlayState extends MusicBeatState
 			{
 				if (!paused) resyncConductor();
 			}
-			if (!paused && FlxG.sound.music.time - vocals.time > 20 && FlxG.sound.music.time < vocals.length) vocals.time = FlxG.sound.music.time;
+			if (!paused && vocals.time - FlxG.sound.music.time > 20 && FlxG.sound.music.time < vocals.length) vocals.time = FlxG.sound.music.time;
 		}
 
 		if (camTwist)

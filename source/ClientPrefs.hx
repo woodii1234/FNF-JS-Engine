@@ -85,6 +85,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var healthBarStyle:String = 'Vanilla';
 	public static var watermarkStyle:String = 'Vanilla';
 	public static var botTxtStyle:String = 'Vanilla';
+	public static var ytWatermarkPosition:String = 'Hidden';
 	public static var strumLitStyle:String = 'Full Anim';
 	public static var noteStyleThing:String = 'Default';
 	public static var bfIconStyle:String = 'Default';
@@ -327,6 +328,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.healthBarStyle = healthBarStyle;
 		FlxG.save.data.watermarkStyle = watermarkStyle;
 		FlxG.save.data.botTxtStyle = botTxtStyle;
+		FlxG.save.data.ytWatermarkPosition = ytWatermarkPosition;
 		FlxG.save.data.strumLitStyle = strumLitStyle;
 		FlxG.save.data.noteStyleThing = noteStyleThing;
 		FlxG.save.data.bfIconStyle = bfIconStyle;
@@ -667,6 +669,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.botTxtStyle != null) {
 			botTxtStyle = FlxG.save.data.botTxtStyle;
+		}
+		if(FlxG.save.data.ytWatermarkPosition != null) {
+			ytWatermarkPosition = FlxG.save.data.ytWatermarkPosition;
 		}
 		if(FlxG.save.data.strumLitStyle != null) {
 			strumLitStyle = FlxG.save.data.strumLitStyle;
