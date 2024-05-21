@@ -637,7 +637,7 @@ class ChartingState extends MusicBeatState
 			var songName:String = Paths.formatToSongPath(_song.song);
 			var file:String = Paths.songEvents(songName, diff);
 			#if sys
-			if (FileSystem.exists(Paths.json(file)) || FileSystem.exists(Paths.json(file)))
+			if (FileSystem.exists(Paths.json(file)) || FileSystem.exists(Paths.modsJson(file)))
 			#else
 			if (OpenFlAssets.exists(file))
 			#end
