@@ -4616,6 +4616,7 @@ class PlayState extends MusicBeatState
 
 			case 'Disable Bot Energy':
 				canUseBotEnergy = false;
+				if (usingBotEnergy) usingBotEnergy = false;
 				var varsFadeIn:Array<Dynamic> = [energyBarBG, energyBar, energyTxt];
 				for (i in 0...varsFadeIn.length)
 					FlxTween.tween(varsFadeIn[i], {alpha: 0}, 0.75, {
