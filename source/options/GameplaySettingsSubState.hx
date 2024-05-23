@@ -249,13 +249,20 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.decimals = 1;
 		option.onChange = onChangeHitsoundVolume;
 
-		var option:Option = new Option('Hitsound:',
-			"What type of hitsound would you like?",
-			'hitsoundType',
-			'string',
-			'osu!mania',
-			['osu!mania', 'Dave And Bambi', 'Indie Cross', 'Snap', 'Clap', 'Generic Click', 'Keyboard Click', 'vine boom', 'ADOFAI', 'Discord Ping', "i'm spongebob!", 'FIRE IN THE HOLE', 'Vivziepop']);
-		addOption(option);
+		var hitsoundList:Array<String> = Paths.mergeAllTextsNamed('sounds/hitsounds/list.txt');
+		if (hitsoundList.length > 0)
+		{
+			if (!hitsoundList.contains(ClientPrefs.hitsoundType))
+				ClientPrefs.hitsoundType = hitsoundList[0];
+
+			var option:Option = new Option('Hitsound:',
+				"What type of hitsound would you like?",
+				'hitsoundType',
+				'string',
+				'osu!mania',
+				hitsoundList);
+			addOption(option);
+		}
 
 		var option:Option = new Option('Rating Offset',
 			'Changes how late/early you have to hit for a "Sick!"\nHigher values mean you have to hit later.',

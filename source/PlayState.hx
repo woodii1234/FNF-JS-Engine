@@ -395,7 +395,8 @@ class PlayState extends MusicBeatState
 	public var cameraSpeed:Float = 1;
 	var hueh231:FlxSprite;
 	var secretsong:FlxSprite;
-	var SPUNCHBOB:FlxSprite;
+	var hitsoundImage:FlxSprite;
+	var hitsoundImageToLoad:String;
 
 	//ok moxie this doesn't cause memory leaks
 	public var scoreTxtUpdateFrame:Int = 0;
@@ -405,6 +406,8 @@ class PlayState extends MusicBeatState
 	public var missRecalcsPerFrame:Int = 0;
 	public var charAnimsFrame:Int = 0;
 	public var oppAnimsFrame:Int = 0;
+
+	public var hitImagesFrame:Int = 0;
 
 	var notesHitArray:Array<Float> = [];
 	var oppNotesHitArray:Array<Float> = [];
@@ -607,6 +610,11 @@ class PlayState extends MusicBeatState
 		var compactNPS:String = formatCompactNumber(nps);
 		var compactTotalPlays:String = formatCompactNumber(totalNotesPlayed);
 		theListBotplay = CoolUtil.coolTextFile(Paths.txt('botplayText'));
+
+		if (FileSystem.exists(Paths.getSharedPath('sounds/hitsounds/' + ClientPrefs.hitsoundType.toLowerCase() + '.txt'))) 
+			hitsoundImageToLoad = File.getContent(Paths.getSharedPath('sounds/hitsounds/' + ClientPrefs.hitsoundType.toLowerCase() + '.txt'));
+		else if (FileSystem.exists(Paths.modFolders('sounds/hitsounds/' + ClientPrefs.hitsoundType.toLowerCase() + '.txt')))
+			hitsoundImageToLoad = File.getContent(Paths.modFolders('sounds/hitsounds/' + ClientPrefs.hitsoundType.toLowerCase() + '.txt'));
 
 		randomBotplayText = theListBotplay[FlxG.random.int(0, theListBotplay.length - 1)];
 		//trace('Playback Rate: ' + playbackRate);
@@ -3956,6 +3964,8 @@ class PlayState extends MusicBeatState
 		strumsHit = [false, false, false, false, false, false, false, false];
 		if (splashesPerFrame[0] > 0 || splashesPerFrame[1] > 0) splashesPerFrame = [0, 0];
 
+		if (hitImagesFrame > 0) hitImagesFrame = 0;
+
 		if (lerpingScore) updateScore();
 		if (shownScore != songScore && ClientPrefs.scoreStyle == 'JS Engine' && Math.abs(shownScore - songScore) >= 10) {
 			shownScore = FlxMath.lerp(shownScore, songScore, 0.2 / ((!ffmpegMode ? ClientPrefs.framerate : targetFPS) / 60));
@@ -4609,21 +4619,27 @@ class PlayState extends MusicBeatState
 				camHUD.zoom = 1;
 
 			case 'Enable Bot Energy':
-				canUseBotEnergy = true;
-				energyBarBG.visible = energyBar.visible = energyTxt.visible = true;
-				var varsFadeIn:Array<Dynamic> = [energyBarBG, energyBar, energyTxt];
-				for (i in 0...varsFadeIn.length) FlxTween.tween(varsFadeIn[i], {alpha: 1}, 0.75, {ease: FlxEase.expoOut});
+				if (!cpuControlled)
+				{
+					canUseBotEnergy = true;
+					energyBarBG.visible = energyBar.visible = energyTxt.visible = true;
+					var varsFadeIn:Array<Dynamic> = [energyBarBG, energyBar, energyTxt];
+					for (i in 0...varsFadeIn.length) FlxTween.tween(varsFadeIn[i], {alpha: 1}, 0.75, {ease: FlxEase.expoOut});
+				}
 
 			case 'Disable Bot Energy':
-				canUseBotEnergy = false;
-				if (usingBotEnergy) usingBotEnergy = false;
-				var varsFadeIn:Array<Dynamic> = [energyBarBG, energyBar, energyTxt];
-				for (i in 0...varsFadeIn.length)
-					FlxTween.tween(varsFadeIn[i], {alpha: 0}, 0.75, {
-						ease: FlxEase.expoOut, 
-							onComplete: function(_){
-								varsFadeIn[i].visible = false;
-							}});
+				if (!cpuControlled)
+				{
+					canUseBotEnergy = false;
+					if (usingBotEnergy) usingBotEnergy = false;
+					var varsFadeIn:Array<Dynamic> = [energyBarBG, energyBar, energyTxt];
+					for (i in 0...varsFadeIn.length)
+						FlxTween.tween(varsFadeIn[i], {alpha: 0}, 0.75, {
+							ease: FlxEase.expoOut, 
+								onComplete: function(_){
+									varsFadeIn[i].visible = false;
+								}});
+				}
 
 			case 'Set Bot Energy Speeds':
 				var drainSpeed:Float = Std.parseFloat(value1);
@@ -6340,31 +6356,25 @@ class PlayState extends MusicBeatState
 				{
 					hitsound.play(true);
 					hitsound.pitch = playbackRate;
-					if (hitSoundString == 'vine boom')
+					if (hitsoundImageToLoad.length > 0 && hitImagesFrame < 4)
 					{
-						SPUNCHBOB = new FlxSprite().loadGraphic(Paths.image('sadsponge'));
+						hitImagesFrame++;
+						hitsoundImage = new FlxSprite().loadGraphic(Paths.image(hitsoundImageToLoad));
+						hitsoundImage.antialiasing = ClientPrefs.globalAntialiasing;
+						hitsoundImage.scrollFactor.set();
+						hitsoundImage.setGraphicSize(Std.int(hitsoundImage.width / FlxG.camera.zoom));
+						hitsoundImage.updateHitbox();
+						hitsoundImage.screenCenter();
+						hitsoundImage.alpha = 1;
+						hitsoundImage.cameras = [camGame];
+						add(hitsoundImage);
+						FlxTween.tween(hitsoundImage, {alpha: 0}, 1 / (SONG.bpm/100) / playbackRate, {
+							onComplete: function(tween:FlxTween)
+							{
+								hitsoundImage.destroy();
+							}
+						});
 					}
-					if (hitSoundString == "i'm spongebob!")
-					{
-						SPUNCHBOB = new FlxSprite().loadGraphic(Paths.image('itspongebob'));
-					}
-						if (hitSoundString == "i'm spongebob!" || hitSoundString == 'vine boom')
-						{
-							SPUNCHBOB.antialiasing = ClientPrefs.globalAntialiasing;
-							SPUNCHBOB.scrollFactor.set();
-							SPUNCHBOB.setGraphicSize(Std.int(SPUNCHBOB.width / FlxG.camera.zoom));
-							SPUNCHBOB.updateHitbox();
-							SPUNCHBOB.screenCenter();
-							SPUNCHBOB.alpha = 1;
-							SPUNCHBOB.cameras = [camGame];
-							add(SPUNCHBOB);
-							FlxTween.tween(SPUNCHBOB, {alpha: 0}, 1 / (SONG.bpm/100) / playbackRate, {
-								onComplete: function(tween:FlxTween)
-								{
-									SPUNCHBOB.destroy();
-								}
-							});
-						}
 				}
 
 				if(note.hitCausesMiss) {
