@@ -161,12 +161,14 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var ffmpegMode:Bool = false;
 	public static var ffmpegInfo:Bool = false;
 	public static var targetFPS:Float = 60;
-	public static var lossless:Bool = false;
-	public static var quality:Int = 80;
-	public static var noCapture:Bool = false;
-	public static var renderGCRate:Float = 5.0;
+	public static var unlockFPS:Bool = false;
 	public static var renderBitrate:Float = 5.0;
 	public static var vidEncoder:String = 'libx264';
+	public static var oldFFmpegMode:Bool = false;
+	public static var lossless:Bool = false;
+	public static var quality:Int = 50;
+	public static var renderGCRate:Float = 5.0;
+	public static var showRemainingTime:Bool = false;
 
 	//Misc
 	public static var JSEngineRecharts:Bool = false;
@@ -418,12 +420,14 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.ffmpegMode = ffmpegMode;
 		FlxG.save.data.ffmpegInfo = ffmpegInfo;
 		FlxG.save.data.targetFPS = targetFPS;
-		FlxG.save.data.lossless = lossless;
-		FlxG.save.data.quality = quality;
-		FlxG.save.data.noCapture = noCapture;
-		FlxG.save.data.renderGCRate = renderGCRate;
+		FlxG.save.data.unlockFPS = unlockFPS;
 		FlxG.save.data.renderBitrate = renderBitrate;
 		FlxG.save.data.vidEncoder = vidEncoder;
+		FlxG.save.data.oldFFmpegMode = oldFFmpegMode;
+		FlxG.save.data.lossless = lossless;
+		FlxG.save.data.quality = quality;
+		FlxG.save.data.renderGCRate = renderGCRate;
+		FlxG.save.data.showRemainingTime = showRemainingTime;
 
 		//Note HSV
 		FlxG.save.data.arrowHSV = arrowHSV;
@@ -946,23 +950,29 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		if(FlxG.save.data.targetFPS != null) {
 			targetFPS = FlxG.save.data.targetFPS;
 		}
-		if(FlxG.save.data.lossless != null) {
-			lossless = FlxG.save.data.lossless;
-		}
-		if(FlxG.save.data.quality != null) {
-			quality = FlxG.save.data.quality;
-		}
-		if(FlxG.save.data.noCapture != null) {
-			noCapture = FlxG.save.data.noCapture;
-		}
-		if(FlxG.save.data.renderGCRate != null) {
-			renderGCRate = FlxG.save.data.renderGCRate;
+		if(FlxG.save.data.unlockFPS != null) {
+			unlockFPS = FlxG.save.data.unlockFPS;
 		}
 		if(FlxG.save.data.renderBitrate != null) {
 			renderBitrate = FlxG.save.data.renderBitrate;
 		}
 		if(FlxG.save.data.vidEncoder != null) {
 			vidEncoder = FlxG.save.data.vidEncoder;
+		}
+		if(FlxG.save.data.oldFFmpegMode != null) {
+			oldFFmpegMode = FlxG.save.data.oldFFmpegMode;
+		}
+		if(FlxG.save.data.lossless != null) {
+			lossless = FlxG.save.data.lossless;
+		}
+		if(FlxG.save.data.quality != null) {
+			quality = FlxG.save.data.quality;
+		}
+		if(FlxG.save.data.renderGCRate != null) {
+			renderGCRate = FlxG.save.data.renderGCRate;
+		}
+		if(FlxG.save.data.showRemainingTime != null) {
+			showRemainingTime = FlxG.save.data.showRemainingTime;
 		}
 
 		//Misc Settings

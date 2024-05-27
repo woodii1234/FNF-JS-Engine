@@ -568,7 +568,9 @@ class PlayState extends MusicBeatState
 	var ffmpegMode = ClientPrefs.ffmpegMode;
 	var ffmpegInfo = ClientPrefs.ffmpegInfo;
 	var targetFPS = ClientPrefs.targetFPS;
-	var noCapture = ClientPrefs.noCapture;
+	var unlockFPS = ClientPrefs.unlockFPS;
+	var renderGCRate = ClientPrefs.renderGCRate;
+	static var capture:Screenshot = new Screenshot();
 
 	// Callbacks for stages
 	public var startCallback:Void->Void = null;
@@ -599,9 +601,14 @@ class PlayState extends MusicBeatState
 				}
 		}
 		if (ffmpegMode) {
+			if (unlockFPS)
+			{
+				FlxG.updateFramerate = 1000;
+				FlxG.drawFramerate = 1000;
+			}
 			FlxG.fixedTimestep = true;
 			FlxG.animationTimeScale = ClientPrefs.framerate / targetFPS;
-			#if !mac initRender(); #end
+			if (!ClientPrefs.oldFFmpegMode) initRender();
 		}
 			var compactCombo:String = formatCompactNumber(combo);
 			var compactMaxCombo:String = formatCompactNumber(maxCombo);
@@ -630,14 +637,13 @@ class PlayState extends MusicBeatState
 		// for lua
 		instance = this;
 
-
-	if (ClientPrefs.moreMaxHP)
-	{
-	maxHealth = 3;
-	} else
-	{
-	maxHealth = 2;
-	}
+		if (ClientPrefs.moreMaxHP)
+		{
+		maxHealth = 3;
+		} else
+		{
+		maxHealth = 2;
+		}
 
 		debugKeysChart = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
 		debugKeysCharacter = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_2'));
@@ -1431,7 +1437,6 @@ class PlayState extends MusicBeatState
 
 		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
 		}
-		FlxG.fixedTimestep = false;
 		moveCameraSection();
 
 		msTxt = new FlxText(0, 0, 0, "");
@@ -3714,10 +3719,10 @@ class PlayState extends MusicBeatState
 		else if (ClientPrefs.resyncType == 'Psych')
 		{
 			FlxG.sound.music.play();
+			vocals.play();
 
 			Conductor.songPosition = FlxG.sound.music.time;
-			//if (Conductor.songPosition < vocals.length) vocals.time = Conductor.songPosition;
-			vocals.play();
+			if (Conductor.songPosition < vocals.length) vocals.time = FlxG.sound.music.time;
 		}
 	}
 
@@ -4432,20 +4437,33 @@ class PlayState extends MusicBeatState
 		setOnLuas('botPlay', cpuControlled);
 		callOnLuas('onUpdatePost', [elapsed]);
 
-		for (i in shaderUpdates){
-			i(elapsed);
-		}
+		if (shaderUpdates.length > 0)
+			for (i in shaderUpdates){
+				i(elapsed);
+			}
 		super.update(elapsed);
 
 		if (ffmpegMode)
 		{
-			pipeFrame();
+			if (!ClientPrefs.oldFFmpegMode) pipeFrame();
+			else
+			{
+				var filename = CoolUtil.zeroFill(frameCaptured, 7);
+				capture.save(Paths.formatToSongPath(SONG.song) + #if linux '/' #else '\\' #end, filename);
+				if (ClientPrefs.renderGCRate > 0 && (frameCaptured / targetFPS) % ClientPrefs.renderGCRate == 0) openfl.system.System.gc();
+			}
 			frameCaptured++;
 		}
 
 		if(botplayTxt != null && botplayTxt.visible) {
 			if (ffmpegInfo)
-				botplayTxt.text = CoolUtil.floatToStringPrecision(haxe.Timer.stamp() - takenTime, 3);
+				botplayTxt.text = CoolUtil.floatToStringPrecision(haxe.Timer.stamp() - takenTime, 3) + 's';
+
+			if (ClientPrefs.showRemainingTime)
+			{
+				var timeETA:String = CoolUtil.formatTime((FlxG.sound.music.length - Conductor.songPosition) * (60 / Main.fpsVar.currentFPS), 2);
+				botplayTxt.text += '\nTime Remaining: ' + timeETA;
+			}
 		}
 		takenTime = haxe.Timer.stamp();
 	}
@@ -6981,6 +6999,10 @@ class PlayState extends MusicBeatState
 			if (FlxG.fixedTimestep) {
 				FlxG.fixedTimestep = false;
 				FlxG.animationTimeScale = 1;
+			}
+			if(unlockFPS) {
+				FlxG.drawFramerate = ClientPrefs.framerate;
+				FlxG.updateFramerate = ClientPrefs.framerate;
 			}
 		}
 

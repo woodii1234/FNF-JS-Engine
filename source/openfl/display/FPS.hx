@@ -98,10 +98,10 @@ class FPS extends TextField
 
 		//Literally the stupidest thing i've done for the FPS counter but it allows it to update correctly when on 60 FPS??
 		var currentCount = times.length;
-		currentFPS = Math.round((currentCount + cacheCount) / 2) - 1;
+		currentFPS = ((currentCount + cacheCount) / 2) - 1;
 		if (currentFPS > ClientPrefs.framerate / fpsMultiplier) currentFPS = ClientPrefs.framerate / fpsMultiplier;
 
-			text = (ClientPrefs.showFPS ? "FPS: " + (ClientPrefs.ffmpegMode ? ClientPrefs.targetFPS : currentFPS) : "");
+			text = (ClientPrefs.showFPS ? "FPS: " + (ClientPrefs.ffmpegMode ? ClientPrefs.targetFPS : Math.round(currentFPS)) : "");
 			if (ClientPrefs.ffmpegMode) {
 				text += " (Rendering Mode)";
 			}

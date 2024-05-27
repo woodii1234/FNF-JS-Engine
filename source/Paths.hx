@@ -192,6 +192,8 @@ class Paths
 	public static function initSplashConfig(skin:String)
 	{
 		var path:String = Paths.getSharedPath('images/noteSplashes/' + skin + '.txt');
+		if (!FileSystem.exists(path)) path = Paths.modsTxt('noteSplashes/' + skin);
+		if (!FileSystem.exists(path)) path = Paths.getSharedPath('images/noteSplashes/noteSplashes.txt');
 		var configFile:Array<String> = CoolUtil.coolTextFile(path);
 
 		if (configFile.length < 1) return null;
