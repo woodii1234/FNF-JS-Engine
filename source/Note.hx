@@ -401,7 +401,7 @@ class Note extends FlxSprite
 		sustainLength = chartNoteData.sustainLength;
 		sustainScale = chartNoteData.sustainScale;
 		lowPriority = chartNoteData.lowPriority;
-
+		
 		hitHealth = chartNoteData.hitHealth;
 		missHealth = chartNoteData.missHealth;
 		hitCausesMiss = chartNoteData.hitCausesMiss;

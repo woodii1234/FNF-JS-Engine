@@ -481,6 +481,8 @@ class PlayState extends MusicBeatState
 
 	public var ogCamZoom:Float = 1.05;
 
+	var ogBotTxt:String = '';
+
 	// how big to stretch the pixel art assets
 	public static var daPixelZoom:Float = 6;
 
@@ -1828,17 +1830,17 @@ class PlayState extends MusicBeatState
 		}
 		if (botplayTxt != null){
 			if (!cpuControlled && practiceMode) {
-			botplayTxt.text = 'Practice Mode';
-			botplayTxt.visible = true;
+				botplayTxt.text = 'Practice Mode';
+				botplayTxt.visible = true;
 			}
-			if (ClientPrefs.showcaseMode) {
-			botplayTxt.y += (!ClientPrefs.downScroll ? 60 : -60);
-			botplayTxt.text = 'NPS: $nps/$maxNPS\nOpp NPS: $oppNPS/$maxOppNPS';
-			botplayTxt.visible = true;
+				if (ClientPrefs.showcaseMode) {
+				botplayTxt.y += (!ClientPrefs.downScroll ? 60 : -60);
+				botplayTxt.text = 'NPS: $nps/$maxNPS\nOpp NPS: $oppNPS/$maxOppNPS';
+				botplayTxt.visible = true;
 			}
 		}
 			if (ClientPrefs.showRendered)
-			renderedTxt.text = 'Rendered Notes: 0' + FlxStringUtil.formatMoney(notes.length, false);
+			renderedTxt.text = 'Rendered Notes: ' + FlxStringUtil.formatMoney(notes.length, false);
 
 		if (ClientPrefs.communityGameBot && botplayTxt != null) botplayTxt.destroy();
 
@@ -1954,6 +1956,8 @@ class PlayState extends MusicBeatState
 			{
 				botplayTxt.text = theListBotplay[FlxG.random.int(0, theListBotplay.length - 1)];
 			}
+
+		ogBotTxt = botplayTxt.text;
 
 		cacheCountdown();
 		if (ClientPrefs.ratingType != 'Simple') cachePopUpScore();
@@ -3830,7 +3834,11 @@ class PlayState extends MusicBeatState
 		energyTxt.y = (FlxG.height / 1.3) - (botEnergy * 50 * 4);
 
 		if (ClientPrefs.showcaseMode && botplayTxt != null)
+		{
 			botplayTxt.text = '${FlxStringUtil.formatMoney(Math.abs(totalNotesPlayed), false)}/${FlxStringUtil.formatMoney(Math.abs(enemyHits), false)}\nNPS: ${FlxStringUtil.formatMoney(nps, false)}/${FlxStringUtil.formatMoney(maxNPS, false)}\nOpp NPS: ${FlxStringUtil.formatMoney(oppNPS, false)}/${FlxStringUtil.formatMoney(maxOppNPS, false)}';
+			if (polyphony != 1)
+				botplayTxt.text += '\nNote Multiplier: ' + polyphony;
+		}
 
 		if (ClientPrefs.showRendered) renderedTxt.text = 'Rendered Notes: ${FlxStringUtil.formatMoney(amountOfRenderedNotes, false)}';
 
@@ -4462,7 +4470,8 @@ class PlayState extends MusicBeatState
 			if (ClientPrefs.showRemainingTime)
 			{
 				var timeETA:String = CoolUtil.formatTime((FlxG.sound.music.length - Conductor.songPosition) * (60 / Main.fpsVar.currentFPS), 2);
-				botplayTxt.text += '\nTime Remaining: ' + timeETA;
+				if (ClientPrefs.showcaseMode || ffmpegInfo) botplayTxt.text += '\nTime Remaining: ' + timeETA;
+				else botplayTxt.text = ogBotTxt + '\nTime Remaining: ' + timeETA;
 			}
 		}
 		takenTime = haxe.Timer.stamp();

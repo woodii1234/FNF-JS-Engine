@@ -1322,7 +1322,7 @@ class ChartingState extends MusicBeatState
 			var deleteOppNotes:Bool = FlxG.keys.pressed.CONTROL;
 
 			for(i in 0...sectionsToDelete) {
-				if (_song.notes[startSec + i].sectionNotes != null)
+				if (_song.notes[startSec + i] != null && _song.notes[startSec + i].sectionNotes != null)
 					if (!deleteBfNotes && !deleteOppNotes) 
 						_song.notes[startSec + i].sectionNotes = [];
 					else {
