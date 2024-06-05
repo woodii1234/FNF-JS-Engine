@@ -108,6 +108,13 @@ class VisualsUISubState extends BaseOptionsMenu
 			true);
 		addOption(option);
 
+		var option:Option = new Option('Old Sustain Note Style',
+			'If checked, sustain notes will react like how they did before 0.3.X.',
+			'oldSusStyle',
+			'bool',
+			false);
+		addOption(option);
+
 		var option:Option = new Option('Show Rendered Notes',
 			'If checked, the game will show how many notes are currently rendered on screen.',
 			'showRendered',

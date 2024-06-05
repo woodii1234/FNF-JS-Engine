@@ -51,6 +51,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var hideHud:Bool = false;
 	public static var hideScore:Bool = false;
 	public static var tauntOnGo:Bool = true;
+	public static var oldSusStyle:Bool = false;
 	public static var showRendered:Bool = false;
 	public static var showcaseMode:Bool = false;
 	public static var showMaxScore:Bool = true;
@@ -296,6 +297,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.hideHud = hideHud;
 		FlxG.save.data.hideScore = hideScore;
 		FlxG.save.data.tauntOnGo = tauntOnGo;
+		FlxG.save.data.oldSusStyle = oldSusStyle;
 		FlxG.save.data.showRendered = showRendered;
 		FlxG.save.data.showcaseMode = showcaseMode;
 		FlxG.save.data.showMaxScore = showMaxScore;
@@ -571,6 +573,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.tauntOnGo != null) {
 			tauntOnGo = FlxG.save.data.tauntOnGo;
+		}
+		if(FlxG.save.data.oldSusStyle != null) {
+			oldSusStyle = FlxG.save.data.oldSusStyle;
 		}
 		if(FlxG.save.data.showRendered != null) {
 			showRendered = FlxG.save.data.showRendered;

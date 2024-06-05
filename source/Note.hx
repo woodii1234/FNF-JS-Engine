@@ -249,13 +249,15 @@ class Note extends FlxSprite
 
 	override function update(elapsed:Float)
 	{
+		if (PlayState.instance != null && PlayState.instance.cpuControlled) return;
+		
 		super.update(elapsed);
 
 		if (mustPress)
 		{
 			// ok river
 			if (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * lateHitMult)
-				&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * earlyHitMult) || (PlayState.instance != null && PlayState.instance.cpuControlled))
+				&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * earlyHitMult))
 				canBeHit = true;
 			else
 				canBeHit = false;

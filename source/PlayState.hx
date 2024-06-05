@@ -3723,10 +3723,10 @@ class PlayState extends MusicBeatState
 		else if (ClientPrefs.resyncType == 'Psych')
 		{
 			FlxG.sound.music.play();
-			vocals.play();
+			//vocals.play();
 
 			Conductor.songPosition = FlxG.sound.music.time;
-			if (Conductor.songPosition < vocals.length) vocals.time = FlxG.sound.music.time;
+			//if (Conductor.songPosition < vocals.length) vocals.time = FlxG.sound.music.time;
 		}
 	}
 
@@ -3751,6 +3751,9 @@ class PlayState extends MusicBeatState
 	var botEnergyCooldown:Float = 0;
 	var energyDrainSpeed:Float = 1;
 	var energyRefillSpeed:Float = 1;
+
+	var spawnedNote:Note = new Note();
+	var curNote:Note = new Note();
 
 	override public function update(elapsed:Float)
 	{
@@ -4343,7 +4346,8 @@ class PlayState extends MusicBeatState
 		else if (ClientPrefs.showNotes || !ClientPrefs.showNotes && !cpuControlled)
 		{
 			while (unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < (NOTE_SPAWN_TIME / unspawnNotes[notesAddedCount].multSpeed)) {
-				inline (unspawnNotes[notesAddedCount].isSustainNote ? sustainNotes : notes).recycle(Note).setupNoteData(unspawnNotes[notesAddedCount]);
+				spawnedNote = (unspawnNotes[notesAddedCount].isSustainNote ? sustainNotes : notes).recycle(Note);
+				spawnedNote.setupNoteData(unspawnNotes[notesAddedCount]);
 				if (!ClientPrefs.noSpawnFunc) callOnLuas('onSpawnNote', [(!unspawnNotes[notesAddedCount].isSustainNote ? notes.members.indexOf(notes.members[notes.length-1]) : sustainNotes.members.indexOf(sustainNotes.members[sustainNotes.length-1])), unspawnNotes[notesAddedCount].noteData, unspawnNotes[notesAddedCount].noteType, unspawnNotes[notesAddedCount].isSustainNote]);
 				notesAddedCount++;
 			}
@@ -4373,7 +4377,8 @@ class PlayState extends MusicBeatState
 					var noteIndex:Int = group.members.length;
 					while (noteIndex >= 0)
 					{
-						emitter.emit(NoteSignalStuff.NOTE_UPDATE, group.members[noteIndex--]);
+						curNote = group.members[noteIndex--];
+						emitter.emit(NoteSignalStuff.NOTE_UPDATE, curNote);
 					}
 					inline group.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 				}
@@ -6485,7 +6490,7 @@ class PlayState extends MusicBeatState
 				if (!usingBotEnergy && (ClientPrefs.healthGainType == 'Psych Engine' || ClientPrefs.healthGainType == 'Leather Engine' || ClientPrefs.healthGainType == 'Kade (1.2)' || ClientPrefs.healthGainType == 'Kade (1.6+)' || ClientPrefs.healthGainType == 'Doki Doki+' || ClientPrefs.healthGainType == 'VS Impostor')) {
 					health += note.hitHealth * healthGain * polyphony;
 				}
-				if(!note.noAnimation && ClientPrefs.charsAndBG && (!oppTrigger ? charAnimsFrame : oppAnimsFrame) < 4 && !note.isSustainNote) {
+				if(!note.noAnimation && ClientPrefs.charsAndBG && (!oppTrigger ? charAnimsFrame : oppAnimsFrame) < 4 && (!note.isSustainNote || ClientPrefs.oldSusStyle && note.isSustainNote)) {
 					(!oppTrigger ? charAnimsFrame : oppAnimsFrame) += 1;
 					final animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))];
 					if(note.gfNote)
@@ -6572,7 +6577,7 @@ class PlayState extends MusicBeatState
 						}
 					}
 				}
-				else if (note.isSustainNote && charAnimsFrame < 4)
+				else if (note.isSustainNote && !ClientPrefs.oldSusStyle && charAnimsFrame < 4)
 				{
 					charAnimsFrame += 1;
 					final char = (note.gfNote ? gf : (!oppTrigger ? boyfriend : dad));
@@ -6730,7 +6735,7 @@ class PlayState extends MusicBeatState
 					char.specialAnim = true;
 					char.heyTimer = 0.6;
 				}
-			} else if(!daNote.noAnimation && oppAnimsFrame < 4 && ClientPrefs.charsAndBG && !daNote.isSustainNote) {
+			} else if(!daNote.noAnimation && oppAnimsFrame < 4 && ClientPrefs.charsAndBG && (!daNote.isSustainNote || ClientPrefs.oldSusStyle && daNote.isSustainNote)) {
 				oppAnimsFrame += 1;
 
 				final animToPlay:String = singAnimations[Std.int(Math.abs(daNote.noteData))] + daNote.animSuffix;
@@ -6790,7 +6795,7 @@ class PlayState extends MusicBeatState
 						}
 				}
 			}
-			else if (daNote.isSustainNote && oppAnimsFrame < 4)
+			else if (daNote.isSustainNote && !ClientPrefs.oldSusStyle && oppAnimsFrame < 4)
 			{
 				oppAnimsFrame += 1;
 				final char = (daNote.gfNote ? gf : (opponentChart ? boyfriend : dad));
@@ -6844,7 +6849,7 @@ class PlayState extends MusicBeatState
 			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
 		   	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 
-			if (shouldDrainHealth && health > healthDrainFloor && !practiceMode || opponentDrain && practiceMode) {
+			if (shouldDrainHealth && health > (healthDrainFloor * polyphony) && !practiceMode || opponentDrain && practiceMode) {
 				health -= (opponentDrain ? daNote.hitHealth : healthDrainAmount) * hpDrainLevel * polyphony;
 				if (ClientPrefs.healthDisplay && !ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 			}
@@ -7143,7 +7148,7 @@ class PlayState extends MusicBeatState
 			{
 				if (!paused) resyncConductor();
 			}
-			if (!paused && FlxG.sound.music.time - vocals.time > 20 * playbackRate && FlxG.sound.music.time < vocals.length) vocals.time = FlxG.sound.music.time;
+			if (!paused && FlxG.sound.music.time - vocals.time > 20 * playbackRate && FlxG.sound.music.time < vocals.length || FlxG.sound.music.time < 100) vocals.time = FlxG.sound.music.time;
 		}
 
 		if (camTwist)
@@ -7216,7 +7221,12 @@ class PlayState extends MusicBeatState
 			FlxTween.tween(camGame, {x: -twistShit * camTwistIntensity}, Conductor.crochet * (0.001 * gfSpeed), {ease: FlxEase.linear});
 		}
 
-		if (ClientPrefs.iconBopWhen == 'Every Beat' && (iconP1.visible || iconP2.visible)) bopIcons();
+		if (ClientPrefs.iconBopWhen == 'Every Beat' && (iconP1.visible || iconP2.visible)) 
+		{
+			bopIcons();
+			iconP1.updateHitbox();
+			iconP2.updateHitbox();
+		}
 
 		if (ClientPrefs.charsAndBG) {
 			if (gf != null && curBeat % Math.round(gfSpeed * gf.danceEveryNumBeats) == 0 && gf.animation.curAnim != null && !gf.animation.curAnim.name.startsWith("sing") && !gf.stunned)
