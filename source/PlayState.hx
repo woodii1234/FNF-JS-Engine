@@ -3723,7 +3723,7 @@ class PlayState extends MusicBeatState
 		else if (ClientPrefs.resyncType == 'Psych')
 		{
 			FlxG.sound.music.play();
-			//vocals.play();
+			if (!vocals.playing) vocals.play();
 
 			Conductor.songPosition = FlxG.sound.music.time;
 			//if (Conductor.songPosition < vocals.length) vocals.time = FlxG.sound.music.time;
