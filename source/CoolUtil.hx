@@ -48,6 +48,8 @@ class CoolUtil
 
 	public static var defaultSongs:Array<String> = ['tutorial', 'bopeebo', 'fresh', 'dad battle', 'spookeez', 'south', 'monster', 'pico', 'philly nice', 'blammed', 'satin panties', 'high', 'milf', 'cocoa', 'eggnog', 'winter horrorland', 'senpai', 'roses', 'thorns', 'ugh', 'guns', 'stress'];
 	public static var defaultSongsFormatted:Array<String> = ['dad-battle', 'philly-nice', 'satin-panties', 'winter-horrorland'];
+	
+	public static var defaultCharacters:Array<String> = ['dad', 'gf', 'gf-bent', 'gf-car', 'gf-christmas', 'gf-pixel', 'gf-tankmen', 'mom', 'mom-car', 'monster', 'monster-christmas', 'parents-christmas', 'pico', 'pico-player', 'senpai', 'senpai-angry', 'spirit', 'spooky', 'tankman', 'tankman-player'];
 
 	inline public static function quantize(f:Float, snap:Float){
 		// changed so this actually works lol

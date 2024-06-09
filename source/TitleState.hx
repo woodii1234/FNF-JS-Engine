@@ -94,6 +94,8 @@ class TitleState extends MusicBeatState
 
 		MusicBeatState.windowNameSuffix = "";
 
+		FlxG.fixedTimestep = false;
+
 		#if LUA_ALLOWED
 		Paths.pushGlobalMods();
 		#end

@@ -6156,7 +6156,7 @@ class PlayState extends MusicBeatState
 				boyfriend.dance();
 				//boyfriend.animation.curAnim.finish();
 			}
-			else if (ClientPrefs.charsAndBG && dad.holdTimer > Conductor.stepCrochet * (0.0011 / playbackRate) * dad.singDuration * singDurMult && dad.animation.curAnim.name.startsWith('sing') && !dad.animation.curAnim.name.endsWith('miss')) {
+			else if (ClientPrefs.charsAndBG && dad.animation.curAnim != null && dad.holdTimer > Conductor.stepCrochet * (0.0011 / playbackRate) * dad.singDuration * singDurMult && dad.animation.curAnim.name.startsWith('sing') && !dad.animation.curAnim.name.endsWith('miss')) {
 				dad.dance();
 			}
 		}
