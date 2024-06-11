@@ -100,6 +100,13 @@ class OptimizationSubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
+		var option:Option = new Option('Disable Note Hit Lua Calls',
+			"If checked, the game will not call note hit functions when a note is hit.",
+			'noHitFuncs',
+			'bool',
+			false);
+		addOption(option);
+
 		var option:Option = new Option('Even LESS Botplay Lag',
 			"Reduce Botplay lag even further.",
 			'lessBotLag',

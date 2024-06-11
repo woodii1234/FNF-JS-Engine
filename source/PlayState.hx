@@ -578,8 +578,6 @@ class PlayState extends MusicBeatState
 	public var startCallback:Void->Void = null;
 	public var endCallback:Void->Void = null;
 
-	public var emitter:Emitter = new Emitter();
-
 	override public function create()
 	{
 		//Stops playing on a height that isn't divisible by 2
@@ -1977,10 +1975,6 @@ class PlayState extends MusicBeatState
 			Paths.clearUnusedMemory();
 
 		startingTime = Sys.time();
-
-		emitter.on(NoteSignalStuff.NOTE_UPDATE, updateNote);
-		emitter.on(NoteSignalStuff.NOTE_HIT_BF, goodNoteHit);
-		emitter.on(NoteSignalStuff.NOTE_HIT_OPP, opponentNoteHit);
 
 		CustomFadeTransition.nextCamera = camOther;
 	}
@@ -4339,7 +4333,7 @@ class PlayState extends MusicBeatState
 		{
 			while (unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime <= Conductor.songPosition) {
 				unspawnNotes[notesAddedCount].wasHit = true; //Set this to true so the game doesn't do a double hit and crash the game
-				unspawnNotes[notesAddedCount].mustPress ? emitter.emit(NoteSignalStuff.NOTE_HIT_BF, null, unspawnNotes[notesAddedCount]): emitter.emit(NoteSignalStuff.NOTE_HIT_OPP, null, unspawnNotes[notesAddedCount]);
+				unspawnNotes[notesAddedCount].mustPress ? goodNoteHit(null, unspawnNotes[notesAddedCount]): opponentNoteHit(null, unspawnNotes[notesAddedCount]);
 				notesAddedCount++;
 			}
 		}
@@ -4374,13 +4368,11 @@ class PlayState extends MusicBeatState
 				amountOfRenderedNotes = 0;
 				for (group in [notes, sustainNotes])
 				{
-					var noteIndex:Int = group.members.length;
-					while (noteIndex >= 0)
+					group.forEach(function(daNote)
 					{
-						curNote = group.members[noteIndex--];
-						emitter.emit(NoteSignalStuff.NOTE_UPDATE, curNote);
-					}
-					inline group.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
+						updateNote(daNote);
+					});
+					group.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 				}
 			}
 
@@ -5999,7 +5991,7 @@ class PlayState extends MusicBeatState
 
 						// eee jack detection before was not super good
 						if (!notesStopped) {
-							emitter.emit(NoteSignalStuff.NOTE_HIT_BF, epicNote, null);
+							goodNoteHit(epicNote);
 							pressNotes.push(epicNote);
 						}
 					if (sortedNotesList.length > 2 && ClientPrefs.ezSpam) //literally all you need to allow you to spam though impossiblely hard jacks
@@ -6007,7 +5999,7 @@ class PlayState extends MusicBeatState
 						var notesThatCanBeHit = sortedNotesList.length;
 						for (i in 1...Std.int(notesThatCanBeHit)) //i may consider making this hit half the notes instead
 						{
-							emitter.emit(NoteSignalStuff.NOTE_HIT_BF, sortedNotesList[i], null);
+							goodNoteHit(sortedNotesList[i]);
 						}
 
 					}
@@ -6131,7 +6123,7 @@ class PlayState extends MusicBeatState
 				// hold note functions
 				if (!usingBotEnergy && strumsBlocked[daNote.noteData] != true && daNote.isSustainNote && parsedHoldArray[daNote.noteData] && daNote.canBeHit
 				&& daNote.mustPress && !daNote.tooLate && !daNote.wasGoodHit && !daNote.blockHit) {
-				emitter.emit(NoteSignalStuff.NOTE_HIT_BF, daNote, null);
+					goodNoteHit(daNote);
 				}
 			});
 
@@ -6337,7 +6329,7 @@ class PlayState extends MusicBeatState
 
 			if (!daNote.mustPress && !daNote.hitByOpponent && !daNote.ignoreNote && daNote.strumTime <= Conductor.songPosition)
 			{
-				if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) emitter.emit(NoteSignalStuff.NOTE_HIT_OPP, daNote, null);
+				if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) opponentNoteHit(daNote);
 					if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
 					{
 						if (!daNote.isSustainNote) {
@@ -6364,7 +6356,7 @@ class PlayState extends MusicBeatState
 				}
 			if(daNote.mustPress) {
 				if((cpuControlled || usingBotEnergy && strumsHeld[daNote.noteData]) && daNote.strumTime + (ClientPrefs.communityGameBot && !daNote.isSustainNote ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition && !daNote.ignoreNote) {
-					if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) emitter.emit(NoteSignalStuff.NOTE_HIT_BF, daNote, null);
+					if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) goodNoteHit(daNote);
 					if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
 					{
 						if (!daNote.isSustainNote) {
@@ -6645,7 +6637,7 @@ class PlayState extends MusicBeatState
 					hitResetTimer = 0.3 / playbackRate;
 				}
 
-				callOnLuas((oppTrigger ? 'opponentNoteHit' : 'goodNoteHit'), [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
+				if (!ClientPrefs.noHitFuncs) callOnLuas((oppTrigger ? 'opponentNoteHit' : 'goodNoteHit'), [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
 
 					if (ClientPrefs.showNotes && !note.isSustainNote) note.exists = false;
 				if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
@@ -6844,7 +6836,7 @@ class PlayState extends MusicBeatState
 			daNote.hitByOpponent = true;
 
 
-			callOnLuas(!opponentChart ? 'opponentNoteHit' : 'goodNoteHit', [notes.members.indexOf(daNote), Math.abs(daNote.noteData), daNote.noteType, daNote.isSustainNote]);
+			if (!ClientPrefs.noHitFuncs) callOnLuas(!opponentChart ? 'opponentNoteHit' : 'goodNoteHit', [notes.members.indexOf(daNote), Math.abs(daNote.noteData), daNote.noteType, daNote.isSustainNote]);
 
 			if (!daNote.isSustainNote)
 			{
@@ -7036,10 +7028,6 @@ class PlayState extends MusicBeatState
 		Paths.splashSkinAnimsMap.clear();
 		Paths.splashConfigs.clear();
 		Paths.splashAnimCountMap.clear();
-		
-		emitter.off(NoteSignalStuff.NOTE_UPDATE, updateNote);
-		emitter.off(NoteSignalStuff.NOTE_HIT_BF, goodNoteHit);
-		emitter.off(NoteSignalStuff.NOTE_HIT_OPP, opponentNoteHit);
 
 		super.destroy();
 	}
@@ -7688,20 +7676,23 @@ class PlayState extends MusicBeatState
 				(perfects > 0), // 'PFC'
 				(sicks > 0), // 'SFC'
 				(goods > 0), // 'GFC'
-				(shits > 0), // 'BFC'
-				(songMisses > 0 && songMisses < 10), // 'FC'
-				(shits >= 10), // 'Clear'
-				(shits >= 100), // 'TDCB'
-				(shits >= 1000) // 'QDCB'
+				(bads > 0), // 'BFC'
+				(shits > 0), // 'FC'
+				(songMisses > 0 && songMisses < 10), // 'SDCB'
+				(songMisses >= 10), // 'Clear'
+				(songMisses >= 100), // 'TDCB'
+				(songMisses >= 1000) // 'QDCB'
 			];
 			
+			var cond:Int = fcConditions.length - 1;
 			ratingFC = "";
-			for (i in 0...fcConditions.length)
+			while (cond >= 0)
 			{
-				if (fcConditions[i]) {
-					ratingFC = fcStrings[i];
+				if (fcConditions[cond]) {
+					ratingFC = fcStrings[cond];
 					break;
 				}
+				cond--;
 			}
 
 			var accuracy:Float = (ratingPercent * 100);
@@ -7726,13 +7717,15 @@ class PlayState extends MusicBeatState
 				[ accuracy < 50.00, "F" ]
 			];
 
+			cond = ratingConditions.length;
 			ratingCool = "";
-			for (i in 0...ratingConditions.length)
+			while (cond >= 0)
 			{
-				if (ratingConditions[i][0]) {
-					ratingCool = ratingConditions[i][1];
+				if (ratingConditions[cond] != null && ratingConditions[cond][0]) {
+					ratingCool = ratingConditions[cond][1];
 					break;
 				}
+				cond--;
 			}
 
 			// basically same stuff, doesn't update every frame but it also means no memory leaks during botplay
