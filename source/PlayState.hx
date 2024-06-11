@@ -1555,10 +1555,10 @@ class PlayState extends MusicBeatState
 			EngineWatermark.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
 			EngineWatermark.scrollFactor.set();
 			add(EngineWatermark);
-			EngineWatermark.text = SONG.song + " " + CoolUtil.difficultyString() + " | JSE " + MainMenuState.psychEngineJSVersion;
+			EngineWatermark.text = SONG.song + " " + CoolUtil.difficultyString() + " | JSE: Anniversary Update";
 		}
 		if (ClientPrefs.watermarkStyle == 'Forever Engine') {
-			EngineWatermark = new FlxText(0, FlxG.height - 30, 0, "JS Engine v" + MainMenuState.psychEngineJSVersion, 16);
+			EngineWatermark = new FlxText(0, FlxG.height - 30, 0, "JS Engine: Anniversary Update", 16);
 			EngineWatermark.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
 			EngineWatermark.updateHitbox();
 			EngineWatermark.x = FlxG.width - EngineWatermark.width - 5;
@@ -1571,7 +1571,7 @@ class PlayState extends MusicBeatState
 			EngineWatermark.scrollFactor.set();
 			if (ClientPrefs.downScroll) EngineWatermark.y = (FlxG.height * 0.9 + 50);
 			add(EngineWatermark);
-			EngineWatermark.text = "You are now playing " + SONG.song + " on " + CoolUtil.difficultyString() + "! (JSE v" + MainMenuState.psychEngineJSVersion + ")";
+			EngineWatermark.text = "You are now playing " + SONG.song + " on " + CoolUtil.difficultyString() + "! (JSE: Anniversary Update)";
 		}
 		if (ClientPrefs.watermarkStyle == 'Dave Engine') {
 			EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
@@ -6507,7 +6507,6 @@ class PlayState extends MusicBeatState
 							{
 								if (!note.isSustainNote && noteRows[note.mustPress?0:1][note.row].length > 1)
 									{
-										// potentially have jump anims?
 										final chord = noteRows[note.mustPress?0:1][note.row];
 										final animNote = chord[0];
 										final realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
@@ -6518,18 +6517,9 @@ class PlayState extends MusicBeatState
 
 										gf.mostRecentRow = note.row;
 										doGhostAnim('gf', animToPlay);
-										gfGhost.color = FlxColor.fromRGB(gf.healthColorArray[0] + 50, gf.healthColorArray[1] + 50, gf.healthColorArray[2] + 50);
-										gfGhostTween = FlxTween.tween(gfGhost, {alpha: 0}, 0.75, {
-											ease: FlxEase.linear,
-											onComplete: function(twn:FlxTween)
-											{
-												gfGhostTween = null;
-											}
-										});
 									}
 								else{
 										inline gf.playAnim(animToPlay + note.animSuffix, true);
-										gf.holdTimer = 0;
 								}
 							}
 						}
@@ -6555,7 +6545,7 @@ class PlayState extends MusicBeatState
 								}
 
 								char.mostRecentRow = note.row;
-								inline doGhostAnim((!oppTrigger ? 'bf' : 'dad'), animToPlay);
+								doGhostAnim((!oppTrigger ? 'bf' : 'dad'), animToPlay);
 							}
 							else
 							{
@@ -6742,6 +6732,7 @@ class PlayState extends MusicBeatState
 
 				final animToPlay:String = singAnimations[Std.int(Math.abs(daNote.noteData))] + daNote.animSuffix;
 				if(daNote.gfNote && ClientPrefs.charsAndBG) {
+					if (gf != null) gf.holdTimer = 0;
 					if (ClientPrefs.doubleGhost && gf != null)
 					{
 						if (!daNote.isSustainNote && noteRows[daNote.mustPress?0:1][daNote.row].length > 1)
@@ -6757,11 +6748,13 @@ class PlayState extends MusicBeatState
 
 							gf.mostRecentRow = daNote.row;
 							inline doGhostAnim('gf', animToPlay);
-							}
 						}
-						else if (gf != null) {
+						else {
 							inline gf.playAnim(animToPlay, true);
-							gf.holdTimer = 0;
+						}
+					}
+					else if (!ClientPrefs.doubleGhost && gf != null) {
+							inline gf.playAnim(animToPlay, true);
 						}
 				}
 				else if(ClientPrefs.charsAndBG && !daNote.gfNote)
