@@ -477,6 +477,8 @@ class Paths
 	//Loads the Voices. Crucial for generateSong
 	static public function voices(song:String, ?difficulty:String = ''):Any
 	{
+		var formattedDifficulty:String = formatToSongPath(difficulty);
+		if (difficulty.contains(' ')) difficulty = formattedDifficulty;
 		#if html5
 		return 'songs:assets/songs/${formatToSongPath(song)}/Voices.$SOUND_EXT';
 		#else
@@ -497,6 +499,8 @@ class Paths
 	//Loads the instrumental. Crucial for generateSong
 	static public function inst(song:String, ?difficulty:String = ''):Any
 	{
+		var formattedDifficulty:String = formatToSongPath(difficulty);
+		if (difficulty.contains(' ')) difficulty = formattedDifficulty;
 		#if html5
 		return 'songs:assets/songs/${formatToSongPath(song)}/Inst.$SOUND_EXT';
 		#else
@@ -518,6 +522,9 @@ class Paths
 	//For song events.
 	static public function songEvents(song:String, ?difficulty:String, ?onlyEventsString:Bool = false):String {
 		if (difficulty != null) {
+			var formattedDifficulty:String = formatToSongPath(difficulty);
+			if (difficulty.contains(' ')) difficulty = formattedDifficulty;
+			
 			var eventsKey:String = formatToSongPath(song) + '/events-${difficulty.toLowerCase()}';
 			if (FileSystem.exists(Paths.json(eventsKey)) || FileSystem.exists(Paths.modsJson(eventsKey)))
 				return (!onlyEventsString ? eventsKey : 'events-${difficulty.toLowerCase()}');

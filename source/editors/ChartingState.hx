@@ -4146,7 +4146,7 @@ class ChartingState extends MusicBeatState
 			var gamingName:String = Paths.formatToSongPath(_song.song);
 
 			if (difficulty.toLowerCase() != 'normal')
-				gamingName = gamingName + '-' + difficulty.toLowerCase();
+				gamingName = gamingName + '-' + Paths.formatToSongPath(difficulty);
 
 			_file.save(data.trim(), gamingName + ".json");
 		}

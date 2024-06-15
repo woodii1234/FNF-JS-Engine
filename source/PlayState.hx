@@ -1724,8 +1724,8 @@ class PlayState extends MusicBeatState
 		ytWatermark.visible = ClientPrefs.ytWatermarkPosition != 'Hidden';
 		add(ytWatermark);
 
-		renderedTxt = new FlxText(0, healthBarBG.y - 50, FlxG.width, "", 40);
-		renderedTxt.setFormat(Paths.font("vcr.ttf"), 40, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		renderedTxt = new FlxText(0, healthBarBG.y - 50, FlxG.width, "", 32);
+		renderedTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		renderedTxt.scrollFactor.set();
 		renderedTxt.borderSize = 1.25;
 		renderedTxt.cameras = [camHUD];
@@ -3733,6 +3733,7 @@ class PlayState extends MusicBeatState
 	public var takenTime:Float = haxe.Timer.stamp();
 
 	public var amountOfRenderedNotes:Float = 0;
+	public var maxRenderedNotes:Float = 0;
 
 	var canUseBotEnergy:Bool = false;
 	var usingBotEnergy:Bool = false;
@@ -3837,7 +3838,7 @@ class PlayState extends MusicBeatState
 				botplayTxt.text += '\nNote Multiplier: ' + polyphony;
 		}
 
-		if (ClientPrefs.showRendered) renderedTxt.text = 'Rendered Notes: ${FlxStringUtil.formatMoney(amountOfRenderedNotes, false)}';
+		if (ClientPrefs.showRendered) renderedTxt.text = 'Rendered Notes: ${FlxStringUtil.formatMoney(amountOfRenderedNotes, false)}/${FlxStringUtil.formatMoney(maxRenderedNotes, false)}/${FlxStringUtil.formatMoney(notes.length + sustainNotes.length, false)}';
 
 		if (iconsShouldGoUp) iconP1.y = iconP2.y = healthBarBG.y - 75;
 
@@ -6323,6 +6324,7 @@ class PlayState extends MusicBeatState
 		if (daNote != null && daNote.exists)
 		{
 			amountOfRenderedNotes += daNote.noteDensity;
+			if (maxRenderedNotes < amountOfRenderedNotes) maxRenderedNotes = amountOfRenderedNotes;
 			inline daNote.followStrum((daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData], songSpeed);
 			final strum = (daNote.mustPress ? playerStrums : opponentStrums).members[daNote.noteData];
 			if(daNote.isSustainNote && strum != null && strum.sustainReduce) inline daNote.clipToStrumNote(strum);
