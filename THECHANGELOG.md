@@ -1,3 +1,7 @@
+1.27.2;
+Added Senpai (Erect) and High (Erect) events
+Satin Panties, High, Senpai, Roses, and Thorns now load the correct song on Nightmare difficulty
+
 1.27.1;
 Fixed the game possibly crashing when botplayTxt is null
 The wega hitsound doesn't actually crash the game now
