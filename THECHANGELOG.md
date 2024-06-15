@@ -1,3 +1,7 @@
+1.27.1;
+Fixed the game possibly crashing when botplayTxt is null
+The wega hitsound doesn't actually crash the game now
+
 1.27.0;
 Happy birthday, JS Engine!
 
