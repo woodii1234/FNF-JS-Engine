@@ -1955,7 +1955,7 @@ class PlayState extends MusicBeatState
 				botplayTxt.text = theListBotplay[FlxG.random.int(0, theListBotplay.length - 1)];
 			}
 
-		ogBotTxt = botplayTxt.text;
+		if (botplayTxt != null) ogBotTxt = botplayTxt.text;
 
 		cacheCountdown();
 		if (ClientPrefs.ratingType != 'Simple') cachePopUpScore();
