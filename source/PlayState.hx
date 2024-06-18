@@ -1729,7 +1729,7 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.scoreTxtSize > 0 && scoreTxt != null && !ClientPrefs.showcaseMode && !ClientPrefs.hideScore && !ClientPrefs.hideHud) scoreTxt.size = ClientPrefs.scoreTxtSize;
 		if (!ClientPrefs.hideScore) updateScore();
 
-		var ytWMPosition = switch(ClientPrefs.ytWatermarkPosition)
+		final ytWMPosition = switch(ClientPrefs.ytWatermarkPosition)
 		{
 			case 'Top': FlxG.height * 0.2;
 			case 'Middle': FlxG.height / 2;
@@ -1737,7 +1737,8 @@ class PlayState extends MusicBeatState
 			default: FlxG.height / 2;
 		}
 
-		var ytWatermarkText = Assets.getText(Paths.txt("ytWatermarkInfo", "preload"));
+		final path:String = Paths.txt("ytWatermarkInfo", "preload");
+		final ytWatermarkText:String = Assets.exists(path) ? Assets.getText(path) : '';
 		ytWatermark = new FlxText(0, ytWMPosition, FlxG.width, ytWatermarkText, 40);
 		ytWatermark.setFormat(Paths.font("vcr.ttf"), 25, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		ytWatermark.scrollFactor.set();
@@ -3079,6 +3080,7 @@ class PlayState extends MusicBeatState
 			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 			if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 
+		// TODO: Lock other note inputs
 		if (oneK)
 		{
 			playerStrums.forEachAlive(function(daNote:FlxSprite)
@@ -3086,7 +3088,7 @@ class PlayState extends MusicBeatState
 				if (daNote != playerStrums.members[firstNoteData]) 
 				{
 					FlxTween.cancelTweensOf(daNote);
-					FlxTween.tween(daNote, {alpha: 0}, 0.7, {ease: FlxEase.expoOut,});
+					FlxTween.tween(daNote, {alpha: 0}, 0.7, {ease: FlxEase.expoOut});
 				}
 			});
 			opponentStrums.forEachAlive(function(daNote:FlxSprite)
@@ -3094,7 +3096,7 @@ class PlayState extends MusicBeatState
 				if (daNote != opponentStrums.members[firstNoteData]) 
 				{
 					FlxTween.cancelTweensOf(daNote);
-					FlxTween.tween(daNote, {alpha: 0}, 0.7, {ease: FlxEase.expoOut,});
+					FlxTween.tween(daNote, {alpha: 0}, 0.7, {ease: FlxEase.expoOut});
 				}
 			});
 			FlxG.sound.play(Paths.sound('FunnyVanish'));
@@ -6415,7 +6417,7 @@ class PlayState extends MusicBeatState
 				{
 					hitsound.play(true);
 					hitsound.pitch = playbackRate;
-					if (hitsoundImageToLoad.length > 0 && hitImagesFrame < 4)
+					if (Assets.exists(hitsoundImageToLoad) && hitImagesFrame < 4)
 					{
 						hitImagesFrame++;
 						hitsoundImage = new FlxSprite().loadGraphic(Paths.image(hitsoundImageToLoad));
