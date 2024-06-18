@@ -45,12 +45,12 @@ class MusicBeatState extends FlxUIState
 	// better then updating it all the time which can cause memory leaks
 	static function set_windowNameSuffix(value:String){
 		windowNameSuffix = value;
-		Application.current.window.title += windowNameSuffix;
+		Application.current.window.title = windowNamePrefix + windowNameSuffix + windowNameSuffix2;
 		return value;
 	}
 	static function set_windowNameSuffix2(value:String){
 		windowNameSuffix = value;
-		Application.current.window.title += windowNameSuffix2;
+		Application.current.window.title = windowNamePrefix + windowNameSuffix + windowNameSuffix2;
 		return value;
 	}
 
@@ -79,7 +79,6 @@ class MusicBeatState extends FlxUIState
 		FlxG.cameras.reset(camera);
 		FlxG.cameras.setDefaultDrawTarget(camera, true);
 		_psychCameraInitialized = true;
-		//trace('initialized psych camera ' + Sys.cpuTime());
 		return camera;
 	}
 
