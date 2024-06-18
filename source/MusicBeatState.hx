@@ -38,9 +38,21 @@ class MusicBeatState extends FlxUIState
 
 	var _psychCameraInitialized:Bool = false;
 
-	public static var windowNameSuffix:String = "";
-	public static var windowNameSuffix2:String = ""; //changes to "Outdated!" if the version of the engine is outdated
+	public static var windowNameSuffix(default, set):String = "";
+	public static var windowNameSuffix2(default, set):String = ""; //changes to "Outdated!" if the version of the engine is outdated
 	public static var windowNamePrefix:String = "Friday Night Funkin': JS Engine";
+
+	// better then updating it all the time which can cause memory leaks
+	static function set_windowNameSuffix(value:String){
+		windowNameSuffix = value;
+		Application.current.window.title += windowNameSuffix;
+		return value;
+	}
+	static function set_windowNameSuffix2(value:String){
+		windowNameSuffix = value;
+		Application.current.window.title += windowNameSuffix2;
+		return value;
+	}
 
 	override public function new() {
 		super();
@@ -57,6 +69,8 @@ class MusicBeatState extends FlxUIState
 			openSubState(new CustomFadeTransition(0.7, true));
 		}
 		FlxTransitionableState.skipNextTransOut = false;
+
+		Application.current.window.title = windowNamePrefix + windowNameSuffix + windowNameSuffix2;
 	}
 
 	public function initPsychCamera():PsychCamera
@@ -101,7 +115,6 @@ class MusicBeatState extends FlxUIState
 		});
 
 		super.update(elapsed);
-		Application.current.window.title = windowNamePrefix + windowNameSuffix + windowNameSuffix2;
 	}
 
 	private function updateSection():Void
