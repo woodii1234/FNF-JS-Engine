@@ -2984,6 +2984,7 @@ class PlayState extends MusicBeatState
 		}
 		Conductor.songPosition = time;
 		songTime = time;
+		clearNotesBefore(time);
 	}
 
 	public function startNextDialogue() {
