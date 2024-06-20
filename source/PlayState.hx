@@ -3369,6 +3369,7 @@ class PlayState extends MusicBeatState
 								mustPress: swagNote.mustPress,
 								oppNote: swagNote.oppNote,
 								noteType: swagNote.noteType,
+								animSuffix: (songNotes[3] == 'Alt Animation' || section.altAnim ? '-alt' : ''),
 								noteskin: (gottaHitNote ? bfNoteskin : dadNoteskin),
 								gfNote: swagNote.gfNote,
 								isSustainNote: false,
@@ -4897,6 +4898,7 @@ class PlayState extends MusicBeatState
 							if(!boyfriendMap.exists(value2)) {
 								addCharacterToList(value2, charType);
 							}
+							var bfAnim:String = (boyfriend.animation.curAnim != null && boyfriend.animation.curAnim.name.startsWith('sing') ? boyfriend.animation.curAnim.name : '');
 
 							var lastAlpha:Float = boyfriend.alpha;
 							boyfriend.alpha = 0.00001;
@@ -4913,6 +4915,7 @@ class PlayState extends MusicBeatState
 								if (ClientPrefs.bfIconStyle == "OS 'Engine'") iconP1.changeIcon('bfos');
 							}
 							bfNoteskin = boyfriend.noteskin;
+							if (bfAnim != '') boyfriend.playAnim(bfAnim, true);
 						}
 						setOnLuas('boyfriendName', boyfriend.curCharacter);
 
@@ -4922,6 +4925,7 @@ class PlayState extends MusicBeatState
 								addCharacterToList(value2, charType);
 							}
 
+							var dadAnim:String = (dad.animation.curAnim != null && dad.animation.curAnim.name.startsWith('sing') ? dad.animation.curAnim.name : '');
 							var wasGf:Bool = dad.curCharacter.startsWith('gf');
 							var lastAlpha:Float = dad.alpha;
 							dad.alpha = 0.00001;
@@ -4943,6 +4947,7 @@ class PlayState extends MusicBeatState
 							if (ClientPrefs.scoreStyle == 'JS Engine' && !ClientPrefs.hideHud) {
 								if (!ClientPrefs.hideScore && scoreTxt != null) FlxTween.color(scoreTxt, 1, scoreTxt.color, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]));
 							}
+							if (dadAnim != '') dad.playAnim(dadAnim, true);
 						}
 							dadNoteskin = dad.noteskin;
 						setOnLuas('dadName', dad.curCharacter);
@@ -5203,6 +5208,12 @@ class PlayState extends MusicBeatState
 		if (pb >= 256 && pb < 512) return 12.8;
 		if (pb >= 512 && pb < 1024) return 25.6;
 		return 0.05;
+	}
+
+	function calculateResetTime(?sustainNote:Bool = false):Float {
+		if (ClientPrefs.strumLitStyle == 'BPM Based' && !ClientPrefs.communityGameBot) return (Conductor.stepCrochet * 1.5 / 1000) / playbackRate;
+		if (ClientPrefs.communityGameBot) return (sustainNote ? 0.15 : FlxG.random.float(0.05, 0.15)) / playbackRate;
+		return 0.15 / playbackRate;
 	}
 
 	public var transitioning = false;
@@ -6401,6 +6412,8 @@ class PlayState extends MusicBeatState
 	}
 
 	var oppTrigger:Bool = false;
+	var doGf:Bool = false;
+	var playerChar = null;
 	function goodNoteHit(note:Note, noteAlt:PreloadedChartNote = null):Void
 	{
 		if (note != null)
@@ -6468,8 +6481,8 @@ class PlayState extends MusicBeatState
 					totalNotesPlayed += 1 * polyphony;
 					missCombo = 0;
 					if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
-					inline notesHitArray.push(1 * polyphony);
-					inline notesHitDateArray.push(Conductor.songPosition);
+						inline notesHitArray.push(1 * polyphony);
+						inline notesHitDateArray.push(Conductor.songPosition);
 					}
 					if (!ClientPrefs.lessBotLag) popUpScore(note);
 					else
@@ -6515,6 +6528,7 @@ class PlayState extends MusicBeatState
 
 				if (bothSides) oppTrigger = bothSides && note.doOppStuff;
 				else if (opponentChart && !oppTrigger) oppTrigger = true;
+				doGf = note.gfNote;
 
 				if (!usingBotEnergy && (ClientPrefs.healthGainType == 'Psych Engine' || ClientPrefs.healthGainType == 'Leather Engine' || ClientPrefs.healthGainType == 'Kade (1.2)' || ClientPrefs.healthGainType == 'Kade (1.6+)' || ClientPrefs.healthGainType == 'Doki Doki+' || ClientPrefs.healthGainType == 'VS Impostor')) {
 					health += note.hitHealth * healthGain * polyphony;
@@ -6522,71 +6536,40 @@ class PlayState extends MusicBeatState
 				if(!note.noAnimation && ClientPrefs.charsAndBG && (!oppTrigger ? charAnimsFrame : oppAnimsFrame) < 4 && (!note.isSustainNote || ClientPrefs.oldSusStyle && note.isSustainNote)) {
 					(!oppTrigger ? charAnimsFrame : oppAnimsFrame) += 1;
 					final animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))];
-					if(note.gfNote)
-					{
-						if(gf != null)
-						{
-							gf.holdTimer = 0;
-							if (!ClientPrefs.doubleGhost) {
-								inline gf.playAnim(animToPlay + note.animSuffix, true);
-							}
-							else
-							{
-								if (!note.isSustainNote && noteRows[note.mustPress?0:1][note.row].length > 1)
-									{
-										final chord = noteRows[note.mustPress?0:1][note.row];
-										final animNote = chord[0];
-										final realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
-										if (gf.mostRecentRow != note.row)
-										{
-											inline gf.playAnim(realAnim, true);
-										}
 
-										gf.mostRecentRow = note.row;
-										doGhostAnim('gf', animToPlay);
-									}
-								else{
-										inline gf.playAnim(animToPlay + note.animSuffix, true);
-								}
-							}
-						}
+					playerChar = (!oppTrigger ? (doGf ? gf : boyfriend) : dad);
+					playerChar.holdTimer = 0;
+					if (ClientPrefs.cameraPanning) inline camPanRoutine(animToPlay, (!oppTrigger ? 'bf' : 'oppt'));
+					if (!ClientPrefs.doubleGhost) {
+						inline playerChar.playAnim(animToPlay + note.animSuffix, true);
 					}
 					else
 					{
-						final char = (!oppTrigger ? boyfriend : dad);
-						char.holdTimer = 0;
-						if (ClientPrefs.cameraPanning) inline camPanRoutine(animToPlay, (!oppTrigger ? 'bf' : 'oppt'));
-						if (!ClientPrefs.doubleGhost) {
-							inline char.playAnim(animToPlay + note.animSuffix, true);
+						if (!note.isSustainNote && noteRows[note.mustPress?0:1][note.row].length > 1)
+						{
+							final chord = noteRows[note.mustPress?0:1][note.row];
+							final animNote = chord[0];
+							final realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
+							if (playerChar.mostRecentRow != note.row)
+							{
+								inline playerChar.playAnim(realAnim, true);
+							}
+
+							playerChar.mostRecentRow = note.row;
+							doGhostAnim((!oppTrigger ? (doGf ? 'gf' : 'bf') : 'dad'), animToPlay);
 						}
 						else
 						{
-							if (!note.isSustainNote && noteRows[note.mustPress?0:1][note.row].length > 1)
-							{
-								final chord = noteRows[note.mustPress?0:1][note.row];
-								final animNote = chord[0];
-								final realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
-								if (char.mostRecentRow != note.row)
-								{
-									inline char.playAnim(realAnim, true);
-								}
-
-								char.mostRecentRow = note.row;
-								doGhostAnim((!oppTrigger ? 'bf' : 'dad'), animToPlay);
-							}
-							else
-							{
-								inline char.playAnim(animToPlay + note.animSuffix, true);
-							}
+							inline playerChar.playAnim(animToPlay + note.animSuffix, true);
 						}
 					}
 
 					if(note.noteType == 'Hey!') {
-						final char:Character = !note.gfNote ? !oppTrigger ? boyfriend : dad : gf;
-						if(char.animOffsets.exists('hey')) {
-							char.playAnim('hey', true);
-							char.specialAnim = true;
-							char.heyTimer = 0.6;
+						playerChar = !doGf ? !oppTrigger ? boyfriend : dad : gf;
+						if(playerChar.animOffsets.exists('hey')) {
+							playerChar.playAnim('hey', true);
+							playerChar.specialAnim = true;
+							playerChar.heyTimer = 0.6;
 						}
 
 						if(gf != null && gf.animOffsets.exists('cheer')) {
@@ -6599,22 +6582,12 @@ class PlayState extends MusicBeatState
 				else if (note.isSustainNote && !ClientPrefs.oldSusStyle && charAnimsFrame < 4)
 				{
 					charAnimsFrame += 1;
-					final char = (note.gfNote ? gf : (!oppTrigger ? boyfriend : dad));
-					if (char != null) char.holdTimer = 0;
+					playerChar = (note.gfNote ? gf : (!oppTrigger ? boyfriend : dad));
+					if (playerChar != null) playerChar.holdTimer = 0;
 				}
 
 				if((cpuControlled || usingBotEnergy && strumsHeld[note.noteData]) && ClientPrefs.botLightStrum && !strumsHit[(note.noteData % 4) + 4]) {
 					strumsHit[(note.noteData % 4) + 4] = true;
-					var time:Float = 0;
-
-					if (ClientPrefs.strumLitStyle == 'Full Anim' && !ClientPrefs.communityGameBot) time = 0.15 / playbackRate;
-					if (ClientPrefs.strumLitStyle == 'BPM Based' && !ClientPrefs.communityGameBot) time = (Conductor.stepCrochet * 1.5 / 1000) / playbackRate;
-					if (ClientPrefs.communityGameBot) time = (note.isSustainNote ? 0.15 : FlxG.random.float(0.05, 0.15)) / playbackRate;
-					if(note.isSustainNote && (ClientPrefs.showNotes && !note.animation.curAnim.name.endsWith('end'))) {
-						if (ClientPrefs.strumLitStyle == 'Full Anim' && !ClientPrefs.communityGameBot) time += 0.15 / playbackRate;
-						if (ClientPrefs.strumLitStyle == 'BPM Based' && !ClientPrefs.communityGameBot) time += (Conductor.stepCrochet * 1.5 / 1000) / playbackRate;
-						if (ClientPrefs.communityGameBot) time += 0.15 / playbackRate;
-					}
 
 					if(playerStrums.members[note.noteData] != null) {
 						if ((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && ClientPrefs.showNotes && ClientPrefs.enableColorShader) {
@@ -6622,7 +6595,7 @@ class PlayState extends MusicBeatState
 						} else {
 							inline playerStrums.members[note.noteData].playAnim('confirm', true, 0, 0, 0, ClientPrefs.noteColorStyle == 'Char-Based', !note.doOppStuff, note.gfNote);
 						}
-						playerStrums.members[note.noteData].resetAnim = time;
+						playerStrums.members[note.noteData].resetAnim = calculateResetTime(note.isSustainNote);
 					}
 				} else if (ClientPrefs.playerLightStrum && !cpuControlled) {
 					final spr = playerStrums.members[note.noteData];
@@ -6636,14 +6609,10 @@ class PlayState extends MusicBeatState
 					}
 				}
 
-				if ((!note.gfNote ? !oppTrigger ? boyfriend : dad : gf).shakeScreen)
+				if (playerChar != null && playerChar.shakeScreen)
 				{
-					final char:Character = !note.gfNote ? !oppTrigger ? boyfriend : dad : gf;
-					if (char != null)
-					{
-						camGame.shake(char.shakeIntensity, char.shakeDuration / playbackRate);
-						camHUD.shake(char.shakeIntensity / 2, char.shakeDuration / playbackRate);
-					}
+					camGame.shake(playerChar.shakeIntensity, playerChar.shakeDuration / playbackRate);
+					camHUD.shake(playerChar.shakeIntensity / 2, playerChar.shakeDuration / playbackRate);
 				}
 				note.wasGoodHit = true;
 				if (ClientPrefs.songLoading && !ffmpegMode) vocals.volume = 1;
@@ -6669,11 +6638,11 @@ class PlayState extends MusicBeatState
 			oppTrigger = opponentChart || bothSides && noteAlt.oppNote;
 			if(noteAlt.noteType == 'Hey!')
 			{
-				final char:Character = !noteAlt.gfNote ? oppTrigger ? dad : boyfriend : gf;
-				if (char.animOffsets.exists('hey')) {
-					char.playAnim('hey', true);
-					char.specialAnim = true;
-					char.heyTimer = 0.6;
+				playerChar = !noteAlt.gfNote ? oppTrigger ? dad : boyfriend : gf;
+				if (playerChar.animOffsets.exists('hey')) {
+					playerChar.playAnim('hey', true);
+					playerChar.specialAnim = true;
+					playerChar.heyTimer = 0.6;
 				}
 			}
 			if(!noteAlt.noAnimation && ClientPrefs.charsAndBG && (!oppTrigger ? charAnimsFrame : oppAnimsFrame) < 4) {
@@ -6698,18 +6667,8 @@ class PlayState extends MusicBeatState
 				if (ClientPrefs.botLightStrum && !strumsHit[(noteAlt.noteData % 4) + 4])
 				{
 					strumsHit[(noteAlt.noteData % 4) + 4] = true;
-					var time:Float = 0;
-
-					if (ClientPrefs.strumLitStyle == 'Full Anim' && !ClientPrefs.communityGameBot) time = 0.15 / playbackRate;
-					if (ClientPrefs.strumLitStyle == 'BPM Based' && !ClientPrefs.communityGameBot) time = (Conductor.stepCrochet * 1.5 / 1000) / playbackRate;
-					if (ClientPrefs.communityGameBot) time = (!ClientPrefs.communityGameBot ? 0.15 : FlxG.random.float(0.05, 0.15)) / playbackRate;
-					if(noteAlt.isSustainNote && !noteAlt.isSustainEnd) {
-						if (ClientPrefs.strumLitStyle == 'Full Anim' && !ClientPrefs.communityGameBot) time += 0.15 / playbackRate;
-						if (ClientPrefs.strumLitStyle == 'BPM Based' && !ClientPrefs.communityGameBot) time += (Conductor.stepCrochet * 1.5 / 1000) / playbackRate;
-						if (ClientPrefs.communityGameBot) time += (!ClientPrefs.communityGameBot ? 0.15 : FlxG.random.float(0.05, 0.15)) / playbackRate;
-					}
 					inline playerStrums.members[noteAlt.noteData].playAnim('confirm', true, 0, 0, 0, false, false, false);
-					playerStrums.members[noteAlt.noteData].resetAnim = time;
+					playerStrums.members[noteAlt.noteData].resetAnim = calculateResetTime(noteAlt.isSustainNote);
 				}
 			}
 			if (!noteAlt.isSustainNote && cpuControlled)
@@ -6737,6 +6696,9 @@ class PlayState extends MusicBeatState
 		}
 		return;
 	}
+
+	var oppChar = null;
+	var gfTrigger:Bool = false;
 	function opponentNoteHit(daNote:Note, noteAlt:PreloadedChartNote = null):Void
 	{
 		if (daNote != null)
@@ -6748,80 +6710,52 @@ class PlayState extends MusicBeatState
 
 			if(daNote.noteType == 'Hey!')
 			{
-				final char:Character = !daNote.gfNote ? !opponentChart ? dad : boyfriend : gf;
-				if (char.animOffsets.exists('hey')) {
-					char.playAnim('hey', true);
-					char.specialAnim = true;
-					char.heyTimer = 0.6;
+				oppChar = !daNote.gfNote ? !opponentChart ? dad : boyfriend : gf;
+				if (oppChar.animOffsets.exists('hey')) {
+					oppChar.playAnim('hey', true);
+					oppChar.specialAnim = true;
+					oppChar.heyTimer = 0.6;
 				}
 			} else if(!daNote.noAnimation && oppAnimsFrame < 4 && ClientPrefs.charsAndBG && (!daNote.isSustainNote || ClientPrefs.oldSusStyle && daNote.isSustainNote)) {
 				oppAnimsFrame += 1;
 
 				final animToPlay:String = singAnimations[Std.int(Math.abs(daNote.noteData))] + daNote.animSuffix;
-				if(daNote.gfNote && ClientPrefs.charsAndBG) {
-					if (gf != null) gf.holdTimer = 0;
-					if (ClientPrefs.doubleGhost && gf != null)
-					{
-						if (!daNote.isSustainNote && noteRows[daNote.mustPress?0:1][daNote.row].length > 1)
-						{
-							// potentially have jump anims?
-							final chord = noteRows[daNote.mustPress?0:1][daNote.row];
-							final animNote = chord[0];
-							final realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
-							if (gf.mostRecentRow != daNote.row)
-							{
-								inline gf.playAnim(realAnim, true);
-							}
+				gfTrigger = daNote.gfNote;
+				oppChar = (!opponentChart ? (gfTrigger ? gf : dad) : boyfriend);
 
-							gf.mostRecentRow = daNote.row;
-							inline doGhostAnim('gf', animToPlay);
-						}
-						else {
-							inline gf.playAnim(animToPlay, true);
-						}
-					}
-					else if (!ClientPrefs.doubleGhost && gf != null) {
-							inline gf.playAnim(animToPlay, true);
-						}
-				}
-				else if(ClientPrefs.charsAndBG && !daNote.gfNote)
+				if (!ClientPrefs.doubleGhost) inline oppChar.playAnim(animToPlay, true);
+				oppChar.holdTimer = 0;
+				if (ClientPrefs.cameraPanning) inline camPanRoutine(animToPlay, (!opponentChart ? 'dad' : 'bf'));
+				if (ClientPrefs.doubleGhost)
 				{
-					var char = (!opponentChart ? dad : boyfriend);
-
-					inline char.playAnim(animToPlay, true);
-					char.holdTimer = 0;
-					if (ClientPrefs.cameraPanning) inline camPanRoutine(animToPlay, (!opponentChart ? 'dad' : 'bf'));
-					if (ClientPrefs.doubleGhost)
-					{
 					if (!daNote.isSustainNote && noteRows[daNote.mustPress?0:1][daNote.row].length > 1)
+					{
+						// potentially have jump anims?
+						final chord = noteRows[daNote.mustPress?0:1][daNote.row];
+						final animNote = chord[0];
+						final realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
+						if (oppChar.mostRecentRow != daNote.row)
 						{
-							// potentially have jump anims?
-							final chord = noteRows[daNote.mustPress?0:1][daNote.row];
-							final animNote = chord[0];
-							final realAnim = singAnimations[Std.int(Math.abs(animNote.noteData))];
-							if (char.mostRecentRow != daNote.row)
-							{
-								inline char.playAnim(realAnim, true);
-							}
+							inline oppChar.playAnim(realAnim, true);
+						}
 
-								if (!daNote.noAnimation && !daNote.gfNote)
-								{
-									if(char.mostRecentRow != daNote.row)
-										inline doGhostAnim((!opponentChart ? 'dad' : 'bf'), animToPlay);
-								}
-								char.mostRecentRow = daNote.row;
-							}
+						if (!daNote.noAnimation)
+						{
+							if(oppChar.mostRecentRow != daNote.row)
+								inline doGhostAnim((!opponentChart ? (gfTrigger ? 'gf' : 'dad') : 'bf'), animToPlay);
 						}
-						else{
-							inline char.playAnim(animToPlay, true);
-						}
+						oppChar.mostRecentRow = daNote.row;
+					}
+					else{
+						inline oppChar.playAnim(animToPlay, true);
+					}
 				}
 			}
 			else if (daNote.isSustainNote && !ClientPrefs.oldSusStyle && oppAnimsFrame < 4)
 			{
 				oppAnimsFrame += 1;
-				final char = (daNote.gfNote ? gf : (opponentChart ? boyfriend : dad));
-				if (char != null) char.holdTimer = 0;
+				oppChar = (daNote.gfNote ? gf : (opponentChart ? boyfriend : dad));
+				if (oppChar != null) oppChar.holdTimer = 0;
 			}
 
 			if(ClientPrefs.oppNoteSplashes && !daNote.isSustainNote && splashesPerFrame[0] <= 4)
@@ -6837,21 +6771,13 @@ class PlayState extends MusicBeatState
 			if (ClientPrefs.opponentLightStrum && !strumsHit[daNote.noteData % 4])
 			{
 				strumsHit[daNote.noteData % 4] = true;
-				var time:Float = 0;
-				if (ClientPrefs.strumLitStyle == 'Full Anim') time = 0.15 / playbackRate;
-				if (ClientPrefs.strumLitStyle == 'BPM Based') time = (Conductor.stepCrochet * 1.5 / 1000) / playbackRate;
 
-				if(daNote.isSustainNote && (ClientPrefs.showNotes && !daNote.animation.curAnim.name.endsWith('end'))) {
-					if (ClientPrefs.strumLitStyle == 'Full Anim') time += 0.15 / playbackRate;
-					if (ClientPrefs.strumLitStyle == 'BPM Based') time += (Conductor.stepCrochet * 1.5 / 1000) / playbackRate;
+				if ((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && ClientPrefs.showNotes && ClientPrefs.enableColorShader) {
+					inline opponentStrums.members[daNote.noteData].playAnim('confirm', true, daNote.colorSwap.hue, daNote.colorSwap.saturation, daNote.colorSwap.brightness);
+				} else {
+					inline opponentStrums.members[daNote.noteData].playAnim('confirm', true, 0, 0, 0, ClientPrefs.noteColorStyle == 'Char-Based', false, daNote.gfNote);
 				}
-
-					if ((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && ClientPrefs.showNotes && ClientPrefs.enableColorShader) {
-						inline opponentStrums.members[daNote.noteData].playAnim('confirm', true, daNote.colorSwap.hue, daNote.colorSwap.saturation, daNote.colorSwap.brightness);
-					} else {
-						inline opponentStrums.members[daNote.noteData].playAnim('confirm', true, 0, 0, 0, ClientPrefs.noteColorStyle == 'Char-Based', false, daNote.gfNote);
-					}
-					opponentStrums.members[daNote.noteData].resetAnim = time;
+				opponentStrums.members[daNote.noteData].resetAnim = calculateResetTime(daNote.isSustainNote);
 			}
 			daNote.hitByOpponent = true;
 
@@ -6875,11 +6801,10 @@ class PlayState extends MusicBeatState
 				health -= (opponentDrain ? daNote.hitHealth : healthDrainAmount) * hpDrainLevel * polyphony;
 				if (ClientPrefs.healthDisplay && !ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 			}
-			if ((!daNote.gfNote ? !opponentChart ? dad : boyfriend : (gf != null ? gf : dad)).shakeScreen)
+			if (oppChar != null && oppChar.shakeScreen)
 			{
-				final char:Character = !daNote.gfNote ? !opponentChart ? dad : boyfriend : gf;
-				camGame.shake(char.shakeIntensity, char.shakeDuration / playbackRate);
-				camHUD.shake(char.shakeIntensity / 2, char.shakeDuration / playbackRate);
+				camGame.shake(oppChar.shakeIntensity, oppChar.shakeDuration / playbackRate);
+				camHUD.shake(oppChar.shakeIntensity / 2, oppChar.shakeDuration / playbackRate);
 			}
 			if (ClientPrefs.denpaDrainBug) displayedHealth -= daNote.hitHealth * hpDrainLevel * polyphony;
 			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
@@ -6890,11 +6815,11 @@ class PlayState extends MusicBeatState
 		{
 			if(noteAlt.noteType == 'Hey!')
 			{
-				final char:Character = !noteAlt.gfNote ? !opponentChart ? dad : boyfriend : gf;
-				if (char.animOffsets.exists('hey')) {
-					char.playAnim('hey', true);
-					char.specialAnim = true;
-					char.heyTimer = 0.6;
+				oppChar = !noteAlt.gfNote ? !opponentChart ? dad : boyfriend : gf;
+				if (oppChar.animOffsets.exists('hey')) {
+					oppChar.playAnim('hey', true);
+					oppChar.specialAnim = true;
+					oppChar.heyTimer = 0.6;
 				}
 			}
 			if(!noteAlt.noAnimation && ClientPrefs.charsAndBG && oppAnimsFrame < 4) {
@@ -6919,19 +6844,8 @@ class PlayState extends MusicBeatState
 			if (ClientPrefs.opponentLightStrum && !strumsHit[noteAlt.noteData % 4])
 			{
 				strumsHit[noteAlt.noteData % 4] = true;
-				var time:Float = 0;
-
-				if (ClientPrefs.strumLitStyle == 'Full Anim' && !ClientPrefs.communityGameBot) time = 0.15 / playbackRate;
-				if (ClientPrefs.strumLitStyle == 'BPM Based' && !ClientPrefs.communityGameBot) time = (Conductor.stepCrochet * 1.5 / 1000) / playbackRate;
-				if (ClientPrefs.communityGameBot) time = (!ClientPrefs.communityGameBot ? 0.15 : FlxG.random.float(0.05, 0.15)) / playbackRate;
-				if(noteAlt.isSustainNote && !noteAlt.isSustainEnd) {
-					if (ClientPrefs.strumLitStyle == 'Full Anim' && !ClientPrefs.communityGameBot) time += 0.15 / playbackRate;
-					if (ClientPrefs.strumLitStyle == 'BPM Based' && !ClientPrefs.communityGameBot) time += (Conductor.stepCrochet * 1.5 / 1000) / playbackRate;
-					if (ClientPrefs.communityGameBot) time += (!ClientPrefs.communityGameBot ? 0.15 : FlxG.random.float(0.05, 0.15)) / playbackRate;
-				}
-				final spr:StrumNote = opponentStrums.members[noteAlt.noteData];
-				inline spr.playAnim('confirm', true, 0, 0, 0, false, false, false);
-				spr.resetAnim = time;
+				inline opponentStrums.members[noteAlt.noteData].playAnim('confirm', true, 0, 0, 0, false, false, false);
+				opponentStrums.members[noteAlt.noteData].resetAnim = calculateResetTime(noteAlt.isSustainNote);
 			}
 			if (!noteAlt.isSustainNote && cpuControlled)
 			{
@@ -6950,11 +6864,11 @@ class PlayState extends MusicBeatState
 					if (ClientPrefs.healthDisplay && !ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 				}
 			}
-			if ((!noteAlt.gfNote ? !opponentChart ? dad : boyfriend : gf).shakeScreen)
+			if ((!noteAlt.gfNote ? !opponentChart ? dad : boyfriend : gf) != null && (!noteAlt.gfNote ? !opponentChart ? dad : boyfriend : gf).shakeScreen)
 			{
-				final char:Character = !noteAlt.gfNote ? !opponentChart ? dad : boyfriend : gf;
-				camGame.shake(char.shakeIntensity, char.shakeDuration / playbackRate);
-				camHUD.shake(char.shakeIntensity / 2, char.shakeDuration / playbackRate);
+				oppChar = !noteAlt.gfNote ? !opponentChart ? dad : boyfriend : gf;
+				camGame.shake(oppChar.shakeIntensity, oppChar.shakeDuration / playbackRate);
+				camHUD.shake(oppChar.shakeIntensity / 2, oppChar.shakeDuration / playbackRate);
 			}
 			if (ClientPrefs.songLoading && !ffmpegMode) vocals.volume = 1;
 		}
