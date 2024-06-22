@@ -249,7 +249,7 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.decimals = 1;
 		option.onChange = onChangeHitsoundVolume;
 
-		var hitsoundList:Array<String> = Paths.mergeAllTextsNamed('sounds/hitsounds/list.txt');
+		var hitsoundList:Array<String> = Paths.mergeAllTextsNamed('list.txt', 'sounds/hitsounds');
 		if (hitsoundList.length > 0)
 		{
 			if (!hitsoundList.contains(ClientPrefs.hitsoundType))

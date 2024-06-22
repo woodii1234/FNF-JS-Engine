@@ -148,9 +148,9 @@ class PauseSubState extends MusicBeatSubstate
 	override function update(elapsed:Float)
 	{
 		if(requireRestart) {
-		menuItemsOG.remove('Resume'); //technically that's the logical thing to do
-		regenMenu();
-		requireRestart = false;
+			menuItemsOG.remove('Resume'); //technically that's the logical thing to do
+			regenMenu();
+			requireRestart = false;
 		}
 		cantUnpause -= elapsed;
 		if (pauseMusic.volume < 0.5)

@@ -3865,7 +3865,7 @@ class PlayState extends MusicBeatState
 				botplayTxt.text += '\nNote Multiplier: ' + polyphony;
 		}
 
-		if (ClientPrefs.showRendered) renderedTxt.text = 'Rendered Notes: ${FlxStringUtil.formatMoney(amountOfRenderedNotes, false)}/${FlxStringUtil.formatMoney(maxRenderedNotes, false)}/${FlxStringUtil.formatMoney(notes.length + sustainNotes.length, false)}';
+		if (ClientPrefs.showRendered) renderedTxt.text = 'Rendered Notes: ${FlxStringUtil.formatMoney(amountOfRenderedNotes, false)}/${FlxStringUtil.formatMoney(maxRenderedNotes, false)}/${FlxStringUtil.formatMoney(notes.members.length + sustainNotes.members.length, false)}';
 
 		if (iconsShouldGoUp) iconP1.y = iconP2.y = healthBarBG.y - 75;
 
@@ -4583,10 +4583,10 @@ class PlayState extends MusicBeatState
 	function doDeathCheck(?skipHealthCheck:Bool = false) {
 		if (((skipHealthCheck && instakillOnMiss) || health <= 0) && !practiceMode && !isDead)
 		{
-		if (ClientPrefs.instaRestart)
-		{
-		restartSong(true);
-		}
+			if (ClientPrefs.instaRestart)
+			{
+				restartSong(true);
+			}
 			var ret:Dynamic = callOnLuas('onGameOver', [], false);
 			if(ret != FunkinLua.Function_Stop) {
 				boyfriend.stunned = true;
@@ -6032,15 +6032,14 @@ class PlayState extends MusicBeatState
 							goodNoteHit(epicNote);
 							pressNotes.push(epicNote);
 						}
-					if (sortedNotesList.length > 2 && ClientPrefs.ezSpam) //literally all you need to allow you to spam though impossiblely hard jacks
-					{
-						var notesThatCanBeHit = sortedNotesList.length;
-						for (i in 1...Std.int(notesThatCanBeHit)) //i may consider making this hit half the notes instead
+						if (sortedNotesList.length > 2 && ClientPrefs.ezSpam) //literally all you need to allow you to spam though impossibly hard jacks
 						{
-							goodNoteHit(sortedNotesList[i]);
+							var notesThatCanBeHit = sortedNotesList.length;
+							for (i in 1...Std.int(notesThatCanBeHit)) //i may consider making this hit half the notes instead
+							{
+								goodNoteHit(sortedNotesList[i]);
+							}
 						}
-
-					}
 					}
 				}
 				else {
@@ -6369,30 +6368,19 @@ class PlayState extends MusicBeatState
 			if (!daNote.mustPress && !daNote.hitByOpponent && !daNote.ignoreNote && daNote.strumTime <= Conductor.songPosition)
 			{
 				if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) opponentNoteHit(daNote);
-					if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
-					{
-						if (!daNote.isSustainNote) {
-							enemyHits += 1 * polyphony;
-							if (ClientPrefs.showNPS) {
-								inline oppNotesHitArray.push(1 * polyphony);
-								inline oppNotesHitDateArray.push(Conductor.songPosition);
-							}
+				if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG)
+				{
+					if (!daNote.isSustainNote) {
+						enemyHits += 1 * polyphony;
+						if (ClientPrefs.showNPS) {
+							inline oppNotesHitArray.push(1 * polyphony);
+							inline oppNotesHitDateArray.push(Conductor.songPosition);
 						}
 						daNote.exists = false;
 					}
+				}
 			}
 
-				if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
-				{
-					if (daNote.mustPress && (!(cpuControlled || usingBotEnergy && strumsHeld[daNote.noteData]) || cpuControlled && ClientPrefs.communityGameBot) && !daNote.ignoreNote && !endingSong && !daNote.wasGoodHit) {
-						noteMiss(daNote);
-						if (ClientPrefs.missSoundShit)
-						{
-							FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
-						}
-					}
-					daNote.exists = false;
-				}
 			if(daNote.mustPress) {
 				if((cpuControlled || usingBotEnergy && strumsHeld[daNote.noteData]) && daNote.strumTime + (ClientPrefs.communityGameBot && !daNote.isSustainNote ? FlxG.random.float(ClientPrefs.minCGBMS, ClientPrefs.maxCGBMS) : 0) <= Conductor.songPosition && !daNote.ignoreNote) {
 					if (!ClientPrefs.showcaseMode || ClientPrefs.charsAndBG) goodNoteHit(daNote);
@@ -6408,6 +6396,18 @@ class PlayState extends MusicBeatState
 						}
 					}
 				}
+			}
+
+			if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
+			{
+				if (daNote.mustPress && (!(cpuControlled || usingBotEnergy && strumsHeld[daNote.noteData]) || cpuControlled && ClientPrefs.communityGameBot) && !daNote.ignoreNote && !endingSong && !daNote.wasGoodHit) {
+					noteMiss(daNote);
+					if (ClientPrefs.missSoundShit)
+					{
+						FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
+					}
+				}
+				daNote.exists = false;
 			}
 		}
 	}
@@ -6626,7 +6626,8 @@ class PlayState extends MusicBeatState
 
 				if (!ClientPrefs.noHitFuncs) callOnLuas((oppTrigger ? 'opponentNoteHit' : 'goodNoteHit'), [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
 
-					if (ClientPrefs.showNotes && !note.isSustainNote) note.exists = false;
+				if (ClientPrefs.showNotes && !note.isSustainNote) note.exists = false;
+
 				if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
 				if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
 		   			if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();

@@ -245,6 +245,7 @@ class Paths
 	{
 		var assetDirectory:String = 'assets/$path';
 		if (path.startsWith('assets/')) assetDirectory = path;
+		if (path.contains('hitsounds/')) assetDirectory = 'assets/shared/$path';
 		var foldersToCheck:Array<String> = [];
 		#if sys
 		if(FileSystem.exists(assetDirectory + fileToFind))

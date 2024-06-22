@@ -84,7 +84,6 @@ class MusicBeatState extends FlxUIState
 
 	override function update(elapsed:Float)
 	{
-		//everyStep();
 		if (oldStep != curStep) oldStep = curStep;
 
 		updateCurStep();
@@ -196,7 +195,6 @@ class MusicBeatState extends FlxUIState
 	//runs whenever the game hits a beat
 	public function beatHit():Void
 	{
-		//trace('Beat: ' + curBeat);
 		stagesFunc(function(stage:BaseStage) {
 			stage.curBeat = curBeat;
 			stage.curDecBeat = curDecBeat;
@@ -207,7 +205,6 @@ class MusicBeatState extends FlxUIState
 	//runs whenever the game hits a section
 	public function sectionHit():Void
 	{
-		//trace('Section: ' + curSection + ', Beat: ' + curBeat + ', Step: ' + curStep);
 		stagesFunc(function(stage:BaseStage) {
 			stage.curSection = curSection;
 			stage.sectionHit();
