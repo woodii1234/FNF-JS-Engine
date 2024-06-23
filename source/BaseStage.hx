@@ -119,7 +119,7 @@ class BaseStage extends FlxBasic
 	// overrides
 	function startCountdown() 
 	{
-		if(onPlayState) 
+		if(onPlayState && !PlayState.instance.skipCountdown) 
 		{
 			PlayState.instance.startCountdown(); 
 			return true;

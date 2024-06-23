@@ -5,9 +5,6 @@ import Conductor;
 import Note.PreloadedChartNote;
 
 class NoteGroup extends FlxTypedGroup<Note> {
-	var __loopSprite:Note;
-	var i:Int = 0;
-	var __currentlyLooping:Bool = false;
 	var pool:Array<Note> = [];
 	
 	public function pushToPool(object:Note)
