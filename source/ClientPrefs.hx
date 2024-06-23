@@ -143,6 +143,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var noSpawnFunc:Bool = false;
 	public static var noHitFuncs:Bool = false;
 	public static var lessBotLag:Bool = false;
+	public static var fastNoteSpawn:Bool = false;
 
 	//Secret Debug
 	public static var noGunsRNG:Bool = false;
@@ -390,6 +391,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.noSpawnFunc = noSpawnFunc;
 		FlxG.save.data.noHitFuncs = noHitFuncs;
 		FlxG.save.data.lessBotLag = lessBotLag;
+		FlxG.save.data.fastNoteSpawn = fastNoteSpawn;
 
 		//Secret Debug
 		FlxG.save.data.noGunsRNG = noGunsRNG;
@@ -873,6 +875,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.lessBotLag != null) {
 			lessBotLag = FlxG.save.data.lessBotLag;
+		}
+		if(FlxG.save.data.fastNoteSpawn != null) {
+			fastNoteSpawn = FlxG.save.data.fastNoteSpawn;
 		}
 
 		//Secret Debug

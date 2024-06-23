@@ -20,7 +20,6 @@ import flixel.input.keyboard.FlxKey;
 import openfl.events.KeyboardEvent;
 import FunkinLua;
 import Note.PreloadedChartNote;
-import backend.NoteSignalStuff;
 
 using StringTools;
 
@@ -34,7 +33,7 @@ class EditorPlayState extends MusicBeatState
 	public var playerStrums:FlxTypedGroup<StrumNote>;
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 
-	public var notes:FlxTypedGroup<Note>;
+	public var notes:NoteGroup;
 	public var unspawnNotes:Array<PreloadedChartNote> = [];
 
 	var generatedMusic:Bool = false;
@@ -68,8 +67,6 @@ class EditorPlayState extends MusicBeatState
 
 	public static var cpuControlled:Bool = false;
 
-	public var emitter:Emitter = new Emitter();
-
 	override function create()
 	{
 		instance = this;
@@ -101,7 +98,7 @@ class EditorPlayState extends MusicBeatState
 		generateStaticArrows(0);
 		generateStaticArrows(1);
 
-		notes = new FlxTypedGroup<Note>();
+		notes = new NoteGroup();
 		add(notes);
 		
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
@@ -180,8 +177,6 @@ class EditorPlayState extends MusicBeatState
 
 		Paths.initNote(4, PlayState.SONG.arrowSkin);
 		Paths.initDefaultSkin(4, PlayState.SONG.arrowSkin);
-
-		emitter.on(NoteSignalStuff.NOTE_UPDATE, updateNote);
 
 		super.create();
 	}
@@ -371,8 +366,12 @@ class EditorPlayState extends MusicBeatState
 			if (notesAddedCount > unspawnNotes.length)
 				notesAddedCount -= (notesAddedCount - unspawnNotes.length);
 
-			while (unspawnNotes.length > 0 && unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < (1500 / PlayState.SONG.speed / unspawnNotes[notesAddedCount].multSpeed)) {
-				inline notes.recycle(Note).setupNoteData(unspawnNotes[notesAddedCount]);
+			while (unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < (1500 / PlayState.SONG.speed / unspawnNotes[notesAddedCount].multSpeed)) {
+				if (ClientPrefs.fastNoteSpawn) notes.spawnNote(unspawnNotes[notesAddedCount]);
+				else
+				{
+					notes.recycle(Note).setupNoteData(unspawnNotes[notesAddedCount]);
+				}
 				notesAddedCount++;
 			}
 				if (notesAddedCount > 0)
@@ -386,7 +385,7 @@ class EditorPlayState extends MusicBeatState
 			{
 				var daNote:Note = notes.members[noteIndex--];
 				if (daNote != null) daNote.update(elapsed);
-				emitter.emit(NoteSignalStuff.NOTE_UPDATE, daNote);
+				updateNote(daNote);
 			}
 			if (Conductor.songPosition >= FlxG.sound.music.length) endSong();
 		}
@@ -612,7 +611,7 @@ class EditorPlayState extends MusicBeatState
 
 
 	var note:Note = new Note();
-	inline function updateNote(daNote:Note):Void
+	function updateNote(daNote:Note):Void
 	{
 		if (daNote != null && daNote.exists)
 		{
@@ -635,6 +634,7 @@ class EditorPlayState extends MusicBeatState
 				if (!daNote.isSustainNote)
 				{
 					daNote.exists = false;
+					if (ClientPrefs.fastNoteSpawn) notes.pushToPool(daNote);
 				}
 			}
 
@@ -643,7 +643,9 @@ class EditorPlayState extends MusicBeatState
 				if (PlayState.SONG.needsVoices)
 					vocals.volume = 1;
 				goodNoteHit(daNote);
+				if (ClientPrefs.fastNoteSpawn) notes.pushToPool(daNote);
 			}
+			if (!daNote.exists) return;
 
 			if (Conductor.songPosition > (noteKillOffset / PlayState.SONG.speed) + daNote.strumTime)
 			{
@@ -655,6 +657,7 @@ class EditorPlayState extends MusicBeatState
 						notes.forEachAlive(function(note:Note) {
 							if (daNote != note && daNote.mustPress && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 10) {
 								daNote.exists = false;
+								if (ClientPrefs.fastNoteSpawn) notes.pushToPool(daNote);
 							}
 						});
 
@@ -664,8 +667,8 @@ class EditorPlayState extends MusicBeatState
 						}
 					}
 				}
-
 				daNote.exists = false;
+				if (ClientPrefs.fastNoteSpawn) notes.pushToPool(daNote);
 			}
 		}
 	}
@@ -987,7 +990,6 @@ class EditorPlayState extends MusicBeatState
 			FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 			FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		}
-		emitter.off(NoteSignalStuff.NOTE_UPDATE, updateNote);
 		super.destroy();
 	}
 }

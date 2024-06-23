@@ -111,7 +111,14 @@ class OptimizationSubState extends BaseOptionsMenu
 			"Reduce Botplay lag even further.",
 			'lessBotLag',
 			'bool',
-			true);
+			false);
+		addOption(option);
+
+		var option:Option = new Option('Fast Note Spawning',
+			"If checked, the game will use a faster type of note recycling.\n(HEAVILY WIP, SO USE AT YOUR OWN RISK!)",
+			'fastNoteSpawn',
+			'bool',
+			false);
 		addOption(option);
 
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length-1]];

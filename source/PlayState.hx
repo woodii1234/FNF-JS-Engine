@@ -66,7 +66,6 @@ import Shaders;
 import openfl.display.BitmapData;
 import openfl.utils.ByteArray;
 import Note.PreloadedChartNote;
-import backend.NoteSignalStuff;
 
 #if !flash
 import flixel.addons.display.FlxRuntimeShader;
@@ -220,8 +219,8 @@ class PlayState extends MusicBeatState
 	public var isEkSong:Bool = false; //we'll use this so that the game doesn't load all notes twice?
 	public var usingEkFile:Bool = false; //we'll also use this so that the game doesn't load all notes twice?
 
-	public var notes:FlxTypedGroup<Note>;
-	public var sustainNotes:FlxTypedGroup<Note>;
+	public var notes:NoteGroup;
+	public var sustainNotes:NoteGroup;
 	public var unspawnNotes:Array<PreloadedChartNote> = [];
 	public var unspawnNotesCopy:Array<PreloadedChartNote> = [];
 	public var eventNotes:Array<EventNote> = [];
@@ -1389,13 +1388,13 @@ class PlayState extends MusicBeatState
 
 		energyBarBG.cameras = energyBar.cameras = energyTxt.cameras = [camHUD];
 
-		sustainNotes = new FlxTypedGroup<Note>();
+		sustainNotes = new NoteGroup();
 		add(sustainNotes);
 
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		add(strumLineNotes);
 
-		notes = new FlxTypedGroup<Note>();
+		notes = new NoteGroup();
 		add(notes);
 		notes.visible = sustainNotes.visible = ClientPrefs.showNotes; //that was easier than expected
 
@@ -3773,6 +3772,7 @@ class PlayState extends MusicBeatState
 	var botEnergyCooldown:Float = 0;
 	var energyDrainSpeed:Float = 1;
 	var energyRefillSpeed:Float = 1;
+	var NOTE_SPAWN_TIME:Float = 0;
 
 	var spawnedNote:Note = new Note();
 	var curNote:Note = new Note();
@@ -4351,8 +4351,8 @@ class PlayState extends MusicBeatState
 
 	if (unspawnNotes.length > 0 && unspawnNotes[0] != null)
 	{
-		final NOTE_SPAWN_TIME = (ClientPrefs.dynamicSpawnTime ? (1600 / songSpeed) : 1600 * ClientPrefs.noteSpawnTime) / camHUD.zoom;
-		notesAddedCount = 0;
+		NOTE_SPAWN_TIME = (ClientPrefs.dynamicSpawnTime ? (1600 / songSpeed) : 1600 * ClientPrefs.noteSpawnTime) / camHUD.zoom;
+		if (notesAddedCount != 0) notesAddedCount = 0;
 
 		if (notesAddedCount > unspawnNotes.length)
 			notesAddedCount -= (notesAddedCount - unspawnNotes.length);
@@ -4368,9 +4368,13 @@ class PlayState extends MusicBeatState
 		else if (ClientPrefs.showNotes || !ClientPrefs.showNotes && !cpuControlled)
 		{
 			while (unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < (NOTE_SPAWN_TIME / unspawnNotes[notesAddedCount].multSpeed)) {
-				spawnedNote = (unspawnNotes[notesAddedCount].isSustainNote ? sustainNotes : notes).recycle(Note);
-				spawnedNote.setupNoteData(unspawnNotes[notesAddedCount]);
-				if (!ClientPrefs.noSpawnFunc) callOnLuas('onSpawnNote', [(!unspawnNotes[notesAddedCount].isSustainNote ? notes.members.indexOf(notes.members[notes.length-1]) : sustainNotes.members.indexOf(sustainNotes.members[sustainNotes.length-1])), unspawnNotes[notesAddedCount].noteData, unspawnNotes[notesAddedCount].noteType, unspawnNotes[notesAddedCount].isSustainNote]);
+				if (ClientPrefs.fastNoteSpawn) (unspawnNotes[notesAddedCount].isSustainNote ? sustainNotes : notes).spawnNote(unspawnNotes[notesAddedCount]);
+				else
+				{
+					spawnedNote = (unspawnNotes[notesAddedCount].isSustainNote ? sustainNotes : notes).recycle(Note);
+					spawnedNote.setupNoteData(unspawnNotes[notesAddedCount]);
+				}
+				if (!ClientPrefs.noSpawnFunc) callOnLuas('onSpawnNote', [(!unspawnNotes[notesAddedCount].isSustainNote ? notes.members.indexOf(notes.members[0]) : sustainNotes.members.indexOf(sustainNotes.members[0])), unspawnNotes[notesAddedCount].noteData, unspawnNotes[notesAddedCount].noteType, unspawnNotes[notesAddedCount].isSustainNote]);
 				notesAddedCount++;
 			}
 		}
@@ -6023,6 +6027,7 @@ class PlayState extends MusicBeatState
 						for (doubleNote in pressNotes) {
 							if (Math.abs(doubleNote.strumTime - epicNote.strumTime) < 1) {
 								doubleNote.exists = false;
+								if (ClientPrefs.fastNoteSpawn) (doubleNote.isSustainNote ? sustainNotes : notes).pushToPool(doubleNote);
 							} else
 								notesStopped = true;
 						}
@@ -6031,6 +6036,7 @@ class PlayState extends MusicBeatState
 						if (!notesStopped) {
 							goodNoteHit(epicNote);
 							pressNotes.push(epicNote);
+							if (ClientPrefs.fastNoteSpawn && !epicNote.isSustainNote) notes.pushToPool(epicNote);
 						}
 						if (sortedNotesList.length > 2 && ClientPrefs.ezSpam) //literally all you need to allow you to spam though impossibly hard jacks
 						{
@@ -6038,6 +6044,7 @@ class PlayState extends MusicBeatState
 							for (i in 1...Std.int(notesThatCanBeHit)) //i may consider making this hit half the notes instead
 							{
 								goodNoteHit(sortedNotesList[i]);
+								if (ClientPrefs.fastNoteSpawn && !sortedNotesList[i].isSustainNote) notes.pushToPool(sortedNotesList[i]);
 							}
 						}
 					}
@@ -6379,6 +6386,7 @@ class PlayState extends MusicBeatState
 						daNote.exists = false;
 					}
 				}
+				if (ClientPrefs.fastNoteSpawn && !daNote.isSustainNote) notes.pushToPool(daNote);
 			}
 
 			if(daNote.mustPress) {
@@ -6395,8 +6403,10 @@ class PlayState extends MusicBeatState
 							daNote.exists = false;
 						}
 					}
+					if (ClientPrefs.fastNoteSpawn && !daNote.isSustainNote) notes.pushToPool(daNote);
 				}
 			}
+			if (!daNote.exists) return;
 
 			if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
 			{
@@ -6408,6 +6418,7 @@ class PlayState extends MusicBeatState
 					}
 				}
 				daNote.exists = false;
+				if (ClientPrefs.fastNoteSpawn) (daNote.isSustainNote ? sustainNotes : notes).pushToPool(daNote);
 			}
 		}
 	}

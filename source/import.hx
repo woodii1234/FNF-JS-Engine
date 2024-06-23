@@ -16,9 +16,6 @@ import flxanimate.*;
 //so that it doesn't bring up a "Type not found: Countdown"
 import BaseStage.Countdown;
 
-//Signals
-import emitter.signals.*;
-
 //Flixel
 import flixel.sound.FlxSound;
 import flixel.FlxG;
