@@ -208,6 +208,8 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		'onekey' => false,
 		'jacks' => 0,
 		'randomspeed' => false,
+		'randomspeedmin' => 0.5,
+		'randomspeedmax' => 2,
 		'thetrollingever' => false
 	];
 

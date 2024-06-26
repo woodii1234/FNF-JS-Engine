@@ -371,6 +371,8 @@ class PlayState extends MusicBeatState
 	var randomSpeedThing:Bool = false;
 	public var trollingMode:Bool = false;
 	public var jackingtime:Float = 0;
+	public var minSpeed:Float = 0.1;
+	public var maxSpeed:Float = 10;
 
 	public var songWasLooped:Bool = false; //If the song was looped. Used in Troll Mode
 	public var shouldKillNotes:Bool = true; //Whether notes should be killed when you hit them. Disables automatically when in Troll Mode because you can't end the song anyway
@@ -728,6 +730,8 @@ class PlayState extends MusicBeatState
 		oneK = ClientPrefs.getGameplaySetting('onekey', false);
 		randomSpeedThing = ClientPrefs.getGameplaySetting('randomspeed', false);
 		jackingtime = ClientPrefs.getGameplaySetting('jacks', 0);
+		minSpeed = ClientPrefs.getGameplaySetting('randomspeedmin', 0.1);
+		maxSpeed = ClientPrefs.getGameplaySetting('randomspeedmax', 10);
 
 		middleScroll = ClientPrefs.middleScroll || bothSides;
 		if (bothSides) opponentChart = false;
@@ -2429,6 +2433,8 @@ class PlayState extends MusicBeatState
 				songSpeed = ClientPrefs.getGameplaySetting('scrollspeed', 1);
 		}
 
+		ogSongSpeed = songSpeed;
+
 		shouldDrainHealth = (opponentDrain || (opponentChart ? boyfriend.healthDrain : dad.healthDrain));
 		if (!opponentDrain && !Math.isNaN((opponentChart ? boyfriend : dad).drainAmount)) healthDrainAmount = opponentChart ? boyfriend.drainAmount : dad.drainAmount;
 		if (!opponentDrain && !Math.isNaN((opponentChart ? boyfriend : dad).drainFloor)) healthDrainFloor = opponentChart ? boyfriend.drainFloor : dad.drainFloor;
@@ -3110,14 +3116,20 @@ class PlayState extends MusicBeatState
 		setOnLuas('songLength', songLength);
 		callOnLuas('onSongStart', []);
 	}
+
+	var ogSongSpeed:Float = 0;
 	public function lerpSongSpeed(num:Float, time:Float):Void
 	{
 		FlxTween.num(playbackRate, num, time, {onUpdate: function(tween:FlxTween){
 			var ting = FlxMath.lerp(playbackRate, num, tween.percent);
+			var ting2 = FlxMath.lerp(songSpeed, ogSongSpeed / playbackRate, tween.percent);
 			if (ting != 0) //divide by 0 is a verry bad
 				playbackRate = ting; //why cant i just tween a variable
 
-			if (ClientPrefs.songLoading) FlxG.sound.music.time = Conductor.songPosition;
+			if (ting2 != 0)
+				songSpeed = ogSongSpeed / playbackRate;
+
+			if (ClientPrefs.songLoading) FlxG.sound.music.time = vocals.time = Conductor.songPosition;
 			if (ClientPrefs.songLoading && !ffmpegMode) resyncConductor();
 		}});
 	}
@@ -3141,6 +3153,8 @@ class PlayState extends MusicBeatState
 			case "constant":
 				songSpeed = ClientPrefs.getGameplaySetting('scrollspeed', 1);
 		}
+
+		ogSongSpeed = songSpeed;
 
 		Conductor.changeBPM(SONG.bpm);
 
@@ -7141,7 +7155,7 @@ class PlayState extends MusicBeatState
 
 		if (curBeat % 32 == 0 && randomSpeedThing)
 		{
-			var randomShit = FlxMath.roundDecimal(FlxG.random.float(0.4, 3), 2);
+			var randomShit = FlxMath.roundDecimal(FlxG.random.float(minSpeed, maxSpeed), 2);
 			lerpSongSpeed(randomShit, 1);
 		}
 		if (camZooming && !endingSong && !startingSong && FlxG.camera.zoom < 1.35 && ClientPrefs.camZooms && (curBeat % camBopInterval == 0))

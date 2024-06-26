@@ -163,6 +163,24 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		option.onChange = onChangeChartOption;
 		optionsArray.push(option);
 
+		var option:GameplayOption = new GameplayOption('Minimum Speed', 'randomspeedmin', 'float', 0.5);
+		option.scrollSpeed = 0.5;
+		option.minValue = 0.1;
+		option.maxValue = 1;
+		option.changeValue = !ClientPrefs.moreSpecificSpeed ? 0.05 : 0.01;
+		option.displayFormat = '%v';
+		option.decimals = 2;
+		optionsArray.push(option);
+
+		var option:GameplayOption = new GameplayOption('Max Speed', 'randomspeedmax', 'float', 2);
+		option.scrollSpeed = 0.5;
+		option.minValue = 1;
+		option.maxValue = 10;
+		option.changeValue = !ClientPrefs.moreSpecificSpeed ? 0.05 : 0.01;
+		option.displayFormat = '%v';
+		option.decimals = 2;
+		optionsArray.push(option);
+
 		var option:GameplayOption = new GameplayOption('Troll Mode', 'thetrollingever', 'bool', false);
 		option.onChange = onChangeChartOption;
 		optionsArray.push(option);
