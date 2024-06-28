@@ -18,6 +18,7 @@ import cpp.vm.Gc;
 #end
 import haxe.io.Input;
 import haxe.io.BytesBuffer;
+import backend.SSPlugin as ScreenShotPlugin;
 // crash handler stuff
 #if CRASH_HANDLER
 import openfl.events.UncaughtErrorEvent;
@@ -159,6 +160,12 @@ class Main extends Sprite {
 		if (fpsVar != null) {
 			fpsVar.visible = ClientPrefs.showFPS;
 		}
+
+		#if (!web && flixel < "5.5.0")
+		FlxG.plugins.add(new ScreenShotPlugin());
+		#elseif (flixel >= "5.6.0")
+		FlxG.plugins.addIfUniqueType(new ScreenShotPlugin());
+		#end
 
 		FlxG.autoPause = false;
 
