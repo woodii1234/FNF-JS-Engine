@@ -3552,7 +3552,7 @@ class PlayState extends MusicBeatState
 
 			strumLineNotes.add(babyArrow);
 			babyArrow.postAddedToGroup();
-			if (ClientPrefs.enableColorShader && ClientPrefs.noteColorStyle != 'Normal' && ClientPrefs.noteStyleThing != 'TGT V4' && !PlayState.isPixelStage) 
+			if (ClientPrefs.noteColorStyle != 'Normal' && ClientPrefs.noteStyleThing != 'TGT V4' && !PlayState.isPixelStage) 
 			{
 				var arrowAngle = switch(i)
 				{
