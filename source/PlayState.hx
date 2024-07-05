@@ -6406,7 +6406,7 @@ class PlayState extends MusicBeatState
 				{
 					hitsound.play(true);
 					hitsound.pitch = playbackRate;
-					if (Assets.exists(hitsoundImageToLoad) && hitImagesFrame < 4)
+					if (FileSystem.exists('assets/shared/images/' + hitsoundImageToLoad + '.png') || FileSystem.exists(Paths.modFolders('images/' + hitsoundImageToLoad + '.png')) && hitImagesFrame < 4)
 					{
 						hitImagesFrame++;
 						hitsoundImage = new FlxSprite().loadGraphic(Paths.image(hitsoundImageToLoad));
@@ -6451,7 +6451,7 @@ class PlayState extends MusicBeatState
 
 					if (combo < 0) combo = 0;
 					if (polyphony > 1 && !note.isSustainNote) totalNotes += polyphony - 1;
-				if (!note.isSustainNote && !cpuControlled || !note.isSustainNote && cpuControlled)
+				if (!note.isSustainNote && !cpuControlled)
 				{
 					combo += 1 * polyphony;
 					totalNotesPlayed += 1 * polyphony;
