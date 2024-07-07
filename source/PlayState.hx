@@ -4937,7 +4937,7 @@ class PlayState extends MusicBeatState
 				if (ClientPrefs.showNotes)
 				{
 					for (i in strumLineNotes.members)
-						if (i.player == 0 ? dadNoteskin : bfNoteskin).length > 0) i.updateNoteSkin(i.player == 0 ? dadNoteskin : bfNoteskin);
+						if ((i.player == 0 ? dadNoteskin : bfNoteskin).length > 0) i.updateNoteSkin(i.player == 0 ? dadNoteskin : bfNoteskin);
 				}
 				if (ClientPrefs.noteColorStyle == 'Char-Based')
 				{
