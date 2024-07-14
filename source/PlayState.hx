@@ -195,6 +195,7 @@ class PlayState extends MusicBeatState
 	public var splashesPerFrame:Array<Int> = [0, 0];
 
 	public var vocals:FlxSound;
+	public var opponentVocals:FlxSound;
 	var intro3:FlxSound;
 	var intro2:FlxSound;
 	var intro1:FlxSound;
@@ -2038,9 +2039,10 @@ class PlayState extends MusicBeatState
 
 	inline function set_playbackRate(value:Float):Float
 	{
+		#if FLX_PITCH
 		if(generatedMusic)
 		{
-			if(vocals != null) vocals.pitch = value;
+			vocals.pitch = opponentVocals.pitch = value;
 			FlxG.sound.music.pitch = value;
 		}
 		playbackRate = value;
@@ -2048,7 +2050,10 @@ class PlayState extends MusicBeatState
 		trace('Anim speed: ' + FlxG.animationTimeScale);
 		Conductor.safeZoneOffset = (ClientPrefs.safeFrames / 60) * 1000 * value;
 		setOnLuas('playbackRate', playbackRate);
-		return value;
+		#else
+		playbackRate = 1.0;
+		#end
+		return playbackRate;
 	}
 
 	inline function set_polyphony(value:Float):Float
@@ -2710,15 +2715,19 @@ class PlayState extends MusicBeatState
 				switch (swagCounter)
 				{
 					case 0:
+						intro3.volume = FlxG.sound.volume;
 						intro3.play();
 						tick = THREE;
 					case 1:
+						intro2.volume = FlxG.sound.volume;
 						intro2.play();
 						tick = TWO;
 					case 2:
+						intro1.volume = FlxG.sound.volume;
 						intro1.play();
 						tick = ONE;
 					case 3:
+						introGo.volume = FlxG.sound.volume;
 						introGo.play();
 						tick = GO;
 						if (ClientPrefs.tauntOnGo && ClientPrefs.charsAndBG)
@@ -2907,7 +2916,7 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.songLoading)
 		{
 			FlxG.sound.music.pause();
-			vocals.pause();
+			pauseVocals();
 
 			FlxG.sound.music.time = time;
 			FlxG.sound.music.play();
@@ -2916,11 +2925,15 @@ class PlayState extends MusicBeatState
 
 			if (Conductor.songPosition <= vocals.length)
 			{
-				vocals.time = time;
+				setVocalsTime(time);
+				#if FLX_PITCH
 				vocals.pitch = playbackRate;
+				opponentVocals.pitch = playbackRate;
+				#end
 			}
 			vocals.play();
-			if (ffmpegMode) vocals.volume = 0;
+			opponentVocals.play();
+			if (ffmpegMode) vocals.volume = opponentVocals.volume = 0;
 		}
 		Conductor.songPosition = time;
 		songTime = time;
@@ -2956,12 +2969,14 @@ class PlayState extends MusicBeatState
 			} else {
 				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song, diff), 0, false);
 				vocals.volume = 0;
+				opponentVocals.play();
 			}
 			if (!ffmpegMode && (!trollingMode || SONG.song.toLowerCase() != 'anti-cheat-song'))
 				FlxG.sound.music.onComplete = finishSong.bind();
 				FlxG.sound.music.pitch = playbackRate;
 			vocals.play();
-			vocals.pitch = playbackRate;
+			opponentVocals.play();
+			vocals.pitch = opponentVocals.pitch = playbackRate;
 		}
 
 		if(startOnTime > 0)
@@ -2975,7 +2990,7 @@ class PlayState extends MusicBeatState
 			if (ClientPrefs.songLoading)
 			{
 				FlxG.sound.music.pause();
-				vocals.pause();
+				pauseVocals();
 			}
 		}
 		curTime = Conductor.songPosition - ClientPrefs.noteOffset;
@@ -3064,8 +3079,8 @@ class PlayState extends MusicBeatState
 			if (ting2 != 0)
 				songSpeed = ogSongSpeed / playbackRate;
 
-			if (ClientPrefs.songLoading) FlxG.sound.music.time = vocals.time = Conductor.songPosition;
-			if (ClientPrefs.songLoading && !ffmpegMode) resyncConductor();
+			if (ClientPrefs.songLoading) setVocalsTime(Conductor.songPosition);
+			if (ClientPrefs.songLoading && !ffmpegMode) resyncVocals();
 		}});
 	}
 
@@ -3100,14 +3115,28 @@ class PlayState extends MusicBeatState
 		if (SONG.windowName != null && SONG.windowName != '')
 			MusicBeatState.windowNamePrefix = SONG.windowName;
 
-		if (SONG.needsVoices && ClientPrefs.songLoading)
-			vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song, diff));
-		else
+		if (ClientPrefs.songLoading)
+		{
 			vocals = new FlxSound();
+			opponentVocals = new FlxSound();
+			try
+			{
+				if (SONG.needsVoices)
+				{
+					var playerVocals = Paths.voices(curSong, diff, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
+					vocals.loadEmbedded(playerVocals != null ? playerVocals : Paths.voices(curSong, diff));
+					
+					var oppVocals = Paths.voices(curSong, diff, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
+					if(oppVocals != null) opponentVocals.loadEmbedded(oppVocals);
+				}
+			}
+			catch(e) {}
 
-		if (ClientPrefs.songLoading) vocals.pitch = playbackRate;
-		if (ClientPrefs.songLoading) FlxG.sound.list.add(vocals);
-		if (ClientPrefs.songLoading) FlxG.sound.list.add(new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song, diff)));
+			vocals.pitch = opponentVocals.pitch = playbackRate;
+			FlxG.sound.list.add(vocals);
+			FlxG.sound.list.add(opponentVocals);
+			FlxG.sound.list.add(new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song, diff)));
+		}
 
 		final noteData:Array<SwagSection> = SONG.notes;
 
@@ -3542,8 +3571,8 @@ class PlayState extends MusicBeatState
 			if (FlxG.sound.music != null)
 			{
 				if (ClientPrefs.songLoading) {
-				FlxG.sound.music.pause();
-				vocals.pause();
+					FlxG.sound.music.pause();
+					pauseVocals();
 				}
 			}
 
@@ -3579,7 +3608,7 @@ class PlayState extends MusicBeatState
 		{
 			if (FlxG.sound.music != null && !startingSong && !ffmpegMode)
 			{
-				resyncConductor();
+				resyncVocals();
 			}
 
 			if (startTimer != null && !startTimer.finished)
@@ -3651,19 +3680,17 @@ class PlayState extends MusicBeatState
 		super.onFocusLost();
 	}
 
-	function resyncConductor():Void
+	function resyncVocals():Void
 	{
 		if(finishTimer != null) return;
 
 		FlxG.sound.music.pitch = playbackRate;
-		vocals.pitch = playbackRate;
+		vocals.pitch = opponentVocals.pitch = playbackRate;
 		if (ClientPrefs.resyncType == 'Leather')
 		{
 			if(!(Conductor.songPosition > 20 && FlxG.sound.music.time < 20))
 			{
-				//trace("SONG POS: " + Conductor.songPosition + " | Musice: " + FlxG.sound.music.time + " / " + FlxG.sound.music.length);
-
-				vocals.pause();
+				pauseVocals();
 				FlxG.sound.music.pause();
 
 				if(FlxG.sound.music.time >= FlxG.sound.music.length)
@@ -3671,20 +3698,22 @@ class PlayState extends MusicBeatState
 				else
 					Conductor.songPosition = FlxG.sound.music.time;
 
-				vocals.time = Conductor.songPosition;
+				setVocalsTime(Conductor.songPosition);
 
 				FlxG.sound.music.play();
 				vocals.play();
+				opponentVocals.play();
 			}
 			else
 			{
 				while(Conductor.songPosition > 20 && FlxG.sound.music.time < 20)
 				{
 					FlxG.sound.music.time = Conductor.songPosition;
-					vocals.time = Conductor.songPosition;
+					setVocalsTime(Conductor.songPosition);
 
 					FlxG.sound.music.play();
 					vocals.play();
+					opponentVocals.play();
 				}
 			}
 		}
@@ -3692,9 +3721,10 @@ class PlayState extends MusicBeatState
 		{
 			FlxG.sound.music.play();
 			if (!vocals.playing) vocals.play();
+			if (!opponentVocals.playing) opponentVocals.play();
 
 			Conductor.songPosition = FlxG.sound.music.time;
-			//if (Conductor.songPosition < vocals.length) vocals.time = FlxG.sound.music.time;
+			setVocalsTime(Conductor.songPosition);
 		}
 	}
 
@@ -4037,11 +4067,11 @@ class PlayState extends MusicBeatState
 				var title:String = 'Incoming Alert from Boyfriend';
 				var message:String = '3 minutes until Boyfriend steals your liver!';
 				FlxG.sound.music.pause();
-				vocals.pause();
+				pauseVocals();
 
 				lime.app.Application.current.window.alert(message, title);
 				FlxG.sound.music.resume();
-				vocals.resume();
+				unpauseVocals();
 					botplayUsed = true;
 					new FlxTimer().start(180, function(tmr:FlxTimer)
 						{
@@ -4053,11 +4083,10 @@ class PlayState extends MusicBeatState
 				var title:String = 'Incoming Alert from Jordan';
 				var message:String = '3 minutes until I steal your liver.';
 				FlxG.sound.music.pause();
-				vocals.pause();
+				pauseVocals();
 
 				lime.app.Application.current.window.alert(message, title);
-				FlxG.sound.music.resume();
-				vocals.resume();
+				unpauseVocals();
 					botplayUsed = true;
 					new FlxTimer().start(180, function(tmr:FlxTimer)
 						{
@@ -4098,8 +4127,9 @@ class PlayState extends MusicBeatState
 				case "Play Video":
 					updateTime = false;
 					FlxG.sound.music.volume = 0;
-					vocals.volume = 0;
+					vocals.volume = opponentVocals.volume = 0;
 					vocals.stop();
+					opponentVocals.stop();
 					FlxG.sound.music.stop();
 					KillNotes();
 					heyStopTrying = true;
@@ -4399,7 +4429,7 @@ class PlayState extends MusicBeatState
 			if (FlxG.sound.music.length - Conductor.songPosition <= endingTimeLimit) {
 				KillNotes(); //kill any existing notes
 				FlxG.sound.music.time = 0;
-				if (SONG.needsVoices && vocals != null) vocals.time = 0;
+				if (SONG.needsVoices) setVocalsTime(0);
 				lastUpdateTime = 0.0;
 				Conductor.songPosition = 0;
 
@@ -4418,7 +4448,7 @@ class PlayState extends MusicBeatState
 				if (FlxG.sound.music.time < 0 || Conductor.songPosition < 0)
 				{
 					FlxG.sound.music.time = 0;
-					resyncConductor();
+					resyncVocals();
 				}
 				SONG.song.toLowerCase() != 'anti-cheat-song' ? loopSongLol() : loopCallback(0);
 			}
@@ -4479,7 +4509,7 @@ class PlayState extends MusicBeatState
 
 		if(FlxG.sound.music != null && ClientPrefs.songLoading) {
 			FlxG.sound.music.pause();
-			vocals.pause();
+			pauseVocals();
 		}
 		if (!ClientPrefs.charsAndBG) openSubState(new PauseSubState(0, 0));
 		if (ClientPrefs.charsAndBG) openSubState(new PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
@@ -4507,7 +4537,7 @@ class PlayState extends MusicBeatState
 		var eventsToRemove:Int = 0;
 		KillNotes(); //kill any existing notes
 		FlxG.sound.music.time = startingPoint;
-		if (SONG.needsVoices && vocals != null) vocals.time = startingPoint;
+		if (SONG.needsVoices) setVocalsTime(startingPoint);
 		lastUpdateTime = startingPoint;
 		Conductor.songPosition = startingPoint;
 
@@ -4553,8 +4583,12 @@ class PlayState extends MusicBeatState
 
 				paused = true;
 
-				if (ClientPrefs.songLoading) vocals.stop();
-				if (ClientPrefs.songLoading) FlxG.sound.music.stop();
+				if (ClientPrefs.songLoading) 
+				{
+					vocals.stop();
+					opponentVocals.stop();
+					FlxG.sound.music.stop();
+				}
 
 				persistentUpdate = false;
 				persistentDraw = false;
@@ -4977,11 +5011,11 @@ class PlayState extends MusicBeatState
 				var title:String = (value1);
 				var message:String = (value2);
 				FlxG.sound.music.pause();
-				vocals.pause();
+				pauseVocals();
 
 				lime.app.Application.current.window.alert(message, title);
 				FlxG.sound.music.resume();
-				vocals.resume();
+				unpauseVocals();
 			case 'Popup (No Pause)':
 				var title:String = (value1);
 				var message:String = (value2);
@@ -5100,15 +5134,37 @@ class PlayState extends MusicBeatState
 		camFollowPos.setPosition(x, y);
 	}
 
+	public function unpauseVocals()
+	{
+		if (vocals.time <= FlxG.sound.music.length)
+		{
+			vocals.resume();
+			opponentVocals.resume();
+		}
+	}
+	public function pauseVocals()
+	{
+		if (vocals.time <= FlxG.sound.music.length)
+		{
+			vocals.pause();
+			opponentVocals.pause();
+		}
+	}
+	public function setVocalsTime(time:Float)
+	{
+		vocals.time = time;
+		opponentVocals.time = time;
+	}
+
 	public function finishSong(?ignoreNoteOffset:Bool = false):Void
 	{
 		if (!trollingMode && SONG.song.toLowerCase() != 'anti-cheat-song') {
 			updateTime = false;
 			if (ClientPrefs.songLoading) {
 				FlxG.sound.music.volume = 0;
-				vocals.volume = 0;
+				vocals.volume = opponentVocals.volume = 0;
 			}
-			vocals.pause();
+			pauseVocals();
 			if(!ffmpegMode){
 				if(ClientPrefs.noteOffset <= 0 || ignoreNoteOffset) {
 					endCallback();
@@ -5368,12 +5424,12 @@ class PlayState extends MusicBeatState
 		eventNotes = [];
 	}
 
-	public static function restartSong(noTrans:Bool = true)
+	public function restartSong(noTrans:Bool = true)
 	{
 		if (process != null) stopRender();
 		PlayState.instance.paused = true; // For lua
 		if (ClientPrefs.songLoading) FlxG.sound.music.volume = 0;
-		if (ClientPrefs.songLoading) PlayState.instance.vocals.volume = 0;
+		if (ClientPrefs.songLoading) vocals.volume = opponentVocals.volume = 0;
 
 		if(noTrans)
 		{
@@ -5437,7 +5493,7 @@ class PlayState extends MusicBeatState
 		final noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset) / playbackRate;
 		final wife:Float = EtternaFunctions.wife3(noteDiff, Conductor.timeScale);
 
-		if (!miss && !ffmpegMode) vocals.volume = 1;
+		if (!miss && !ffmpegMode) (opponentChart ? opponentVocals : vocals).volume = 1;
 
 		final offset = FlxG.width * 0.35;
 		if(ClientPrefs.scoreZoom && !ClientPrefs.hideScore && scoreTxt != null && !cpuControlled && !miss)
@@ -6080,14 +6136,12 @@ class PlayState extends MusicBeatState
 
 			if(instakillOnMiss || sickOnly)
 			{
-				vocals.volume = 0;
+				(opponentChart ? opponentVocals : vocals).volume = 0;
 				doDeathCheck(true);
 			}
 
-			//For testing purposes
-			//trace(daNote.missHealth);
 			songMisses += 1 * polyphony;
-			vocals.volume = 0;
+			(opponentChart ? opponentVocals : vocals).volume = 0;
 			if(!practiceMode) songScore -= 10 * Std.int(polyphony);
 
 			totalPlayed++;
@@ -6127,15 +6181,14 @@ class PlayState extends MusicBeatState
 				}
 			}
 
-
 			if(instakillOnMiss)
 			{
-				vocals.volume = 0;
+				(opponentChart ? opponentVocals : vocals).volume = 0;
 				doDeathCheck(true);
 			}
 
 			songMisses += 1 * polyphony;
-			vocals.volume = 0;
+			(opponentChart ? opponentVocals : vocals).volume = 0;
 			if(!practiceMode) songScore -= 10 * Std.int(polyphony);
 
 			totalPlayed++;
@@ -6166,7 +6219,7 @@ class PlayState extends MusicBeatState
 			health -= 0.05 * healthLoss;
 			if(instakillOnMiss)
 			{
-				vocals.volume = 0;
+				(opponentChart ? opponentVocals : vocals).volume = 0;
 				doDeathCheck(true);
 			}
 
@@ -6190,7 +6243,7 @@ class PlayState extends MusicBeatState
 			if(char.hasMissAnimations) {
 				char.playAnim(singAnimations[Std.int(Math.abs(direction))] + 'miss', true);
 			}
-			vocals.volume = 0;
+			(opponentChart ? opponentVocals : vocals).volume = 0;
 		}
 		if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
@@ -6442,7 +6495,7 @@ class PlayState extends MusicBeatState
 					camHUD.shake(playerChar.shakeIntensity / 2, playerChar.shakeDuration / playbackRate);
 				}
 				note.wasGoodHit = true;
-				if (ClientPrefs.songLoading && !ffmpegMode) vocals.volume = 1;
+				if (ClientPrefs.songLoading && !ffmpegMode) (opponentChart ? opponentVocals : vocals).volume = 1;
 
 				if (!notesBeingHit && usingBotEnergy)
 				{
@@ -6521,7 +6574,7 @@ class PlayState extends MusicBeatState
 			if (ClientPrefs.healthGainType == 'Psych Engine' || ClientPrefs.healthGainType == 'Leather Engine' || ClientPrefs.healthGainType == 'Kade (1.2)' || ClientPrefs.healthGainType == 'Kade (1.6+)' || ClientPrefs.healthGainType == 'Doki Doki+' || ClientPrefs.healthGainType == 'VS Impostor') {
 				health += noteAlt.hitHealth * healthGain * polyphony;
 			}
-			if (ClientPrefs.songLoading && !ffmpegMode) vocals.volume = 1;
+			if (ClientPrefs.songLoading && !ffmpegMode) (opponentChart ? opponentVocals : vocals).volume = 1;
 		}
 		return;
 	}
@@ -6568,8 +6621,8 @@ class PlayState extends MusicBeatState
 				spawnNoteSplashOnNote(true, daNote, daNote.gfNote);
 			}
 
-			if (SONG.needsVoices && !ffmpegMode && vocals.volume != 1)
-				vocals.volume = 1;
+			if (SONG.needsVoices && !ffmpegMode && (!opponentChart ? opponentVocals : vocals).volume != 1)
+				(!opponentChart ? opponentVocals : vocals).volume = 1;
 
 				if (polyphony > 1 && !daNote.isSustainNote) opponentNoteTotal += polyphony - 1;
 
@@ -6675,7 +6728,6 @@ class PlayState extends MusicBeatState
 				camGame.shake(oppChar.shakeIntensity, oppChar.shakeDuration / playbackRate);
 				camHUD.shake(oppChar.shakeIntensity / 2, oppChar.shakeDuration / playbackRate);
 			}
-			if (ClientPrefs.songLoading && !ffmpegMode) vocals.volume = 1;
 		}
 	}
 
@@ -6879,13 +6931,14 @@ class PlayState extends MusicBeatState
 		}
 		if (!ffmpegMode && ClientPrefs.songLoading && playbackRate < 256) //much better resync code, doesn't just resync every step!!
 		{
-			if (FlxG.sound.music.time > Conductor.songPosition + 20 * playbackRate
-				|| FlxG.sound.music.time < Conductor.songPosition - 20 * playbackRate
-				|| FlxG.sound.music.time < 500 && ClientPrefs.startingSync)
+			var timeSub:Float = Conductor.songPosition - Conductor.offset;
+			var syncTime:Float = 20 * playbackRate;
+			if (Math.abs(FlxG.sound.music.time - timeSub) > syncTime ||
+			(vocals.length > 0 && Math.abs(vocals.time - timeSub) > syncTime) ||
+			(opponentVocals.length > 0 && Math.abs(opponentVocals.time - timeSub) > syncTime))
 			{
-				if (!paused) resyncConductor();
+				resyncVocals();
 			}
-			if (!paused && FlxG.sound.music.time - vocals.time > 20 * playbackRate && FlxG.sound.music.time < vocals.length || FlxG.sound.music.time < 100) vocals.time = FlxG.sound.music.time;
 		}
 
 		if (camTwist)
