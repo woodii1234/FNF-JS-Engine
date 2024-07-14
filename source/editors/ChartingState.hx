@@ -2968,10 +2968,10 @@ class ChartingState extends MusicBeatState
 			playbackSpeed = 1;
 		//
 
-		if (playbackSpeed <= 0.5)
-			playbackSpeed = 0.5;
-		if (playbackSpeed >= 3)
-			playbackSpeed = 3;
+		if (playbackSpeed <= 0.25)
+			playbackSpeed = 0.25;
+		if (playbackSpeed >= 4)
+			playbackSpeed = 4;
 
 		FlxG.sound.music.pitch = playbackSpeed;
 		vocals.pitch = playbackSpeed;
