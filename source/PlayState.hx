@@ -6176,7 +6176,7 @@ class PlayState extends MusicBeatState
 				if (missResetTimer <= 0.1)
 				{
 					if (!notesBeingMissed) notesBeingMissed = true;
-					hitResetTimer += 0.01 / playbackRate;
+					missResetTimer += 0.01 / playbackRate;
 				}
 			}
 
