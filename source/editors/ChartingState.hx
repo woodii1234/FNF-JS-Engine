@@ -2470,11 +2470,11 @@ class ChartingState extends MusicBeatState
 				if (!FlxG.keys.pressed.CONTROL && !FlxG.keys.pressed.ALT)
 				{
 					saveUndo(_song);
-						if (soundEffectsCheck.checked) FlxG.sound.play(Paths.sound('removeNote'));
+						if (soundEffectsCheck.checked) FlxG.sound.play(Paths.sound('removeNote'), 0.7);
 				}
 				if (FlxG.keys.pressed.CONTROL || FlxG.keys.pressed.ALT)
 				{
-						if (soundEffectsCheck.checked) FlxG.sound.play(Paths.sound('selectNote'));
+						if (soundEffectsCheck.checked) FlxG.sound.play(Paths.sound('selectNote'), 0.7);
 				}
 				curRenderedNotes.forEachAlive(function(note:Note)
 				{
@@ -2517,7 +2517,7 @@ class ChartingState extends MusicBeatState
 						addNote(curSelectedNote[0] + (15000/Conductor.bpm)/stepperStackOffset.value, curSelectedNote[1] + Math.floor(stepperStackSideOffset.value), currentType);
 					}
 					selectionNote.playAnim('confirm' + selectionNote.noteData, true, 0.15);
-					if (soundEffectsCheck.checked) FlxG.sound.play(Paths.sound('addedNote'));
+					if (soundEffectsCheck.checked) FlxG.sound.play(Paths.sound('addedNote'), 0.7);
 
 				//updateGrid(false);
 				updateNoteUI();

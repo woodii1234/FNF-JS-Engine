@@ -6145,12 +6145,14 @@ class PlayState extends MusicBeatState
 
 			if(instakillOnMiss || sickOnly)
 			{
-				(opponentChart ? opponentVocals : vocals).volume = 0;
+				vocals.volume = opponentVocals.volume = 0;
 				doDeathCheck(true);
 			}
 
 			songMisses += 1 * polyphony;
-			(opponentChart ? opponentVocals : vocals).volume = 0;
+			if (SONG.needsVoices && ClientPrefs.songLoading && !ffmpegMode)
+				if (opponentChart && opponentVocals != null && opponentVocals.volume != 0) opponentVocals.volume = 0;
+				else if (!opponentChart && vocals.volume != 0 || vocals.volume != 0) vocals.volume = 0;
 			if(!practiceMode) songScore -= 10 * Std.int(polyphony);
 
 			totalPlayed++;
@@ -6233,7 +6235,6 @@ class PlayState extends MusicBeatState
 
 		if (!boyfriend.stunned)
 		{
-
 			health -= 0.05 * healthLoss;
 			if(instakillOnMiss)
 			{
@@ -6513,7 +6514,9 @@ class PlayState extends MusicBeatState
 					camHUD.shake(playerChar.shakeIntensity / 2, playerChar.shakeDuration / playbackRate);
 				}
 				note.wasGoodHit = true;
-				if (ClientPrefs.songLoading && !ffmpegMode) (opponentChart ? opponentVocals : vocals).volume = 1;
+				if (SONG.needsVoices && ClientPrefs.songLoading && !ffmpegMode)
+					if (opponentChart && opponentVocals != null && opponentVocals.volume != 1) opponentVocals.volume = 1;
+					else if (!opponentChart && vocals.volume != 1 || vocals.volume != 1) vocals.volume = 1;
 
 				if (!notesBeingHit && usingBotEnergy)
 				{
@@ -6639,8 +6642,9 @@ class PlayState extends MusicBeatState
 				spawnNoteSplashOnNote(true, daNote, daNote.gfNote);
 			}
 
-			if (SONG.needsVoices && !ffmpegMode && (!opponentChart ? opponentVocals : vocals).volume != 1)
-				(!opponentChart ? opponentVocals : vocals).volume = 1;
+			if (SONG.needsVoices && !ffmpegMode)
+				if (!opponentChart && opponentVocals != null && opponentVocals.volume != 1) opponentVocals.volume = 1;
+				else if (opponentChart && vocals.volume != 1 || vocals.volume != 1) vocals.volume = 1;
 
 				if (polyphony > 1 && !daNote.isSustainNote) opponentNoteTotal += polyphony - 1;
 
@@ -6746,6 +6750,9 @@ class PlayState extends MusicBeatState
 				camGame.shake(oppChar.shakeIntensity, oppChar.shakeDuration / playbackRate);
 				camHUD.shake(oppChar.shakeIntensity / 2, oppChar.shakeDuration / playbackRate);
 			}
+			if (SONG.needsVoices && !ffmpegMode)
+				if (!opponentChart && opponentVocals != null && opponentVocals.volume != 1) opponentVocals.volume = 1;
+				else if (opponentChart && vocals.volume != 1 || vocals.volume != 1) vocals.volume = 1;
 		}
 	}
 
