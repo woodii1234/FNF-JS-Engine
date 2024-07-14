@@ -66,7 +66,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var smoothHealth:Bool = true;
 	public static var smoothHPBug:Bool = false;
 	public static var noBopLimit:Bool = false;
-	public static var denpaDrainBug:Bool = false;
 	public static var ogHPColor:Bool = false;
 	public static var timeBarType:String = 'Time Left';
 	public static var scoreStyle:String = 'Psych Engine';
@@ -304,7 +303,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.smoothHealth = smoothHealth;
 		FlxG.save.data.smoothHPBug = smoothHPBug;
 		FlxG.save.data.noBopLimit = noBopLimit;
-		FlxG.save.data.denpaDrainBug = denpaDrainBug;
 		FlxG.save.data.ogHPColor = ogHPColor;
 		FlxG.save.data.timeBarType = timeBarType;
 		FlxG.save.data.scoreStyle = scoreStyle;
@@ -599,9 +597,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.noBopLimit != null) {
 			noBopLimit = FlxG.save.data.noBopLimit;
-		}
-		if(FlxG.save.data.denpaDrainBug != null) {
-			denpaDrainBug = FlxG.save.data.denpaDrainBug;
 		}
 		if(FlxG.save.data.ogHPColor != null) {
 			ogHPColor = FlxG.save.data.ogHPColor;
