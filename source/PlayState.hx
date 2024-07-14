@@ -3746,7 +3746,9 @@ class PlayState extends MusicBeatState
 	var strumsHeld:Array<Bool> = [false, false, false, false];
 	var strumHeldAmount:Int = 0;
 	var notesBeingHit:Bool = false;
+	var notesBeingMissed:Bool = false;
 	var hitResetTimer:Float = 0;
+	var missResetTimer:Float = 0;
 	var botEnergyCooldown:Float = 0;
 	var energyDrainSpeed:Float = 1;
 	var energyRefillSpeed:Float = 1;
@@ -3791,7 +3793,7 @@ class PlayState extends MusicBeatState
 		}
 		if (!cpuControlled && canUseBotEnergy) 
 		{
-			if (FlxG.keys.pressed.CONTROL && !noEnergy)
+			if (controls.BOT_ENERGY_P && !noEnergy)
 			{
 				usingBotEnergy = true;
 			}
@@ -3804,6 +3806,14 @@ class PlayState extends MusicBeatState
 				health += elapsed / 2;
 				hitResetTimer -= elapsed;
 				if (hitResetTimer <= 0) notesBeingHit = false;
+				if (missResetTimer > 0) missResetTimer -= 0.01 / (ClientPrefs.framerate / 60);
+			}
+			if (notesBeingMissed && missResetTimer >= 0)
+			{
+				if (missResetTimer > 0.1) missResetTimer = 0.1;
+				health -= missResetTimer / (ClientPrefs.framerate / 60);
+				missResetTimer -= elapsed;
+				if (missResetTimer <= 0) notesBeingMissed = false;
 			}
 			if (usingBotEnergy)
 				botEnergy -= (elapsed / ((!ffmpegMode ? ClientPrefs.framerate : targetFPS) / 60) / 4) * strumHeldAmount * energyDrainSpeed;
@@ -6122,7 +6132,7 @@ class PlayState extends MusicBeatState
 			if (combo > 0)
 				combo = 0;
 			else combo -= 1 * polyphony;
-			if (health > 0)
+			if (health > 0 && !usingBotEnergy)
 			{
 				if (ClientPrefs.healthGainType != 'VS Impostor') {
 					health -= daNote.missHealth * healthLoss;
@@ -6132,7 +6142,6 @@ class PlayState extends MusicBeatState
 					health -= daNote.missHealth * missCombo;
 				}
 			}
-
 
 			if(instakillOnMiss || sickOnly)
 			{
@@ -6161,6 +6170,15 @@ class PlayState extends MusicBeatState
 		   		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 
 			daNote.tooLate = true;
+
+			if (usingBotEnergy)
+			{
+				if (missResetTimer <= 0.1)
+				{
+					if (!notesBeingMissed) notesBeingMissed = true;
+					hitResetTimer += 0.01 / playbackRate;
+				}
+			}
 
 			callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote]);
 			if (ClientPrefs.missRating) popUpScore(daNote, true);

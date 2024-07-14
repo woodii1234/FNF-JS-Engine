@@ -521,60 +521,64 @@ class FreeplayState extends MusicBeatState
 					}
 					var diff:String = (PlayState.SONG.specialAudioName.length > 1 ? PlayState.SONG.specialAudioName : CoolUtil.difficulties[curDifficulty]).toLowerCase();
 
-					vocals = new FlxSound();
-					try
+					if (PlayState.SONG.needsVoices)
 					{
-						var playerVocals:String = getVocalFromCharacter(PlayState.SONG.player1);
-						var loadedVocals:openfl.media.Sound = Paths.voices(PlayState.SONG.song, diff, (playerVocals != null && playerVocals.length > 0) ? playerVocals : 'Player');
-						if(loadedVocals == null) loadedVocals = Paths.voices(PlayState.SONG.song, diff);
-						
-						if(loadedVocals != null && loadedVocals.length > 0)
+						vocals = new FlxSound();
+						try
 						{
-							vocals.loadEmbedded(loadedVocals);
-							FlxG.sound.list.add(vocals);
-							vocals.persist = vocals.looped = true;
-							vocals.volume = 0.8;
-							vocals.play();
-							vocals.pause();
+							var playerVocals:String = getVocalFromCharacter(PlayState.SONG.player1);
+							var loadedVocals:openfl.media.Sound = Paths.voices(PlayState.SONG.song, diff, (playerVocals != null && playerVocals.length > 0) ? playerVocals : 'Player');
+							if(loadedVocals == null) loadedVocals = Paths.voices(PlayState.SONG.song, diff);
+							
+							if(loadedVocals != null && loadedVocals.length > 0)
+							{
+								vocals.loadEmbedded(loadedVocals);
+								FlxG.sound.list.add(vocals);
+								vocals.persist = vocals.looped = true;
+								vocals.volume = 0.8;
+								vocals.play();
+								vocals.pause();
+							}
+							else vocals = FlxDestroyUtil.destroy(vocals);
 						}
-						else vocals = FlxDestroyUtil.destroy(vocals);
-					}
-					catch(e:Dynamic)
-					{
-						vocals = FlxDestroyUtil.destroy(vocals);
-					}
-					
-					opponentVocals = new FlxSound();
-					try
-					{
-						//trace('please work...');
-						var oppVocals:String = getVocalFromCharacter(PlayState.SONG.player2);
-						var loadedVocals:openfl.media.Sound = Paths.voices(PlayState.SONG.song, diff, (oppVocals != null && oppVocals.length > 0) ? oppVocals : 'Opponent');
-						
-						if(loadedVocals != null && loadedVocals.length > 0)
+						catch(e:Dynamic)
 						{
-							opponentVocals.loadEmbedded(loadedVocals);
-							FlxG.sound.list.add(opponentVocals);
-							opponentVocals.persist = opponentVocals.looped = true;
-							opponentVocals.volume = 0.8;
-							opponentVocals.play();
-							opponentVocals.pause();
-							//trace('it worked yaaay!!');
+							vocals = FlxDestroyUtil.destroy(vocals);
 						}
-						else opponentVocals = FlxDestroyUtil.destroy(opponentVocals);
+						
+						opponentVocals = new FlxSound();
+						try
+						{
+							//trace('please work...');
+							var oppVocals:String = getVocalFromCharacter(PlayState.SONG.player2);
+							var loadedVocals:openfl.media.Sound = Paths.voices(PlayState.SONG.song, diff, (oppVocals != null && oppVocals.length > 0) ? oppVocals : 'Opponent');
+							
+							if(loadedVocals != null && loadedVocals.length > 0)
+							{
+								opponentVocals.loadEmbedded(loadedVocals);
+								FlxG.sound.list.add(opponentVocals);
+								opponentVocals.persist = opponentVocals.looped = true;
+								opponentVocals.volume = 0.8;
+								opponentVocals.play();
+								opponentVocals.pause();
+								//trace('it worked yaaay!!');
+							}
+							else opponentVocals = FlxDestroyUtil.destroy(opponentVocals);
+						}
+						catch(e:Dynamic)
+						{
+							//trace('FUUUCK');
+							opponentVocals = FlxDestroyUtil.destroy(opponentVocals);
+						}
 					}
-					catch(e:Dynamic)
-					{
-						//trace('FUUUCK');
-						opponentVocals = FlxDestroyUtil.destroy(opponentVocals);
-					}
-
-					FlxG.sound.list.add(vocals);
 					FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song, diff), 0.7);
-					vocals.play();
-					vocals.persist = true;
-					vocals.looped = true;
-					vocals.volume = 0.7;
+					if (vocals != null) 
+					{
+						vocals.play();
+						vocals.persist = true;
+						vocals.looped = true;
+						vocals.volume = 0.7;
+					}
 					instPlaying = curSelected;
 					Conductor.changeBPM(PlayState.SONG.bpm);
 					for (funnyIcon in grpIcons.members)
