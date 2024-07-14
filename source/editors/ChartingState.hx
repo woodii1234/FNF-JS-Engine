@@ -253,6 +253,7 @@ class ChartingState extends MusicBeatState
 	var text:String = "";
 	public static var vortex:Bool = false;
 	public var mouseQuant:Bool = false;
+	public var hitsoundVol:Float = 1;
 	override function create()
 	{
 		idleMusic = new EditingMusic();
@@ -2070,9 +2071,12 @@ class ChartingState extends MusicBeatState
 		voicesOppVolume.value = vocals.volume;
 		voicesOppVolume.name = 'voices_opp_volume';
 		blockPressWhileTypingOnStepper.push(voicesOppVolume);
+
+		if (FlxG.save.data.chart_hitsoundVolume == null) FlxG.save.data.chart_hitsoundVolume = 1;
+
+		hitsoundVol = FlxG.save.data.chart_hitsoundVolume;
 		
-		hitsoundVolume = new FlxUINumericStepper(voicesVolume.x + 100, voicesVolume.y, 0.1, 1, 0, 1, 1);
-		hitsoundVolume.value = hitsound.volume;
+		hitsoundVolume = new FlxUINumericStepper(voicesVolume.x + 100, voicesVolume.y + 30, 0.1, hitsoundVol, 0, 1, 1);
 		hitsoundVolume.name = 'hitsound_volume';
 		blockPressWhileTypingOnStepper.push(hitsoundVolume);
 		
@@ -2312,6 +2316,9 @@ class ChartingState extends MusicBeatState
 				case 'voices_opp_volume':
 					opponentVocals.volume = nums.value;
 					if(check_mute_vocals_opponent.checked) opponentVocals.volume = 0;
+
+				case 'hitsound_volume':
+					FlxG.save.data.chart_hitsoundVolume = nums.value;
 			}
 		}
 		else if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
