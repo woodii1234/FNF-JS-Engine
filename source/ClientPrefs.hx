@@ -12,7 +12,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var downScroll:Bool = false;
 	public static var middleScroll:Bool = false;
 	public static var opponentStrums:Bool = true;
-	public static var healthGainType:String = 'Psych Engine';
 	public static var ghostTapping:Bool = true;
 	public static var autoPause:Bool = true;
 	public static var complexAccuracy:Bool = false;
@@ -60,7 +59,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var cameraPanning:Bool = true;
 	public static var panIntensity:Float = 1;
 	public static var rateNameStuff:String = 'Quotes';
-	public static var goldSickSFC:Bool = true;
 	public static var colorRatingHit:Bool = true;
 	public static var marvRateColor:String = 'Golden';
 	public static var smoothHealth:Bool = true;
@@ -85,7 +83,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var healthDisplay:Bool = false;
 	public static var opponentRateCount:Bool = true;
 	public static var showMS:Bool = false;
-	public static var wrongCameras:Bool = false;
 	public static var flashing:Bool = true;
 	public static var camZooms:Bool = true;
 	public static var ratingCounter:Bool = false;
@@ -124,7 +121,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var botLightStrum:Bool = true;
 	public static var playerLightStrum:Bool = true;
 	public static var ratesAndCombo:Bool = false;
-	public static var comboPopup:Bool = false;
 	public static var songLoading:Bool = true;
 	public static var noSpawnFunc:Bool = false;
 	public static var noHitFuncs:Bool = false;
@@ -249,7 +245,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.downScroll = downScroll;
 		FlxG.save.data.middleScroll = middleScroll;
 		FlxG.save.data.opponentStrums = opponentStrums;
-		FlxG.save.data.healthGainType = healthGainType;
 		FlxG.save.data.ghostTapping = ghostTapping;
 		FlxG.save.data.autoPause = autoPause;
 		FlxG.save.data.complexAccuracy = complexAccuracy;
@@ -297,7 +292,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.cameraPanning = cameraPanning;
 		FlxG.save.data.panIntensity = panIntensity;
 		FlxG.save.data.rateNameStuff = rateNameStuff;
-		FlxG.save.data.goldSickSFC = goldSickSFC;
 		FlxG.save.data.colorRatingHit = colorRatingHit;
 		FlxG.save.data.marvRateColor = marvRateColor;
 		FlxG.save.data.smoothHealth = smoothHealth;
@@ -321,7 +315,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.longFCName = longFCName;
 		FlxG.save.data.healthDisplay = healthDisplay;
 		FlxG.save.data.opponentRateCount = opponentRateCount;
-		FlxG.save.data.wrongCameras = wrongCameras;
 		FlxG.save.data.showMS = showMS;
 		FlxG.save.data.flashing = flashing;
 		FlxG.save.data.camZooms = camZooms;
@@ -361,7 +354,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		FlxG.save.data.botLightStrum = botLightStrum;
 		FlxG.save.data.playerLightStrum = playerLightStrum;
 		FlxG.save.data.ratesAndCombo = ratesAndCombo;
-		FlxG.save.data.comboPopup = comboPopup;
 		FlxG.save.data.songLoading = songLoading;
 		FlxG.save.data.noSpawnFunc = noSpawnFunc;
 		FlxG.save.data.noHitFuncs = noHitFuncs;
@@ -439,9 +431,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.opponentStrums != null) {
 			opponentStrums = FlxG.save.data.opponentStrums;
-		}
-		if(FlxG.save.data.healthGainType != null) {
-			healthGainType = FlxG.save.data.healthGainType;
 		}
 		if(FlxG.save.data.ghostTapping != null) {
 			ghostTapping = FlxG.save.data.ghostTapping;
@@ -580,9 +569,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		if(FlxG.save.data.rateNameStuff != null) {
 			rateNameStuff = FlxG.save.data.rateNameStuff;
 		}
-		if(FlxG.save.data.goldSickSFC != null) {
-			goldSickSFC = FlxG.save.data.goldSickSFC;
-		}
 		if(FlxG.save.data.colorRatingHit != null) {
 			colorRatingHit = FlxG.save.data.colorRatingHit;
 		}
@@ -654,9 +640,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.showMS != null) {
 			showMS = FlxG.save.data.showMS;
-		}
-		if(FlxG.save.data.wrongCameras != null) {
-			wrongCameras = FlxG.save.data.wrongCameras;
 		}
 		if(FlxG.save.data.flashing != null) {
 			flashing = FlxG.save.data.flashing;
@@ -793,9 +776,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		}
 		if(FlxG.save.data.ratesAndCombo != null) {
 			ratesAndCombo = FlxG.save.data.ratesAndCombo;
-		}
-		if(FlxG.save.data.comboPopup != null) {
-			comboPopup = FlxG.save.data.comboPopup;
 		}
 		if(FlxG.save.data.songLoading != null) {
 			songLoading = FlxG.save.data.songLoading;

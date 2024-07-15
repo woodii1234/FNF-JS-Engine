@@ -244,13 +244,6 @@ class VisualsUISubState extends BaseOptionsMenu
 			addOption(option);
 		}
 
-		var option:Option = new Option('Golden Sick on MFC/SFC',
-			'If checked, your Sick! & Perfect!! ratings will be golden if your FC rating is better than GFC.',
-			'goldSickSFC',
-			'bool',
-			true);
-		addOption(option);
-
 		var option:Option = new Option('Rating Accuracy Color',
 			'If checked, the ratings & combo will be colored based on the actual rating.',
 			'colorRatingHit',
@@ -435,13 +428,6 @@ class VisualsUISubState extends BaseOptionsMenu
 		var option:Option = new Option('Show MS Popup',
 			"If checked, hitting a note will also show how late/early you hit it.",
 			'showMS',
-			'bool',
-			false);
-		addOption(option);
-
-		var option:Option = new Option('Use Wrong Popup Camera',
-			'If checked, the popups will use the game world camera instead of the HUD.',
-			'wrongCameras',
 			'bool',
 			false);
 		addOption(option);

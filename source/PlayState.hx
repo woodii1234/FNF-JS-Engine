@@ -309,7 +309,6 @@ class PlayState extends MusicBeatState
 	public var enemyHits:Float = 0;
 	public var opponentNoteTotal:Float = 0;
 	public var polyphony(default, set):Float = 1;
-	private var allSicks:Bool = true;
 
 		var pixelShitPart1:String = "";
 		var pixelShitPart2:String = '';
@@ -528,8 +527,6 @@ class PlayState extends MusicBeatState
 
 	// stores the last judgement object
 	public static var lastRating:FlxSprite;
-	// stores the last combo sprite object
-	public static var lastCombo:FlxSprite;
 	// stores the last combo score objects in an array
 	public static var lastScore:Array<FlxSprite> = [];
 
@@ -1420,7 +1417,7 @@ class PlayState extends MusicBeatState
 		moveCameraSection();
 
 		msTxt = new FlxText(0, 0, 0, "");
-		msTxt.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
+		msTxt.cameras = [camHUD];
 		msTxt.scrollFactor.set();
 		msTxt.setFormat("vcr.ttf", 20, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		if (ClientPrefs.scoreStyle == 'Tails Gets Trolled V4') msTxt.setFormat("calibri.ttf", 20, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -1439,7 +1436,7 @@ class PlayState extends MusicBeatState
 		insert(members.indexOf(strumLineNotes), msTxt);
 
 		judgeTxt = new FlxText(400, timeBarBG.y + 120, FlxG.width - 800, "");
-		judgeTxt.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
+		judgeTxt.cameras = [camHUD];
 		judgeTxt.scrollFactor.set();
 		judgeTxt.setFormat("vcr.ttf", 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		if (ClientPrefs.scoreStyle == 'Tails Gets Trolled V4') judgeTxt.setFormat("calibri.ttf", 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -5456,8 +5453,6 @@ class PlayState extends MusicBeatState
 	public var totalPlayed:Int = 0;
 	public var totalNotesHit:Float = 0.0;
 	public var totalNotes:Float = 0;
-
-	public var showCombo:Bool = true;
 	public var showComboNum:Bool = true;
 	public var showRating:Bool = true;
 
@@ -5478,20 +5473,16 @@ class PlayState extends MusicBeatState
 			case 'Base FNF': pixelShitPart1 = '';
 			default: pixelShitPart1 = ClientPrefs.ratingType.toLowerCase().replace(' ', '').trim() + '/';
 		}
-		if (allSicks) { //cache gold rating sprites
+		//cache gold ratings..
 		Paths.image('goldstuff/' + "perfect" + pixelShitPart2);
-		Paths.image('goldstuff/' + "sick" + pixelShitPart2);
-		Paths.image('goldstuff/' + "combo" + pixelShitPart2);
 		for (i in 0...10) Paths.image('goldstuff/' + 'num' + i + pixelShitPart2);
-			trace('cached gold ratings');
-		}
-		//cache normal/pixel ratings
+
+		//then normal/pixel ratings
 		Paths.image(pixelShitPart1 + "perfect" + pixelShitPart2);
 		Paths.image(pixelShitPart1 + "sick" + pixelShitPart2);
 		Paths.image(pixelShitPart1 + "good" + pixelShitPart2);
 		Paths.image(pixelShitPart1 + "bad" + pixelShitPart2);
 		Paths.image(pixelShitPart1 + "shit" + pixelShitPart2);
-		Paths.image(pixelShitPart1 + "combo" + pixelShitPart2);
 		Paths.image(pixelShitPart1 + "miss" + pixelShitPart2);
 
 		for (i in 0...10) Paths.image(pixelShitPart1 + 'num' + i + pixelShitPart2);
@@ -5537,17 +5528,7 @@ class PlayState extends MusicBeatState
 		}
 		note.rating = daRating.name;
 
-		if (goods > 0 || bads > 0 || shits > 0 || songMisses > 0 && ClientPrefs.goldSickSFC || !ClientPrefs.goldSickSFC)
-		{
-			// if it isn't a sick, and you had a sick combo, then it becomes not sick :(
-			if (allSicks)
-				allSicks = false;
-
-		}
-		if (daRating.name == 'shit' && ClientPrefs.shitGivesMiss && ClientPrefs.ratingIntensity == 'Normal')
-		{
-			noteMiss(note);
-		}
+		if (daRating.name == 'shit' && ClientPrefs.shitGivesMiss && ClientPrefs.ratingIntensity == 'Normal') noteMiss(note);
 		if (noteDiff > ClientPrefs.goodWindow && ClientPrefs.shitGivesMiss && ClientPrefs.ratingIntensity == 'Harsh')
 		{
 			noteMiss(note);
@@ -5556,41 +5537,6 @@ class PlayState extends MusicBeatState
 		{
 			noteMiss(note);
 		}
-			if (!usingBotEnergy) switch (ClientPrefs.healthGainType)
-			{
-				case 'Leather Engine':
-					switch(daRating.name)
-					{
-						case 'perfect', 'sick': health += 0.012 * healthGain * polyphony;
-						case 'good': health += -0.008 * healthGain * polyphony;
-						case 'bad': health += -0.018 * healthGain * polyphony;
-						case 'shit': health += -0.023 * healthGain * polyphony;
-					}
-				case 'Kade (1.4.2 to 1.6)', 'Doki Doki+':
-					switch(daRating.name)
-					{
-						case 'perfect', 'sick': health += (ClientPrefs.healthGainType == 'Doki Doki+' ? 0.077 : 0.1) * healthGain * polyphony;
-						case 'good': health += 0.04 * healthGain * polyphony;
-						case 'bad': health -= 0.06 * healthGain * polyphony;
-						case 'shit': health -= (ClientPrefs.healthGainType == 'Doki Doki+' ? 0.1 : 0.2) * healthLoss * polyphony;
-					}
-				case 'Kade (1.6+)':
-					switch(daRating.name)
-					{
-						case 'perfect', 'sick': health += 0.017 * healthGain * polyphony;
-						case 'good': health += 0 * healthGain * polyphony;
-						case 'bad': health += -0.03 * healthLoss;
-						case 'shit': health += -0.06 * healthLoss;
-					}
-				case 'Kade (1.2)':
-					switch(daRating.name)
-					{
-						case 'perfect', 'sick': health += 0.023 * healthGain * polyphony;
-						case 'good': health += 0.004 * healthGain * polyphony;
-						case 'bad': health += 0;
-						case 'shit': health += 0;
-					}
-			}
 
 		if(daRating.noteSplash && !note.noteSplashDisabled && !miss && splashesPerFrame[1] <= 4)
 		{
@@ -5624,16 +5570,12 @@ class PlayState extends MusicBeatState
 					case 'Base FNF': pixelShitPart1 = '';
 					default: pixelShitPart1 = ClientPrefs.ratingType.toLowerCase().replace(' ', '').trim() + '/';
 				}
-				if (allSicks && ClientPrefs.marvRateColor == 'Golden' && noteDiff < ClientPrefs.sickWindow && ClientPrefs.ratingType != 'Tails Gets Trolled V4' && ClientPrefs.ratingType != 'Doki Doki+' && !ClientPrefs.noMarvJudge)
-				{
-					pixelShitPart1 = 'goldstuff/';
-				}
-				if (!allSicks && ClientPrefs.marvRateColor == 'Golden' && noteDiff < ClientPrefs.perfectWindow && ClientPrefs.ratingType != 'Tails Gets Trolled V4' && ClientPrefs.ratingType != 'Doki Doki+' && !ClientPrefs.noMarvJudge)
+				if (ClientPrefs.marvRateColor == 'Golden' && noteDiff < ClientPrefs.sickWindow && ClientPrefs.ratingType != 'Tails Gets Trolled V4' && ClientPrefs.ratingType != 'Doki Doki+' && !ClientPrefs.noMarvJudge)
 				{
 					pixelShitPart1 = 'goldstuff/';
 				}
 				final rating = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + daRating.image + pixelShitPart2));
-				rating.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
+				rating.cameras = [camHUD];
 				rating.screenCenter();
 				rating.x = offset - 40;
 				rating.y -= 60;
@@ -5645,7 +5587,7 @@ class PlayState extends MusicBeatState
 				rating.y -= ClientPrefs.comboOffset[1];
 				if (!miss)
 				{
-					if (!allSicks && ClientPrefs.colorRatingHit && ClientPrefs.ratingType != 'Tails Gets Trolled V4' && ClientPrefs.ratingType != 'Doki Doki+' && !miss)
+					if (ClientPrefs.colorRatingHit && ClientPrefs.ratingType != 'Tails Gets Trolled V4' && ClientPrefs.ratingType != 'Doki Doki+' && !miss)
 					{
 						switch (daRating.name) //This is so stupid, but it works
 						{
@@ -5705,7 +5647,7 @@ class PlayState extends MusicBeatState
 				for (daLoop=>i in separatedScore)
 				{
 					final numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + 'num' + i + pixelShitPart2));
-					numScore.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
+					numScore.cameras = [camHUD];
 					numScore.screenCenter();
 					numScore.x = offset + (43 * daLoop) - 90;
 					numScore.y += 80;
@@ -5746,54 +5688,6 @@ class PlayState extends MusicBeatState
 					});
 				}
 
-				if (ClientPrefs.comboPopup && ClientPrefs.ratingType != 'Simple' && popUpsFrame <= 3)
-				{
-					final comboSpr = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + 'combo' + pixelShitPart2));
-					comboSpr.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
-					comboSpr.screenCenter();
-					comboSpr.x = offset;
-					comboSpr.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
-					comboSpr.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
-					comboSpr.visible = (!ClientPrefs.hideHud && showCombo);
-					comboSpr.x += ClientPrefs.comboOffset[0];
-					comboSpr.y -= ClientPrefs.comboOffset[1];
-					comboSpr.y += 60;
-					comboSpr.color = rating.color;
-					comboSpr.velocity.x += FlxG.random.int(1, 10) * playbackRate;
-					if (ClientPrefs.comboPopup && !cpuControlled)
-					{
-						insert(members.indexOf(strumLineNotes), comboSpr);
-					}
-					comboSpr.x = offset + (43 * Std.string(combo).length) - 90 + 50;
-					if (!ClientPrefs.comboStacking)
-					{
-						if (lastCombo != null)
-						{
-							FlxTween.cancelTweensOf(lastCombo);
-							remove(lastCombo, true);
-							lastCombo.destroy();
-						}
-							lastCombo = comboSpr;
-					}
-					if (!PlayState.isPixelStage)
-					{
-						comboSpr.setGraphicSize(Std.int(comboSpr.width * 0.7));
-						comboSpr.antialiasing = ClientPrefs.globalAntialiasing;
-					}
-					else
-					{
-						comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.85));
-					}
-						comboSpr.updateHitbox();
-					FlxTween.tween(comboSpr, {alpha: 0}, 0.2 / playbackRate, {
-						onComplete: function(tween:FlxTween)
-						{
-							comboSpr.destroy();
-						},
-						startDelay: Conductor.crochet * 0.002 / playbackRate
-					});
-				}
-
 					FlxTween.tween(rating, {alpha: 0}, 0.2 / playbackRate, {
 						startDelay: Conductor.crochet * 0.001 / playbackRate,
 						onComplete: function(tween:FlxTween)
@@ -5805,10 +5699,10 @@ class PlayState extends MusicBeatState
 
 				if (ClientPrefs.ratesAndCombo && ClientPrefs.showMS && !ClientPrefs.hideHud && popUpsFrame <= 3) {
 					FlxTween.cancelTweensOf(msTxt);
-					msTxt.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
+					msTxt.cameras = [camHUD];
 					msTxt.visible = true;
 					msTxt.screenCenter();
-					msTxt.x = (ClientPrefs.comboPopup ? offset + 280 : offset + 80);
+					msTxt.x = offset + 80;
 					msTxt.alpha = 1;
 					msTxt.text = FlxMath.roundDecimal(-noteDiff, 3) + " MS";
 					if (cpuControlled) msTxt.text = "0 MS (Bot)";
@@ -5844,7 +5738,7 @@ class PlayState extends MusicBeatState
 				if (ClientPrefs.ratesAndCombo && ClientPrefs.ratingType == 'Simple' && popUpsFrame <= 3 && !ClientPrefs.hideHud) {
 					FlxTween.cancelTweensOf(judgeTxt);
 					FlxTween.cancelTweensOf(judgeTxt.scale);
-					judgeTxt.cameras = (ClientPrefs.wrongCameras ? [camGame] : [camHUD]);
+					judgeTxt.cameras = [camHUD];
 					judgeTxt.visible = true;
 					judgeTxt.screenCenter(X);
 					judgeTxt.y = !ClientPrefs.downScroll ? botplayTxt.y + 60 : botplayTxt.y - 60;
@@ -6134,13 +6028,7 @@ class PlayState extends MusicBeatState
 			else combo -= 1 * polyphony;
 			if (health > 0 && !usingBotEnergy)
 			{
-				if (ClientPrefs.healthGainType != 'VS Impostor') {
-					health -= daNote.missHealth * healthLoss;
-				}
-				else {
-					missCombo += 1;
-					health -= daNote.missHealth * missCombo;
-				}
+				health -= daNote.missHealth * healthLoss;
 			}
 
 			if(instakillOnMiss || sickOnly)
@@ -6192,13 +6080,7 @@ class PlayState extends MusicBeatState
 			else combo -= 1 * polyphony;
 			if (health > 0)
 			{
-				if (ClientPrefs.healthGainType != 'VS Impostor') {
-					health -= daNoteAlt.missHealth * healthLoss;
-				}
-				else {
-					missCombo += 1;
-					health -= daNoteAlt.missHealth * missCombo;
-				}
+				health -= daNoteAlt.missHealth * healthLoss;
 			}
 
 			if(instakillOnMiss)
@@ -6450,7 +6332,7 @@ class PlayState extends MusicBeatState
 				else if (opponentChart && !oppTrigger) oppTrigger = true;
 				doGf = note.gfNote;
 
-				if (!usingBotEnergy && (ClientPrefs.healthGainType == 'Psych Engine' || ClientPrefs.healthGainType == 'Leather Engine' || ClientPrefs.healthGainType == 'Kade (1.2)' || ClientPrefs.healthGainType == 'Kade (1.6+)' || ClientPrefs.healthGainType == 'Doki Doki+' || ClientPrefs.healthGainType == 'VS Impostor')) {
+				if (!usingBotEnergy) {
 					health += note.hitHealth * healthGain * polyphony;
 				}
 				if(!note.noAnimation && ClientPrefs.charsAndBG && (!oppTrigger ? charAnimsFrame : oppAnimsFrame) < 4 && (!note.isSustainNote || ClientPrefs.oldSusStyle && note.isSustainNote)) {
@@ -6592,9 +6474,7 @@ class PlayState extends MusicBeatState
 				}
 				if (polyphony > 1) totalNotes += polyphony - 1;
 			}
-			if (ClientPrefs.healthGainType == 'Psych Engine' || ClientPrefs.healthGainType == 'Leather Engine' || ClientPrefs.healthGainType == 'Kade (1.2)' || ClientPrefs.healthGainType == 'Kade (1.6+)' || ClientPrefs.healthGainType == 'Doki Doki+' || ClientPrefs.healthGainType == 'VS Impostor') {
-				health += noteAlt.hitHealth * healthGain * polyphony;
-			}
+			health += noteAlt.hitHealth * healthGain * polyphony;
 			if (ClientPrefs.songLoading && !ffmpegMode) (opponentChart ? opponentVocals : vocals).volume = 1;
 		}
 		return;
