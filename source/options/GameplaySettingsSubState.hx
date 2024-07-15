@@ -91,14 +91,6 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
-		var option:Option = new Option('Resync Style:',
-			"What type of resync do you prefer?",
-			'resyncType',
-			'string',
-			'Leather',
-			['Leather', 'Psych']);
-		addOption(option);
-
 		var option:Option = new Option('Remove Perfect!! Judgement',
 			"If checked, removes the Perfect judgement.",
 			'noMarvJudge',

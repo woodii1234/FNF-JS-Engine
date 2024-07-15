@@ -3683,45 +3683,33 @@ class PlayState extends MusicBeatState
 
 		FlxG.sound.music.pitch = playbackRate;
 		vocals.pitch = opponentVocals.pitch = playbackRate;
-		if (ClientPrefs.resyncType == 'Leather')
+		if(!(Conductor.songPosition > 20 && FlxG.sound.music.time < 20))
 		{
-			if(!(Conductor.songPosition > 20 && FlxG.sound.music.time < 20))
+			pauseVocals();
+			FlxG.sound.music.pause();
+
+			if(FlxG.sound.music.time >= FlxG.sound.music.length)
+				Conductor.songPosition = FlxG.sound.music.length;
+			else
+				Conductor.songPosition = FlxG.sound.music.time;
+
+			setVocalsTime(Conductor.songPosition);
+
+			FlxG.sound.music.play();
+			vocals.play();
+			opponentVocals.play();
+		}
+		else
+		{
+			while(Conductor.songPosition > 20 && FlxG.sound.music.time < 20)
 			{
-				pauseVocals();
-				FlxG.sound.music.pause();
-
-				if(FlxG.sound.music.time >= FlxG.sound.music.length)
-					Conductor.songPosition = FlxG.sound.music.length;
-				else
-					Conductor.songPosition = FlxG.sound.music.time;
-
+				FlxG.sound.music.time = Conductor.songPosition;
 				setVocalsTime(Conductor.songPosition);
 
 				FlxG.sound.music.play();
 				vocals.play();
 				opponentVocals.play();
 			}
-			else
-			{
-				while(Conductor.songPosition > 20 && FlxG.sound.music.time < 20)
-				{
-					FlxG.sound.music.time = Conductor.songPosition;
-					setVocalsTime(Conductor.songPosition);
-
-					FlxG.sound.music.play();
-					vocals.play();
-					opponentVocals.play();
-				}
-			}
-		}
-		else if (ClientPrefs.resyncType == 'Psych')
-		{
-			FlxG.sound.music.play();
-			if (!vocals.playing) vocals.play();
-			if (!opponentVocals.playing) opponentVocals.play();
-
-			Conductor.songPosition = FlxG.sound.music.time;
-			setVocalsTime(Conductor.songPosition);
 		}
 	}
 
