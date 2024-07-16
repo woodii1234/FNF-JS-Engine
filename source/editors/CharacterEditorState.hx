@@ -1077,21 +1077,12 @@ class CharacterEditorState extends MusicBeatState
 		}
 		char.debugMode = true;
 
-		currentCharacter = (Reflect.fields(char).indexOf('DADDY_DEAREST') != -1 || Reflect.fields(cast(Json.parse(TemplateCharacter), Array<String>)).substr(0) == TemplateCharacter.substr(0));
+		//currentCharacter = (Reflect.fields(char).indexOf('DADDY_DEAREST') != -1 || Reflect.fields(cast(Json.parse(TemplateCharacter), Array<String>)).substr(0) == TemplateCharacter.substr(0));
 
 		charLayer.add(ghostChar);
 		charLayer.add(char);
 
 		char.setPosition(char.positionArray[0] + OFFSET_X + 100, char.positionArray[1]);
-
-		/* THIS FUNCTION WAS USED TO PUT THE .TXT OFFSETS INTO THE .JSON
-
-		for (anim => offset in char.animOffsets) {
-			var leAnim:AnimArray = findAnimationByName(anim);
-			if(leAnim != null) {
-				leAnim.offsets = [offset[0], offset[1]];
-			}
-		}*/
 
 		if(blahBlahBlah) {
 			genBoyOffsets();
