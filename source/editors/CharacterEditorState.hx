@@ -58,6 +58,16 @@ class CharacterEditorState extends MusicBeatState
 	var goToPlayState:Bool = true;
 	var camFollow:FlxObject;
 
+	// counts when you last saved
+	/*
+	var lastSaved:Int = 0;
+	var isDirty:Bool = false;
+
+	var currentCharacter:Character = null;
+	var savedFile:Dynamic = null;
+	*/
+	var checkifChanged:Array<CharacterChange> = [];
+
 	public function new(daAnim:String = 'spooky', goToPlayState:Bool = true)
 	{
 		super();
@@ -1067,6 +1077,8 @@ class CharacterEditorState extends MusicBeatState
 		}
 		char.debugMode = true;
 
+		currentCharacter = (Reflect.fields(char).indexOf('DADDY_DEAREST') != -1 || Reflect.fields(cast(Json.parse(TemplateCharacter), Array<String>)).substr(0) == TemplateCharacter.substr(0));
+
 		charLayer.add(ghostChar);
 		charLayer.add(char);
 
@@ -1525,4 +1537,13 @@ class CharacterEditorState extends MusicBeatState
 
 		    super.onFocus();
 	    }
+}
+
+enum CharacterChange {
+	CEditInfo(oldInfo:String, newInfo:String);
+	CCreateAnim(animID:Int, animData:Dynamic);
+	CEditAnim(name:String, oldData:Dynamic, animData:Dynamic);
+	CDeleteAnim(animID:Int, animData:Dynamic);
+	CChangeOffset(name:String, change:FlxPoint);
+	CResetOffsets(oldOffsets:Map<String, FlxPoint>);
 }
