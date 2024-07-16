@@ -1976,7 +1976,7 @@ class PlayState extends MusicBeatState
 		#end
 	}
 
-	public function initLuaShader(name:String, ?glslVersion:Int = 110)
+	public function initLuaShader(name:String, ?glslVersion:Int = 120)
 	{
 		if(!ClientPrefs.shaders) return false;
 
@@ -4025,6 +4025,7 @@ class PlayState extends MusicBeatState
 					botplayUsed = true;
 					new FlxTimer().start(10, function(tmr:FlxTimer)
 						{
+							#if VIDEOS_ALLOWED
 							var vidSpr:FlxSprite;
 							var videoDone:Bool = true;
 							var video:MP4Handler = new MP4Handler(); // it plays but it doesn't show???
@@ -4046,6 +4047,10 @@ class PlayState extends MusicBeatState
 								vidSpr.visible = false;
 								Sys.exit(0);
 							});
+							#end
+							#else
+							throw 'You should RUN, any minute now.'; // thought this'd be cooler
+							// Sys.exit(0);
 							#end
 						});
 				}
@@ -4989,19 +4994,27 @@ class PlayState extends MusicBeatState
 			}
 
 			case 'Rainbow Eyesore':
-					if(ClientPrefs.flashing) {
-						var timeRainbow:Int = Std.parseInt(value1);
-						var speedRainbow:Float = Std.parseFloat(value2);
-						disableTheTripper = false;
-						disableTheTripperAt = timeRainbow;
-						FlxG.camera.filters = [new ShaderFilter(screenshader.shader)];
-						screenshader.waveAmplitude = 1;
-						screenshader.waveFrequency = 2;
-						screenshader.waveSpeed = speedRainbow * playbackRate;
-						screenshader.shader.uTime.value[0] = new flixel.math.FlxRandom().float(-100000, 100000);
-						screenshader.shader.uampmul.value[0] = 1;
-						screenshader.Enabled = true;
-					}
+				#if linux
+				#if LUA_ALLOWED
+				addTextToDebug('Rainbow shader does not work on Linux right now!', FlxColor.RED);
+				#else
+				trace('Rainbow shader does not work on Linux right now!');
+				#end
+				return;
+				#end
+				if(ClientPrefs.flashing && ClientPrefs.shaders) {
+					var timeRainbow:Int = Std.parseInt(value1);
+					var speedRainbow:Float = Std.parseFloat(value2);
+					disableTheTripper = false;
+					disableTheTripperAt = timeRainbow;
+					FlxG.camera.filters = [new ShaderFilter(screenshader.shader)];
+					screenshader.waveAmplitude = 1;
+					screenshader.waveFrequency = 2;
+					screenshader.waveSpeed = speedRainbow * playbackRate;
+					screenshader.shader.uTime.value[0] = new flixel.math.FlxRandom().float(-100000, 100000);
+					screenshader.shader.uampmul.value[0] = 1;
+					screenshader.Enabled = true;
+				}
 			case 'Popup':
 				var title:String = (value1);
 				var message:String = (value2);
