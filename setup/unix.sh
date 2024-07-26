@@ -11,7 +11,7 @@ haxelib install flixel-addons 3.2.2
 haxelib install flixel-tools 1.5.1
 haxelib install flixel-ui	
 haxelib install hscript
-haxelib install hxcpp 4.2.1
+haxelib install hxcpp
 haxelib install hxcpp-debug-server
 haxelib git hxCodec https://github.com/polybiusproxy/hxCodec
 haxelib git flxanimate https://github.com/ShadowMario/flxanimate dev
