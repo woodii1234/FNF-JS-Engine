@@ -55,7 +55,9 @@ jobs:
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
       - name: Compile
-        run: haxelib run lime build linux --app-version="4.0.0-${{ github.run_id}}" -D ${{ inputs.buildFlags }}
+        run: |
+        haxelib run lime build linux --app-version="4.0.0-${{ github.run_id}}" -D ${{ inputs.buildFlags }}
+        y
       - name: Clear Previous Cache
         uses: actions/github-script@main
         with:
@@ -126,7 +128,9 @@ jobs:
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
       - name: Compile
-        run: haxelib run lime build windows --app-version="4.0.0-${{ github.run_id}}" -D ${{ inputs.buildFlags }}
+        run: |
+        haxelib run lime build windows --app-version="4.0.0-${{ github.run_id}}" -D ${{ inputs.buildFlags }}
+        y
       - name: Clear Previous Cache
         uses: actions/github-script@main
         with:
@@ -196,7 +200,9 @@ jobs:
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
       - name: Compile
-        run: haxelib run lime build mac --app-version="4.0.0-${{ github.run_id}}" -D ${{ inputs.buildFlags }}
+        run: |
+    	  haxelib run lime build mac --app-version="4.0.0-${{ github.run_id}}" -D ${{ inputs.buildFlags }}
+    	  y
       - name: Clear Previous Cache
         uses: actions/github-script@main
         with:
