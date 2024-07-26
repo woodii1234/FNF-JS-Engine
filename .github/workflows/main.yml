@@ -63,9 +63,7 @@ jobs:
           haxe compile.hxml
           cd ../..
       - name: Compile
-        run: |
-          haxelib run lime build linux --app-version="4.0.0-${{ github.run_id}}" -D ${{ inputs.buildFlags }}
-          y
+        run: haxelib run lime build linux --app-version="4.0.0-${{ github.run_id}}" -D ${{ inputs.buildFlags }}
       - name: Clear Previous Cache
         uses: actions/github-script@main
         with:
@@ -144,9 +142,7 @@ jobs:
           haxe compile.hxml
           cd ../..
       - name: Compile
-        run: |
-          haxelib run lime build windows --app-version="4.0.0-${{ github.run_id}}" -D ${{ inputs.buildFlags }}
-          y
+        run: haxelib run lime build windows --app-version="4.0.0-${{ github.run_id}}" -D ${{ inputs.buildFlags }}
       - name: Clear Previous Cache
         uses: actions/github-script@main
         with:
@@ -224,9 +220,7 @@ jobs:
           haxe compile.hxml
           cd ../..
       - name: Compile
-        run: |
-          haxelib run lime build mac --app-version="4.0.0-${{ github.run_id}}" -D ${{ inputs.buildFlags }}
-          y
+        run: haxelib run lime build mac --app-version="4.0.0-${{ github.run_id}}" -D ${{ inputs.buildFlags }}
       - name: Clear Previous Cache
         uses: actions/github-script@main
         with:
