@@ -259,7 +259,7 @@ class Main extends Sprite {
 
 		errorMessage += "\nUncaught Error: " 
 				+ e.error 
-				+ "\nPlease report this error to the GitHub page: https://github.com/JordanSantiagoYT/FNF-PsychEngine-NoBotplayLag\n\n> Crash Handler written by: sqirra-rng"
+				+ "\nPlease report this error to the GitHub page: https://github.com/JordanSantiagoYT/FNF-JS-Engine\n\n> Crash Handler written by: sqirra-rng"
 				+ "\nThe engine has saved a crash log inside the crash folder, If you're making a GitHub issue you might want to send that!";
 
 		if (!FileSystem.exists("crash/"))
