@@ -816,7 +816,7 @@ class PlayState extends MusicBeatState
 
 		// "GLOBAL" SCRIPTS
 		#if LUA_ALLOWED
-		for (folder in Paths.directoriesWithFile(Paths.getSharedPath(), 'scripts/'))
+		for (folder in Paths.directoriesWithFile(Paths.getPreloadPath(), 'scripts/'))
 			for (file in FileSystem.readDirectory(folder)) {
 				if(file.toLowerCase().endsWith('.lua'))
 				{
@@ -1748,7 +1748,7 @@ class PlayState extends MusicBeatState
 
 		// SONG SPECIFIC SCRIPTS
 		#if LUA_ALLOWED
-		for (folder in Paths.directoriesWithFile(Paths.getSharedPath(), 'data/$songName/'))
+		for (folder in Paths.directoriesWithFile(Paths.getPreloadPath(), 'data/$songName/'))
 			for (file in FileSystem.readDirectory(folder))
 			{
 				#if LUA_ALLOWED

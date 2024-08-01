@@ -86,28 +86,6 @@ class HScript
 			else FunkinLua.luaTrace('createCallback ($name): 3rd argument is null', false, false, FlxColor.RED);
 		});
 		#end
-		interp.variables.set('addHaxeLibrary', function(libName:String, ?libPackage:String = '') {
-			try {
-				var str:String = '';
-				if(libPackage.length > 0)
-					str = libPackage + '.';
-
-				interp.variables.set(libName, Type.resolveClass(str + libName));
-			}
-			catch (e:Dynamic) {
-				var msg:String = e.message.substr(0, e.message.indexOf('\n'));
-				#if LUA_ALLOWED
-				if(parentLua != null)
-				{
-					FunkinLua.lastCalledScript = parentLua;
-					FunkinLua.luaTrace('${parentLua.lastCalledFunction} - $msg', false, false, FlxColor.RED);
-					return;
-				}
-				#end
-				if(PlayState.instance != null) PlayState.instance.addTextToDebug(msg, FlxColor.RED);
-				else trace(msg);
-			}
-		});
 	}
 
 	public function execute(codeToRun:String):Dynamic
