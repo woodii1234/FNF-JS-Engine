@@ -9,6 +9,11 @@ import sys.io.*;
 import js.html.*;
 #end
 
+#if LUA_ALLOWED
+import llua.*;
+import llua.Lua;
+#end
+
 #if flxanimate
 import flxanimate.*;
 #end
@@ -23,13 +28,14 @@ import flixel.FlxSprite;
 import flixel.FlxCamera;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
+import flixel.math.FlxRect;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
-import flixel.math.FlxRect;
 import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.util.FlxDestroyUtil;
+import flixel.addons.transition.FlxTransitionableState;
 #end

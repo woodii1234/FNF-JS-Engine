@@ -1,8 +1,5 @@
 package options;
 
-#if desktop
-import DiscordClient;
-#end
 import flash.text.TextField;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -87,8 +84,6 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 		FlxG.cameras.add(subCamera, false);
 		FlxG.cameras.add(otherCamera, false);
 
-		CustomFadeTransition.nextCamera = otherCamera;
-
 		camFollow = new FlxObject(0, 0, 1, 1);
 		camFollowPos = new FlxObject(0, 0, 1, 1);
 		add(camFollow);
@@ -157,7 +152,6 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
 
 		if (controls.BACK && !isEnteringKonamiCode) {
-			CustomFadeTransition.nextCamera = otherCamera;
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			if(PauseSubState.inPause)
 			{
@@ -169,7 +163,6 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 			else FlxG.switchState(MainMenuState.new);
 		}
 		if (controls.ACCEPT && !isEnteringKonamiCode) {
-			CustomFadeTransition.nextCamera = otherCamera;
 			if (isEnteringKonamiCode) return;
 			openSelectedSubstate(options[curSelected]);
 		}
