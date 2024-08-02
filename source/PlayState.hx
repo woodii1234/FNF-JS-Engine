@@ -816,7 +816,10 @@ class PlayState extends MusicBeatState
 
 		// "GLOBAL" SCRIPTS
 		#if LUA_ALLOWED
-		for (folder in Paths.directoriesWithFile(Paths.getPreloadPath(), 'scripts/'))
+		var foldersToCheck:Array<String> = [Paths.getPreloadPath('scripts/')];
+		for (folder in Paths.directoriesWithFile('scripts/', '')) foldersToCheck.insert(0, folder);
+
+		for (folder in foldersToCheck)
 			for (file in FileSystem.readDirectory(folder)) {
 				if(file.toLowerCase().endsWith('.lua'))
 				{
