@@ -815,11 +815,9 @@ class PlayState extends MusicBeatState
 		// "GLOBAL" SCRIPTS
 		#if LUA_ALLOWED
 		var foldersToCheck:Array<String> = [Paths.getPreloadPath('scripts/')];
-		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
-			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/scripts/'));
-
-		for(mod in Paths.getGlobalMods())
-			foldersToCheck.insert(0, Paths.mods(mod + '/scripts/'));
+		for (folder in Paths.directoriesWithFile('scripts/', ''))
+			if (FileSystem.exists(folder)) 
+				foldersToCheck.insert(0, folder);
 
 		for (folder in foldersToCheck)
 		{
