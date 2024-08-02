@@ -153,6 +153,9 @@ class Main extends Sprite {
 
 		#if CRASH_HANDLER
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
+			#if cpp
+			untyped __global__.__hxcpp_set_critical_error_handler(onError);
+			#end
 		#end
 
 		#if DISCORD_ALLOWED DiscordClient.prepare(); #end
@@ -222,6 +225,13 @@ class Main extends Sprite {
 		DiscordClient.shutdown();
 		#end
 		Sys.exit(1);
+	}
+	#end
+
+	#if cpp
+	private static function onError(message:Dynamic):Void
+	{
+		throw Std.string(message);
 	}
 	#end
 }
