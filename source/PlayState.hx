@@ -822,6 +822,7 @@ class PlayState extends MusicBeatState
 			foldersToCheck.insert(0, Paths.mods(mod + '/scripts/'));
 
 		for (folder in foldersToCheck)
+			trace(folder);
 			for (file in FileSystem.readDirectory(folder)) {
 				if(file.toLowerCase().endsWith('.lua'))
 				{
