@@ -1,8 +1,5 @@
 package editors;
 
-#if desktop
-import DiscordClient;
-#end
 import flash.geom.Rectangle;
 import haxe.Json;
 import haxe.format.JsonParser;
@@ -4094,14 +4091,7 @@ class ChartingState extends MusicBeatState
 
 	function getNotes():Array<Dynamic>
 	{
-		var noteData:Array<Dynamic> = [];
-
-		for (i in _song.notes)
-		{
-			noteData.push(i.sectionNotes);
-		}
-
-		return noteData;
+		return [for (i in _song.notes) i.sectionNotes];
 	}
 
 	function loadJson(song:String, ?diff:String = ''):Void
