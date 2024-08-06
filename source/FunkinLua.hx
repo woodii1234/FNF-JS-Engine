@@ -1602,10 +1602,7 @@ class FunkinLua {
 				FlxTransitionableState.skipNextTransOut = true;
 			}
 
-			PlayState.cancelMusicFadeTween();
-			CustomFadeTransition.nextCamera = PlayState.instance.camOther;
-			if(FlxTransitionableState.skipNextTransIn)
-				CustomFadeTransition.nextCamera = null;
+			if(FlxG.sound.music != null) FlxG.sound.music.stop();
 
 			if(PlayState.isStoryMode)
 				FlxG.switchState(StoryMenuState.new);
@@ -2371,7 +2368,8 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "makeLuaText", function(tag:String, text:String, width:Int, x:Float, y:Float) {
 			tag = tag.replace('.', '');
 			resetTextTag(tag);
-			var leText:ModchartText = new ModchartText(x, y, text, width);
+			var leText:FlxText = new FlxText(x, y, width, text, 16);
+			leText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			PlayState.instance.modchartTexts.set(tag, leText);
 		});
 
@@ -2509,12 +2507,8 @@ class FunkinLua {
 
 		Lua_helper.add_callback(lua, "addLuaText", function(tag:String) {
 			if(PlayState.instance.modchartTexts.exists(tag)) {
-				var shit:ModchartText = PlayState.instance.modchartTexts.get(tag);
-				if(!shit.wasAdded) {
-					getInstance().add(shit);
-					shit.wasAdded = true;
-					//trace('added a thing: ' + tag);
-				}
+				var shit:FlxText = PlayState.instance.modchartTexts.get(tag);
+				if(shit != null) getInstance().add(shit);
 			}
 		});
 		Lua_helper.add_callback(lua, "removeLuaText", function(tag:String, destroy:Bool = true) {
@@ -2522,15 +2516,10 @@ class FunkinLua {
 				return;
 			}
 
-			var pee:ModchartText = PlayState.instance.modchartTexts.get(tag);
-			if(destroy) {
-				pee.kill();
-			}
+			var pee:FlxText = PlayState.instance.modchartTexts.get(tag);
 
-			if(pee.wasAdded) {
+			if(pee != null)
 				getInstance().remove(pee, true);
-				pee.wasAdded = false;
-			}
 
 			if(destroy) {
 				pee.destroy();
@@ -3131,11 +3120,10 @@ class FunkinLua {
 			return;
 		}
 
-		var pee:ModchartText = PlayState.instance.modchartTexts.get(tag);
-		pee.kill();
-		if(pee.wasAdded) {
+		var pee:FlxText = PlayState.instance.modchartTexts.get(tag);
+		if(pee != null)
 			PlayState.instance.remove(pee, true);
-		}
+
 		pee.destroy();
 		PlayState.instance.modchartTexts.remove(tag);
 	}
@@ -3446,22 +3434,9 @@ class ModchartSprite extends FlxSprite
 	}
 }
 
-class ModchartText extends FlxText
-{
-	public var wasAdded:Bool = false;
-	public function new(x:Float, y:Float, text:String, width:Float)
-	{
-		super(x, y, width, text, 16);
-		setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		cameras = [PlayState.instance.camHUD];
-		scrollFactor.set();
-		borderSize = 2;
-	}
-}
-
 class DebugLuaText extends FlxText
 {
-	private var disableTime:Float = 6;
+	public var disableTime:Float = 6;
 	public var parentGroup:FlxTypedGroup<DebugLuaText>;
 	public function new(text:String, parentGroup:FlxTypedGroup<DebugLuaText>, color:FlxColor) {
 		this.parentGroup = parentGroup;
