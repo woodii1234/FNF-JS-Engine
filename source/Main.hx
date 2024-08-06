@@ -6,14 +6,6 @@ import openfl.display.Sprite;
 import debug.FPSCounter;
 import lime.app.Application;
 import backend.SSPlugin as ScreenShotPlugin;
-// crash handler stuff
-#if CRASH_HANDLER
-import openfl.events.UncaughtErrorEvent;
-import haxe.CallStack;
-import haxe.io.Path;
-import sys.FileSystem;
-import sys.io.File;
-#end
 
 #if linux
 import lime.graphics.Image;
@@ -28,7 +20,7 @@ using StringTools;
 ')
 #end
 class Main extends Sprite {
-	var game = {
+	final game = {
 		width: 1280,
 		height: 720,
 		initialState: StartupState.new,
@@ -40,9 +32,9 @@ class Main extends Sprite {
 
 	public static var fpsVar:FPSCounter;
 
-	public static var superDangerMode:Bool = Sys.args().contains("-troll");
+	public static final superDangerMode:Bool = Sys.args().contains("-troll");
 
-    public static var __superCoolErrorMessagesArray:Array<String> = [
+    public static final __superCoolErrorMessagesArray:Array<String> = [
         "A fatal error has occ- wait what?",
         "missigno.",
         "oopsie daisies!! you did a fucky wucky!!",
@@ -111,6 +103,7 @@ class Main extends Sprite {
 		SetProcessDPIAware()
 		')
 		#end
+		CrashHandler.init();
 		setupGame();
 	}
 
@@ -151,13 +144,6 @@ class Main extends Sprite {
 		Lib.current.stage.window.setIcon(icon);
 		#end
 
-		#if CRASH_HANDLER
-		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
-			#if cpp
-			untyped __global__.__hxcpp_set_critical_error_handler(onError);
-			#end
-		#end
-
 		#if DISCORD_ALLOWED DiscordClient.prepare(); #end
 
 		// shader coords fix
@@ -183,55 +169,4 @@ class Main extends Sprite {
 	public static function changeFPSColor(color:FlxColor) {
 		fpsVar.textColor = color;
 	}
-
-	// Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!
-	// very cool person for real they don't get enough credit for their work
-	#if (CRASH_HANDLER)
-	function onCrash(e:UncaughtErrorEvent):Void {
-		var errorMessage:String = "";
-		var path:String;
-		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
-		var dateNow:String = Date.now().toString();
-
-		dateNow = dateNow.replace(" ", "_");
-		dateNow = dateNow.replace(":", "'");
-
-		path = "crash/" + "JSEngine_" + dateNow + ".log";
-
-		for (stackItem in callStack) {
-			switch (stackItem) {
-				case FilePos(s, file, line, column):
-					errorMessage += file + " (Line " + line + ")\n";
-				default:
-					Sys.println(stackItem);
-			}
-		}
-
-		errorMessage += "\nUncaught Error: " 
-				+ e.error 
-				+ "\nPlease report this error to the GitHub page: https://github.com/JordanSantiagoYT/FNF-JS-Engine\n\n> Crash Handler written by: sqirra-rng"
-				+ "\nThe engine has saved a crash log inside the crash folder, If you're making a GitHub issue you might want to send that!";
-
-		if (!FileSystem.exists("crash/"))
-			FileSystem.createDirectory("crash/");
-
-		File.saveContent(path, errorMessage + "\n");
-
-		Sys.println(errorMessage);
-		Sys.println("Crash dump saved in " + Path.normalize(path));
-
-		Application.current.window.alert(errorMessage, "Error! JS Engine v" + MainMenuState.psychEngineJSVersion + " (" + Main.__superCoolErrorMessagesArray[FlxG.random.int(0, Main.__superCoolErrorMessagesArray.length)] + ")");
-		#if DISCORD_ALLOWED
-		DiscordClient.shutdown();
-		#end
-		Sys.exit(1);
-	}
-	#end
-
-	#if cpp
-	private static function onError(message:Dynamic):Void
-	{
-		throw Std.string(message);
-	}
-	#end
 }
