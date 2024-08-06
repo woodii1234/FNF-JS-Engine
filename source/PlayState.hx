@@ -18,10 +18,7 @@ import openfl.events.KeyboardEvent;
 import flixel.util.FlxSave;
 import Achievements;
 import StageData;
-import psychlua.FunkinLua;
-import psychlua.LuaUtils;
-import psychlua.ModchartSprite;
-import psychlua.DebugLuaText;
+import FunkinLua;
 import DialogueBoxPsych;
 import Conductor.Rating;
 import Character.Boyfriend;
@@ -814,18 +811,34 @@ class PlayState extends MusicBeatState
 
 		// "GLOBAL" SCRIPTS
 		#if LUA_ALLOWED
+		var filesPushed:Array<String> = [];
 		var foldersToCheck:Array<String> = [Paths.getPreloadPath('scripts/')];
-		for (folder in Paths.directoriesWithFile('scripts/', ''))
-			if (FileSystem.exists(folder)) 
-				foldersToCheck.insert(0, folder);
+
+		#if MODS_ALLOWED
+		foldersToCheck.insert(0, Paths.mods('scripts/'));
+		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
+			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/scripts/'));
+
+		for(mod in Paths.getGlobalMods())
+			foldersToCheck.insert(0, Paths.mods(mod + '/scripts/'));
+		#end
 
 		for (folder in foldersToCheck)
 		{
-			if (!FileSystem.exists(folder)) continue;
-			for (file in FileSystem.readDirectory(folder)) {
-				if(file.toLowerCase().endsWith('.lua'))
+			if(FileSystem.exists(folder))
+			{
+				for (file in FileSystem.readDirectory(folder))
 				{
-					new FunkinLua(folder + file);
+					if(file.endsWith('.lua') && !filesPushed.contains(file))
+					{
+						luaArray.push(new FunkinLua(folder + file));
+						if (Std.string(file) == 'extra keys hscript.lua')
+						{
+						trace ('theres a lua extra keys file');
+						usingEkFile = true;
+						}
+						filesPushed.push(file);
+					}
 				}
 			}
 		}
@@ -1732,9 +1745,13 @@ class PlayState extends MusicBeatState
 
 		#if LUA_ALLOWED
 		for (notetype in noteTypeMap.keys())
-			startLuasNamed('custom_notetypes/' + notetype + '.lua');
+		{
+			startLuasOnFolder('custom_notetypes/' + notetype + '.lua');
+		}
 		for (event in eventPushedMap.keys())
-			startLuasNamed('custom_events/' + event + '.lua');
+		{
+			startLuasOnFolder('custom_events/' + event + '.lua');
+		}
 		#end
 		noteTypeMap.clear();
 		noteTypeMap = null;
@@ -1749,14 +1766,32 @@ class PlayState extends MusicBeatState
 
 		// SONG SPECIFIC SCRIPTS
 		#if LUA_ALLOWED
-		for (folder in Paths.directoriesWithFile(Paths.getPreloadPath(), 'data/$songName/'))
-			for (file in FileSystem.readDirectory(folder))
+		var filesPushed:Array<String> = [];
+		var foldersToCheck:Array<String> = [Paths.getPreloadPath('data/' + Paths.formatToSongPath(SONG.song) + '/')];
+
+		#if MODS_ALLOWED
+		foldersToCheck.insert(0, Paths.mods('data/' + Paths.formatToSongPath(SONG.song) + '/'));
+		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
+			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/data/' + Paths.formatToSongPath(SONG.song) + '/'));
+
+		for(mod in Paths.getGlobalMods())
+			foldersToCheck.insert(0, Paths.mods(mod + '/data/' + Paths.formatToSongPath(SONG.song) + '/' ));// using push instead of insert because these should run after everything else
+		#end
+
+		for (folder in foldersToCheck)
+		{
+			if(FileSystem.exists(folder))
 			{
-				#if LUA_ALLOWED
-				if(file.toLowerCase().endsWith('.lua'))
-					new FunkinLua(folder + file);
-				#end
+				for (file in FileSystem.readDirectory(folder))
+				{
+					if(file.endsWith('.lua') && !filesPushed.contains(file))
+					{
+						luaArray.push(new FunkinLua(folder + file));
+						filesPushed.push(file);
+					}
+				}
 			}
+		}
 		#end
 
 		startCallback();
@@ -1907,7 +1942,7 @@ class PlayState extends MusicBeatState
 
 	public function addTextToDebug(text:String, color:FlxColor) {
 		#if LUA_ALLOWED
-		var newText:psychlua.DebugLuaText = luaDebugGroup.recycle(DebugLuaText);
+		var newText:FunkinLua.DebugLuaText = luaDebugGroup.recycle(DebugLuaText);
 		newText.text = text;
 		newText.color = color;
 		newText.disableTime = 6;
@@ -1971,39 +2006,33 @@ class PlayState extends MusicBeatState
 
 	function startCharacterLua(name:String)
 	{
-		// Lua
 		#if LUA_ALLOWED
 		var doPush:Bool = false;
 		var luaFile:String = 'characters/$name.lua';
 		#if MODS_ALLOWED
-		var replacePath:String = Paths.modFolders(luaFile);
-		if(FileSystem.exists(replacePath))
-		{
-			luaFile = replacePath;
+		if(FileSystem.exists(Paths.modFolders(luaFile))) {
+			luaFile = Paths.modFolders(luaFile);
 			doPush = true;
-		}
-		else
-		{
-			luaFile = Paths.getSharedPath(luaFile);
-			if(FileSystem.exists(luaFile))
+		} else {
+			luaFile = Paths.getPreloadPath(luaFile);
+			if(FileSystem.exists(luaFile)) {
 				doPush = true;
+			}
 		}
 		#else
-		luaFile = Paths.getSharedPath(luaFile);
-		if(Assets.exists(luaFile)) doPush = true;
+		luaFile = Paths.getPreloadPath(luaFile);
+		if(Assets.exists(luaFile)) {
+			doPush = true;
+		}
 		#end
 
 		if(doPush)
 		{
 			for (script in luaArray)
 			{
-				if(script.scriptName == luaFile)
-				{
-					doPush = false;
-					break;
-				}
+				if(script.scriptName == luaFile) return;
 			}
-			if(doPush) new FunkinLua(luaFile);
+			luaArray.push(new FunkinLua(luaFile));
 		}
 		#end
 	}
@@ -2490,7 +2519,7 @@ class PlayState extends MusicBeatState
 			laneunderlay.screenCenter(X);
 		}
 
-		if(ret != LuaUtils.Function_Stop) {
+		if(ret != FunkinLua.Function_Stop) {
 			if (skipCountdown || startOnTime > 0) skipArrowStartTween = true;
 
 			generateStaticArrows(0);
@@ -3320,7 +3349,7 @@ class PlayState extends MusicBeatState
 
 	function eventNoteEarlyTrigger(event:EventNote):Float {
 		var returnedValue:Null<Float> = callOnLuas('eventEarlyTrigger', [event.event, event.value1, event.value2, event.strumTime], [], [0]);
-		if(returnedValue != null && returnedValue != 0 && returnedValue != LuaUtils.Function_Continue) {
+		if(returnedValue != null && returnedValue != 0 && returnedValue != FunkinLua.Function_Continue) {
 			return returnedValue;
 		}
 
@@ -3893,8 +3922,8 @@ class PlayState extends MusicBeatState
 
 		if (controls.PAUSE && startedCountdown && canPause && !heyStopTrying)
 		{
-			final ret:Dynamic = callOnLuas('onPause');
-			if(ret != LuaUtils.Function_Stop)
+			final ret:Dynamic = callOnLuas('onPause', [], false);
+			if(ret != FunkinLua.Function_Stop)
 				openPauseMenu();
 		}
 
@@ -4373,9 +4402,8 @@ class PlayState extends MusicBeatState
 			{
 				restartSong(true);
 			}
-			var ret:Dynamic = callOnLuas('onGameOver');
-			if(ret != LuaUtils.Function_Stop) {
-				FlxG.animationTimeScale = 1;
+			var ret:Dynamic = callOnLuas('onGameOver', [], false);
+			if(ret != FunkinLua.Function_Stop) {
 				boyfriend.stunned = true;
 				deathCounter++;
 
@@ -4863,9 +4891,9 @@ class PlayState extends MusicBeatState
 				{
 					var split:Array<String> = value1.split('.');
 					if(split.length > 1) {
-						LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1], value2);
+						FunkinLua.setVarInArray(FunkinLua.getPropertyLoopThingWhatever(split), split[split.length-1], value2);
 					} else {
-						LuaUtils.setVarInArray(this, value1, value2);
+						FunkinLua.setVarInArray(this, value1, value2);
 					}
 				}
 				catch(e:Dynamic)
@@ -5104,7 +5132,7 @@ class PlayState extends MusicBeatState
 			#end
 
 			var ret:Dynamic = callOnLuas('onEndSong', [], true);
-			if(ret != LuaUtils.Function_Stop && !transitioning) {
+			if(ret != FunkinLua.Function_Stop && !transitioning) {
 				if (!cpuControlled && !playerIsCheating && ClientPrefs.safeFrames <= 10)
 				{
 					#if !switch
@@ -6481,16 +6509,17 @@ class PlayState extends MusicBeatState
 	}
 
 	override function destroy() {
-		#if LUA_ALLOWED
-		for (lua in luaArray)
-		{
+		for (lua in luaArray) {
 			lua.call('onDestroy', []);
 			lua.stop();
 		}
 		luaArray = [];
-		FunkinLua.customFunctions.clear();
-		#end
+
 		camFollow.put();
+
+		#if hscript
+		if(FunkinLua.hscript != null) FunkinLua.hscript = null;
+		#end
 
 		if(!ClientPrefs.controllerMode)
 		{
@@ -6520,7 +6549,6 @@ class PlayState extends MusicBeatState
 		Paths.splashConfigs.clear();
 		Paths.splashAnimCountMap.clear();
 
-		instance = null;
 		super.destroy();
 	}
 
@@ -7004,76 +7032,70 @@ class PlayState extends MusicBeatState
 	}
 
 	#if LUA_ALLOWED
-	public function startLuasNamed(luaFile:String)
+	public function startLuasOnFolder(luaFile:String)
 	{
+		for (script in luaArray)
+		{
+			if(script.scriptName == luaFile) return false;
+		}
+
 		#if MODS_ALLOWED
 		var luaToLoad:String = Paths.modFolders(luaFile);
-		if(!FileSystem.exists(luaToLoad))
-			luaToLoad = Paths.getPreloadPath(luaFile);
-
 		if(FileSystem.exists(luaToLoad))
+		{
+			luaArray.push(new FunkinLua(luaToLoad));
+			return true;
+		}
+		else
+		{
+			luaToLoad = Paths.getPreloadPath(luaFile);
+			if(FileSystem.exists(luaToLoad))
+			{
+				luaArray.push(new FunkinLua(luaToLoad));
+				return true;
+			}
+		}
 		#elseif sys
 		var luaToLoad:String = Paths.getPreloadPath(luaFile);
 		if(OpenFlAssets.exists(luaToLoad))
-		#end
 		{
-			for (script in luaArray)
-				if(script.scriptName == luaToLoad) return false;
-
-			new FunkinLua(luaToLoad);
+			luaArray.push(new FunkinLua(luaToLoad));
 			return true;
 		}
+		#end
 		return false;
 	}
 	#end
 
-	public function callOnLuas(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
-		var returnVal:Dynamic = LuaUtils.Function_Continue;
+	public function callOnLuas(event:String, args:Array<Dynamic> = null, ignoreStops = true, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
+		var returnVal = FunkinLua.Function_Continue;
 		#if LUA_ALLOWED
 		if(args == null) args = [];
 		if(exclusions == null) exclusions = [];
-		if(excludeValues == null) excludeValues = [LuaUtils.Function_Continue];
+		if(excludeValues == null) excludeValues = [];
 
-		var arr:Array<FunkinLua> = [];
-		for (script in luaArray)
-		{
-			if(script.closed)
-			{
-				arr.push(script);
-				continue;
-			}
-
-			if(exclusions.contains(script.scriptName))
-				continue;
-
-			var myValue:Dynamic = script.call(funcToCall, args);
-			if(myValue == LuaUtils.Function_StopLua && !excludeValues.contains(myValue) && !ignoreStops)
-			{
-				returnVal = myValue;
-				break;
-			}
-
-			if(myValue != null && !excludeValues.contains(myValue))
-				returnVal = myValue;
-
-			if(script.closed) arr.push(script);
-		}
-
-		if(arr.length > 0)
-			for (script in arr)
-				luaArray.remove(script);
-		#end
-		return returnVal;
-	}
-
-	public function setOnLuas(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
-		if(exclusions == null) exclusions = [];
 		for (script in luaArray) {
 			if(exclusions.contains(script.scriptName))
 				continue;
 
-			script.set(variable, arg);
+			final myValue = script.call(event, args);
+			if(myValue == FunkinLua.Function_StopLua && !ignoreStops)
+				break;
+			
+			if(myValue != null && myValue != FunkinLua.Function_Continue) {
+				returnVal = myValue;
+			}
 		}
+		#end
+		return returnVal;
+	}
+
+	public function setOnLuas(variable:String, arg:Dynamic) {
+		#if LUA_ALLOWED
+		for (i in 0...luaArray.length) {
+			luaArray[i].set(variable, arg);
+		}
+		#end
 	}
 
 	function StrumPlayAnim(isDad:Bool, id:Int, time:Float) {
@@ -7118,8 +7140,7 @@ class PlayState extends MusicBeatState
 		setOnLuas('combo', combo);
 		if (badHit) missRecalcsPerFrame += 1;
 
-		var ret:Dynamic = callOnLuas('onRecalculateRating');
-		if(ret != LuaUtils.Function_Stop)
+		if(ret != FunkinLua.Function_Stop)
 		{
 			if(totalPlayed < 1) //Prevent divide by 0
 				ratingName = '?';
