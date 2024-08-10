@@ -440,7 +440,7 @@ class EditorPlayState extends MusicBeatState
 
 	override function stepHit()
 	{
-		if (PlayState.SONG.needsVoices && FlxG.sound.music.time >= -ClientPrefs.noteOffset)
+		if (FlxG.sound.music.time >= -ClientPrefs.noteOffset)
 		{
 			var timeSub:Float = Conductor.songPosition - Conductor.offset;
 			var syncTime:Float = 20;

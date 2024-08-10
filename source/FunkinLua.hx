@@ -2370,6 +2370,7 @@ class FunkinLua {
 			resetTextTag(tag);
 			var leText:FlxText = new FlxText(x, y, width, text, 16);
 			leText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			leText.cameras = [PlayState.instance.camHUD];
 			PlayState.instance.modchartTexts.set(tag, leText);
 		});
 

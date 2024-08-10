@@ -222,7 +222,7 @@ class PlayState extends MusicBeatState
 	public var energyBar:FlxBar;
 	public var energyTxt:FlxText;
 
-	public var ratingsData:Array<Rating> = [];
+	public var ratingsData:Array<Rating> = Rating.loadDefault();
 	public var perfects:Int = 0;
 	public var sicks:Int = 0;
 	public var goods:Int = 0;
@@ -566,36 +566,6 @@ class PlayState extends MusicBeatState
 			'NOTE_RIGHT'
 		];
 
-		//Ratings
-		if (!ClientPrefs.noMarvJudge)
-		{
-		ratingsData.push(new Rating('perfect'));
-		}
-
-		var rating:Rating = new Rating('sick');
-		rating.ratingMod = 1;
-		rating.score = 350;
-		rating.noteSplash = true;
-		ratingsData.push(rating);
-
-		var rating:Rating = new Rating('good');
-		rating.ratingMod = 0.7;
-		rating.score = 200;
-		rating.noteSplash = false;
-		ratingsData.push(rating);
-
-		var rating:Rating = new Rating('bad');
-		rating.ratingMod = 0.4;
-		rating.score = 100;
-		rating.noteSplash = false;
-		ratingsData.push(rating);
-
-		var rating:Rating = new Rating('shit');
-		rating.ratingMod = 0;
-		rating.score = 50;
-		rating.noteSplash = false;
-		ratingsData.push(rating);
-
 		// For the "Just the Two of Us" achievement
 		for (i in 0...keysArray.length)
 		{
@@ -639,7 +609,7 @@ class PlayState extends MusicBeatState
 		if (trollingMode || SONG.song.toLowerCase() == 'anti-cheat-song')
 			shouldKillNotes = false;
 
-		if (ClientPrefs.showcaseMode)
+		if (ClientPrefs.showcaseMode || ffmpegMode)
 			cpuControlled = true;
 
 		// var gameCam:FlxCamera = FlxG.camera;
@@ -2962,7 +2932,7 @@ class PlayState extends MusicBeatState
 	private var eventPushedMap:Map<String, Bool> = new Map<String, Bool>();
 	private function generateSong(dataPath:String, ?startingPoint:Float = 0):Void
 	{
-	   		final startTime = Sys.time();
+	   	final startTime = Sys.time();
 
 		songSpeedType = ClientPrefs.getGameplaySetting('scrolltype','multiplicative');
 
@@ -3249,7 +3219,9 @@ class PlayState extends MusicBeatState
 					}
 				}
 			}
+			sectionsLoaded += 1;
 			notesLoadedRN += section.sectionNotes.length;
+			Sys.print('\rSection $sectionsLoaded loaded! (' + notesLoadedRN + ' notes)');
 		}
 
 		bfNoteskin = boyfriend.noteskin;
@@ -3278,7 +3250,7 @@ class PlayState extends MusicBeatState
 
 		var elapsedTime = endTime - startTime;
 
-		trace('Done! $notesLoadedRN notes were loaded in ' + elapsedTime + " seconds.");
+		trace('\nDone! \n\nTime taken: ' + CoolUtil.formatTime(elapsedTime * 1000) + "\nAverage NPS while loading: " + Math.floor(notesLoadedRN / elapsedTime));
 		notesLoadedRN = 0;
 	}
 
