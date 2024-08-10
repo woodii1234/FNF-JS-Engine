@@ -1,19 +1,8 @@
-1.30.2;
+1.31.0;
 
-Fixed Roses Erect using the normal voices for the Opponent
-Fixed a weird offset with the Spirit idle
-
-1.30.1;
-
-Fixed making graphics returning a transparent white color.
-
-1.30.0;
-
-you can now split the vocals between both characters!
-the editor music and the song intro sounds are now dependent on the game's volume!
-You can now rebind the key that's used to activate Bot Energy!
-Hitsound Volume now saves!
-4 options have been removed for being useless/recreatable in LUA!
-Bot Energy no longer instantly kills you if you miss spam.
-possibly fixed a bug where the engine would crash with ghost characters sometimes
-fixed a crash that would occur if a section's sectionNotes was null and you tried clearing the left/right side of a section
+FPS RAM Tracker now tracks GC memory usage instead of total memory (by system32unknown)
+The Spam Multiplier limit for Note Spam Mode (in the editor) is now 999999
+Crash Handler improvements (by YoshiCrafter29, Ne_Eo, MAJigsaw77 and mcagabe19)
+Scroll Speed gameplay changer's max value has been increased to 128/1024
+Option scroll speed now changes depending on the option's current value
+2 new tips, and 1 old tip has been edited!
