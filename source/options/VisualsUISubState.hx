@@ -161,13 +161,6 @@ class VisualsUISubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
-		var option:Option = new Option('Results Screen',
-			'If unchecked, the results screen will be skipped.',
-			'resultsScreen',
-			'bool',
-			false);
-		addOption(option);
-
 		var option:Option = new Option('Compact UI Numbers',
 			'If checked, Score, combo, misses and NPS will be compact.',
 			'compactNumbers',

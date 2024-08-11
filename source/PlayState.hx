@@ -5043,162 +5043,139 @@ class PlayState extends MusicBeatState
 	}
 
 	public var transitioning = false;
-	public var endedTheSong = false;
 	public function endSong():Void
 	{
-		if (!endedTheSong && ClientPrefs.resultsScreen)
-		{
-				if (!isStoryMode || isStoryMode && storyPlaylist.length <= 0)
-				{
-					new FlxTimer().start(0.02, function(tmr:FlxTimer) {
-						endedTheSong = true;
-					});
-					persistentUpdate = false;
-					persistentDraw = true;
-					paused = true;
-					openSubState(new ResultsScreenSubState([perfects, sicks, goods, bads, shits], Std.int(songScore), Std.int(songMisses), Highscore.floorDecimal(ratingPercent * 100, 2),
-					ratingName + (' [' + ratingFC + '] ')));
-				} else {
-					endedTheSong = true;
-				}
-		}
-		if (!ClientPrefs.resultsScreen) {
-			endedTheSong = true;
-		}
-		if (endedTheSong || !ClientPrefs.resultsScreen)
-		{
-			timeBarBG.visible = false;
-			timeBar.visible = false;
-			timeTxt.visible = false;
-			canPause = false;
-			endingSong = true;
-			camZooming = false;
-			inCutscene = false;
-			updateTime = false;
+		timeBarBG.visible = false;
+		timeBar.visible = false;
+		timeTxt.visible = false;
+		canPause = false;
+		endingSong = true;
+		camZooming = false;
+		inCutscene = false;
+		updateTime = false;
 
-			startedCountdown = false;
+		startedCountdown = false;
 
-			deathCounter = 0;
-			seenCutscene = false;
+		deathCounter = 0;
+		seenCutscene = false;
 
-			#if ACHIEVEMENTS_ALLOWED
-			if(achievementObj != null) {
+		#if ACHIEVEMENTS_ALLOWED
+		if(achievementObj != null) {
+			return;
+		} else {
+			var achieve:String = checkForAchievement(['week1_nomiss', 'week2_nomiss', 'week3_nomiss', 'week4_nomiss',
+				'week5_nomiss', 'week6_nomiss', 'week7_nomiss', 'ur_bad',
+				'ur_good', 'hype', 'two_keys', 'toastie', 'debugger']);
+			var customAchieves:String = checkForAchievement(achievementWeeks);
+
+			if(achieve != null || customAchieves != null) {
+				startAchievement(achieve);
 				return;
-			} else {
-				var achieve:String = checkForAchievement(['week1_nomiss', 'week2_nomiss', 'week3_nomiss', 'week4_nomiss',
-					'week5_nomiss', 'week6_nomiss', 'week7_nomiss', 'ur_bad',
-					'ur_good', 'hype', 'two_keys', 'toastie', 'debugger']);
-				var customAchieves:String = checkForAchievement(achievementWeeks);
-
-				if(achieve != null || customAchieves != null) {
-					startAchievement(achieve);
-					return;
-				}
 			}
-			#end
+		}
+		#end
 
-			var ret:Dynamic = callOnLuas('onEndSong', [], true);
-			if(ret != FunkinLua.Function_Stop && !transitioning) {
-				if (!cpuControlled && !playerIsCheating && ClientPrefs.safeFrames <= 10)
+		var ret:Dynamic = callOnLuas('onEndSong', [], true);
+		if(ret != FunkinLua.Function_Stop && !transitioning) {
+			if (!cpuControlled && !playerIsCheating && ClientPrefs.safeFrames <= 10)
+			{
+				#if !switch
+				var percent:Float = ratingPercent;
+				if(Math.isNaN(percent)) percent = 0;
+				Highscore.saveScore(SONG.song, Std.int(songScore), storyDifficulty, percent);
+				#end
+			}
+			playbackRate = 1;
+
+			if (chartingMode)
+			{
+				if (!ffmpegMode) openChartEditor();
+				else 
 				{
-					#if !switch
-					var percent:Float = ratingPercent;
-					if(Math.isNaN(percent)) percent = 0;
-					Highscore.saveScore(SONG.song, Std.int(songScore), storyDifficulty, percent);
-					#end
+					endingTime = Sys.time();
+					FlxG.switchState(new RenderingDoneSubState(endingTime - startingTime));
+					chartingMode = true;
 				}
-				playbackRate = 1;
+				return;
+			}
 
-				if (chartingMode)
+			if (isStoryMode)
+			{
+				campaignScore += songScore;
+				campaignMisses += Std.int(songMisses);
+
+				storyPlaylist.remove(storyPlaylist[0]);
+
+				if (storyPlaylist.length <= 0)
 				{
-					if (!ffmpegMode) openChartEditor();
-					else 
-					{
-						endingTime = Sys.time();
-						FlxG.switchState(new RenderingDoneSubState(endingTime - startingTime));
-						chartingMode = true;
-					}
-					return;
-				}
+					disableCoolHealthTween = false;
+					WeekData.loadTheFirstEnabledMod();
+					FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
+					#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 
-				if (isStoryMode)
-				{
-					campaignScore += songScore;
-					campaignMisses += Std.int(songMisses);
+					FlxG.switchState(new StoryMenuState());
 
-					storyPlaylist.remove(storyPlaylist[0]);
+					if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false)) {
+						StoryMenuState.weekCompleted.set(WeekData.weeksList[storyWeek], true);
 
-					if (storyPlaylist.length <= 0)
-					{
-						disableCoolHealthTween = false;
-						WeekData.loadTheFirstEnabledMod();
-						FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
-						#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
-
-						FlxG.switchState(new StoryMenuState()); //removed results screen from story mode because for some reason it opens the screen after the first song even if the story playlist's length is greater than 0??
-
-						if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false)) {
-							StoryMenuState.weekCompleted.set(WeekData.weeksList[storyWeek], true);
-
-							if (SONG.validScore)
-							{
-								Highscore.saveWeekScore(WeekData.getWeekFileName(), Std.int(campaignScore), storyDifficulty);
-							}
-
-							FlxG.save.data.weekCompleted = StoryMenuState.weekCompleted;
-							FlxG.save.flush();
-						}
-						changedDifficulty = false;
-					}
-					else
-					{
-						var difficulty:String = CoolUtil.getDifficultyFilePath();
-
-						trace('LOADING NEXT SONG');
-						trace(Paths.formatToSongPath(PlayState.storyPlaylist[0]) + difficulty);
-
-						FlxTransitionableState.skipNextTransIn = true;
-						FlxTransitionableState.skipNextTransOut = true;
-
-						prevCamFollow = camFollow;
-						prevCamFollowPos = camFollowPos;
-
-
-						if (storyDifficulty == 2)
+						if (SONG.validScore)
 						{
-							if (ClientPrefs.JSEngineRecharts && CoolUtil.defaultSongs.contains(PlayState.storyPlaylist[0].toLowerCase())) {
-								PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0] + '-jshard', PlayState.storyPlaylist[0]);
-								}
-								else if (ClientPrefs.JSEngineRecharts && !CoolUtil.defaultSongs.contains(PlayState.storyPlaylist[0].toLowerCase())) 	{
-								PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0] + difficulty, PlayState.storyPlaylist[0]);
-								}
-							else if (!ClientPrefs.JSEngineRecharts)
-								PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0] + difficulty, PlayState.storyPlaylist[0]);
-						} else {
-							PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0] + difficulty, PlayState.storyPlaylist[0]);
+							Highscore.saveWeekScore(WeekData.getWeekFileName(), Std.int(campaignScore), storyDifficulty);
 						}
-						FlxG.sound.music.stop();
-						disableCoolHealthTween = true;
-						LoadingState.loadAndSwitchState(new PlayState());
+
+						FlxG.save.data.weekCompleted = StoryMenuState.weekCompleted;
+						FlxG.save.flush();
 					}
+					changedDifficulty = false;
 				}
 				else
 				{
-					disableCoolHealthTween = false;
-					trace('WENT BACK TO FREEPLAY??');
-					WeekData.loadTheFirstEnabledMod();
-					#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
-					if (!ffmpegMode) FlxG.switchState(new FreeplayState());
-					else 
+					var difficulty:String = CoolUtil.getDifficultyFilePath();
+
+					trace('LOADING NEXT SONG');
+					trace(Paths.formatToSongPath(PlayState.storyPlaylist[0]) + difficulty);
+
+					FlxTransitionableState.skipNextTransIn = true;
+					FlxTransitionableState.skipNextTransOut = true;
+
+					prevCamFollow = camFollow;
+					prevCamFollowPos = camFollowPos;
+
+
+					if (storyDifficulty == 2)
 					{
-						endingTime = Sys.time();
-						FlxG.switchState(new RenderingDoneSubState(endingTime - startingTime));
+						if (ClientPrefs.JSEngineRecharts && CoolUtil.defaultSongs.contains(PlayState.storyPlaylist[0].toLowerCase())) {
+							PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0] + '-jshard', PlayState.storyPlaylist[0]);
+							}
+							else if (ClientPrefs.JSEngineRecharts && !CoolUtil.defaultSongs.contains(PlayState.storyPlaylist[0].toLowerCase())) 	{
+							PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0] + difficulty, PlayState.storyPlaylist[0]);
+							}
+						else if (!ClientPrefs.JSEngineRecharts)
+							PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0] + difficulty, PlayState.storyPlaylist[0]);
+					} else {
+						PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0] + difficulty, PlayState.storyPlaylist[0]);
 					}
-					FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
-					changedDifficulty = false;
+					FlxG.sound.music.stop();
+					disableCoolHealthTween = true;
+					LoadingState.loadAndSwitchState(new PlayState());
 				}
-				transitioning = true;
 			}
+			else
+			{
+				disableCoolHealthTween = false;
+				trace('WENT BACK TO FREEPLAY??');
+				WeekData.loadTheFirstEnabledMod();
+				#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
+				if (!ffmpegMode) FlxG.switchState(new FreeplayState());
+				else 
+				{
+					endingTime = Sys.time();
+					FlxG.switchState(new RenderingDoneSubState(endingTime - startingTime));
+				}
+				FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
+				changedDifficulty = false;
+			}
+			transitioning = true;
 		}
 	}
 
