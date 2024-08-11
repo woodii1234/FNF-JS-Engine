@@ -3471,7 +3471,7 @@ class PlayState extends MusicBeatState
 
 	function resyncVocals():Void
 	{
-		if(finishTimer != null) return;
+		if(finishTimer != null || paused) return;
 
 		FlxG.sound.music.pitch = playbackRate;
 		vocals.pitch = opponentVocals.pitch = playbackRate;
@@ -4057,6 +4057,8 @@ class PlayState extends MusicBeatState
 			persistentUpdate = false;
 			paused = true;
 			if(FlxG.sound.music != null) FlxG.sound.music.stop();
+			if (vocals != null) vocals.stop();
+			if (opponentVocals != null) opponentVocals.stop();
 			#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 			FlxG.switchState(new CharacterEditorState(SONG.player2));
 		}
