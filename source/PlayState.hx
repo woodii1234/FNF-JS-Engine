@@ -6594,7 +6594,7 @@ class PlayState extends MusicBeatState
 					cameraSpeed = 1;
 			}
 		}
-		if (!ffmpegMode && ClientPrefs.songLoading && playbackRate < 256) //much better resync code, doesn't just resync every step!!
+		if (!ffmpegMode && ClientPrefs.songLoading && playbackRate < 256 && !paused) //much better resync code, doesn't just resync every step!!
 		{
 			var timeSub:Float = Conductor.songPosition - Conductor.offset;
 			var syncTime:Float = 20 * playbackRate;

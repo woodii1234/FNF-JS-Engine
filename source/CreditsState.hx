@@ -84,7 +84,7 @@ class CreditsState extends MusicBeatState
 
 		var pisspoop:Array<Array<String>> = [ //Name - Icon name - Description - Link - BG Color
 			['JS Engine People'],
-			['Jordan Santiago',			'jor',				'Coded everything into JS Engine', 'https://twitter.com/JordansTweetsYT', 'FF9300'],
+			['Jordan Santiago',			'jor',				'Coded everything into JS Engine',								'https://twitter.com/JordansTweetsYT',			'FF9300'],
 			[''],
 			['Special Engine Thanks'],
 			['Denpa Engine',			'denpeak',				'The crossfade code used for this engine',								'https://github.com/UmbratheUmbreon/PublicDenpaEngine',			'FF9300'],
