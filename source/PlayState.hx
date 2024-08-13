@@ -5575,68 +5575,54 @@ class PlayState extends MusicBeatState
 
 				var canMiss:Bool = !ClientPrefs.ghostTapping;
 
-				// heavily based on my own code LOL if it aint broke dont fix it
-				var pressNotes:Array<Note> = [];
-				//var notesDatas:Array<Int> = [];
-				var notesStopped:Bool = false;
-
-				var sortedNotesList:Array<Dynamic> = [];
-				for (group in [notes, sustainNotes]) group.forEachAlive(function(daNote:Note)
-				{
-					if (!usingBotEnergy && daNote.canBeHit && !daNote.tooLate && !daNote.wasGoodHit && !daNote.isSustainNote && !daNote.blockHit)
-					{
-						if(daNote.noteData == key)
-						{
-							sortedNotesList.push(daNote);
-						}
-						canMiss = true;
-					}
+				// obtain notes that the player can hit
+				var plrInputNotes:Array<Note> = notes.members.filter(function(n:Note):Bool {
+					var canHit:Bool = !usingBotEnergy && !strumsBlocked[n.noteData] && n.canBeHit && n.mustPress && !n.tooLate && !n.wasGoodHit && !n.blockHit;
+					return n != null && canHit && !n.isSustainNote && n.noteData == key;
 				});
-					
-				sortedNotesList.sort(sortHitNotes);
+				plrInputNotes.sort(sortHitNotes);
 
-				if (sortedNotesList.length > 0) {
-					for (epicNote in sortedNotesList)
-					{
-						for (doubleNote in pressNotes) {
-							if (Math.abs(doubleNote.strumTime - epicNote.strumTime) < 1) {
-								doubleNote.exists = false;
-								if (ClientPrefs.fastNoteSpawn) (doubleNote.isSustainNote ? sustainNotes : notes).pushToPool(doubleNote);
-							} else
-								notesStopped = true;
-						}
+				if (plrInputNotes.length != 0) {
+					var funnyNote:Note = plrInputNotes[0]; // front note
 
-						// eee jack detection before was not super good
-						if (!notesStopped) {
-							goodNoteHit(epicNote);
-							pressNotes.push(epicNote);
-							if (ClientPrefs.fastNoteSpawn && !epicNote.isSustainNote) notes.pushToPool(epicNote);
-						}
-						if (sortedNotesList.length > 2 && ClientPrefs.ezSpam) //literally all you need to allow you to spam though impossibly hard jacks
-						{
-							var notesThatCanBeHit = sortedNotesList.length;
-							for (i in 1...Std.int(notesThatCanBeHit)) //i may consider making this hit half the notes instead
+					if (plrInputNotes.length > 1) {
+						var doubleNote:Note = plrInputNotes[1];
+
+						if (doubleNote.noteData == funnyNote.noteData) {
+							// if the note has a 0ms distance (is on top of the current note), kill it
+							if (Math.abs(doubleNote.strumTime - funnyNote.strumTime) < 1.0)
+								invalidateNote(doubleNote);
+							else if (doubleNote.strumTime < funnyNote.strumTime)
 							{
-								goodNoteHit(sortedNotesList[i]);
-								if (ClientPrefs.fastNoteSpawn && !sortedNotesList[i].isSustainNote) notes.pushToPool(sortedNotesList[i]);
+								// replace the note if its ahead of time (or at least ensure "doubleNote" is ahead)
+								funnyNote = doubleNote;
 							}
+						}
+					}
+					goodNoteHit(funnyNote);
+					if (plrInputNotes.length > 2 && ClientPrefs.ezSpam) //literally all you need to allow you to spam though impossibly hard jacks
+					{
+						var notesThatCanBeHit = plrInputNotes.length;
+						for (i in 1...Std.int(notesThatCanBeHit)) //i may consider making this hit half the notes instead
+						{
+							goodNoteHit(plrInputNotes[i]);
 						}
 					}
 				}
 				else {
 					callOnLuas('onGhostTap', [key]);
-				if (!opponentChart && ClientPrefs.ghostTapAnim && ClientPrefs.charsAndBG)
-				{
-					boyfriend.playAnim(singAnimations[Std.int(Math.abs(key))], true);
-					if (ClientPrefs.cameraPanning) camPanRoutine(singAnimations[Std.int(Math.abs(key))], 'bf');
-					boyfriend.holdTimer = 0;
-				}
-				if (opponentChart && ClientPrefs.ghostTapAnim && ClientPrefs.charsAndBG)
-				{
-					dad.playAnim(singAnimations[Std.int(Math.abs(key))], true);
-					if (ClientPrefs.cameraPanning) camPanRoutine(singAnimations[Std.int(Math.abs(key))], 'dad');
-					dad.holdTimer = 0;
-				}
+					if (!opponentChart && ClientPrefs.ghostTapAnim && ClientPrefs.charsAndBG)
+					{
+						boyfriend.playAnim(singAnimations[Std.int(Math.abs(key))], true);
+						if (ClientPrefs.cameraPanning) camPanRoutine(singAnimations[Std.int(Math.abs(key))], 'bf');
+						boyfriend.holdTimer = 0;
+					}
+					if (opponentChart && ClientPrefs.ghostTapAnim && ClientPrefs.charsAndBG)
+					{
+						dad.playAnim(singAnimations[Std.int(Math.abs(key))], true);
+						if (ClientPrefs.cameraPanning) camPanRoutine(singAnimations[Std.int(Math.abs(key))], 'dad');
+						dad.holdTimer = 0;
+					}
 					if (canMiss) {
 						noteMissPress(key);
 					}
@@ -5656,7 +5642,6 @@ class PlayState extends MusicBeatState
 			}
 			callOnLuas('onKeyPress', [key]);
 		}
-		//trace('pressed: ' + controlArray);
 	}
 
 	function sortHitNotes(a:Dynamic, b:Dynamic):Int
@@ -5944,10 +5929,9 @@ class PlayState extends MusicBeatState
 							inline oppNotesHitArray.push(1 * polyphony);
 							inline oppNotesHitDateArray.push(Conductor.songPosition);
 						}
-						daNote.exists = false;
+						invalidateNote(daNote);
 					}
 				}
-				if (ClientPrefs.fastNoteSpawn && !daNote.isSustainNote) notes.pushToPool(daNote);
 			}
 
 			if(daNote.mustPress) {
@@ -5961,10 +5945,9 @@ class PlayState extends MusicBeatState
 								inline notesHitArray.push(1 * polyphony);
 								inline notesHitDateArray.push(Conductor.songPosition);
 							}
-							daNote.exists = false;
+							invalidateNote(daNote);
 						}
 					}
-					if (ClientPrefs.fastNoteSpawn && !daNote.isSustainNote) notes.pushToPool(daNote);
 				}
 			}
 			if (!daNote.exists) return;
@@ -5978,8 +5961,7 @@ class PlayState extends MusicBeatState
 						FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
 					}
 				}
-				daNote.exists = false;
-				if (ClientPrefs.fastNoteSpawn) (daNote.isSustainNote ? sustainNotes : notes).pushToPool(daNote);
+				invalidateNote(daNote);
 			}
 		}
 	}
@@ -6042,7 +6024,7 @@ class PlayState extends MusicBeatState
 					}
 
 					note.wasGoodHit = true;
-					if (!note.isSustainNote) note.exists = false;
+					if (!note.isSustainNote) invalidateNote(note);
 					return;
 				}
 
@@ -6179,7 +6161,7 @@ class PlayState extends MusicBeatState
 
 				if (!ClientPrefs.noHitFuncs) callOnLuas((oppTrigger ? 'opponentNoteHit' : 'goodNoteHit'), [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
 
-				if (ClientPrefs.showNotes && !note.isSustainNote) note.exists = false;
+				if (ClientPrefs.showNotes && !note.isSustainNote) invalidateNote(note);
 
 				if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
 				if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
@@ -6322,7 +6304,7 @@ class PlayState extends MusicBeatState
 					inline oppNotesHitDateArray.push(Conductor.songPosition);
 				}
 				enemyHits += 1 * polyphony;
-				daNote.exists = false;
+				invalidateNote(daNote);
 			}
 			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
 			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
@@ -6406,6 +6388,10 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	public function invalidateNote(note:Note):Void {
+		note.exists = false;
+		if (ClientPrefs.fastNoteSpawn) (note.isSustainNote ? sustainNotes : notes).pushToPool(note);
+	}
 
 	public function spawnNoteSplashOnNote(isDad:Bool, note:Note, ?isGf:Bool = false) {
 		if(ClientPrefs.noteSplashes && note != null) {
@@ -7282,12 +7268,9 @@ class PlayState extends MusicBeatState
 
 	private function initRender():Void
 	{
-		if (!ffmpegMode)
-			return;
-
 		if (!FileSystem.exists(#if linux 'ffmpeg' #else 'ffmpeg.exe' #end))
 		{
-			trace("\"FFmpeg.exe\" not found! (Is it in the same folder as the JS Engine exe?)");
+			trace("\"FFmpeg\" not found! (Is it in the same folder as JSEngine?)");
 			return;
 		}
 
