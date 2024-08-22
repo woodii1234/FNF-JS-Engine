@@ -335,8 +335,6 @@ class PlayState extends MusicBeatState
 	public var charAnimsFrame:Int = 0;
 	public var oppAnimsFrame:Int = 0;
 	public var hitImagesFrame:Int = 0;
-	public var skippedCount:Int = 0;
-	public var maxSkipped:Int = 0;
 
 	var notesHitArray:Array<Float> = [];
 	var oppNotesHitArray:Array<Float> = [];
@@ -3657,7 +3655,7 @@ class PlayState extends MusicBeatState
 				botplayTxt.text += '\nNote Multiplier: ' + polyphony;
 		}
 
-		if (ClientPrefs.showRendered) renderedTxt.text = 'Rendered/Skipped: ${FlxStringUtil.formatMoney(amountOfRenderedNotes, false)}/${FlxStringUtil.formatMoney(skippedCount, false)}/${FlxStringUtil.formatMoney(maxRenderedNotes, false)}/${FlxStringUtil.formatMoney(maxSkipped, false)}';
+		if (ClientPrefs.showRendered) renderedTxt.text = 'Rendered Notes: ${FlxStringUtil.formatMoney(amountOfRenderedNotes, false)}/${FlxStringUtil.formatMoney(maxRenderedNotes, false)}/${FlxStringUtil.formatMoney(notes.members.length + sustainNotes.members.length, false)}';
 
 		if (iconsShouldGoUp) iconP1.y = iconP2.y = healthBarBG.y - 75;
 
@@ -4164,17 +4162,15 @@ class PlayState extends MusicBeatState
 		if (notesAddedCount > unspawnNotes.length)
 			notesAddedCount -= (notesAddedCount - unspawnNotes.length);
 
-		if (!unspawnNotes[notesAddedCount].wasHit)
+		if (!ClientPrefs.showNotes && cpuControlled && !unspawnNotes[notesAddedCount].wasHit)
 		{
 			while (unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime <= Conductor.songPosition) {
 				unspawnNotes[notesAddedCount].wasHit = true;
 				unspawnNotes[notesAddedCount].mustPress ? goodNoteHit(null, unspawnNotes[notesAddedCount]): opponentNoteHit(null, unspawnNotes[notesAddedCount]);
-				skippedCount += 1;
-				if (skippedCount > maxSkipped) maxSkipped = skippedCount;
 				notesAddedCount++;
 			}
 		}
-		if (ClientPrefs.showNotes)
+		else if (ClientPrefs.showNotes || !ClientPrefs.showNotes && !cpuControlled)
 		{
 			while (unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < (NOTE_SPAWN_TIME / unspawnNotes[notesAddedCount].multSpeed)) {
 				if (ClientPrefs.fastNoteSpawn) (unspawnNotes[notesAddedCount].isSustainNote ? sustainNotes : notes).spawnNote(unspawnNotes[notesAddedCount]);
@@ -4207,7 +4203,6 @@ class PlayState extends MusicBeatState
 					}
 				}
 				amountOfRenderedNotes = 0;
-				skippedCount = 0;
 				for (group in [notes, sustainNotes])
 				{
 					group.forEach(function(daNote)
