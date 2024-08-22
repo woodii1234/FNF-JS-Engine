@@ -3784,6 +3784,7 @@ class ChartingState extends MusicBeatState
 			}
 			note.noteData = -1;
 			daNoteInfo = -1;
+			note.useRGBShader = false;
 		}
 
 		note.setGraphicSize(GRID_SIZE, GRID_SIZE);
