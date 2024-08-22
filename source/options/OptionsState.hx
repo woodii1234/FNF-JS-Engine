@@ -47,7 +47,8 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 	function openSelectedSubstate(label:String) {
 		switch(label) {
 			case 'Note Colors':
-				openSubState(new options.NotesSubState());
+				if (!ClientPrefs.enableColorShader) CoolUtil.coolError("It appears that you don't have the 'Enable Note Colors' option enabled!\nTo prevent a crash, you cannot access this menu unless you turn the option on.\nYou can find it in the Visuals & UI menu.", "JS Engine Anti-Crash Tool");
+				else openSubState(new options.NotesSubState());
 			case 'Controls':
 				openSubState(new options.ControlsSubState());
 			case 'Graphics':

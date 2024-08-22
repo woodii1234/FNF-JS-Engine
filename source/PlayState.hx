@@ -109,7 +109,13 @@ class PlayState extends MusicBeatState
 	public var shaderUpdates:Array<Float->Void> = [];
 	var botplayUsed:Bool = false;
 	public static var curStage:String = '';
+	public static var stageUI:String = "normal";
 	public static var isPixelStage:Bool = false;
+
+	@:noCompletion
+	static function get_isPixelStage():Bool
+		return stageUI == "pixel" || stageUI.endsWith("-pixel");
+
 	public static var SONG:SwagSong = null;
 	public static var isStoryMode:Bool = false;
 	public static var storyWeek:Int = 0;
@@ -328,8 +334,9 @@ class PlayState extends MusicBeatState
 	public var missRecalcsPerFrame:Int = 0;
 	public var charAnimsFrame:Int = 0;
 	public var oppAnimsFrame:Int = 0;
-
 	public var hitImagesFrame:Int = 0;
+	public var skippedCount:Int = 0;
+	public var maxSkipped:Int = 0;
 
 	var notesHitArray:Array<Float> = [];
 	var oppNotesHitArray:Array<Float> = [];
@@ -699,6 +706,7 @@ class PlayState extends MusicBeatState
 				directory: "",
 				defaultZoom: 0.9,
 				isPixelStage: false,
+				stageUI: "normal",
 
 				boyfriend: [770, 100],
 				girlfriend: [400, 130],
@@ -710,6 +718,14 @@ class PlayState extends MusicBeatState
 				camera_girlfriend: [0, 0],
 				camera_speed: 1
 			};
+		}
+
+		stageUI = "normal";
+		if (stageData.stageUI != null && stageData.stageUI.trim().length > 0)
+			stageUI = stageData.stageUI;
+		else {
+			if (stageData.isPixelStage)
+				stageUI = "pixel";
 		}
 
 		defaultCamZoom = ogCamZoom = stageData.defaultZoom;
@@ -762,8 +778,9 @@ class PlayState extends MusicBeatState
 				GameOverSubstate.characterName = 'bf-holding-gf-dead';
 		}
 
-		Paths.initNote(4, SONG.arrowSkin);
+		if (Note.globalRgbShaders.length > 0) Note.globalRgbShaders = [];
 		Paths.initDefaultSkin(SONG.arrowSkin);
+		Paths.initNote(4, SONG.arrowSkin);
 
 		if(isPixelStage) {
 			introSoundsSuffix = '-pixel';
@@ -872,7 +889,7 @@ class PlayState extends MusicBeatState
 			startCharacterLua(gf.curCharacter);
 		}
 
-		var ratingQuoteStuff:Array<Dynamic> = Paths.mergeAllTextsNamed('ratingQuotes/${ClientPrefs.rateNameStuff}.txt', 'data');
+		var ratingQuoteStuff:Array<Dynamic> = Paths.mergeAllTextsNamed('data/ratingQuotes/${ClientPrefs.rateNameStuff}.txt', '', true);
 		if (ratingQuoteStuff == null || ratingQuoteStuff.indexOf(null) != -1){
 			trace('Failed to find quotes for ratings!');
 			// this should help fix a crash
@@ -2359,14 +2376,14 @@ class PlayState extends MusicBeatState
 	function cacheCountdown()
 	{
 		var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
-		introAssets.set('default', ['ready', 'set', 'go']);
-		introAssets.set('pixel', ['pixelUI/ready-pixel', 'pixelUI/set-pixel', 'pixelUI/date-pixel']);
-
-		var introAlts:Array<String> = introAssets.get('default');
-		if (isPixelStage) introAlts = introAssets.get('pixel');
-
-		for (asset in introAlts)
-			Paths.image(asset);
+		var introImagesArray:Array<String> = switch(stageUI) {
+			case "pixel": ['${stageUI}UI/ready-pixel', '${stageUI}UI/set-pixel', '${stageUI}UI/date-pixel'];
+			case "normal": ["ready", "set" ,"go"];
+			default: ['${stageUI}UI/ready', '${stageUI}UI/set', '${stageUI}UI/go'];
+		}
+		introAssets.set(stageUI, introImagesArray);
+		var introAlts:Array<String> = introAssets.get(stageUI);
+		for (asset in introAlts) Paths.image(asset);
 
 		intro3 = new FlxSound().loadEmbedded(Paths.sound('intro3' + introSoundsSuffix));
 		intro2 = new FlxSound().loadEmbedded(Paths.sound('intro2' + introSoundsSuffix));
@@ -2537,10 +2554,14 @@ class PlayState extends MusicBeatState
 				}
 
 				var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
-				introAssets.set('default', ['ready', 'set', 'go']);
-				introAssets.set('pixel', ['pixelUI/ready-pixel', 'pixelUI/set-pixel', 'pixelUI/date-pixel']);
+				var introImagesArray:Array<String> = switch(stageUI) {
+					case "pixel": ['${stageUI}UI/ready-pixel', '${stageUI}UI/set-pixel', '${stageUI}UI/date-pixel'];
+					case "normal": ["ready", "set" ,"go"];
+					default: ['${stageUI}UI/ready', '${stageUI}UI/set', '${stageUI}UI/go'];
+				}
+				introAssets.set(stageUI, introImagesArray);
 
-				var introAlts:Array<String> = introAssets.get('default');
+				var introAlts:Array<String> = introAssets.get(stageUI);
 				var antialias:Bool = ClientPrefs.globalAntialiasing;
 				if(isPixelStage) {
 					introAlts = introAssets.get('pixel');
@@ -3105,7 +3126,7 @@ class PlayState extends MusicBeatState
 						strumTime: daStrumTime,
 						noteData: daNoteData,
 						mustPress: bothSides || gottaHitNote,
-						oppNote: !gottaHitNote,
+						oppNote: (opponentChart ? gottaHitNote : !gottaHitNote),
 						noteType: songNotes[3],
 						animSuffix: (songNotes[3] == 'Alt Animation' || section.altAnim ? '-alt' : ''),
 						noteskin: (gottaHitNote ? bfNoteskin : dadNoteskin),
@@ -3353,7 +3374,11 @@ class PlayState extends MusicBeatState
 
 			var babyArrow:StrumNote = new StrumNote(middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X, strumLine.y, i, player);
 			babyArrow.downScroll = ClientPrefs.downScroll;
-			if (noteSkinExists) babyArrow.texture = "noteskins/" + (player == 0 ? dad.noteskin : boyfriend.noteskin);
+			if (noteSkinExists) 
+			{
+				babyArrow.texture = "noteskins/" + (player == 0 ? dad.noteskin : boyfriend.noteskin);
+				babyArrow.useRGBShader = false;
+			}
 			if (!isStoryMode && !skipArrowStartTween)
 			{
 				babyArrow.alpha = 0;
@@ -3384,7 +3409,8 @@ class PlayState extends MusicBeatState
 
 			strumLineNotes.add(babyArrow);
 			babyArrow.postAddedToGroup();
-			if (ClientPrefs.noteColorStyle != 'Normal' && ClientPrefs.noteStyleThing != 'TGT V4' && !PlayState.isPixelStage) 
+			/*
+			if (ClientPrefs.noteColorStyle != 'Normal' !PlayState.isPixelStage) 
 			{
 				var arrowAngle = switch(i)
 				{
@@ -3397,6 +3423,7 @@ class PlayState extends MusicBeatState
 				babyArrow.angle += arrowAngle;
 				babyArrow.reloadNote();
 			}
+			*/
 		}
 		strumLine.put();
 	}
@@ -3449,7 +3476,8 @@ class PlayState extends MusicBeatState
 	override public function onFocusLost():Void
 	{
 		#if DISCORD_ALLOWED
-		if (health > 0 && !paused && autoUpdateRPC) DiscordClient.changePresence(detailsPausedText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
+		try {if (health > 0 && !paused && autoUpdateRPC) DiscordClient.changePresence(detailsPausedText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());}
+		catch(e) {};
 		#end
 
 		super.onFocusLost();
@@ -3532,7 +3560,6 @@ class PlayState extends MusicBeatState
 	var NOTE_SPAWN_TIME:Float = 0;
 
 	var spawnedNote:Note = new Note();
-	var curNote:Note = new Note();
 
 	override public function update(elapsed:Float)
 	{
@@ -3630,7 +3657,7 @@ class PlayState extends MusicBeatState
 				botplayTxt.text += '\nNote Multiplier: ' + polyphony;
 		}
 
-		if (ClientPrefs.showRendered) renderedTxt.text = 'Rendered Notes: ${FlxStringUtil.formatMoney(amountOfRenderedNotes, false)}/${FlxStringUtil.formatMoney(maxRenderedNotes, false)}/${FlxStringUtil.formatMoney(notes.members.length + sustainNotes.members.length, false)}';
+		if (ClientPrefs.showRendered) renderedTxt.text = 'Rendered/Skipped: ${FlxStringUtil.formatMoney(amountOfRenderedNotes, false)}/${FlxStringUtil.formatMoney(skippedCount, false)}/${FlxStringUtil.formatMoney(maxRenderedNotes, false)}/${FlxStringUtil.formatMoney(maxSkipped, false)}';
 
 		if (iconsShouldGoUp) iconP1.y = iconP2.y = healthBarBG.y - 75;
 
@@ -4137,15 +4164,17 @@ class PlayState extends MusicBeatState
 		if (notesAddedCount > unspawnNotes.length)
 			notesAddedCount -= (notesAddedCount - unspawnNotes.length);
 
-		if (!ClientPrefs.showNotes && cpuControlled && !unspawnNotes[notesAddedCount].wasHit)
+		if (!unspawnNotes[notesAddedCount].wasHit)
 		{
 			while (unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime <= Conductor.songPosition) {
-				unspawnNotes[notesAddedCount].wasHit = true; //Set this to true so the game doesn't do a double hit and crash the game
+				unspawnNotes[notesAddedCount].wasHit = true;
 				unspawnNotes[notesAddedCount].mustPress ? goodNoteHit(null, unspawnNotes[notesAddedCount]): opponentNoteHit(null, unspawnNotes[notesAddedCount]);
+				skippedCount += 1;
+				if (skippedCount > maxSkipped) maxSkipped = skippedCount;
 				notesAddedCount++;
 			}
 		}
-		else if (ClientPrefs.showNotes || !ClientPrefs.showNotes && !cpuControlled)
+		if (ClientPrefs.showNotes)
 		{
 			while (unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < (NOTE_SPAWN_TIME / unspawnNotes[notesAddedCount].multSpeed)) {
 				if (ClientPrefs.fastNoteSpawn) (unspawnNotes[notesAddedCount].isSustainNote ? sustainNotes : notes).spawnNote(unspawnNotes[notesAddedCount]);
@@ -4178,6 +4207,7 @@ class PlayState extends MusicBeatState
 					}
 				}
 				amountOfRenderedNotes = 0;
+				skippedCount = 0;
 				for (group in [notes, sustainNotes])
 				{
 					group.forEach(function(daNote)
@@ -4763,25 +4793,19 @@ class PlayState extends MusicBeatState
 				if (ClientPrefs.showNotes)
 				{
 					for (i in strumLineNotes.members)
-						if ((i.player == 0 ? dadNoteskin : bfNoteskin).length > 0) i.updateNoteSkin(i.player == 0 ? dadNoteskin : bfNoteskin);
+						if ((i.player == 0 ? dadNoteskin : bfNoteskin).length > 0) 
+						{
+							i.updateNoteSkin(i.player == 0 ? dadNoteskin : bfNoteskin);
+							i.useRGBShader = false;
+						}
 				}
 				if (ClientPrefs.noteColorStyle == 'Char-Based')
 				{
-				for (note in notes){
-				 	if (note == null)
-						continue;
-					note.updateRGBColors();
-				}
-				for (note in playerStrums.members){
-				 	if (note == null)
-						continue;
-					note.updateRGBColors(true);
-				}
-				for (note in opponentStrums.members){
-				 	if (note == null)
-						continue;
-					note.updateRGBColors(false);
-				}
+					for (note in notes){
+						if (note == null)
+							continue;
+						note.updateRGBColors();
+					}
 				}
 			}
 
@@ -5665,6 +5689,7 @@ class PlayState extends MusicBeatState
 			{
 				spr.playAnim('static');
 				spr.resetAnim = 0;
+				spr.resetRGB();
 			}
 			callOnLuas('onKeyRelease', [key]);
 		}
@@ -6124,10 +6149,10 @@ class PlayState extends MusicBeatState
 					strumsHit[(note.noteData % 4) + 4] = true;
 
 					if(playerStrums.members[note.noteData] != null) {
-						if ((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && ClientPrefs.showNotes && ClientPrefs.enableColorShader) {
-							inline playerStrums.members[note.noteData].playAnim('confirm', true, note.colorSwap.hue, note.colorSwap.saturation, note.colorSwap.brightness);
+						if (ClientPrefs.noteColorStyle != 'Normal' && ClientPrefs.showNotes && ClientPrefs.enableColorShader) {
+							inline playerStrums.members[note.noteData].playAnim('confirm', true, note.rgbShader.r, note.rgbShader.g, note.rgbShader.b);
 						} else {
-							inline playerStrums.members[note.noteData].playAnim('confirm', true, 0, 0, 0, ClientPrefs.noteColorStyle == 'Char-Based', !note.doOppStuff, note.gfNote);
+							inline playerStrums.members[note.noteData].playAnim('confirm', true);
 						}
 						playerStrums.members[note.noteData].resetAnim = calculateResetTime(note.isSustainNote);
 					}
@@ -6135,10 +6160,10 @@ class PlayState extends MusicBeatState
 					final spr = playerStrums.members[note.noteData];
 					if(spr != null)
 					{
-						if ((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && ClientPrefs.showNotes && ClientPrefs.enableColorShader) {
-							inline spr.playAnim('confirm', true, note.colorSwap.hue, note.colorSwap.saturation, note.colorSwap.brightness);
+						if (ClientPrefs.noteColorStyle != 'Normal' && ClientPrefs.showNotes && ClientPrefs.enableColorShader) {
+							inline spr.playAnim('confirm', true, note.rgbShader.r, note.rgbShader.g, note.rgbShader.b);
 						} else {
-							inline spr.playAnim('confirm', true, 0, 0, 0, ClientPrefs.noteColorStyle == 'Char-Based', note.mustPress, note.gfNote);
+							inline spr.playAnim('confirm', true);
 						}
 					}
 				}
@@ -6205,7 +6230,7 @@ class PlayState extends MusicBeatState
 				if (ClientPrefs.botLightStrum && !strumsHit[(noteAlt.noteData % 4) + 4])
 				{
 					strumsHit[(noteAlt.noteData % 4) + 4] = true;
-					inline playerStrums.members[noteAlt.noteData].playAnim('confirm', true, 0, 0, 0, false, false, false);
+					inline playerStrums.members[noteAlt.noteData].playAnim('confirm', true);
 					playerStrums.members[noteAlt.noteData].resetAnim = calculateResetTime(noteAlt.isSustainNote);
 				}
 			}
@@ -6259,9 +6284,12 @@ class PlayState extends MusicBeatState
 				gfTrigger = daNote.gfNote;
 				oppChar = (gfTrigger ? gf : (!opponentChart ? dad : boyfriend));
 
-				inline oppChar.playAnim(animToPlay, true);
-				oppChar.holdTimer = 0;
-				if (ClientPrefs.cameraPanning) inline camPanRoutine(animToPlay, (!opponentChart ? 'dad' : 'bf'));
+				if (oppChar != null)
+				{
+					inline oppChar.playAnim(animToPlay, true);
+					oppChar.holdTimer = 0;
+					if (ClientPrefs.cameraPanning) inline camPanRoutine(animToPlay, (!opponentChart ? 'dad' : 'bf'));
+				}
 			}
 			else if (daNote.isSustainNote && !ClientPrefs.oldSusStyle && oppAnimsFrame < 4)
 			{
@@ -6285,10 +6313,10 @@ class PlayState extends MusicBeatState
 			{
 				strumsHit[daNote.noteData % 4] = true;
 
-				if ((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && ClientPrefs.showNotes && ClientPrefs.enableColorShader) {
-					inline opponentStrums.members[daNote.noteData].playAnim('confirm', true, daNote.colorSwap.hue, daNote.colorSwap.saturation, daNote.colorSwap.brightness);
+				if (ClientPrefs.noteColorStyle != 'Normal' && ClientPrefs.showNotes && ClientPrefs.enableColorShader) {
+					inline opponentStrums.members[daNote.noteData].playAnim('confirm', true, daNote.rgbShader.r, daNote.rgbShader.g, daNote.rgbShader.b);
 				} else {
-					inline opponentStrums.members[daNote.noteData].playAnim('confirm', true, 0, 0, 0, ClientPrefs.noteColorStyle == 'Char-Based', false, daNote.gfNote);
+					inline opponentStrums.members[daNote.noteData].playAnim('confirm', true);
 				}
 				opponentStrums.members[daNote.noteData].resetAnim = calculateResetTime(daNote.isSustainNote);
 			}
@@ -6337,17 +6365,17 @@ class PlayState extends MusicBeatState
 			if(!noteAlt.noAnimation && ClientPrefs.charsAndBG && oppAnimsFrame < 4) {
 				oppAnimsFrame += 1;
 				final animToPlay:String = singAnimations[Std.int(Math.abs(noteAlt.noteData))] + noteAlt.animSuffix;
-				if (noteAlt.gfNote)
+				if (noteAlt.gfNote && gf != null)
 				{
 					inline gf.playAnim(animToPlay, true);
 					gf.holdTimer = 0;
 				}
-				if (!noteAlt.gfNote && opponentChart)
+				if (!noteAlt.gfNote && opponentChart && boyfriend != null)
 				{
 					inline boyfriend.playAnim(animToPlay, true);
 					boyfriend.holdTimer = 0;
 				}
-				if (!noteAlt.gfNote && !opponentChart)
+				if (!noteAlt.gfNote && !opponentChart && dad != null)
 				{
 					inline dad.playAnim(animToPlay, true);
 					dad.holdTimer = 0;
@@ -6356,7 +6384,7 @@ class PlayState extends MusicBeatState
 			if (ClientPrefs.opponentLightStrum && !strumsHit[noteAlt.noteData % 4])
 			{
 				strumsHit[noteAlt.noteData % 4] = true;
-				inline opponentStrums.members[noteAlt.noteData].playAnim('confirm', true, 0, 0, 0, false, false, false);
+				inline opponentStrums.members[noteAlt.noteData].playAnim('confirm', true);
 				opponentStrums.members[noteAlt.noteData].resetAnim = calculateResetTime(noteAlt.isSustainNote);
 			}
 			if (!noteAlt.isSustainNote && cpuControlled)
@@ -6397,46 +6425,15 @@ class PlayState extends MusicBeatState
 		if(ClientPrefs.noteSplashes && note != null) {
 			splashesPerFrame[(isDad ? 0 : 1)] += 1;
 			final strum:StrumNote = !isDad ? playerStrums.members[note.noteData] : opponentStrums.members[note.noteData];
-			if(strum != null) {
-				ClientPrefs.showNotes
-				&& ClientPrefs.enableColorShader
-				&& ClientPrefs.noteColorStyle != 'Char-Based' ? spawnNoteSplash(strum.x, strum.y, note.noteData, null, note.colorSwap.hue, note.colorSwap.saturation, note.colorSwap.brightness, isGf, isDad)
-				: spawnNoteSplash(strum.x, strum.y, note.noteData, null, 0, 0, 0, isGf, isDad, note.noteType == 'Hurt Note');
-			}
+			if(strum != null)
+				spawnNoteSplash(strum.x, strum.y, note.noteData, note);
 		}
 	}
 
-	public function spawnNoteSplash(x:Float, y:Float, data:Int, ?note:Note = null, ?hue:Float = 0, ?sat:Float = 0, ?brt:Float = 0, ?isGfNote:Bool = false, ?isDadNote:Bool = true, ?hurtNote:Bool = false) {
-		var skin:String = (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) ? PlayState.SONG.splashSkin : 'noteSplashes';
-
-		if (ClientPrefs.splashType != 'Psych Engine') skin = (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0 && PlayState.SONG.splashSkin != 'noteSplashes') ? PlayState.SONG.splashSkin : 'noteSplashes-' + ClientPrefs.splashType.toLowerCase();
-		if (hurtNote) skin = 'HURTnoteSplashes';
-
-		if (data > -1 && data < ClientPrefs.arrowHSV.length)
-		{
-			if (ClientPrefs.noteColorStyle == 'Normal')
-			{
-				hue = ClientPrefs.arrowHSV[data][0] / 360;
-				sat = ClientPrefs.arrowHSV[data][1] / 100;
-				brt = ClientPrefs.arrowHSV[data][2] / 100;
-			}
-			if(note != null && ClientPrefs.noteColorStyle == 'Normal') {
-				skin = note.noteSplashTexture;
-				hue = note.noteSplashHue;
-				sat = note.noteSplashSat;
-				brt = note.noteSplashBrt;
-			}
-		}
-
-		var splashColor:FlxColor = !opponentChart ? FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]) : FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]);
-
-		if (ClientPrefs.noteColorStyle == 'Char-Based')
-		{
-			if (!isDadNote) splashColor = !opponentChart ? FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]) : FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]);
-			if (isGfNote && gf != null) splashColor = FlxColor.fromRGB(gf.healthColorArray[0], gf.healthColorArray[1], gf.healthColorArray[2]);
-		}
-
-		grpNoteSplashes.recycle(NoteSplash).setupNoteSplash(x, y, data, skin, hue, sat, brt, splashColor);
+	public function spawnNoteSplash(x:Float, y:Float, data:Int, ?note:Note = null) {
+		var splash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
+		splash.setupNoteSplash(x, y, data, note);
+		grpNoteSplashes.add(splash);
 	}
 
 	override function destroy() {
@@ -6479,6 +6476,8 @@ class PlayState extends MusicBeatState
 		Paths.splashSkinAnimsMap.clear();
 		Paths.splashConfigs.clear();
 		Paths.splashAnimCountMap.clear();
+		Note.globalRgbShaders = [];
+		backend.NoteTypesConfig.clearNoteTypesData();
 
 		super.destroy();
 	}
@@ -6582,7 +6581,7 @@ class PlayState extends MusicBeatState
 					cameraSpeed = 1;
 			}
 		}
-		if (!ffmpegMode && ClientPrefs.songLoading && playbackRate < 256 && !paused) //much better resync code, doesn't just resync every step!!
+		if (!ffmpegMode && ClientPrefs.songLoading && playbackRate < 256) //much better resync code, doesn't just resync every step!!
 		{
 			var timeSub:Float = Conductor.songPosition - Conductor.offset;
 			var syncTime:Float = 20 * playbackRate;

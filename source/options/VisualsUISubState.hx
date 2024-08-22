@@ -28,10 +28,59 @@ using StringTools;
 
 class VisualsUISubState extends BaseOptionsMenu
 {
+	var noteOptionID:Int = -1;
+	var notes:FlxTypedGroup<StrumNote>;
+	var notesTween:Array<FlxTween> = [];
+	var noteY:Float = 90;
 	public function new()
 	{
 		title = 'Visuals and UI';
 		rpcTitle = 'Visuals & UI Settings Menu'; //for Discord Rich Presence
+
+		// for note skins
+		notes = new FlxTypedGroup<StrumNote>();
+		for (i in 0...Note.colArray.length)
+		{
+			var note:StrumNote = new StrumNote(370 + (560 / Note.colArray.length) * i, -200, i, 0);
+			note.centerOffsets();
+			note.centerOrigin();
+			note.playAnim('static');
+			notes.add(note);
+		}
+
+		var noteSkins:Array<String> = Paths.mergeAllTextsNamed('images/noteskins/list.txt');
+		if(noteSkins.length > 0)
+		{
+			noteSkins.insert(0, 'Default'); //Default skin always comes first
+			if(!noteSkins.contains(ClientPrefs.noteSkin))
+				ClientPrefs.noteSkin = noteSkins[0]; //Reset to default if saved noteskin couldnt be found
+
+			var option:Option = new Option('Note Skins:',
+				"Select your prefered Note skin.",
+				'noteSkin',
+				'string',
+				noteSkins[0],
+				noteSkins);
+			addOption(option);
+			option.onChange = onChangeNoteSkin;
+			noteOptionID = optionsArray.length - 1;
+		}
+
+		var noteSplashList:Array<String> = Paths.mergeAllTextsNamed('images/noteSplashes/list.txt');
+		if (noteSplashList.length > 0)
+		{
+			noteSplashList.insert(0, 'Default'); //Default skin always comes first
+			if (!noteSplashList.contains(ClientPrefs.splashType))
+				ClientPrefs.splashType = noteSplashList[0];
+
+			var option:Option = new Option('Note Splash Type:',
+				"Which note splash would you like?",
+				'splashType',
+				'string',
+				'Psych Engine',
+				noteSplashList);
+			addOption(option);
+		}
 
 		var option:Option = new Option('Note Splashes',
 			"If unchecked, hitting \"Sick!\" notes won't show particles.",
@@ -220,7 +269,7 @@ class VisualsUISubState extends BaseOptionsMenu
 		option.displayFormat = '%vX';
 		addOption(option);
 
-		var ratingQuoteList:Array<String> = Paths.mergeAllTextsNamed('ratingQuotes/list.txt', 'data', false);
+		var ratingQuoteList:Array<String> = Paths.mergeAllTextsNamed('data/ratingQuotes/list.txt', '', true);
 		if (ratingQuoteList.length > 0)
 		{
 			if (!ratingQuoteList.contains(ClientPrefs.rateNameStuff))
@@ -341,14 +390,6 @@ class VisualsUISubState extends BaseOptionsMenu
 			['Full Anim', 'BPM Based']);
 		addOption(option);
 
-		var option:Option = new Option('Note Style:',
-			"How would you like your notes to look like? \n(ANY NOTESTYLE OTHER THAN DEFAULT WILL OVERWRITE CHART SETTINGS AS WELL)",
-			'noteStyleThing',
-			'string',
-			'Default',
-			['Default', 'VS Nonsense V2', 'VS AGOTI', 'Doki Doki+', 'TGT V4', 'DNB 3D', 'Pink Circles', 'Chip', 'Future', 'Circle']);
-		addOption(option);
-
 		var option:Option = new Option('BF Icon Style:',
 			"How would you like your BF Icon to look like?",
 			'bfIconStyle',
@@ -372,20 +413,6 @@ class VisualsUISubState extends BaseOptionsMenu
 			'Golden Apple',
 			['Golden Apple', 'Dave and Bambi', 'Old Psych', 'New Psych', 'VS Steve', 'Plank Engine', 'Strident Crisis', 'SB Engine', 'None']);
 		addOption(option);
-
-		var noteSplashList:Array<String> = Paths.mergeAllTextsNamed('images/noteSplashes/list.txt');
-		if (noteSplashList.length > 0)
-		{
-			if (!noteSplashList.contains(ClientPrefs.splashType))
-				ClientPrefs.splashType = noteSplashList[0];
-			var option:Option = new Option('Note Splash Type:',
-				"Which note splash would you like?",
-				'splashType',
-				'string',
-				'Psych Engine',
-				noteSplashList);
-			addOption(option);
-		}
 
 		var option:Option = new Option('long ass health bar',
 			"If this is checked, the Health Bar will become LOOOOOONG",
@@ -586,6 +613,44 @@ class VisualsUISubState extends BaseOptionsMenu
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length-1]];
 
 		super();
+		add(notes);
+	}
+
+	override function changeSelection(change:Int = 0)
+	{
+		super.changeSelection(change);
+		
+		if(noteOptionID < 0) return;
+
+		for (i in 0...Note.colArray.length)
+		{
+			var note:StrumNote = notes.members[i];
+			if(notesTween[i] != null) notesTween[i].cancel();
+			if(curSelected == noteOptionID)
+				notesTween[i] = FlxTween.tween(note, {y: noteY}, Math.abs(note.y / (200 + noteY)) / 3, {ease: FlxEase.quadInOut});
+			else
+				notesTween[i] = FlxTween.tween(note, {y: -200}, Math.abs(note.y / (200 + noteY)) / 3, {ease: FlxEase.quadInOut});
+		}
+	}
+
+	function onChangeNoteSkin()
+	{
+		notes.forEachAlive(function(note:StrumNote) {
+			changeNoteSkin(note);
+			note.centerOffsets();
+			note.centerOrigin();
+		});
+	}
+	
+	function changeNoteSkin(note:StrumNote)
+	{
+		var skin:String = Note.defaultNoteSkin;
+		var customSkin:String = skin + Note.getNoteSkinPostfix();
+		if(Paths.fileExists('images/$customSkin.png', IMAGE)) skin = customSkin;
+
+		note.texture = skin; //Load texture and anims
+		note.reloadNote();
+		note.playAnim('static');
 	}
 
 	var changedMusic:Bool = false;

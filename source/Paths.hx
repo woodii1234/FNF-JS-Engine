@@ -77,52 +77,23 @@ class Paths
 	];
 	#end
 
-	public static var defaultSkin = 'NOTE_assets'; 
+	public static var defaultSkin = 'noteskins/NOTE_assets' + Note.getNoteSkinPostfix(); 
 	//Function that initializes the first note. This way, we can recycle the notes
-	public static function initDefaultSkin(noteSkin:String, inEditor:Bool = false)
+	public static function initDefaultSkin(?noteSkin:String, ?inEditor:Bool = false)
 	{
-		if (ClientPrefs.noteStyleThing == 'Default')
-			defaultSkin = 'NOTE_assets';
-		if(ClientPrefs.noteStyleThing == 'VS Nonsense V2') {
-			defaultSkin = 'Nonsense_NOTE_assets';
-		}
-		if(ClientPrefs.noteStyleThing == 'DNB 3D') {
-			defaultSkin = 'NOTE_assets_3D';
-		}
-		if(ClientPrefs.noteStyleThing == 'VS AGOTI') {
-			defaultSkin = 'AGOTINOTE_assets';
-		}
-		if(ClientPrefs.noteStyleThing == 'Doki Doki+') {
-			defaultSkin = 'NOTE_assets_doki';
-		}
-		if(ClientPrefs.noteStyleThing == 'TGT V4') {
-			defaultSkin = 'TGTNOTE_assets';
-		}
-		if (ClientPrefs.noteStyleThing != 'VS Nonsense V2' && ClientPrefs.noteStyleThing != 'DNB 3D' && ClientPrefs.noteStyleThing != 'VS AGOTI' && ClientPrefs.noteStyleThing != 'Doki Doki+' && ClientPrefs.noteStyleThing != 'TGT V4' && ClientPrefs.noteStyleThing != 'Default') {
-			defaultSkin = 'NOTE_assets_' + ClientPrefs.noteStyleThing.toLowerCase();
-		}
-		if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && (inEditor || PlayState.isPixelStage)) {
-			defaultSkin = ClientPrefs.noteStyleThing == 'TGT V4' ? 'RED_TGTNOTE_assets' : 'RED_NOTE_assets';
-		}
-		if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && ClientPrefs.noteStyleThing == 'TGT V4') {
-			defaultSkin = 'RED_TGTNOTE_assets';
-		}
-		if(ClientPrefs.noteColorStyle == 'Char-Based') {
-			defaultSkin = 'NOTE_assets_colored';
-		}
-		if(ClientPrefs.noteColorStyle == 'Grayscale') {
-			defaultSkin = 'GRAY_NOTE_assets';
-		}
-		if (noteSkin != null && noteSkin.length > 1) defaultSkin = noteSkin;
+		trace(noteSkin);
+		if (noteSkin.length > 0) defaultSkin = noteSkin;
+		else if (!PlayState.isPixelStage) defaultSkin = 'noteskins/NOTE_assets' + Note.getNoteSkinPostfix();
+		else defaultSkin = 'noteskins/NOTE_assets';
 		trace(defaultSkin);
 	}
 
-	public static function initNote(keys:Int = 4, noteSkin:String = 'NOTE_assets')
+	public static function initNote(keys:Int = 4, ?noteSkin:String)
 	{
 		// Do this to be able to just copy over the note animations and not reallocate it
-
+		if (noteSkin.length < 1) noteSkin = defaultSkin;
 		var spr:FlxSprite = new FlxSprite();
-		spr.frames = getSparrowAtlas(noteSkin != null && noteSkin.length > 1 ? noteSkin : defaultSkin);
+		spr.frames = getSparrowAtlas(noteSkin.length > 1 ? noteSkin : defaultSkin);
 
 		// Use a for loop for adding all of the animations in the note spritesheet, otherwise it won't find the animations for the next recycle
 		for (d in 0...keys)
@@ -137,10 +108,11 @@ class Paths
 	}
 
 	//Note Splash initialization
-	public static function initSplash(splashSkin:String = 'noteSplashes')
+	public static function initSplash(?splashSkin:String)
 	{
-		splashFrames = getSparrowAtlas(splashSkin.length > 1 ? 'noteSplashes/' + splashSkin : 'noteSplashes/noteSplashes');
-		if (splashFrames == null) splashFrames = getSparrowAtlas(splashSkin.length > 1 ? splashSkin : 'noteSplashes/noteSplashes');
+		if (splashSkin.length < 1) splashSkin = 'noteSplashes/noteSplashes' + NoteSplash.getSplashSkinPostfix();
+		splashFrames = getSparrowAtlas(splashSkin);
+		if (splashFrames == null) splashFrames = getSparrowAtlas('noteSplashes/noteSplashes' + NoteSplash.getSplashSkinPostfix());
 
 		// Do this to be able to just copy over the splash animations and not reallocate it
 
@@ -187,16 +159,16 @@ class Paths
 	}
 	public static function initSplashConfig(skin:String)
 	{
-		var path:String = Paths.getSharedPath('images/noteSplashes/' + skin + '.txt');
-		if (!FileSystem.exists(path)) path = Paths.modsTxt('noteSplashes/' + skin);
-		if (!FileSystem.exists(path)) path = Paths.getSharedPath('images/noteSplashes/noteSplashes.txt');
+		var path:String = Paths.getSharedPath('images/' + skin + '.txt');
+		if (!FileSystem.exists(path)) path = Paths.modsTxt(skin);
+		if (!FileSystem.exists(path)) path = Paths.getSharedPath('images/noteSplashes/noteSplashes' + NoteSplash.getSplashSkinPostfix());
 		var configFile:Array<String> = CoolUtil.coolTextFile(path);
 
 		if (configFile.length < 1) return null;
 
 		var framerates:Array<String> = configFile[1].split(' ');
 		var offs:Array<Array<Float>> = [];
-		for (i in 3...configFile.length)
+		for (i in 2...configFile.length)
 		{
 			var animOffs:Array<String> = configFile[i].split(' ');
 			offs.push([Std.parseFloat(animOffs[0]), Std.parseFloat(animOffs[1])]);
@@ -205,7 +177,6 @@ class Paths
 			anim: configFile[0],
 			minFps: Std.parseInt(framerates[0]),
 			maxFps: Std.parseInt(framerates[1]),
-			redAnim: Std.parseInt(configFile[2]),
 			offsets: offs
 		};
 		splashConfigs.set(skin, config);
@@ -214,9 +185,10 @@ class Paths
 
 	inline public static function mergeAllTextsNamed(path:String, defaultDirectory:String = null, allowDuplicates:Bool = false)
 	{
-		if(defaultDirectory == null) defaultDirectory = getSharedPath();
+		if(defaultDirectory == null) defaultDirectory = Paths.getSharedPath();
 		defaultDirectory = defaultDirectory.trim();
 		if(!defaultDirectory.endsWith('/')) defaultDirectory += '/';
+		if(!defaultDirectory.startsWith('assets/')) defaultDirectory = 'assets/$defaultDirectory';
 
 		var mergedList:Array<String> = [];
 		var paths:Array<String> = directoriesWithFile(defaultDirectory, path);
@@ -239,14 +211,11 @@ class Paths
 	}
 	inline public static function directoriesWithFile(path:String, fileToFind:String, mods:Bool = true)
 	{
-		var assetDirectory:String = 'assets/$path';
-		if (path.startsWith('assets/')) assetDirectory = path;
-		if (path.contains('hitsounds/')) assetDirectory = 'assets/shared/$path';
 		var foldersToCheck:Array<String> = [];
 		#if sys
-		if(FileSystem.exists(assetDirectory + fileToFind))
+		if(FileSystem.exists(path + fileToFind))
 		#end
-			foldersToCheck.push(assetDirectory + fileToFind);
+			foldersToCheck.push(path + fileToFind);
 
 		#if MODS_ALLOWED
 		if(mods)
@@ -254,18 +223,18 @@ class Paths
 			// Global mods first
 			for(mod in getGlobalMods())
 			{
-				var folder:String = Paths.mods(mod + '/' + path + fileToFind);
+				var folder:String = Paths.mods(mod + '/' + fileToFind);
 				if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(folder);
 			}
 
 			// Then "PsychEngine/mods/" main folder
-			var folder:String = Paths.mods(path + fileToFind);
-			if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(Paths.mods(path + fileToFind));
+			var folder:String = Paths.mods(fileToFind);
+			if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(Paths.mods(fileToFind));
 
 			// And lastly, the loaded mod's folder
 			if(currentModDirectory != null && currentModDirectory.length > 0)
 			{
-				var folder:String = Paths.mods(currentModDirectory + '/' + path + fileToFind);
+				var folder:String = Paths.mods(currentModDirectory + '/' + fileToFind);
 				if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(folder);
 			}
 		}
@@ -626,8 +595,17 @@ class Paths
 	public static function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false)
 	{
 		#if MODS_ALLOWED
-		if(FileSystem.exists(mods(currentModDirectory + '/' + key)) || FileSystem.exists(mods(key))) {
-			return true;
+		if(!ignoreMods)
+		{
+			for(mod in getGlobalMods())
+				if (FileSystem.exists(mods('$mod/$key')))
+					return true;
+
+			if (FileSystem.exists(mods(currentModDirectory + '/' + key)) || FileSystem.exists(mods(key)))
+				return true;
+			
+			if (FileSystem.exists(mods('$key')))
+				return true;
 		}
 		#end
 

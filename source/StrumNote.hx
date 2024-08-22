@@ -3,21 +3,21 @@ package;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
-import NoteShader.ColoredNoteShader;
+import flixel.util.FlxColor;
+import shaders.RGBPalette;
+import shaders.RGBPalette.RGBShaderReference;
 
 using StringTools;
 
 class StrumNote extends FlxSprite
 {
-	public var colorSwap:ColorSwap;
+	public var rgbShader:RGBShaderReference;
     	public var notes_angle:Null<Float> = null;
-	public var noteThing:Note;
 	public var resetAnim:Float = 0;
 	public var noteData:Int = 0;
 	public var direction:Float = 90;//plan on doing scroll directions soon -bb
 	public var downScroll:Bool = false;//plan on doing scroll directions soon -bb
 	public var sustainReduce:Bool = true;
-	public var rgbShaderEnabled:Bool = false;
 	
 	public var player:Int;
 	public var ogNoteskin:String = null;
@@ -25,58 +25,45 @@ class StrumNote extends FlxSprite
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
 		if(texture != value) {
-			texture = (value != null ? value : "NOTE_assets");
+			texture = (value != null ? value : "noteskins/NOTE_assets" + Note.getNoteSkinPostfix());
 			reloadNote();
 		}
 		return value;
 	}
+	public var useRGBShader:Bool = true;
 
-    	public function getAngle() {
-       		return (notes_angle == null ? angle : notes_angle);
-    	}
+	public function getAngle() {
+		return (notes_angle == null ? angle : notes_angle);
+	}
 
 	public function new(x:Float, y:Float, leData:Int, player:Int, ?inEditor:Bool = false) {
-		colorSwap = new ColorSwap();
-		shader = colorSwap.shader;
-		if (ClientPrefs.noteColorStyle == 'Char-Based' && PlayState.instance != null) shader = new ColoredNoteShader(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2], false, 10);
+		rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(leData));
+		rgbShader.enabled = false;
+		if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB || !ClientPrefs.enableColorShader) useRGBShader = false;
+		
+		var arr:Array<FlxColor> = ClientPrefs.arrowRGB[leData];
+		if(PlayState.isPixelStage) arr = ClientPrefs.arrowRGBPixel[leData];
+		if(leData <= arr.length && useRGBShader)
+		{
+			@:bypassAccessor
+			{
+				rgbShader.r = arr[0];
+				rgbShader.g = arr[1];
+				rgbShader.b = arr[2];
+			}
+		}
 		noteData = leData;
 		this.player = player;
 		this.noteData = leData;
 		super(x, y);
 
-		var skin:String = 'NOTE_assets';
-		if(PlayState.instance != null && PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1) skin = PlayState.SONG.arrowSkin;
-			
-			if(ClientPrefs.noteStyleThing == 'VS Nonsense V2') {
-				skin = 'Nonsense_NOTE_assets';
-			}
-			if(ClientPrefs.noteStyleThing == 'DNB 3D') {
-				skin = 'NOTE_assets_3D';
-			}
-			if(ClientPrefs.noteStyleThing == 'VS AGOTI') {
-				skin = 'AGOTINOTE_assets';
-			}
-			if(ClientPrefs.noteStyleThing == 'Doki Doki+') {
-				skin = 'NOTE_assets_doki';
-			}
-			if(ClientPrefs.noteStyleThing == 'TGT V4') {
-				skin = 'TGTNOTE_assets';
-			}
-			if (ClientPrefs.noteStyleThing != 'VS Nonsense V2' && ClientPrefs.noteStyleThing != 'DNB 3D' && ClientPrefs.noteStyleThing != 'VS AGOTI' && ClientPrefs.noteStyleThing != 'Doki Doki+' && ClientPrefs.noteStyleThing != 'TGT V4' && ClientPrefs.noteStyleThing != 'Default') {
-				skin = 'NOTE_assets_' + ClientPrefs.noteStyleThing.toLowerCase();
-			}
-			if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && (inEditor || PlayState.isPixelStage)) {
-				skin = ClientPrefs.noteStyleThing == 'TGT V4' ? 'RED_TGTNOTE_assets' : 'RED_NOTE_assets';
-			}
-			if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && ClientPrefs.noteStyleThing == 'TGT V4') {
-				skin = 'RED_TGTNOTE_assets';
-			}
-			if(ClientPrefs.noteColorStyle == 'Grayscale') {
-				skin = 'GRAY_NOTE_assets';
-			}
-			if(ClientPrefs.noteColorStyle == 'Char-Based') {
-				skin = 'NOTE_assets_colored';
-			}
+		var skin:String = null;
+		if(PlayState.SONG != null && PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1) skin = PlayState.SONG.arrowSkin;
+		else skin = Note.defaultNoteSkin;
+
+		var customSkin:String = skin + Note.getNoteSkinPostfix();
+		if(Paths.fileExists('images/$customSkin.png', IMAGE)) skin = customSkin;
+
 		texture = skin; //Load texture and anims
 		ogNoteskin = skin;
 
@@ -174,125 +161,56 @@ class StrumNote extends FlxSprite
 		if(resetAnim > 0) {
 			resetAnim -= elapsed;
 			if(resetAnim <= 0) {
-				playAnim('static');	
-				if (ClientPrefs.enableColorShader)
-				{
-           				if (ClientPrefs.noteColorStyle != 'Char-Based') resetHue(); // Add this line to reset the hue value
-						else disableRGB();
-				}
+				playAnim('static');
 				resetAnim = 0;
 			}
 		}
-		//if(animation.curAnim != null){ //my bad i was upset
-		if(animation.curAnim.name == 'confirm' && !PlayState.isPixelStage) {
-			centerOrigin();
-		//}
-		}
-
 		super.update(elapsed);
 	}
 
-	public function playAnim(anim:String, ?force:Bool = false, hue:Float = 0, sat:Float = 0, brt:Float = 0, ?enableRGBShader:Bool = false, ?bfRGB:Bool = false, ?gfRGB:Bool = false) {
+	public function playAnim(anim:String, ?force:Bool = false, ?r:FlxColor, ?g:FlxColor, ?b:FlxColor) {
 		animation.play(anim, force);
-		centerOffsets();
-		centerOrigin();
-		if(animation.curAnim == null || animation.curAnim.name == 'static' && ClientPrefs.enableColorShader) {
-			colorSwap.hue = 0;
-			colorSwap.saturation = 0;
-			colorSwap.brightness = 0;
-			if (ClientPrefs.noteColorStyle == 'Char-Based') disableRGB();
-		} else {
-		if (enableRGBShader && !bfRGB && !rgbShaderEnabled) enableRGB();
-		//stupid workaround but it works
-		if (enableRGBShader && bfRGB && !rgbShaderEnabled) enableRGBBF();
-		if (enableRGBShader && gfRGB) enableRGBGF();
-			if (noteData > -1 && noteData < ClientPrefs.arrowHSV.length && ClientPrefs.enableColorShader)
-			{
-				if (ClientPrefs.noteColorStyle == 'Normal')
-				{
-				colorSwap.hue = ClientPrefs.arrowHSV[noteData][0] / 360;
-				colorSwap.saturation = ClientPrefs.arrowHSV[noteData][1] / 100;
-				colorSwap.brightness = ClientPrefs.arrowHSV[noteData][2] / 100;
-				}
-				if (ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow')
-				{
-				colorSwap.hue = hue;
-				colorSwap.saturation = sat;
-				colorSwap.brightness = brt;
-				}
-			}
-			if(animation.curAnim.name == 'confirm' && !PlayState.isPixelStage) {
-				centerOrigin();
-			}
+		if(animation.curAnim != null)
+		{
+			centerOffsets();
+			centerOrigin();
 		}
-	}
-	public function resetHue() {
-  	// Reset the hue value to 0 (or any desired value)
-    	colorSwap.hue = 0;
-    	colorSwap.saturation = 0;
-    	colorSwap.brightness = 0;
-	}
-	public function disableRGB() {
-        if (Std.isOfType(this.shader, ColoredNoteShader))
-            cast(this.shader, ColoredNoteShader).enabled.value = [false];
-			rgbShaderEnabled = false;
-	}
-	public function enableRGB() {
-        if (Std.isOfType(this.shader, ColoredNoteShader))
-	    !PlayState.opponentChart ? cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2]) : cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2]);
-            cast(this.shader, ColoredNoteShader).enabled.value = [true];
-			rgbShaderEnabled = true;
-	}
-	public function enableRGBBF() {
-        if (Std.isOfType(this.shader, ColoredNoteShader))
-	    !PlayState.opponentChart ? cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2]) : cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2]);
-            cast(this.shader, ColoredNoteShader).enabled.value = [true];
-			rgbShaderEnabled = true;
-	}
-	public function enableRGBGF() {
-        if (Std.isOfType(this.shader, ColoredNoteShader) && PlayState.instance.gf != null)
-	    cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.gf.healthColorArray[0], PlayState.instance.gf.healthColorArray[1], PlayState.instance.gf.healthColorArray[2]);
-            cast(this.shader, ColoredNoteShader).enabled.value = [true];
-			rgbShaderEnabled = true;
+		if(useRGBShader)
+		{
+			rgbShader.enabled = (animation.curAnim != null && animation.curAnim.name != 'static');
+			if (r != null && g != null && b != null) updateRGBColors(r, g, b);
+		} else if (!useRGBShader && rgbShader != null) rgbShader.enabled = false;
 	}
 	public function updateNoteSkin(noteskin:String) {
 			if (texture == "noteskins/" + noteskin || noteskin == ogNoteskin || texture == noteskin) return; //if the noteskin to change to is the same as before then don't update it
 			if (noteskin != null && noteskin != '') texture = "noteskins/" + noteskin;
-			if(ClientPrefs.noteStyleThing == 'VS Nonsense V2') {
-				texture = 'Nonsense_NOTE_assets';
-			}
-			if(ClientPrefs.noteStyleThing == 'DNB 3D') {
-				texture = 'NOTE_assets_3D';
-			}
-			if(ClientPrefs.noteStyleThing == 'VS AGOTI') {
-				texture = 'AGOTINOTE_assets';
-			}
-			if(ClientPrefs.noteStyleThing == 'Doki Doki+') {
-				texture = 'NOTE_assets_doki';
-			}
-			if(ClientPrefs.noteStyleThing == 'TGT V4') {
-				texture = 'TGTNOTE_assets';
-			}
-			if (ClientPrefs.noteStyleThing != 'VS Nonsense V2' && ClientPrefs.noteStyleThing != 'DNB 3D' && ClientPrefs.noteStyleThing != 'VS AGOTI' && ClientPrefs.noteStyleThing != 'Doki Doki+' && ClientPrefs.noteStyleThing != 'TGT V4' && ClientPrefs.noteStyleThing != 'Default') {
-				texture = 'NOTE_assets_' + ClientPrefs.noteStyleThing.toLowerCase();
-			}
-			if(ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') {
-				texture = ClientPrefs.noteStyleThing == 'TGT V4' ? 'RED_TGTNOTE_assets' : 'RED_NOTE_assets';
-			}
-			if(ClientPrefs.noteColorStyle == 'Char-Based') {
-				texture = 'NOTE_assets_colored';
-			}
-			if(ClientPrefs.noteColorStyle == 'Grayscale') {
-				texture = 'GRAY_NOTE_assets';
-			}
 	}
-	public function updateRGBColors(?updateBF:Bool = false) {
-        	if (Std.isOfType(this.shader, ColoredNoteShader))
+	public function updateRGBColors(?r:FlxColor, ?g:FlxColor, ?b:FlxColor) {
+        if (rgbShader != null)
 		{
-			if (updateBF)
-	    			!PlayState.opponentChart ? cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2]) : cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2]);
-	    		else 
-			!PlayState.opponentChart ? cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.dad.healthColorArray[0], PlayState.instance.dad.healthColorArray[1], PlayState.instance.dad.healthColorArray[2]) : cast(this.shader, ColoredNoteShader).setColors(PlayState.instance.boyfriend.healthColorArray[0], PlayState.instance.boyfriend.healthColorArray[1], PlayState.instance.boyfriend.healthColorArray[2]);
+			rgbShader.r = r;
+			rgbShader.g = g;
+			rgbShader.b = b;
+		}
+	}
+	public function resetRGB()
+	{
+		if (rgbShader != null && animation.curAnim != null && animation.curAnim.name == 'static') 
+		{
+			switch (ClientPrefs.noteColorStyle)
+			{
+				case 'Quant-Based', 'Rainbow', 'Char-Based':
+				rgbShader.r = 0xFFF9393F;
+				rgbShader.g = 0xFFFFFFFF;
+				rgbShader.b = 0xFF651038;
+				case 'Grayscale':
+				rgbShader.r = 0xFFA0A0A0;
+				rgbShader.g = FlxColor.WHITE;
+				rgbShader.b = 0xFF424242;
+				default:
+				
+			}
+			rgbShader.enabled = false;
 		}
 	}
 }
