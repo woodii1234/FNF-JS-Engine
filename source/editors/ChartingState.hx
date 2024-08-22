@@ -3827,7 +3827,7 @@ class ChartingState extends MusicBeatState
 
 		if (note.noteType == "Hurt Note") color = CoolUtil.dominantColor(note); //Make black if hurt note
 
-		var spr:FlxSprite = new FlxSprite(note.x + (GRID_SIZE * 0.5) - 4, note.y + GRID_SIZE / 2).makeGraphic(8, height, susColor);
+		var spr:FlxSprite = new FlxSprite(note.x + (GRID_SIZE * 0.5) - 4, note.y + GRID_SIZE / 2).makeGraphic(8, height, color);
 		if (note.noteType != 'Hurt Note') {
 			spr.color = color;
 		}

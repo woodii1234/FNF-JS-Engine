@@ -11,6 +11,8 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import Character.Boyfriend;
 
+using StringTools;
+
 class GameOverSubstate extends MusicBeatSubstate
 {
 	public var boyfriend:Boyfriend;
