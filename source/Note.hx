@@ -164,6 +164,7 @@ class Note extends FlxSprite
 		return value;
 	}
 
+	var changeSize:Bool = false;
 	private function set_texture(value:String):String {
 		if (!pixelNote && texture != value)
 		{
@@ -176,7 +177,6 @@ class Note extends FlxSprite
 				frames = @:privateAccess Paths.noteSkinFramesMap.get(Paths.defaultSkin);
 				animation.copyFrom(@:privateAccess Paths.noteSkinAnimsMap.get(Paths.defaultSkin));
 			}
-			setGraphicSize(Std.int(width * 0.7));
 			updateHitbox();
 		}
 		else if (!pixelNote) return value;
@@ -462,7 +462,7 @@ class Note extends FlxSprite
 		if (isSustainNote) 
 		{
 			flipY = ClientPrefs.downScroll;
-			scale.set(0.7, animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? 1 : Conductor.stepCrochet * 0.0105 * (songSpeed * multSpeed) * sustainScale);
+			scale.y = (animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? 1 : Conductor.stepCrochet * 0.0105 * (songSpeed * multSpeed) * sustainScale);
 
 			if (PlayState.isPixelStage) 
 			{
@@ -630,7 +630,11 @@ class Note extends FlxSprite
 			}
 		}
 
-		if (!PlayState.isPixelStage) setGraphicSize(Std.int(width));
+		if (!PlayState.isPixelStage && !changeSize) 
+		{
+			changeSize = true;
+			setGraphicSize(Std.int(width * 0.7));
+		}
 		updateHitbox();
 
 		if (isSustainNote) {
