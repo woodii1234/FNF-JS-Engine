@@ -172,8 +172,6 @@ class FunkinLua {
 		set('altAnim', false);
 		set('gfSection', false);
 
-		set('shouldKillNotes', PlayState.instance.shouldKillNotes);
-
 		set('npsSpeedMult', PlayState.instance.npsSpeedMult);
 		set('polyphony', PlayState.instance.polyphony);
 

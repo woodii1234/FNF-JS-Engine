@@ -301,9 +301,6 @@ class PlayState extends MusicBeatState
 	public var minSpeed:Float = 0.1;
 	public var maxSpeed:Float = 10;
 
-	public var songWasLooped:Bool = false; //If the song was looped. Used in Troll Mode
-	public var shouldKillNotes:Bool = true; //Whether notes should be killed when you hit them. Disables automatically when in Troll Mode because you can't end the song anyway
-
 	private var npsIncreased:Bool = false;
 	private var npsDecreased:Bool = false;
 
@@ -610,9 +607,6 @@ class PlayState extends MusicBeatState
 
 		middleScroll = ClientPrefs.middleScroll || bothSides;
 		if (bothSides) opponentChart = false;
-
-		if (trollingMode || SONG.song.toLowerCase() == 'anti-cheat-song')
-			shouldKillNotes = false;
 
 		if (ClientPrefs.showcaseMode || ffmpegMode)
 			cpuControlled = true;
@@ -5014,34 +5008,34 @@ class PlayState extends MusicBeatState
 		stepsToDo = /* You need stepsToDo to change, otherwise the sections break. */ curStep = curBeat = curSection = 0; // Wow.
 		oldStep  = -1;
 
-			// And now it's time for the actual troll mode stuff
-			var TROLL_MAX_SPEED:Float = 2048; // Default is medium max speed
-			switch(ClientPrefs.trollMaxSpeed) {
-				case 'Lowest':
-					TROLL_MAX_SPEED = 256;
-				case 'Lower':
-					TROLL_MAX_SPEED = 512;
-				case 'Low':
-					TROLL_MAX_SPEED = 1024;
-				case 'Medium':
-					TROLL_MAX_SPEED = 2048;
-				case 'High':
-					TROLL_MAX_SPEED = 5120;
-				case 'Highest':
-					TROLL_MAX_SPEED = 10000;
-				default:
-					TROLL_MAX_SPEED = 1.79e+308; //no limit (until you eventually suffer the fate of crashing :trollface:)
-			}
+		// And now it's time for the actual troll mode stuff
+		var TROLL_MAX_SPEED:Float = 2048; // Default is medium max speed
+		switch(ClientPrefs.trollMaxSpeed) {
+			case 'Lowest':
+				TROLL_MAX_SPEED = 256;
+			case 'Lower':
+				TROLL_MAX_SPEED = 512;
+			case 'Low':
+				TROLL_MAX_SPEED = 1024;
+			case 'Medium':
+				TROLL_MAX_SPEED = 2048;
+			case 'High':
+				TROLL_MAX_SPEED = 5120;
+			case 'Highest':
+				TROLL_MAX_SPEED = 10000;
+			default:
+				TROLL_MAX_SPEED = 1.79e+308; //no limit (until you eventually suffer the fate of crashing :trollface:)
+		}
 
-			if (ClientPrefs.voiidTrollMode) {
-				playbackRate *= 1.05;
-			} else {
-				playbackRate += calculateTrollModeStuff(playbackRate);
-			}
+		if (ClientPrefs.voiidTrollMode) {
+			playbackRate *= 1.05;
+		} else {
+			playbackRate += calculateTrollModeStuff(playbackRate);
+		}
 
-			if (playbackRate >= TROLL_MAX_SPEED && ClientPrefs.trollMaxSpeed != 'Disabled') { // Limit playback rate to the troll mode max speed
-				playbackRate = TROLL_MAX_SPEED;
-			}
+		if (playbackRate >= TROLL_MAX_SPEED && ClientPrefs.trollMaxSpeed != 'Disabled') { // Limit playback rate to the troll mode max speed
+			playbackRate = TROLL_MAX_SPEED;
+		}
 	}
 
 	function calculateTrollModeStuff(pb:Float):Float {
