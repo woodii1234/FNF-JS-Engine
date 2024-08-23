@@ -3767,22 +3767,20 @@ class PlayState extends MusicBeatState
 		}
 
 		if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG) {
-		hitTxt.text = 'Notes Hit: ' + FlxStringUtil.formatMoney(totalNotesPlayed, false) + ' / ' + FlxStringUtil.formatMoney(totalNotes, false)
-		+ '\nNPS: ' + FlxStringUtil.formatMoney(nps, false) + '/' + FlxStringUtil.formatMoney(maxNPS, false)
-		+ '\nOpponent Notes Hit: ' + FlxStringUtil.formatMoney(enemyHits, false)
-		+ '\nOpponent NPS: ' + FlxStringUtil.formatMoney(oppNPS, false) + '/' + FlxStringUtil.formatMoney(maxOppNPS, false)
-		+ '\nTotal Note Hits: ' + FlxStringUtil.formatMoney(Math.abs(totalNotesPlayed + enemyHits), false)
-		+ '\nVideo Speedup: ' + Math.abs(playbackRate / playbackRate / playbackRate) + 'x';
+			hitTxt.text = 'Notes Hit: ' + FlxStringUtil.formatMoney(totalNotesPlayed, false) + ' / ' + FlxStringUtil.formatMoney(totalNotes, false)
+			+ '\nNPS: ' + FlxStringUtil.formatMoney(nps, false) + '/' + FlxStringUtil.formatMoney(maxNPS, false)
+			+ '\nOpponent Notes Hit: ' + FlxStringUtil.formatMoney(enemyHits, false)
+			+ '\nOpponent NPS: ' + FlxStringUtil.formatMoney(oppNPS, false) + '/' + FlxStringUtil.formatMoney(maxOppNPS, false)
+			+ '\nTotal Note Hits: ' + FlxStringUtil.formatMoney(Math.abs(totalNotesPlayed + enemyHits), false)
+			+ '\nVideo Speedup: ' + Math.abs(playbackRate / playbackRate / playbackRate) + 'x';
 		}
 
-		if (judgeCountUpdateFrame > 0) judgeCountUpdateFrame = 0;
-		if (compactUpdateFrame > 0) compactUpdateFrame = 0;
-		if (scoreTxtUpdateFrame > 0) scoreTxtUpdateFrame = 0;
-		if (iconBopsThisFrame > 0) iconBopsThisFrame = 0;
-		if (popUpsFrame > 0) popUpsFrame = 0;
-		if (missRecalcsPerFrame > 0) missRecalcsPerFrame = 0;
-		if (charAnimsFrame > 0) charAnimsFrame = 0;
-		if (oppAnimsFrame > 0) oppAnimsFrame = 0;
+
+		// set all frames to 0
+		for (i in [judgeCountUpdateFrame, compactUpdateFrame, scoreTxtUpdateFrame, iconBopsThisFrame, popUpsFrame, missRecalcsPerFrame, charAnimsFrame, oppAnimsFrame])
+			if (i > 0)
+				i = 0;
+
 		strumsHit = [false, false, false, false, false, false, false, false];
 		if (splashesPerFrame[0] > 0 || splashesPerFrame[1] > 0) splashesPerFrame = [0, 0];
 
@@ -3798,8 +3796,10 @@ class PlayState extends MusicBeatState
 			updateScore(); //Update scoreTxt one last time
 		}
 
-			if (!opponentChart) displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, health, 0.1 / ((!ffmpegMode ? ClientPrefs.framerate : targetFPS) / 60)) : health;
-			else displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, maxHealth - health, 0.1 / ((!ffmpegMode ? ClientPrefs.framerate : targetFPS) / 60)) : maxHealth - health;
+		if (!opponentChart) 
+			displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, health, 0.1 / ((!ffmpegMode ? ClientPrefs.framerate : targetFPS) / 60)) : health;
+		else 
+			displayedHealth = ClientPrefs.smoothHealth ? FlxMath.lerp(displayedHealth, maxHealth - health, 0.1 / ((!ffmpegMode ? ClientPrefs.framerate : targetFPS) / 60)) : maxHealth - health;
 		
 		setOnLuas('curDecStep', curDecStep);
 		setOnLuas('curDecBeat', curDecBeat);
