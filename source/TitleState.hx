@@ -1,14 +1,9 @@
 package;
 
-#if desktop
-import sys.thread.Thread;
-#end
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.input.keyboard.FlxKey;
-import flixel.addons.display.FlxGridOverlay;
-import flixel.addons.transition.FlxTransitionSprite.GraphicTransTileDiamond;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.transition.TransitionData;
 import haxe.Json;
@@ -83,25 +78,10 @@ class TitleState extends MusicBeatState
 		Paths.clearUnusedMemory();
 
 		MusicBeatState.windowNameSuffix = " - Title Screen";
-
+		// ???
 		MusicBeatState.windowNameSuffix = "";
 
-		FlxG.fixedTimestep = false;
-
-		#if LUA_ALLOWED
-		Paths.pushGlobalMods();
-		#end
-		// Just to load a mod on start up if ya got one. For mods that change the menu music and bg
-		WeekData.loadTheFirstEnabledMod();
 		MusicBeatState.windowNamePrefix = Assets.getText(Paths.txt("windowTitleBase", "preload"));
-
-		FlxG.game.focusLostFramerate = 60;
-		FlxG.sound.muteKeys = muteKeys;
-		FlxG.sound.volumeDownKeys = volumeDownKeys;
-		FlxG.sound.volumeUpKeys = volumeUpKeys;
-		FlxG.keys.preventDefaultKeys = [TAB];
-
-		PlayerSettings.init();
 
 		curWacky = FlxG.random.getObject(getIntroTextShit());
 
@@ -109,10 +89,6 @@ class TitleState extends MusicBeatState
 
 		swagShader = new ColorSwap();
 		super.create();
-
-		FlxG.save.bind('funkin', CoolUtil.getSavePath());
-
-		ClientPrefs.loadPrefs();
 
 		#if (CHECK_FOR_UPDATES)
 		if(ClientPrefs.checkForUpdates && !closedState) {
@@ -207,10 +183,10 @@ class TitleState extends MusicBeatState
 			}
 		}
 
-		switch(ClientPrefs.daMenuMusic)
+		switch(ClientPrefs.daMenuMusic) // change this if you're making a source mod, like add your own or something
 		{
-			case 'Mashup' | 'VS Impostor' | 'VS Nonsense V2' | 'Base Game' | 'Default': 
-				Conductor.changeBPM(titleJSON.bpm);
+			case 'Mashup' | 'VS Impostor' | 'VS Nonsense V2': 
+				Conductor.changeBPM(102);
 			case 'Dave & Bambi':
 				Conductor.changeBPM(148);
 			case 'Dave & Bambi (Old)':
@@ -219,6 +195,10 @@ class TitleState extends MusicBeatState
 				Conductor.changeBPM(120);
 			case 'Anniversary':
 				Conductor.changeBPM(115);
+			case 'Base Game' | 'Default': // just in case you're not making a source mod & wanna change this
+				Conductor.changeBPM(titleJSON.bpm);
+			default: // fallback
+				Conductor.changeBPM(titleJSON.bpm);
 		}
 		persistentUpdate = true;
 
@@ -292,10 +272,6 @@ class TitleState extends MusicBeatState
 		titleText.animation.play('idle');
 		titleText.updateHitbox();
 		add(titleText);
-
-		var logo:FlxSprite = new FlxSprite().loadGraphic(Paths.image('logo'));
-		logo.screenCenter();
-		logo.antialiasing = ClientPrefs.globalAntialiasing;
 
 		credGroup = new FlxGroup();
 		add(credGroup);

@@ -1,6 +1,5 @@
 package options;
 
-import flash.text.TextField;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -11,7 +10,6 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import lime.utils.Assets;
 import flixel.FlxSubState;
-import flash.text.TextField;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.util.FlxSave;
@@ -43,6 +41,13 @@ class MiscSettingsSubState extends BaseOptionsMenu
 		var option:Option = new Option('Always Play Cutscenes', //Name
 			'If checked, cutscenes will always play even if you\nenter the song through Freeplay.', //Description
 			'alwaysTriggerCutscene', //Save data variable name
+			'bool', //Variable type
+			false); //Default value
+		addOption(option);
+
+		var option:Option = new Option('Disable Splash Screen', //Name
+			'If checked, the splash screen gets disabled on startup.', //Description
+			'disableSplash', //Save data variable name
 			'bool', //Variable type
 			false); //Default value
 		addOption(option);

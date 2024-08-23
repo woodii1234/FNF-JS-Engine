@@ -23,7 +23,7 @@ class Main extends Sprite {
 	final game = {
 		width: 1280,
 		height: 720,
-		initialState: StartupState.new,
+		initialState: InitState.new,
 		zoom: -1.0,
 		framerate: 60,
 		skipSplash: true,

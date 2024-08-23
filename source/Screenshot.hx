@@ -5,8 +5,10 @@ import lime.app.Application;
 import lime.graphics.Image;
 import flixel.FlxG;
 import lime.ui.Window;
+#if sys
 import sys.FileSystem;
 import sys.io.FileOutput;
+#end
 
 class Screenshot {
 	var x:Int;
@@ -59,6 +61,7 @@ class Screenshot {
 	var byteData:Bytes;
 
 	public function save(path:String = "", name:String = '') {
+		#if sys
 		getScreen();
 
 		if(FileSystem.exists(target)) {
@@ -91,5 +94,9 @@ class Screenshot {
 		} else {
 			return false;
 		}
+		#else
+		trace('Cannot save on non-Sys platforms!');
+		return false;
+		#end
 	}
 }
