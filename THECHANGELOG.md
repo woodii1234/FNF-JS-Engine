@@ -1,8 +1,13 @@
-1.31.0;
+1.32.0;
 
-FPS RAM Tracker now tracks GC memory usage instead of total memory (by system32unknown)
-The Spam Multiplier limit for Note Spam Mode (in the editor) is now 999999
-Crash Handler improvements (by YoshiCrafter29, Ne_Eo, MAJigsaw77 and mcagabe19)
-Scroll Speed gameplay changer's max value has been increased to 128/1024
-Option scroll speed now changes depending on the option's current value
-2 new tips, and 1 old tip has been edited!
+Removed the Results Screen (Unused and broken in the latest versions.)
+
+(!) The Note Color System has been upgraded to the 0.7.X system!! (YOU WILL NEED TO ENTER THE VISUALS & UI MENU TO RESET YOUR NOTESKIN AND SPLASH SKINS TO DEFAULT AS MOST OF THE OPTIONS YOU ALREADY USE HAVE BEEN REMOVED!) If you don't want to use the RGB Shaders the Classic noteskin is also available!
+
+(almost) All of the num1 sprites (and their pixel variants) have been updated to their 0.3.X version
+Botplay is now automatically enabled if you turn on Rendering Mode
+Fixed a possible issue where if you went into another state or paused the game immediately after a big lag spike, a resync would trigger forcing the song to keep playing anyway (However an oversight from this is you have to wait slightly longer when unpausing before a song actually starts playing again. I will try to fix this in the future!)
+Fixed Blammed Erect having the incorrect events
+Fixed bf-christmas having funky offsets for the Left & Down animations
+Fixed texts made using LUA going to camGame
+Fixed vocal resync not working in EditorPlayState

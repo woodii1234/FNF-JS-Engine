@@ -55,6 +55,8 @@ import sys.io.File;
 #end
 
 import Character.CharacterFile;
+import shaders.RGBPalette;
+import shaders.RGBPalette.RGBShaderReference;
 
 @:access(flixel.sound.FlxSound._sound)
 @:access(openfl.media.Sound.__buffer)
@@ -189,9 +191,6 @@ class ChartingState extends MusicBeatState
 	var value2InputText:FlxUIInputText;
 	var currentSongName:String;
 	var autosaveIndicator:FlxSprite;
-
-	var lilBuddiesColorSwap:ColorSwap;
-	var lilBuddies2ColorSwap:ColorSwap;
 	var hitsound:FlxSound = null;
 
 	var zoomTxt:FlxText;
@@ -293,7 +292,8 @@ class ChartingState extends MusicBeatState
 		specialEventsName = _song.specialEventsName;
 		hitsound = FlxG.sound.load(Paths.sound("hitsounds/" + 'osu!mania'));
 		hitsound.volume = 1;
-
+		
+		if (Note.globalRgbShaders.length > 0) Note.globalRgbShaders = [];
 		Paths.initDefaultSkin(_song.arrowSkin, true);
 
 		#if desktop
@@ -315,7 +315,7 @@ class ChartingState extends MusicBeatState
 		lilStage.scrollFactor.set();
 		add(lilStage);
 
-		lilBf = new FlxSprite(32, 432).loadGraphic(Paths.image(ClientPrefs.noteColorStyle == 'Normal' ? "chartEditor/lilBf" : "chartEditor/lilBfRed"), true, 300, 256);
+		lilBf = new FlxSprite(32, 432).loadGraphic(Paths.image("chartEditor/lilBf"), true, 300, 256);
 		lilBf.animation.add("idle", [0, 1], 12, true);
 		lilBf.animation.add("0", [3, 4, 5], 12, false);
 		lilBf.animation.add("1", [6, 7, 8], 12, false);
@@ -329,11 +329,7 @@ class ChartingState extends MusicBeatState
 		lilBf.scrollFactor.set();
 		add(lilBf);
 
-
-		lilBuddiesColorSwap = new ColorSwap();
-		lilBuddies2ColorSwap = new ColorSwap();
-		lilBf.shader = lilBuddiesColorSwap.shader;
-		lilOpp = new FlxSprite(32, 432).loadGraphic(Paths.image(ClientPrefs.noteColorStyle == 'Normal' ? "chartEditor/lilOpp" : "chartEditor/lilOppRed"), true, 300, 256);
+		lilOpp = new FlxSprite(32, 432).loadGraphic(Paths.image("chartEditor/lilOpp"), true, 300, 256);
 		lilOpp.animation.add("idle", [0, 1], 12, true);
 		lilOpp.animation.add("0", [3, 4, 5], 12, false);
 		lilOpp.animation.add("1", [6, 7, 8], 12, false);
@@ -345,7 +341,6 @@ class ChartingState extends MusicBeatState
 		}
 		lilOpp.scrollFactor.set();
 		add(lilOpp);
-		lilOpp.shader = lilBuddies2ColorSwap.shader;
 		lilBf.visible = FlxG.save.data.lilBuddies;
 		lilOpp.visible = FlxG.save.data.lilBuddies;
 		lilStage.visible = FlxG.save.data.lilBuddies;
@@ -376,10 +371,11 @@ class ChartingState extends MusicBeatState
 		
 		selectionNote = new SelectionNote(0, 0, 0);
 		selectionNote.visible = false;
-		var skin:String = 'NOTE_assets';
+		var skin:String = Note.defaultNoteSkin + Note.getNoteSkinPostfix();
 		if(_song.arrowSkin != null && _song.arrowSkin.length > 1) skin = _song.arrowSkin;
 		selectionNote.texture = skin;
 		selectionNote.setGraphicSize(GRID_SIZE, GRID_SIZE);
+		selectionNote.updateHitbox();
 		selectionNote.playAnim('static', true);
 		selectionNote.alpha = 0.75;
 		add(selectionNote);
@@ -871,6 +867,10 @@ class ChartingState extends MusicBeatState
 			CoolUtil.coolError("The engine failed to load the JSON! \nEither it doesn't exist, or the name doesn't match with the one you're putting?", "JS Engine Anti-Crash Tool");
 		}
 
+	var gameOverCharacterInputText:FlxUIInputText;
+	var gameOverSoundInputText:FlxUIInputText;
+	var gameOverLoopInputText:FlxUIInputText;
+	var gameOverEndInputText:FlxUIInputText;
 	var creditInputText:FlxUIInputText;
 	var creditPathInputText:FlxUIInputText;
 	var creditIconInputText:FlxUIInputText;
@@ -895,6 +895,41 @@ class ChartingState extends MusicBeatState
 		winNameInputText = new FlxUIInputText(10, 120, 100, _song.windowName, 8);
 		blockPressWhileTypingOn.push(winNameInputText);
 		winNameInputText.focusGained = () -> FlxG.stage.window.textInputEnabled = true;
+
+		//
+		gameOverCharacterInputText = new FlxUIInputText(10, winNameInputText.y + 30, 150, _song.gameOverChar != null ? _song.gameOverChar : '', 8);
+		blockPressWhileTypingOn.push(gameOverCharacterInputText);
+		
+		gameOverSoundInputText = new FlxUIInputText(10, gameOverCharacterInputText.y + 35, 150, _song.gameOverSound != null ? _song.gameOverSound : '', 8);
+		blockPressWhileTypingOn.push(gameOverSoundInputText);
+		
+		gameOverLoopInputText = new FlxUIInputText(10, gameOverSoundInputText.y + 35, 150, _song.gameOverLoop != null ? _song.gameOverLoop : '', 8);
+		blockPressWhileTypingOn.push(gameOverLoopInputText);
+		
+		gameOverEndInputText = new FlxUIInputText(10, gameOverLoopInputText.y + 35, 150, _song.gameOverEnd != null ? _song.gameOverEnd : '', 8);
+		blockPressWhileTypingOn.push(gameOverEndInputText);
+		//
+
+		var check_disableNoteRGB:FlxUICheckBox = new FlxUICheckBox(10, 270, null, null, "Disable Note RGB", 100);
+		check_disableNoteRGB.checked = (_song.disableNoteRGB == true);
+		check_disableNoteRGB.callback = function()
+		{
+			_song.disableNoteRGB = check_disableNoteRGB.checked;
+			updateGrid();
+			//trace('CHECKED!');
+		};
+
+		tab_group_songdata.add(gameOverCharacterInputText);
+		tab_group_songdata.add(gameOverSoundInputText);
+		tab_group_songdata.add(gameOverLoopInputText);
+		tab_group_songdata.add(gameOverEndInputText);
+
+		tab_group_songdata.add(check_disableNoteRGB);
+
+		tab_group_songdata.add(new FlxText(gameOverCharacterInputText.x, gameOverCharacterInputText.y - 15, 0, 'Game Over Character Name:'));
+		tab_group_songdata.add(new FlxText(gameOverSoundInputText.x, gameOverSoundInputText.y - 15, 0, 'Game Over Death Sound (sounds/):'));
+		tab_group_songdata.add(new FlxText(gameOverLoopInputText.x, gameOverLoopInputText.y - 15, 0, 'Game Over Loop Music (music/):'));
+		tab_group_songdata.add(new FlxText(gameOverEndInputText.x, gameOverEndInputText.y - 15, 0, 'Game Over Retry Music (music/):'));
 
 		tab_group_songdata.add(creditInputText);
 		tab_group_songdata.add(creditPathInputText);
@@ -2497,7 +2532,7 @@ class ChartingState extends MusicBeatState
 						}
 						else
 						{
-							selectionNote.playAnim('pressed' + selectionNote.noteData, true, 0.15);
+							selectionNote.playAnim('pressed' + selectionNote.noteData, true);
 							//trace('tryin to delete note...');
 							deleteNote(note);
 						}
@@ -2521,7 +2556,7 @@ class ChartingState extends MusicBeatState
 					for(i in 0...Std.int(addCount)) {
 						addNote(curSelectedNote[0] + (15000/Conductor.bpm)/stepperStackOffset.value, curSelectedNote[1] + Math.floor(stepperStackSideOffset.value), currentType);
 					}
-					selectionNote.playAnim('confirm' + selectionNote.noteData, true, 0.15);
+					selectionNote.playAnim('confirm' + selectionNote.noteData, true);
 					if (soundEffectsCheck.checked) FlxG.sound.play(Paths.sound('addedNote'), 0.7);
 
 				//updateGrid(false);
@@ -2698,6 +2733,7 @@ class ChartingState extends MusicBeatState
 					pauseVocals();
 					lilBf.animation.play("idle");
 					lilOpp.animation.play("idle");
+					lilBf.color = lilOpp.color = FlxColor.WHITE;
 					if (idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.unpauseMusic(2);
 				}
 				else
@@ -2712,6 +2748,7 @@ class ChartingState extends MusicBeatState
 					if (idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.pauseMusic();
 					lilBf.animation.play("idle");
 					lilOpp.animation.play("idle");
+					lilBf.color = lilOpp.color = FlxColor.WHITE;
 				}
 			}
 
@@ -2750,6 +2787,7 @@ class ChartingState extends MusicBeatState
 				FlxG.sound.music.pause();
 				lilBf.animation.play("idle");
 				lilOpp.animation.play("idle");
+				lilBf.color = lilOpp.color = FlxColor.WHITE;
 				if (!mouseQuant)
 					FlxG.sound.music.time -= (FlxG.mouse.wheel * Conductor.stepCrochet*0.8);
 				else
@@ -2775,6 +2813,7 @@ class ChartingState extends MusicBeatState
 				if (idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.unpauseMusic(2);
 				lilBf.animation.play("idle");
 				lilOpp.animation.play("idle");
+				lilBf.color = lilOpp.color = FlxColor.WHITE;
 				FlxG.sound.music.pause();
 
 				var holdingShift:Float = 1;
@@ -2824,7 +2863,7 @@ class ChartingState extends MusicBeatState
 
 			//AWW YOU MADE IT SEXY <3333 THX SHADMAR
 
-			if(!blockInput){
+			if(!blockInput && !FlxG.keys.pressed.CONTROL){
 				if(FlxG.keys.justPressed.RIGHT){
 					curQuant++;
 					if(curQuant>quantizations.length-1)
@@ -2842,7 +2881,7 @@ class ChartingState extends MusicBeatState
 				}
 				quant.animation.play('q', true, false, curQuant);
 			}
-			if(vortex && !blockInput){
+			if(vortex && !blockInput && !FlxG.keys.pressed.CONTROL){
 				var controlArray:Array<Bool> = [FlxG.keys.justPressed.ONE, FlxG.keys.justPressed.TWO, FlxG.keys.justPressed.THREE, FlxG.keys.justPressed.FOUR,
 											   FlxG.keys.justPressed.FIVE, FlxG.keys.justPressed.SIX, FlxG.keys.justPressed.SEVEN, FlxG.keys.justPressed.EIGHT];
 
@@ -2864,9 +2903,7 @@ class ChartingState extends MusicBeatState
 					if (idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.unpauseMusic(2);
 
 					updateCurStep();
-					//FlxG.sound.music.time = (Math.round(curStep/quants[curQuant])*quants[curQuant]) * Conductor.stepCrochet;
-
-						//(Math.floor((curStep+quants[curQuant]*1.5/(quants[curQuant]/2))/quants[curQuant])*quants[curQuant]) * Conductor.stepCrochet;//snap into quantization
+					
 					var time:Float = FlxG.sound.music.time;
 					var beat:Float = curDecBeat;
 					var snap:Float = quantization / 4;
@@ -3015,10 +3052,11 @@ class ChartingState extends MusicBeatState
 					var noteDataToCheck:Int = note.noteData;
 					if(noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) noteDataToCheck += 4;
 					if ((ClientPrefs.enableColorShader || ClientPrefs.showNotes && ClientPrefs.enableColorShader) && vortex)
-						strumLineNotes.members[noteDataToCheck].playAnim('confirm', true, note.colorSwap.hue, note.colorSwap.saturation, note.colorSwap.brightness);
+						strumLineNotes.members[noteDataToCheck].playAnim('confirm', true, note.rgbShader.r, note.rgbShader.g, note.rgbShader.b);
 					else
 						strumLineNotes.members[noteDataToCheck].playAnim('confirm', true);
-						strumLineNotes.members[noteDataToCheck].resetAnim = ((note.sustainLength / 1000) + 0.15) / playbackSpeed;
+					strumLineNotes.members[noteDataToCheck].resetAnim = ((note.sustainLength / 1000) + 0.15) / playbackSpeed;
+
 					if(!playedSound[data]) {
 						if((playSoundBf.checked && note.mustPress) || (playSoundDad.checked && !note.mustPress)) {
 							if(_song.player1 == 'gf') { //Easter egg
@@ -3035,9 +3073,7 @@ class ChartingState extends MusicBeatState
 						if (note.mustPress && lilBuddiesBox.checked) {
 						if (ClientPrefs.enableColorShader || ClientPrefs.showNotes && ClientPrefs.enableColorShader) 
 						{
-						lilBuddiesColorSwap.hue = note.colorSwap.hue;
-						lilBuddiesColorSwap.saturation = note.colorSwap.saturation;
-						lilBuddiesColorSwap.brightness = note.colorSwap.brightness;
+							lilBf.color = note.rgbShader.r;
 						}
 						lilBf.animation.play("" + (data % 4), true);
 						}
@@ -3045,11 +3081,9 @@ class ChartingState extends MusicBeatState
 						{
 							if (ClientPrefs.enableColorShader || ClientPrefs.showNotes && ClientPrefs.enableColorShader) 
 							{
-							lilBuddies2ColorSwap.hue = note.colorSwap.hue;
-							lilBuddies2ColorSwap.saturation = note.colorSwap.saturation;
-							lilBuddies2ColorSwap.brightness = note.colorSwap.brightness;
+								lilOpp.color = note.rgbShader.r;
 							}
-						lilOpp.animation.play("" + (data % 4), true);
+							lilOpp.animation.play("" + (data % 4), true);
 						}
 						if(note.mustPress != _song.notes[curSec].mustHitSection)
 						{
@@ -3412,8 +3446,9 @@ class ChartingState extends MusicBeatState
 		if (_song.notes[sec] != null)
 		{
 			if (FlxG.sound.music.playing && idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.pauseMusic();
-				lilBf.animation.play("idle");
-				lilOpp.animation.play("idle");
+			lilBf.animation.play("idle");
+			lilOpp.animation.play("idle");
+			lilBf.color = lilOpp.color = FlxColor.WHITE;
 			curSec = sec;
 			if (updateMusic)
 			{
@@ -3722,7 +3757,7 @@ class ChartingState extends MusicBeatState
 		var daStrumTime = i[0];
 		var daSus:Dynamic = i[2];
 
-		var note:Note = new Note(daNoteInfo % 4);
+		var note:Note = new Note(daStrumTime, daNoteInfo % 4);
 		note.strumTime = daStrumTime;
 		note.noteData = daNoteInfo % 4;
 		if(daSus != null) { //Common note
@@ -3736,9 +3771,8 @@ class ChartingState extends MusicBeatState
 			}
 			note.sustainLength = daSus;
 			note.noteType = i[3];
-			if (note.noteType == 'Hurt Note') note.texture = 'HURTNOTE_assets';
-			if (ClientPrefs.noteColorStyle == 'Quant-Based') CoolUtil.checkNoteQuant(note, note.strumTime);
 			note.animation.play(Note.colArray[daNoteInfo % 4] + 'Scroll');
+			if (ClientPrefs.enableColorShader) note.updateRGBColors();
 		} else { //Event note
 			note.loadGraphic(Paths.image('eventArrow'));
 			note.eventName = getEventName(i[1]);
@@ -3750,6 +3784,7 @@ class ChartingState extends MusicBeatState
 			}
 			note.noteData = -1;
 			daNoteInfo = -1;
+			note.useRGBShader = false;
 		}
 
 		note.setGraphicSize(GRID_SIZE, GRID_SIZE);
@@ -3789,24 +3824,13 @@ class ChartingState extends MusicBeatState
 		if(height < minHeight) height = minHeight;
 		if(height < 1) height = 1; //Prevents error of invalid height
 
-		var colorSwap = new ColorSwap();
-		var shader = colorSwap.shader;
+		var color:FlxColor = (!PlayState.isPixelStage) ? ClientPrefs.arrowRGB[note.noteData][0] : ClientPrefs.arrowRGBPixel[note.noteData][0];
 
-		var colorList:Array<String> = ['c24b99', '00ffff', '12fa05', 'f9393f'];
-		if (PlayState.isPixelStage) colorList = ['e276ff', '3dcaff', '71e300', 'ff884e'];
-		var susColor:Int = Std.parseInt('0xff' + colorList[note.noteData]);
+		if (note.noteType == "Hurt Note") color = CoolUtil.dominantColor(note); //Make black if hurt note
 
-		var hueColor = ClientPrefs.arrowHSV[note.noteData][0] / 360;
-		var saturationColor = ClientPrefs.arrowHSV[note.noteData][1] / 100;
-		var brightnessColor = ClientPrefs.arrowHSV[note.noteData][2] / 100;
-		if (note.noteType == "Hurt Note") susColor = CoolUtil.dominantColor(note); //Make black if hurt note
-
-		var spr:FlxSprite = new FlxSprite(note.x + (GRID_SIZE * 0.5) - 4, note.y + GRID_SIZE / 2).makeGraphic(8, height, susColor);
+		var spr:FlxSprite = new FlxSprite(note.x + (GRID_SIZE * 0.5) - 4, note.y + GRID_SIZE / 2).makeGraphic(8, height, color);
 		if (note.noteType != 'Hurt Note') {
-			spr.shader = colorSwap.shader;
-			colorSwap.hue = hueColor;
-			colorSwap.saturation = saturationColor;
-			colorSwap.brightness = brightnessColor;
+			spr.color = color;
 		}
 		return spr;
 	}
@@ -4263,6 +4287,7 @@ class ChartingState extends MusicBeatState
 			Paths.splashSkinAnimsMap.clear();
 			Paths.splashConfigs.clear();
 			Paths.splashAnimCountMap.clear();
+			Note.globalRgbShaders = [];
 
 		    super.destroy();
 	    }
@@ -4292,10 +4317,11 @@ class AttachedFlxText extends FlxText
 
 class SelectionNote extends FlxSprite
 {
-	public var colorSwap:ColorSwap;
+	public var rgbShader:RGBShaderReference;
 	public var resetAnim:Float = 0;
 	public var noteData:Int = 0;
 	public var size:Int = 40;
+	public var useRGBShader:Bool = true;
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
@@ -4307,8 +4333,20 @@ class SelectionNote extends FlxSprite
 	}
 
 	public function new(x:Float, y:Float, leData:Int) {
-		colorSwap = new ColorSwap();
-		shader = colorSwap.shader;
+		rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(leData));
+		rgbShader.enabled = false;
+		if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB || !ClientPrefs.enableColorShader) useRGBShader = false;
+		var arr:Array<FlxColor> = ClientPrefs.arrowRGB[leData];
+		if(PlayState.isPixelStage) arr = ClientPrefs.arrowRGBPixel[leData];
+		if(leData <= arr.length && useRGBShader)
+		{
+			@:bypassAccessor
+			{
+				rgbShader.r = arr[0];
+				rgbShader.g = arr[1];
+				rgbShader.b = arr[2];
+			}
+		}
 		noteData = leData;
 		super(x, y);
 
@@ -4376,53 +4414,44 @@ class SelectionNote extends FlxSprite
 	}
 
 	override function update(elapsed:Float) {
+		if (ClientPrefs.ffmpegMode) elapsed = 1 / ClientPrefs.targetFPS;
 		if(resetAnim > 0) {
 			resetAnim -= elapsed;
 			if(resetAnim <= 0) {
-				playAnim('static' + noteData);	
-				if (ClientPrefs.enableColorShader)
-				{
-           				if (ClientPrefs.noteColorStyle != 'Char-Based') resetHue();
-				}
+				playAnim('static' + noteData);
 				resetAnim = 0;
 			}
 		}
+		super.update(elapsed);
 	}
 
-	public function playAnim(anim:String, ?force:Bool = false, resetTime:Float = 0, hue:Float = 0, sat:Float = 0, brt:Float = 0) {
-		resetAnim = resetTime;
+	public function playAnim(anim:String, ?force:Bool = false) {
 		animation.play(anim, force);
-		centerOffsets();
-		centerOrigin();
-		if(animation.curAnim == null || animation.curAnim.name == 'static' + noteData && ClientPrefs.enableColorShader) {
-			colorSwap.hue = 0;
-			colorSwap.saturation = 0;
-			colorSwap.brightness = 0;
-		} else {
-			if (noteData > -1 && noteData < ClientPrefs.arrowHSV.length && ClientPrefs.enableColorShader)
-			{
-				if (ClientPrefs.noteColorStyle == 'Normal')
-				{
-					colorSwap.hue = ClientPrefs.arrowHSV[noteData][0] / 360;
-					colorSwap.saturation = ClientPrefs.arrowHSV[noteData][1] / 100;
-					colorSwap.brightness = ClientPrefs.arrowHSV[noteData][2] / 100;
-				}
-				if (ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow')
-				{
-					colorSwap.hue = hue;
-					colorSwap.saturation = sat;
-					colorSwap.brightness = brt;
-				}
-			}
-			if(animation.curAnim.name == 'confirm' + noteData && !PlayState.isPixelStage) {
-				centerOrigin();
-			}
+		if(animation.curAnim != null)
+		{
+			centerOffsets();
+			centerOrigin();
+		}
+		resetAnim = 0.15;
+		if (rgbShader != null && useRGBShader)
+		{
+			rgbShader.enabled = (animation.curAnim != null && animation.curAnim.name != 'static');
+			updateRGBColors();
 		}
 	}
-	public function resetHue() {
-  	// Reset the hue value to 0 (or any desired value)
-    	colorSwap.hue = 0;
-    	colorSwap.saturation = 0;
-    	colorSwap.brightness = 0;
+	public function updateRGBColors() {
+		if (rgbShader == null || rgbShader != null && !rgbShader.enabled) return;
+		
+		var arr:Array<FlxColor> = ClientPrefs.arrowRGB[noteData];
+		if(PlayState.isPixelStage) arr = ClientPrefs.arrowRGBPixel[noteData];
+		if(noteData <= arr.length)
+		{
+			@:bypassAccessor
+			{
+				rgbShader.r = arr[0];
+				rgbShader.g = arr[1];
+				rgbShader.b = arr[2];
+			}
+		}
 	}
 }

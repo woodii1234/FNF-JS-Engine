@@ -5,80 +5,84 @@ import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 import flixel.math.FlxMath;
-import NoteShader.ColoredNoteShader;
 import flixel.util.FlxColor;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.FlxCamera;
+import shaders.RGBPalette;
+import shaders.RGBPalette.RGBShaderReference;
+
+using StringTools;
 
 typedef NoteSplashConfig = {
 	anim:String,
 	minFps:Int,
 	maxFps:Int,
-	redAnim:Int,
 	offsets:Array<Array<Float>>
 }
 
 class NoteSplash extends FlxSprite
 {
-	public var colorSwap:ColorSwap = null;
-	public var rgbShader:ColoredNoteShader = null;
+	public var rgbShader:PixelSplashShaderRef;
 	private var idleAnim:String;
 	private var textureLoaded:String = null;
+
+	public static var defaultNoteSplash(default, never):String = 'noteSplashes/noteSplashes';
 
 	public function new(x:Float = 0, y:Float = 0, ?note:Int = 0) {
 		super(x, y);
 
-		var skin:String = 'noteSplashes';
+		var skin:String = null;
 		if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
-		if (ClientPrefs.splashType != 'Psych Engine') skin = 'noteSplashes-' + ClientPrefs.splashType.toLowerCase();
-		
-		colorSwap = new ColorSwap();
-		shader = colorSwap.shader;
-			if (ClientPrefs.noteColorStyle == 'Normal' && ClientPrefs.enableColorShader)
-			{
-				colorSwap.hue = ClientPrefs.arrowHSV[note][0] / 360;
-				colorSwap.saturation = ClientPrefs.arrowHSV[note][1] / 100;
-				colorSwap.brightness = ClientPrefs.arrowHSV[note][2] / 100;
-			}
+		else skin = defaultNoteSplash + getSplashSkinPostfix();
+
+		rgbShader = new PixelSplashShaderRef();
+		shader = rgbShader.shader;
+
+		if (!Paths.splashConfigs.exists(skin)) config = Paths.initSplashConfig(skin); 
+		config = Paths.splashConfigs.get(skin);
 
 		setupNoteSplash(x, y, note);
 		antialiasing = ClientPrefs.globalAntialiasing;
-        	if (ClientPrefs.noteColorStyle == 'Char-Based') 
-		{
-			rgbShader = new ColoredNoteShader(255, 255, 255, false);
-			shader = rgbShader;
-		}
+	}
+
+	override function destroy()
+	{
+		super.destroy();
 	}
 
 	var maxAnims:Int = 2;
 	var config:NoteSplashConfig = null;
-	public function setupNoteSplash(x:Float, y:Float, note:Int = 0, texture:String = null, hueColor:Float = 0, satColor:Float = 0, brtColor:Float = 0, color:FlxColor = null) {
+	public function setupNoteSplash(x:Float, y:Float, direction:Int = 0, ?note:Note = null) {
 		setPosition(x - Note.swagWidth * 0.95, y - Note.swagWidth);
 		alpha = 0.6;
 
-		if(texture == null && ClientPrefs.splashType == 'Psych Engine') {
-			texture = 'noteSplashes';
-			if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
-		}
-		if (texture == null && ClientPrefs.splashType != 'Psych Engine') texture = 'noteSplashes-' + ClientPrefs.splashType.toLowerCase();
-
-		if (!Paths.splashConfigs.exists(texture)) config = Paths.initSplashConfig(texture); 
-		config = Paths.splashConfigs.get(texture);
+		var texture:String = null;
+		if(note != null && note.noteSplashData.texture.length > 0) texture = note.noteSplashData.texture;
+		else if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
+		else texture = defaultNoteSplash + getSplashSkinPostfix();
+		
 		if(textureLoaded != texture) {
 			loadAnims(texture);
 		}
-		if (ClientPrefs.enableColorShader)
+
+		if (note != null && note.rgbShader != null)
 		{
-			if (ClientPrefs.noteColorStyle != 'Char-Based')
+			var tempShader:RGBPalette = null;
+			if((note == null || note.noteSplashData.useRGBShader) && (PlayState.SONG == null || !PlayState.SONG.disableNoteRGB))
 			{
-				colorSwap.hue = hueColor;
-				colorSwap.saturation = satColor;
-				colorSwap.brightness = brtColor;
-			} else if (color != null && ClientPrefs.noteColorStyle == 'Char-Based') { //null check
-					rgbShader.enabled.value = [true];
-					rgbShader.setColors(color.red, color.green, color.blue);
+				// If Note RGB is enabled:
+				if(note != null && !note.noteSplashData.useGlobalShader)
+				{
+					if(note.noteSplashData.r != -1) note.rgbShader.r = note.noteSplashData.r;
+					if(note.noteSplashData.g != -1) note.rgbShader.g = note.noteSplashData.g;
+					if(note.noteSplashData.b != -1) note.rgbShader.b = note.noteSplashData.b;
+					tempShader = note.rgbShader.parent;
+				}
+				else tempShader = Note.globalRgbShaders[direction];
 			}
+			rgbShader.copyValues(tempShader);
 		}
+		textureLoaded = texture;
 		offset.set(10, 10);
 
 		var animNum:Int = FlxG.random.int(1, Paths.splashAnimCountMap.get(texture));
@@ -86,7 +90,7 @@ class NoteSplash extends FlxSprite
 		var maxFps:Int = 26;
 		if(config != null)
 		{
-			var animID:Int = note + ((animNum - 1) * Note.colArray.length);
+			var animID:Int = direction + ((animNum - 1) * Note.colArray.length);
 			var offs:Array<Float> = config.offsets[FlxMath.wrap(animID, 0, config.offsets.length-1)];
 			offset.x += offs[0];
 			offset.y += offs[1];
@@ -94,16 +98,19 @@ class NoteSplash extends FlxSprite
 			maxFps = config.maxFps;
 		}
 
-		var splashToPlay:Int = note;
-		if (ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Char-Based' || ClientPrefs.noteColorStyle == 'Rainbow')
-		{
-			splashToPlay = config.redAnim;
-			if (Math.isNaN(config.redAnim)) splashToPlay = 3; //Incase the red anim wasn't specified
-		}
+		var splashToPlay:Int = direction;
 
 		animation.play('note' + splashToPlay + '-' + (animNum), true);
 
 		if(animation.curAnim != null)animation.curAnim.frameRate = FlxG.random.int(config.minFps, config.maxFps);
+	}
+
+	public static function getSplashSkinPostfix()
+	{
+		var skin:String = '';
+		if(ClientPrefs.splashType != 'Default')
+			skin = '-' + ClientPrefs.splashType.trim().toLowerCase().replace(' ', '_');
+		return skin;
 	}
 
 	function loadAnims(skin:String) {
@@ -113,9 +120,96 @@ class NoteSplash extends FlxSprite
 		animation.copyFrom(Paths.splashSkinAnimsMap.get(skin));
 	}
 
+	static var aliveTime:Float = 0;
+	static var buggedKillTime:Float = 0.5; //automatically kills note splashes if they break to prevent it from flooding your HUD
 	override function update(elapsed:Float) {
-		if(animation.curAnim != null)if(animation.curAnim.finished) kill();
+		aliveTime += elapsed;
+		if((animation.curAnim != null && animation.curAnim.finished) ||
+			(animation.curAnim == null && aliveTime >= buggedKillTime)) kill();
 
 		super.update(elapsed);
+	}
+}
+
+class PixelSplashShaderRef {
+	public var shader:PixelSplashShader = new PixelSplashShader();
+
+	public function copyValues(tempShader:RGBPalette)
+	{
+		var enabled:Bool = false;
+		if(tempShader != null)
+			enabled = true;
+
+		if(enabled)
+		{
+			for (i in 0...3)
+			{
+				shader.r.value[i] = tempShader.shader.r.value[i];
+				shader.g.value[i] = tempShader.shader.g.value[i];
+				shader.b.value[i] = tempShader.shader.b.value[i];
+			}
+			shader.mult.value[0] = tempShader.shader.mult.value[0];
+		}
+		else shader.mult.value[0] = 0.0;
+	}
+
+	public function new()
+	{
+		shader.r.value = [0, 0, 0];
+		shader.g.value = [0, 0, 0];
+		shader.b.value = [0, 0, 0];
+		shader.mult.value = [1];
+
+		var pixel:Float = 1;
+		if(PlayState.isPixelStage) pixel = PlayState.daPixelZoom;
+		shader.uBlocksize.value = [pixel, pixel];
+		//trace('Created shader ' + Conductor.songPosition);
+	}
+}
+
+class PixelSplashShader extends FlxShader
+{
+	@:glFragmentHeader('
+		#pragma header
+		
+		uniform vec3 r;
+		uniform vec3 g;
+		uniform vec3 b;
+		uniform float mult;
+		uniform vec2 uBlocksize;
+
+		vec4 flixel_texture2DCustom(sampler2D bitmap, vec2 coord) {
+			vec2 blocks = openfl_TextureSize / uBlocksize;
+			vec4 color = flixel_texture2D(bitmap, floor(coord * blocks) / blocks);
+			if (!hasTransform) {
+				return color;
+			}
+
+			if(color.a == 0.0 || mult == 0.0) {
+				return color * openfl_Alphav;
+			}
+
+			vec4 newColor = color;
+			newColor.rgb = min(color.r * r + color.g * g + color.b * b, vec3(1.0));
+			newColor.a = color.a;
+			
+			color = mix(color, newColor, mult);
+			
+			if(color.a > 0.0) {
+				return vec4(color.rgb, color.a);
+			}
+			return vec4(0.0, 0.0, 0.0, 0.0);
+		}')
+
+	@:glFragmentSource('
+		#pragma header
+
+		void main() {
+			gl_FragColor = flixel_texture2DCustom(bitmap, openfl_TextureCoordv);
+		}')
+
+	public function new()
+	{
+		super();
 	}
 }

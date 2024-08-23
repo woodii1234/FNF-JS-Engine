@@ -32,6 +32,8 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var missSoundShit:Bool = false;
 
 	//Visuals & UI
+	public static var noteSkin:String = 'Default';
+	public static var splashType:String = 'Psych Engine';
 	public static var noteSplashes:Bool = true;
 	public static var oppNoteSplashes:Bool = true;
 	public static var showNPS:Bool = true;
@@ -71,11 +73,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var botTxtStyle:String = 'Vanilla';
 	public static var ytWatermarkPosition:String = 'Hidden';
 	public static var strumLitStyle:String = 'Full Anim';
-	public static var noteStyleThing:String = 'Default';
 	public static var bfIconStyle:String = 'Default';
 	public static var ratingType:String = 'Base FNF';
 	public static var iconBounceType:String = 'Golden Apple';
-	public static var splashType:String = 'Psych Engine';
 	public static var longHPBar:Bool = false;
 	public static var longFCName:Bool = false;
 	public static var healthDisplay:Bool = false;
@@ -137,8 +137,18 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var crossFadeData:Array<Dynamic> = ['Default', 'Healthbar', [255, 255, 255], 0.3, 0.35];
 	public static var noPausing:Bool = false;
 
-	//Note HSV
-	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
+	//Note Colors
+	public static var arrowRGB:Array<Array<FlxColor>> = [
+		[0xFFC24B99, 0xFFFFFFFF, 0xFF3C1F56],
+		[0xFF00FFFF, 0xFFFFFFFF, 0xFF1542B7],
+		[0xFF12FA05, 0xFFFFFFFF, 0xFF0A4447],
+		[0xFFF9393F, 0xFFFFFFFF, 0xFF651038]];
+	public static var arrowRGBPixel:Array<Array<FlxColor>> = [
+		[0xFFE276FF, 0xFFFFF9FF, 0xFF60008D],
+		[0xFF3DCAFF, 0xFFF4FFFF, 0xFF003060],
+		[0xFF71E300, 0xFFF6FFE6, 0xFF003100],
+		[0xFFFF884E, 0xFFFFFAF5, 0xFF6C0000]];
+
 
 	// Game Renderer
 	public static var ffmpegMode:Bool = false;
@@ -240,9 +250,13 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		"loadBlackList" => ["keyBinds", "defaultKeys"],
 	];
 
-	public static function loadDefaultKeys() {
+	public static var defaultArrowRGB:Array<Array<FlxColor>>;
+	public static var defaultPixelRGB:Array<Array<FlxColor>>;
+
+	public static function loadDefaultStuff() {
 		defaultKeys = keyBinds.copy();
-		//trace(defaultKeys);
+		defaultArrowRGB = arrowRGB.copy();
+		defaultPixelRGB = arrowRGBPixel.copy();
 	}
 
 	public static function saveSettings() { //changes settings when you exit so that it doesn't reset every time you close the game

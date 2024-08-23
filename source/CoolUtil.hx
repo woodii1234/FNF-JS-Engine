@@ -20,6 +20,7 @@ import sys.io.Process;
 import openfl.utils.Assets;
 #end
 import flixel.text.FlxText;
+import shaders.RGBPalette.RGBShaderReference;
 
 using StringTools;
 
@@ -245,12 +246,17 @@ class CoolUtil
 			return str.substr(0, str.length-prec) + '.'+str.substr(str.length-prec);
 		}
 	}
-
-	static final beats:Array<Int> = [4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192,256,384,512,768,1024,1536,2048,3072,6144];
-
-	public static function checkNoteQuant(note:Note, timeToCheck:Float):Void 
+	public static function getHealthColors(char:Character, precision:Int = 0):Array<Int>
 	{
-		if (note.colorSwap != null && ClientPrefs.noteColorStyle == 'Quant-Based' && (ClientPrefs.showNotes && ClientPrefs.enableColorShader))
+		if (char != null) return char.healthColorArray;
+		else return [255,0,0];
+	}
+
+	public static final beats:Array<Int> = [4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192,256,384,512,768,1024,1536,2048,3072,6144];
+
+	public static function checkNoteQuant(note:Note, timeToCheck:Float, ?rgbShader:RGBShaderReference) 
+	{
+		if (ClientPrefs.noteColorStyle == 'Quant-Based' && (ClientPrefs.showNotes && ClientPrefs.enableColorShader))
 		{
 			var theCurBPM = Conductor.bpm;
 			var stepCrochet:Float = (60 / theCurBPM) * 1000;
@@ -270,102 +276,83 @@ class CoolUtil
 				stepCrochet = (60 / theCurBPM) * 1000;
 			}
 
-			var beat = Math.round((timeToCheck / stepCrochet) * 48);
+			var beat = Math.round((timeToCheck / stepCrochet) * 1536); //really stupid but allows the game to register every single quant
 			for (i in 0...beats.length)
 			{
-				if (beat % (192 / beats[i]) == 0)
+				if (beat % (6144 / beats[i]) == 0)
 				{
 					beat = beats[i];
 					break;
 				}			
 			}
-			switch (beat)
+			
+			if (rgbShader != null) switch (beat)
 			{
 				case 4: //red
-					note.colorSwap.hue = 0;
-					note.colorSwap.saturation = 0;
-					note.colorSwap.brightness = 0;
+					rgbShader.r = 0xFFF9393F;
+					rgbShader.b = 0xFF651038;
 				case 8: //blue
-					note.colorSwap.hue = -0.34;
-					note.colorSwap.saturation = 0;
-					note.colorSwap.brightness = 0;
+					rgbShader.r = 0xFF3A48F5;
+					rgbShader.b = 0xFF0C3D60;
 				case 12: //purple
-					note.colorSwap.hue = 0.8;
-					note.colorSwap.saturation = 0;
-					note.colorSwap.brightness = 0;
+					rgbShader.r = 0xFFB200FF;
+					rgbShader.b = 0xFF57007F;
 				case 16: //yellow
-					note.colorSwap.hue = 0.16;
-					note.colorSwap.saturation = 0;
-					note.colorSwap.brightness = 0;
+					rgbShader.r = 0xFFFFD800;
+					rgbShader.b = 0xFF4D4100;
 				case 24: //pink
-					note.colorSwap.hue = 0.91;
-					note.colorSwap.saturation = 0;
-					note.colorSwap.brightness = 0;
+					rgbShader.r = 0xFFFF00DC;
+					rgbShader.b = 0xFF740066;
 				case 32: //orange
-					note.colorSwap.hue = 0.06;
-					note.colorSwap.saturation = 0;
-					note.colorSwap.brightness = 0;
+					rgbShader.r = 0xFFFF6A00;
+					rgbShader.b = 0xFF652800;
 				case 48: //cyan
-					note.colorSwap.hue = -0.53;
-					note.colorSwap.saturation = 0;
-					note.colorSwap.brightness = 0;
+					rgbShader.r = 0xFF00FFFF;
+					rgbShader.b = 0xFF004B5E;
 				case 64: //green
-					note.colorSwap.hue = -0.7;
-					note.colorSwap.saturation = 0;
-					note.colorSwap.brightness = 0;
+					rgbShader.r = 0xFF12FA05;
+					rgbShader.b = 0xFF0A4447;
 				case 96: //salmon lookin ass
-					note.colorSwap.hue = 0;
-					note.colorSwap.saturation = -0.33;
-					note.colorSwap.brightness = 0;
+					rgbShader.r = 0xFFFF7F7F;
+					rgbShader.b = 0xFF592C2C;
 				case 128: //light purple shit
-					note.colorSwap.hue = -0.24;
-					note.colorSwap.saturation = -0.33;
-					note.colorSwap.brightness = 0;
+					rgbShader.r = 0xFFD67FFF;
+					rgbShader.b = 0xFF5F3870;
 				case 192: //turquioe i cant spell
-					note.colorSwap.hue = 0.44;
-					note.colorSwap.saturation = 0.31;
-					note.colorSwap.brightness = 0;
+					rgbShader.r = 0xFF00FF90;
+					rgbShader.b = 0xFF003921;
 				case 256: //shit (the color of it)
-					note.colorSwap.hue = 0.03;
-					note.colorSwap.saturation = 0;
-					note.colorSwap.brightness = -0.63;
-				case 384: //dark green ugly shit
-					note.colorSwap.hue = 0.29;
-					note.colorSwap.saturation = 1;
-					note.colorSwap.brightness = -0.89;
+					rgbShader.r = 0xFF7F3300;
+					rgbShader.b = 0xFF401800;
+				case 384: //dark green
+					rgbShader.r = 0xFF007F0E;
+					rgbShader.b = 0xFF003404;
 				case 512: //darj blue
-					note.colorSwap.hue = -0.33;
-					note.colorSwap.saturation = 0.29;
-					note.colorSwap.brightness = -0.7;
+					rgbShader.r = 0xFF230093;
+					rgbShader.b = 0xFF0F0043;
 				case 768: //gray ok
-					note.colorSwap.hue = 0.04;
-					note.colorSwap.saturation = -0.86;
-					note.colorSwap.brightness = -0.23;
+					rgbShader.r = 0xFFE7E7E7;
+					rgbShader.b = 0xFF2A2A2A;
 				case 1024: //turqyuarfhiouhifueaig but dark
-					note.colorSwap.hue = 0.46;
-					note.colorSwap.saturation = 0;
-					note.colorSwap.brightness = -0.46;
+					rgbShader.r = 0xFF00AB64;
+					rgbShader.b = 0xFF00321E;
 				case 1536: //pure death
-					note.colorSwap.hue = 0;
-					note.colorSwap.saturation = 0;
-					note.colorSwap.brightness = -1;
+					rgbShader.r = 0xFF000000;
+					rgbShader.b = 0xFF000000;
 				case 2048: //piss and shit color
-					note.colorSwap.hue = 0.2;
-					note.colorSwap.saturation = -0.36;
-					note.colorSwap.brightness = -0.74;
+					rgbShader.r = 0xFFA69C52;
+					rgbShader.b = 0xFF2F2D17;
 				case 3072: //boring ass color
-					note.colorSwap.hue = 0.17;
-					note.colorSwap.saturation = -0.57;
-					note.colorSwap.brightness = -0.27;
+					rgbShader.r = 0xFFFFF9AB;
+					rgbShader.b = 0xFF45442F;
 				case 6144: //why did i do this? idk tbh, it just funni
-					note.colorSwap.hue = 0.23;
-					note.colorSwap.saturation = 0.76;
-					note.colorSwap.brightness = -0.83;
+					rgbShader.r = 0xFFFF6A00;
+					rgbShader.b = 0xFF652800;
 				default: // white/gray
-					note.colorSwap.hue = 0.04;
-					note.colorSwap.saturation = -0.86;
-					note.colorSwap.brightness = -0.23;
+					rgbShader.r = 0xFFFFFFFF;
+					rgbShader.b = 0xFF434343;
 			}
+			if (rgbShader != null) rgbShader.g = 0xFFFFFFFF;
 		}
 	}
 	
@@ -613,7 +600,6 @@ class CoolUtil
 		#if (!ios || !iphonesim)
 		try
 		{
-			trace('$title - $message');
 			lime.app.Application.current.window.alert(message, title);
 		}
 		catch (e:Dynamic)

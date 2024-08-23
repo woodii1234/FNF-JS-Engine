@@ -65,7 +65,7 @@ class NoteSplashDebugState extends MusicBeatState
 
 			var splash:FlxSprite = new FlxSprite(x, y);
 			splash.setPosition(splash.x - Note.swagWidth * 0.95, splash.y - Note.swagWidth);
-			splash.shader = note.shader;
+			splash.shader = note.rgbShader.parent.shader;
 			splash.antialiasing = ClientPrefs.globalAntialiasing;
 			splashes.add(splash);
 		}
