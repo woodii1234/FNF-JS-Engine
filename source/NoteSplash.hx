@@ -25,21 +25,21 @@ class NoteSplash extends FlxSprite
 	public var rgbShader:PixelSplashShaderRef;
 	private var idleAnim:String;
 	private var textureLoaded:String = null;
+	var texture:String = null;
 
 	public static var defaultNoteSplash(default, never):String = 'noteSplashes/noteSplashes';
 
 	public function new(x:Float = 0, y:Float = 0, ?note:Int = 0) {
 		super(x, y);
 
-		var skin:String = null;
-		if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
-		else skin = defaultNoteSplash + getSplashSkinPostfix();
+		if(PlayState.SONG.splashSkin.length > 0 && Paths.fileExists('images/' + PlayState.SONG.splashSkin + '.png', IMAGE)) texture = PlayState.SONG.splashSkin;
+		else texture = defaultNoteSplash + getSplashSkinPostfix();
 
 		rgbShader = new PixelSplashShaderRef();
 		shader = rgbShader.shader;
 
-		if (!Paths.splashConfigs.exists(skin)) config = Paths.initSplashConfig(skin); 
-		config = Paths.splashConfigs.get(skin);
+		if (!Paths.splashConfigs.exists(texture)) config = Paths.initSplashConfig(texture); 
+		config = Paths.splashConfigs.get(texture);
 
 		setupNoteSplash(x, y, note);
 		antialiasing = ClientPrefs.globalAntialiasing;
@@ -56,10 +56,7 @@ class NoteSplash extends FlxSprite
 		setPosition(x - Note.swagWidth * 0.95, y - Note.swagWidth);
 		alpha = 0.6;
 
-		var texture:String = null;
-		if(note != null && note.noteSplashData.texture.length > 0) texture = note.noteSplashData.texture;
-		else if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
-		else texture = defaultNoteSplash + getSplashSkinPostfix();
+		if(note != null && note.noteSplashData.texture.length > 0 && Paths.fileExists('images/' + note.noteSplashData.texture + '.png', IMAGE)) texture = note.noteSplashData.texture;
 		
 		if(textureLoaded != texture) {
 			loadAnims(texture);

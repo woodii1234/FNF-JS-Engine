@@ -119,10 +119,6 @@ class Note extends FlxSprite
 
 	// Lua shit
 	public var noteSplashDisabled:Bool = false;
-	public var noteSplashTexture:String = null;
-	public var noteSplashHue:Float = 0;
-	public var noteSplashSat:Float = 0;
-	public var noteSplashBrt:Float = 0;
 
 	public var offsetX:Float = 0;
 	public var offsetY:Float = 0;
@@ -168,6 +164,7 @@ class Note extends FlxSprite
 	private function set_texture(value:String):String {
 		if (!pixelNote && texture != value)
 		{
+			changeSize = false;
 			if (!Paths.noteSkinFramesMap.exists(value)) Paths.initNote(4, value);
 			try {
 				if (frames != @:privateAccess Paths.noteSkinFramesMap.get(value)) frames = @:privateAccess Paths.noteSkinFramesMap.get(value);
@@ -183,6 +180,7 @@ class Note extends FlxSprite
 				setGraphicSize(Std.int(width * 0.7));
 				updateHitbox();
 			}
+			offsetX = 0;
 		}
 		else if (!pixelNote) return value;
 		else if (pixelNote && inEditor) reloadNote(value);
@@ -203,52 +201,11 @@ class Note extends FlxSprite
 		}
 	}
 
-	var setTexture:Bool = false;
 	private function set_noteType(value:String):String {
 		noteSplashData.texture = PlayState.SONG != null ? PlayState.SONG.splashSkin : 'noteSplashes';
-		if (ClientPrefs.noteColorStyle == 'Normal' && rgbShader != null) defaultRGB();
+		if (ClientPrefs.noteColorStyle == 'Normal' && rgbShader != null && useRGBShader) defaultRGB();
 
 		if(noteData > -1 && noteType != value) {
-			switch(value) {
-				case 'Hurt Note':
-					ignoreNote = mustPress;
-					//reloadNote('HURTNOTE_assets');
-					//this used to change the note texture to HURTNOTE_assets.png,
-					//but i've changed it to something more optimized with the implementation of RGBPalette:
-
-					if (ClientPrefs.enableColorShader)
-					{
-						// note colors
-						rgbShader.r = 0xFF101010;
-						rgbShader.g = 0xFFFF0000;
-						rgbShader.b = 0xFF990022;
-
-						// splash data and colors
-						noteSplashData.r = 0xFFFF0000;
-						noteSplashData.g = 0xFF101010;
-					} else
-					{
-						if (!pixelNote) 
-						{
-							setTexture = true;
-							texture = 'HURTNOTE_assets';
-						}
-						else reloadNote('HURTNOTE_assets');
-					}
-					noteSplashData.texture = (ClientPrefs.enableColorShader ? 'noteSplashes/noteSplashes-electric' : 'noteSplashes/HURTnoteSplashes');
-
-					// gameplay data
-					lowPriority = true;
-					missHealth = isSustainNote ? 0.25 : 0.1;
-					hitCausesMiss = true;
-				case 'Alt Animation':
-					animSuffix = '-alt';
-				case 'No Animation':
-					noAnimation = true;
-					noMissAnimation = true;
-				case 'GF Sing':
-					gfNote = true;
-			}
 			if (value != null && value.length > 1) NoteTypesConfig.applyNoteTypeData(this, value);
 			noteType = value;
 		}
@@ -278,6 +235,7 @@ class Note extends FlxSprite
 				catch(e) {};
 				if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB) rgbShader.enabled = useRGBShader = false;
 			}
+			else useRGBShader = false;
 		}
 	}
 
@@ -411,11 +369,7 @@ class Note extends FlxSprite
 				animation.addByPrefix(colArray[noteData] + 'holdend', colArray[noteData] + ' hold end');
 				animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + ' hold piece');
 			}
-			if (!changeSize)
-			{
-				changeSize = true;
-				setGraphicSize(Std.int(width * 0.7));
-			}
+			setGraphicSize(Std.int(width * 0.7));
 			if(!isSustainNote)
 			{
 				centerOffsets();
@@ -487,10 +441,8 @@ class Note extends FlxSprite
 
 			if (PlayState.isPixelStage) 
 			{
-				scale.x *= PlayState.daPixelZoom;
-				scale.y *= PlayState.daPixelZoom;
+				scale.y *= PlayState.daPixelZoom * 1.20;
 			}
-
 			updateHitbox();
 		}
 			
@@ -566,7 +518,7 @@ class Note extends FlxSprite
 
 	public function updateRGBColors()
 	{
-		if (rgbShader == null || ClientPrefs.noteColorStyle == 'Normal' && useRGBShader) rgbShader = new RGBShaderReference(this, initializeGlobalRGBShader(noteData, this));
+		if (rgbShader == null && useRGBShader) rgbShader = new RGBShaderReference(this, initializeGlobalRGBShader(noteData, this));
 		else switch(ClientPrefs.noteColorStyle)
 		{
 			case 'Rainbow':
@@ -594,13 +546,37 @@ class Note extends FlxSprite
 			default:
 
 		}
+		if (noteType == 'Hurt Note' && rgbShader != null)
+		{
+				// note colors
+				rgbShader.r = 0xFF101010;
+				rgbShader.g = 0xFFFF0000;
+				rgbShader.b = 0xFF990022;
+
+				// splash data and colors
+				noteSplashData.r = 0xFFFF0000;
+				noteSplashData.g = 0xFF101010;
+				noteSplashData.texture = 'noteSplashes/noteSplashes-electric';
+		}
 	}
 
 	// this is used for note recycling
 	var firstOffX = false;
 	public function setupNoteData(chartNoteData:PreloadedChartNote):Void 
 	{
-		wasGoodHit = hitByOpponent = tooLate = canBeHit = setTexture = false; // Don't make an update call of this for the note group
+		wasGoodHit = hitByOpponent = tooLate = canBeHit = false; // Don't make an update call of this for the note group
+
+		if (chartNoteData.noteskin.length > 0 && chartNoteData.noteskin != '' && chartNoteData.noteskin != texture) 
+		{
+			texture = 'noteskins/' + chartNoteData.noteskin;
+			useRGBShader = false;
+		}
+		if (chartNoteData.texture.length > 0 && chartNoteData.texture != texture) texture = chartNoteData.texture;
+		if ((chartNoteData.noteskin.length < 1 && chartNoteData.texture.length < 1) && chartNoteData.texture != Paths.defaultSkin)
+		{
+			texture = Paths.defaultSkin;
+			useRGBShader = ClientPrefs.enableColorShader;
+		}
 
 		strumTime = chartNoteData.strumTime;
 		if(!inEditor) strumTime += ClientPrefs.noteOffset;
@@ -612,20 +588,6 @@ class Note extends FlxSprite
 		doOppStuff = chartNoteData.oppNote;
 		gfNote = chartNoteData.gfNote;
 		isSustainNote = chartNoteData.isSustainNote;
-		if (!setTexture)
-		{
-			if (chartNoteData.noteskin.length > 0 && chartNoteData.noteskin != '' && chartNoteData.noteskin != texture) 
-			{
-				texture = 'noteskins/' + chartNoteData.noteskin;
-				useRGBShader = false;
-			}
-			if (chartNoteData.texture.length > 0 && chartNoteData.texture != texture) texture = chartNoteData.texture;
-			if ((chartNoteData.noteskin.length < 1 && chartNoteData.texture.length < 1) && chartNoteData.texture != Paths.defaultSkin)
-			{
-				texture = Paths.defaultSkin;
-				useRGBShader = true;
-			}
-		}
 		sustainLength = chartNoteData.sustainLength;
 		sustainScale = chartNoteData.sustainScale;
 		lowPriority = chartNoteData.lowPriority;
@@ -642,6 +604,12 @@ class Note extends FlxSprite
 		{
 			if (rgbShader == null) rgbShader = new RGBShaderReference(this, initializeGlobalRGBShader(noteData, this));
 			else updateRGBColors();
+		}
+
+		if (noteType == 'Hurt Note' && !ClientPrefs.enableColorShader)
+		{
+			texture = 'HURTNOTE_assets';
+			noteSplashData.texture = 'noteSplashes/HURTnoteSplashes';
 		}
 
 		if (PlayState.isPixelStage)
@@ -672,8 +640,11 @@ class Note extends FlxSprite
 			animation.play(colArray[noteData % 4] + 'Scroll');
 			if (!copyAngle) copyAngle = true;
 			offsetX = 0; //Juuuust in case we recycle a sustain note to a regular note
-			centerOffsets();
-			centerOrigin();
+			if (useRGBShader)
+			{
+				centerOffsets();
+				centerOrigin();
+			}
 		}
 		angle = 0;
 

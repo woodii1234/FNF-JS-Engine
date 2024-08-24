@@ -123,6 +123,7 @@ class Paths
 		// Use a for loop for adding all of the animations in the splash spritesheet, otherwise it won't find the animations for the next recycle
 		
 		var config = splashConfigs.get(splashSkin);
+		if (config == null) config = initSplashConfig(splashSkin);
 		var maxAnims:Int = 0;
 		var animName = config.anim;
 		if(animName == null)
