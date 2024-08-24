@@ -170,14 +170,19 @@ class Note extends FlxSprite
 		{
 			if (!Paths.noteSkinFramesMap.exists(value)) Paths.initNote(4, value);
 			try {
-			if (frames != @:privateAccess Paths.noteSkinFramesMap.get(value)) frames = @:privateAccess Paths.noteSkinFramesMap.get(value);
-			if (animation != @:privateAccess Paths.noteSkinAnimsMap.get(value)) inline animation.copyFrom(@:privateAccess Paths.noteSkinAnimsMap.get(value));
+				if (frames != @:privateAccess Paths.noteSkinFramesMap.get(value)) frames = @:privateAccess Paths.noteSkinFramesMap.get(value);
+				if (animation != @:privateAccess Paths.noteSkinAnimsMap.get(value)) inline animation.copyFrom(@:privateAccess Paths.noteSkinAnimsMap.get(value));
 			}
 			catch (e) {
 				frames = @:privateAccess Paths.noteSkinFramesMap.get(Paths.defaultSkin);
 				animation.copyFrom(@:privateAccess Paths.noteSkinAnimsMap.get(Paths.defaultSkin));
 			}
-			updateHitbox();
+			if (!changeSize) 
+			{
+				changeSize = true;
+				setGraphicSize(Std.int(width * 0.7));
+				updateHitbox();
+			}
 		}
 		else if (!pixelNote) return value;
 		else if (pixelNote && inEditor) reloadNote(value);
@@ -198,6 +203,7 @@ class Note extends FlxSprite
 		}
 	}
 
+	var setTexture:Bool = false;
 	private function set_noteType(value:String):String {
 		noteSplashData.texture = PlayState.SONG != null ? PlayState.SONG.splashSkin : 'noteSplashes';
 		if (ClientPrefs.noteColorStyle == 'Normal' && rgbShader != null) defaultRGB();
@@ -222,7 +228,12 @@ class Note extends FlxSprite
 						noteSplashData.g = 0xFF101010;
 					} else
 					{
-						reloadNote('HURTNOTE_assets');
+						if (!pixelNote) 
+						{
+							setTexture = true;
+							texture = 'HURTNOTE_assets';
+						}
+						else reloadNote('HURTNOTE_assets');
 					}
 					noteSplashData.texture = (ClientPrefs.enableColorShader ? 'noteSplashes/noteSplashes-electric' : 'noteSplashes/HURTnoteSplashes');
 
@@ -400,7 +411,11 @@ class Note extends FlxSprite
 				animation.addByPrefix(colArray[noteData] + 'holdend', colArray[noteData] + ' hold end');
 				animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + ' hold piece');
 			}
-			setGraphicSize(Std.int(width * 0.7));
+			if (!changeSize)
+			{
+				changeSize = true;
+				setGraphicSize(Std.int(width * 0.7));
+			}
 			if(!isSustainNote)
 			{
 				centerOffsets();
@@ -585,7 +600,7 @@ class Note extends FlxSprite
 	var firstOffX = false;
 	public function setupNoteData(chartNoteData:PreloadedChartNote):Void 
 	{
-		wasGoodHit = hitByOpponent = tooLate = canBeHit = false; // Don't make an update call of this for the note group
+		wasGoodHit = hitByOpponent = tooLate = canBeHit = setTexture = false; // Don't make an update call of this for the note group
 
 		strumTime = chartNoteData.strumTime;
 		if(!inEditor) strumTime += ClientPrefs.noteOffset;
@@ -597,16 +612,19 @@ class Note extends FlxSprite
 		doOppStuff = chartNoteData.oppNote;
 		gfNote = chartNoteData.gfNote;
 		isSustainNote = chartNoteData.isSustainNote;
-		if (chartNoteData.noteskin.length > 0 && chartNoteData.noteskin != '' && chartNoteData.noteskin != texture) 
+		if (!setTexture)
 		{
-			texture = 'noteskins/' + chartNoteData.noteskin;
-			useRGBShader = false;
-		}
-		if (chartNoteData.texture.length > 0 && chartNoteData.texture != texture) texture = chartNoteData.texture;
-		if ((chartNoteData.noteskin.length < 1 && chartNoteData.texture.length < 1) && chartNoteData.texture != Paths.defaultSkin)
-		{
-			texture = Paths.defaultSkin;
-			useRGBShader = true;
+			if (chartNoteData.noteskin.length > 0 && chartNoteData.noteskin != '' && chartNoteData.noteskin != texture) 
+			{
+				texture = 'noteskins/' + chartNoteData.noteskin;
+				useRGBShader = false;
+			}
+			if (chartNoteData.texture.length > 0 && chartNoteData.texture != texture) texture = chartNoteData.texture;
+			if ((chartNoteData.noteskin.length < 1 && chartNoteData.texture.length < 1) && chartNoteData.texture != Paths.defaultSkin)
+			{
+				texture = Paths.defaultSkin;
+				useRGBShader = true;
+			}
 		}
 		sustainLength = chartNoteData.sustainLength;
 		sustainScale = chartNoteData.sustainScale;
@@ -640,8 +658,8 @@ class Note extends FlxSprite
 		{
 			changeSize = true;
 			setGraphicSize(Std.int(width * 0.7));
+			updateHitbox();
 		}
-		updateHitbox();
 
 		if (isSustainNote) {
 			offsetX += width / 2;

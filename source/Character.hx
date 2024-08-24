@@ -266,6 +266,7 @@ class Character extends FlxSprite
 				}
 				//trace('Loaded file to character ' + curCharacter);
 		}
+		originalFlipX = flipX;
 
 		if(animOffsets.exists('singLEFTmiss') || animOffsets.exists('singDOWNmiss') || animOffsets.exists('singUPmiss') || animOffsets.exists('singRIGHTmiss')) hasMissAnimations = true;
 		recalculateDanceIdle();
@@ -273,7 +274,6 @@ class Character extends FlxSprite
 
 		if (isPlayer)
 			flipX = !flipX;
-		originalFlipX = flipX;
 
 		switch(curCharacter)
 		{
