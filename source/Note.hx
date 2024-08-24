@@ -210,15 +210,21 @@ class Note extends FlxSprite
 					//this used to change the note texture to HURTNOTE_assets.png,
 					//but i've changed it to something more optimized with the implementation of RGBPalette:
 
-					// note colors
-					rgbShader.r = 0xFF101010;
-					rgbShader.g = 0xFFFF0000;
-					rgbShader.b = 0xFF990022;
+					if (ClientPrefs.enableColorShader)
+					{
+						// note colors
+						rgbShader.r = 0xFF101010;
+						rgbShader.g = 0xFFFF0000;
+						rgbShader.b = 0xFF990022;
 
-					// splash data and colors
-					noteSplashData.r = 0xFFFF0000;
-					noteSplashData.g = 0xFF101010;
-					noteSplashData.texture = 'noteSplashes/noteSplashes-electric';
+						// splash data and colors
+						noteSplashData.r = 0xFFFF0000;
+						noteSplashData.g = 0xFF101010;
+					} else
+					{
+						reloadNote('HURTNOTE_assets');
+					}
+					noteSplashData.texture = (ClientPrefs.enableColorShader ? 'noteSplashes/noteSplashes-electric' : 'noteSplashes/HURTnoteSplashes');
 
 					// gameplay data
 					lowPriority = true;
