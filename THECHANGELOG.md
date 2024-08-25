@@ -1,4 +1,4 @@
-1.32.0;
+1.32.2;
 
 Fixed Splash Skin defaulting to "Psych Engine" (an option that has been removed)
 
