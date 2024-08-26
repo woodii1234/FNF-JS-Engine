@@ -274,6 +274,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		for (flixelS in importantMap.get("flixelSound"))
 			Reflect.setField(FlxG.save.data, flixelS, Reflect.field(FlxG.sound, flixelS));
 
+		#if ACHIEVEMENTS_ALLOWED Achievements.save(); #end
 		FlxG.save.flush();
 
 		var save:FlxSave = new FlxSave();
@@ -284,6 +285,8 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	}
 
 	public static function loadPrefs() { //loads settings if it finds a save file containing the settings
+		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
+		
 		for (field in Type.getClassFields(ClientPrefs))
 		{
 			if (Type.typeof(Reflect.field(ClientPrefs, field)) != TFunction)

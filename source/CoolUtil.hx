@@ -471,10 +471,25 @@ class CoolUtil
 		if(colorNum == null) colorNum = FlxColor.fromString('#$color');
 		return colorNum != null ? colorNum : FlxColor.WHITE;
 	}
+
 	inline public static function listFromString(string:String):Array<String> {
 		final daList:Array<String> = string.trim().split('\n');
 		return [for(i in 0...daList.length) daList[i].trim()];
 	}
+	
+	public static function floorDecimal(value:Float, decimals:Int):Float
+	{
+		if(decimals < 1)
+			return Math.floor(value);
+
+		var tempMult:Float = 1;
+		for (i in 0...decimals)
+			tempMult *= 10;
+
+		var newValue:Float = Math.floor(value * tempMult);
+		return newValue / tempMult;
+	}
+
 	public static function dominantColor(sprite:flixel.FlxSprite):Int{
 		var countByColor:Map<Int, Int> = [];
 		sprite.useFramePixels = true;

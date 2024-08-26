@@ -431,8 +431,6 @@ class PlayState extends MusicBeatState
 
 	// Lua shit
 	public var luaArray:Array<FunkinLua> = [];
-	public var achievementArray:Array<FunkinLua> = [];
-	public var achievementWeeks:Array<String> = [];
 	private var luaDebugGroup:FlxTypedGroup<DebugLuaText>;
 	public var introSoundsSuffix:String = '';
 
@@ -814,27 +812,6 @@ class PlayState extends MusicBeatState
 						filesPushed.push(file);
 					}
 				}
-			}
-		}
-		#end
-
-		//CUSTOM ACHIVEMENTS
-		#if (MODS_ALLOWED && LUA_ALLOWED && ACHIEVEMENTS_ALLOWED)
-		var luaFiles:Array<String> = Achievements.getModAchievements().copy();
-		if(luaFiles.length > 0){
-			for(luaFile in luaFiles)
-			{
-				achievementArray.push(new FunkinLua(luaFile));
-			}
-		}
-
-		var achievementMetas = Achievements.getModAchievementMetas().copy();
-		for (i in achievementMetas) {
-			if(i.lua_code != null) {
-				achievementArray.push(new FunkinLua(i.lua_code));
-			}
-			if(i.week_nomiss != null) {
-				achievementWeeks.push(i.week_nomiss);
 			}
 		}
 		#end
@@ -2530,20 +2507,7 @@ class PlayState extends MusicBeatState
 
 			startTimer = new FlxTimer().start(Conductor.crochet / 1000 / playbackRate, function(tmr:FlxTimer)
 			{
-				if (ClientPrefs.charsAndBG) {
-					if (gf != null && tmr.loopsLeft % Math.round(gfSpeed * gf.danceEveryNumBeats) == 0 && gf.animation.curAnim != null && !gf.animation.curAnim.name.startsWith("sing") && !gf.stunned)
-					{
-						gf.dance();
-					}
-					if (tmr.loopsLeft % boyfriend.danceEveryNumBeats == 0 && boyfriend.animation.curAnim != null && !boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.stunned)
-					{
-						boyfriend.dance();
-					}
-					if (tmr.loopsLeft % dad.danceEveryNumBeats == 0 && dad.animation.curAnim != null && !dad.animation.curAnim.name.startsWith('sing') && !dad.stunned)
-					{
-						dad.dance();
-					}
-				}
+				if (ClientPrefs.charsAndBG) characterBopper(tmr.loopsLeft);
 
 				var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
 				var introImagesArray:Array<String> = switch(stageUI) {
@@ -4189,12 +4153,7 @@ class PlayState extends MusicBeatState
 					keyShit();
 				}
 				else if (ClientPrefs.charsAndBG) {
-					if(boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / playbackRate) * boyfriend.singDuration * singDurMult && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss')) {
-						boyfriend.dance();
-					}
-					if (dad.animation.curAnim != null && dad.holdTimer > Conductor.stepCrochet * (0.0011 / playbackRate) * dad.singDuration * singDurMult && dad.animation.curAnim.name.startsWith('sing') && !dad.animation.curAnim.name.endsWith('miss')) {
-						dad.dance();
-					}
+					playerDance();
 				}
 				amountOfRenderedNotes = 0;
 				for (group in [notes, sustainNotes])
@@ -5075,19 +5034,8 @@ class PlayState extends MusicBeatState
 		seenCutscene = false;
 
 		#if ACHIEVEMENTS_ALLOWED
-		if(achievementObj != null) {
-			return;
-		} else {
-			var achieve:String = checkForAchievement(['week1_nomiss', 'week2_nomiss', 'week3_nomiss', 'week4_nomiss',
-				'week5_nomiss', 'week6_nomiss', 'week7_nomiss', 'ur_bad',
-				'ur_good', 'hype', 'two_keys', 'toastie', 'debugger']);
-			var customAchieves:String = checkForAchievement(achievementWeeks);
-
-			if(achieve != null || customAchieves != null) {
-				startAchievement(achieve);
-				return;
-			}
-		}
+		var weekNoMiss:String = WeekData.getWeekFileName() + '_nomiss';
+		checkForAchievement([weekNoMiss, 'ur_bad', 'ur_good', 'hype', 'two_keys', 'toastie', 'debugger']);
 		#end
 
 		var ret:Dynamic = callOnLuas('onEndSong', [], true);
@@ -5193,23 +5141,6 @@ class PlayState extends MusicBeatState
 			transitioning = true;
 		}
 	}
-
-	#if ACHIEVEMENTS_ALLOWED
-	var achievementObj:AchievementObject = null;
-	public function startAchievement(achieve:String) {
-		achievementObj = new AchievementObject(achieve, camOther);
-		achievementObj.onFinish = achievementEnd;
-		add(achievementObj);
-		trace('Giving achievement ' + achieve);
-	}
-	function achievementEnd():Void
-	{
-		achievementObj = null;
-		if(endingSong && !inCutscene) {
-			endSong();
-		}
-	}
-	#end
 
 	public function KillNotes() {
 		for (group in [notes, sustainNotes])
@@ -5747,22 +5678,13 @@ class PlayState extends MusicBeatState
 				trace("HEY!!");
 				}
 
-			if (parsedHoldArray.contains(true) && !endingSong) {
-				#if ACHIEVEMENTS_ALLOWED
-				var achieve:String = checkForAchievement(['oversinging']);
-				if (achieve != null) {
-					startAchievement(achieve);
-				}
-				#end
+			if (!parsedHoldArray.contains(true) || endingSong) {
+				if (ClientPrefs.charsAndBG) playerDance();
 			}
-			else if (ClientPrefs.charsAndBG && boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / playbackRate) * boyfriend.singDuration * singDurMult && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss'))
-			{
-				boyfriend.dance();
-				//boyfriend.animation.curAnim.finish();
-			}
-			else if (ClientPrefs.charsAndBG && dad.animation.curAnim != null && dad.holdTimer > Conductor.stepCrochet * (0.0011 / playbackRate) * dad.singDuration * singDurMult && dad.animation.curAnim.name.startsWith('sing') && !dad.animation.curAnim.name.endsWith('miss')) {
-				dad.dance();
-			}
+
+			#if ACHIEVEMENTS_ALLOWED
+			else checkForAchievement(['oversinging']);
+			#end
 		}
 
 		// TO DO: Find a better way to handle controller inputs, this should work for now
@@ -6655,28 +6577,32 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.iconBopWhen == 'Every Beat' && (iconP1.visible || iconP2.visible)) 
 		{
 			bopIcons();
-			iconP1.updateHitbox();
-			iconP2.updateHitbox();
 		}
+		iconP1.updateHitbox();
+		iconP2.updateHitbox();
 
-		if (ClientPrefs.charsAndBG) {
-			if (gf != null && curBeat % Math.round(gfSpeed * gf.danceEveryNumBeats) == 0 && gf.animation.curAnim != null && !gf.animation.curAnim.name.startsWith("sing") && !gf.stunned)
-			{
-				gf.dance();
-			}
-			if (curBeat % boyfriend.danceEveryNumBeats == 0 && boyfriend.animation.curAnim != null && !boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.stunned)
-			{
-				boyfriend.dance();
-			}
-			if (curBeat % dad.danceEveryNumBeats == 0 && dad.animation.curAnim != null && !dad.animation.curAnim.name.startsWith('sing') && !dad.stunned)
-			{
-				dad.dance();
-			}
-		}
+		if (ClientPrefs.charsAndBG) characterBopper(curBeat);
 		lastBeatHit = curBeat;
 
 		setOnLuas('curBeat', curBeat); //DAWGG?????
 		callOnLuas('onBeatHit');
+	}
+	public function characterBopper(beat:Int):Void
+	{
+		if (gf != null && beat % Math.round(gfSpeed * gf.danceEveryNumBeats) == 0 && !gf.getAnimationName().startsWith('sing') && !gf.stunned)
+			gf.dance();
+		if (boyfriend != null && beat % boyfriend.danceEveryNumBeats == 0 && !boyfriend.getAnimationName().startsWith('sing') && !boyfriend.stunned)
+			boyfriend.dance();
+		if (dad != null && beat % dad.danceEveryNumBeats == 0 && !dad.getAnimationName().startsWith('sing') && !dad.stunned)
+			dad.dance();
+	}
+
+	public function playerDance():Void
+	{
+		var char = (opponentChart ? dad : boyfriend);
+		var anim:String = char.getAnimationName();
+		if(char.holdTimer > Conductor.stepCrochet * (0.0011 #if FLX_PITCH / FlxG.sound.music.pitch #end) * char.singDuration * singDurMult && anim.startsWith('sing') && !anim.endsWith('miss'))
+			char.dance();
 	}
 
 	var usingBopIntervalEvent = false;
@@ -7177,72 +7103,52 @@ class PlayState extends MusicBeatState
 	}
 
 	#if ACHIEVEMENTS_ALLOWED
-	public function checkForAchievement(achievesToCheck:Array<String> = null):String
+	private function checkForAchievement(achievesToCheck:Array<String> = null)
 	{
-		if(chartingMode || trollingMode) return null;
+		if(chartingMode || trollingMode) return;
 
-		var usedPractice:Bool = (ClientPrefs.getGameplaySetting('practice', false) || ClientPrefs.getGameplaySetting('botplay', false));
-		for (i in 0...achievesToCheck.length) {
-			var achievementName:String = achievesToCheck[i];
-			if(!Achievements.isAchievementUnlocked(achievementName) && !cpuControlled && Achievements.exists(achievementName)) {
-				var unlock:Bool = false;
+		var usedPractice:Bool = (practiceMode || cpuControlled);
+		if(cpuControlled) return;
 
-				if (achievementName.contains(WeekData.getWeekFileName()) && achievementName.endsWith('nomiss')) // any FC achievements, name should be "weekFileName_nomiss", e.g: "weekd_nomiss";
-				{
-					if(isStoryMode && campaignMisses + songMisses < 1 && CoolUtil.difficultyString() == 'HARD'
-						&& storyPlaylist.length <= 1 && !changedDifficulty && !usedPractice)
-						unlock = true;
-				}
-				switch(achievementName)
+		for (name in achievesToCheck) {
+			if(!Achievements.exists(name)) continue;
+
+			var unlock:Bool = false;
+			if (name != WeekData.getWeekFileName() + '_nomiss') // common achievements
+			{
+				switch(name)
 				{
 					case 'ur_bad':
-						if(ratingPercent < 0.2 && !practiceMode) {
-							unlock = true;
-						}
+						unlock = (ratingPercent < 0.2 && !practiceMode);
+
 					case 'ur_good':
-						if(ratingPercent >= 1 && !usedPractice) {
-							unlock = true;
-						}
-					case 'roadkill_enthusiast':
-						if(Achievements.henchmenDeath >= 100) {
-							unlock = true;
-						}
+						unlock = (ratingPercent >= 1 && !usedPractice);
+
 					case 'oversinging':
-						if(boyfriend.holdTimer >= 10 && !usedPractice) {
-							unlock = true;
-						}
+						unlock = (boyfriend.holdTimer >= 10 && !usedPractice);
+
 					case 'hype':
-						if(!boyfriendIdled && !usedPractice) {
-							unlock = true;
-						}
+						unlock = (!boyfriendIdled && !usedPractice);
+
 					case 'two_keys':
-						if(!usedPractice) {
-							var howManyPresses:Int = 0;
-							for (j in 0...keysPressed.length) {
-								if(keysPressed[j]) howManyPresses++;
-							}
+						unlock = (!usedPractice && keysPressed.length <= 2);
 
-							if(howManyPresses <= 2) {
-								unlock = true;
-							}
-						}
 					case 'toastie':
-						if(!ClientPrefs.shaders && ClientPrefs.lowQuality && !ClientPrefs.globalAntialiasing) {
-							unlock = true;
-						}
-					case 'debugger':
-						if(Paths.formatToSongPath(SONG.song) == 'test' && !usedPractice) {
-							unlock = true;
-						}
-				}
+						unlock = (!ClientPrefs.cacheOnGPU && !ClientPrefs.shaders && ClientPrefs.lowQuality && !ClientPrefs.globalAntialiasing);
 
-				if(unlock) {
-					Achievements.unlockAchievement(achievementName);
-					return achievementName;
+					case 'debugger':
+						unlock = (songName == 'test' && !usedPractice);
 				}
 			}
+			else // any FC achievements, name should be "weekFileName_nomiss", e.g: "week3_nomiss";
+			{
+				if(isStoryMode && campaignMisses + songMisses < 1 && CoolUtil.currentDifficulty.toUpperCase() == 'HARD'
+					&& storyPlaylist.length <= 1 && !changedDifficulty && !usedPractice)
+					unlock = true;
+			}
+
+			if(unlock) Achievements.unlock(name);
 		}
-		return null;
 	}
 	#end
 

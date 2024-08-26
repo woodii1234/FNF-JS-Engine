@@ -31,7 +31,7 @@ class OptionsState extends MusicBeatState
 
     var kId = 0;
     var keys:Array<FlxKey> = [D, E, B, U, G, SEVEN]; // lol
-var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
+	var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 	var konamiCode = [];
 	var isEnteringKonamiCode:Bool = false;
 	var options:Array<String> = ['Note Colors', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Optimization', 'Game Rendering', 'Visuals and UI', 'Gameplay', 'Misc'];
@@ -174,13 +174,13 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
             if (FlxG.keys.anyJustPressed([k])) {
                 #if desktop kId++; #end
                 if (kId >= keys.length) {
-			enteringDebugMenu = true;
-			kId = 0;
+					enteringDebugMenu = true;
+					kId = 0;
                     FlxTween.tween(FlxG.camera, {alpha: 0}, 1.5, {startDelay: 1, ease: FlxEase.cubeOut});
                     if (FlxG.sound.music != null)
                         FlxTween.tween(FlxG.sound.music, {pitch: 0, volume: 0}, 2.5, {ease: FlxEase.cubeOut});
                     FlxTween.tween(FlxG.camera, {zoom: 0.1, angle: -15}, 2.5, {ease: FlxEase.cubeIn, onComplete: function(t) {
-			FlxG.camera.angle = 0;
+					FlxG.camera.angle = 0;
                         openSubState(new options.SuperSecretDebugMenu());
                     }});
                 }

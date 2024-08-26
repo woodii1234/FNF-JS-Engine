@@ -384,7 +384,7 @@ class Note extends FlxSprite
 
 		if(animName != null)
 			animation.play(animName, true);
-
+			
 		if(inEditor) {
 			setGraphicSize(editors.ChartingState.GRID_SIZE, editors.ChartingState.GRID_SIZE);
 			updateHitbox();

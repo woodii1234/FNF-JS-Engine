@@ -294,17 +294,23 @@ class Character extends FlxSprite
 				heyTimer -= elapsed * PlayState.instance.playbackRate;
 				if(heyTimer <= 0)
 				{
-					if(specialAnim && animation.curAnim.name == 'hey' || animation.curAnim.name == 'cheer')
+					var anim:String = getAnimationName();
+					if(specialAnim && (anim == 'hey' || anim == 'cheer'))
 					{
 						specialAnim = false;
 						dance();
 					}
 					heyTimer = 0;
 				}
-			} else if(specialAnim && animation.curAnim.finished)
+			} else if(specialAnim && isAnimationFinished())
 			{
 				specialAnim = false;
 				dance();
+			}
+			else if (getAnimationName().endsWith('miss') && isAnimationFinished())
+			{
+				dance();
+				finishAnimation();
 			}
 			
 			switch(curCharacter)
@@ -319,16 +325,13 @@ class Character extends FlxSprite
 						playAnim('shoot' + noteData, true);
 						animationNotes.shift();
 					}
-					if(animation.curAnim.finished) playAnim(animation.curAnim.name, false, false, animation.curAnim.frames.length - 3);
+					if(isAnimationFinished()) playAnim(animation.curAnim.name, false, false, animation.curAnim.frames.length - 3);
 			}
 
 			if (!isPlayer)
 			{
 				if (!PlayState.opponentChart || curCharacter.startsWith('gf')) {
-					if (animation.curAnim.name.startsWith('sing'))
-					{
-						holdTimer += elapsed;
-					}
+					if (getAnimationName().startsWith('sing')) holdTimer += elapsed;
 
 					if (holdTimer >= Conductor.stepCrochet * (0.0011 / (FlxG.sound.music != null ? FlxG.sound.music.pitch : 1)) * singDuration * (PlayState.instance != null ? PlayState.instance.singDurMult : 1))
 					{
@@ -343,17 +346,54 @@ class Character extends FlxSprite
 					else
 						holdTimer = 0;
 
-					if (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished && !debugMode)
+					if (getAnimationName().endsWith('miss') && isAnimationFinished() && !debugMode)
 						dance();
 				}
 			}
 
-			if(animation.curAnim.finished && animation.getByName(animation.curAnim.name + '-loop') != null)
-			{
-				playAnim(animation.curAnim.name + '-loop');
-			}
+			var name:String = getAnimationName();
+			if(isAnimationFinished() && animOffsets.exists('$name-loop'))
+				playAnim('$name-loop');
 		}
 		super.update(elapsed);
+	}
+
+	inline public function isAnimationNull():Bool
+		return (animation.curAnim == null);
+
+	inline public function getAnimationName():String
+	{
+		var name:String = '';
+		@:privateAccess
+		if(!isAnimationNull()) name = animation.curAnim.name;
+		return (name != null) ? name : '';
+	}
+
+	public function isAnimationFinished():Bool
+	{
+		if(isAnimationNull()) return false;
+		return animation.curAnim.finished;
+	}
+
+	public function finishAnimation():Void
+	{
+		if(isAnimationNull()) return;
+
+		animation.curAnim.finish();
+	}
+
+	public var animPaused(get, set):Bool;
+	private function get_animPaused():Bool
+	{
+		if(isAnimationNull()) return false;
+		return animation.curAnim.paused;
+	}
+	private function set_animPaused(value:Bool):Bool
+	{
+		if(isAnimationNull()) return value;
+		animation.curAnim.paused = value;
+
+		return value;
 	}
 
 	public var danced:Bool = false;
@@ -483,12 +523,12 @@ class Boyfriend extends Character
 			else
 				holdTimer = 0;
 
-			if (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished && !debugMode)
+			if (animation.curAnim.name.endsWith('miss') && isAnimationFinished() && !debugMode)
 			{
 				playAnim('idle', true, false, 10);
 			}
 
-			if (animation.curAnim.name == 'firstDeath' && animation.curAnim.finished && startedDeath)
+			if (animation.curAnim.name == 'firstDeath' && isAnimationFinished() && startedDeath)
 			{
 				playAnim('deathLoop');
 			}
