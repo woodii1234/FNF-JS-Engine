@@ -4050,7 +4050,7 @@ class PlayState extends MusicBeatState
 		{
 			Conductor.songPosition += elapsed * 1000 * playbackRate;
 			for (i in [vocals, opponentVocals])
-				if (i.time >= i.length && !i.paused) i.pause();
+				if (i.time >= i.length && i.playing) i.pause();
 		}
 
 		if (startingSong)
