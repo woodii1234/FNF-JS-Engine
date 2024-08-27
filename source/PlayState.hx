@@ -3472,8 +3472,8 @@ class PlayState extends MusicBeatState
 			setVocalsTime(Conductor.songPosition);
 
 			FlxG.sound.music.play();
-			vocals.play();
-			opponentVocals.play();
+			for (i in [vocals, opponentVocals])
+				if (i.time <= i.length) i.play();
 		}
 		else
 		{
@@ -3483,8 +3483,8 @@ class PlayState extends MusicBeatState
 				setVocalsTime(Conductor.songPosition);
 
 				FlxG.sound.music.play();
-				vocals.play();
-				opponentVocals.play();
+				for (i in [vocals, opponentVocals])
+					if (i.time <= i.length) i.play();
 			}
 		}
 	}
@@ -4049,6 +4049,8 @@ class PlayState extends MusicBeatState
 		if (startedCountdown && !paused)
 		{
 			Conductor.songPosition += elapsed * 1000 * playbackRate;
+			for (i in [vocals, opponentVocals])
+				if (i.time >= i.length && !i.paused) i.pause();
 		}
 
 		if (startingSong)
@@ -4254,8 +4256,8 @@ class PlayState extends MusicBeatState
 					}
 					catch (e) {}
 				}
-				if (ClientPrefs.renderGCRate > 0 && (frameCaptured / targetFPS) % ClientPrefs.renderGCRate == 0) openfl.system.System.gc();
 			}
+			if (ClientPrefs.renderGCRate > 0 && (frameCaptured / targetFPS) % ClientPrefs.renderGCRate == 0) openfl.system.System.gc();
 			frameCaptured++;
 		}
 
@@ -4937,8 +4939,9 @@ class PlayState extends MusicBeatState
 	}
 	public function setVocalsTime(time:Float)
 	{
-		vocals.time = time;
-		opponentVocals.time = time;
+		for (i in [vocals, opponentVocals])
+			if (i.time < vocals.length)
+				i.time = time;
 	}
 
 	public function finishSong(?ignoreNoteOffset:Bool = false):Void
@@ -6497,8 +6500,8 @@ class PlayState extends MusicBeatState
 			var timeSub:Float = Conductor.songPosition - Conductor.offset;
 			var syncTime:Float = 20 * playbackRate;
 			if (Math.abs(FlxG.sound.music.time - timeSub) > syncTime ||
-			(vocals.length > 0 && Math.abs(vocals.time - timeSub) > syncTime) ||
-			(opponentVocals.length > 0 && Math.abs(opponentVocals.time - timeSub) > syncTime))
+			(vocals.length > 0 && vocals.time < vocals.length && Math.abs(vocals.time - timeSub) > syncTime) ||
+			(opponentVocals.length > 0 && opponentVocals.time < opponentVocals.length && Math.abs(opponentVocals.time - timeSub) > syncTime))
 			{
 				resyncVocals();
 			}
