@@ -474,8 +474,8 @@ class PlayState extends MusicBeatState
 		var botText:String;
 		var tempScore:String;
 
-	var startingTime:Float = Sys.time();
-	var endingTime:Float = Sys.time();
+	var startingTime:Float = haxe.Timer.stamp();
+	var endingTime:Float = haxe.Timer.stamp();
 
 	// FFMpeg values :)
 	var ffmpegMode = ClientPrefs.ffmpegMode;
@@ -1768,7 +1768,7 @@ class PlayState extends MusicBeatState
 		else if(ClientPrefs.pauseMusic != 'None')
 			Paths.music(Paths.formatToSongPath(ClientPrefs.pauseMusic));
 
-		if(cpuControlled && ClientPrefs.randomBotplayText && ClientPrefs.botTxtStyle != 'Hide' && botplayTxt != null && !ffmpegInfo)
+		if(cpuControlled && ClientPrefs.randomBotplayText && ClientPrefs.botTxtStyle != 'Hide' && botplayTxt != null && ffmpegInfo != 'None')
 		{
 			botplayTxt.text = theListBotplay[FlxG.random.int(0, theListBotplay.length - 1)];
 		}
@@ -1783,7 +1783,7 @@ class PlayState extends MusicBeatState
 		super.create();
 		Paths.clearUnusedMemory();
 
-		startingTime = Sys.time();
+		startingTime = haxe.Timer.stamp();
 	}
 
 	#if (!flash && sys)
@@ -2909,7 +2909,7 @@ class PlayState extends MusicBeatState
 	private var eventPushedMap:Map<String, Bool> = new Map<String, Bool>();
 	private function generateSong(dataPath:String, ?startingPoint:Float = 0):Void
 	{
-	   	final startTime = Sys.time();
+	   	final startTime = haxe.Timer.stamp();
 
 		songSpeedType = ClientPrefs.getGameplaySetting('scrolltype','multiplicative');
 
@@ -3221,7 +3221,7 @@ class PlayState extends MusicBeatState
 
 		sectionsLoaded = 0;
 
-		var endTime = Sys.time();
+		var endTime = haxe.Timer.stamp();
 
 		openfl.system.System.gc();
 
@@ -3496,6 +3496,7 @@ class PlayState extends MusicBeatState
 	var pbRM:Float = 2.0;
 
 	public var takenTime:Float = haxe.Timer.stamp();
+	public var totalRenderTime:Float = 0;
 
 	public var amountOfRenderedNotes:Float = 0;
 	public var maxRenderedNotes:Float = 0;
@@ -4262,14 +4263,19 @@ class PlayState extends MusicBeatState
 		}
 
 		if(botplayTxt != null && botplayTxt.visible) {
-			if (ffmpegInfo)
-				botplayTxt.text = CoolUtil.floatToStringPrecision(haxe.Timer.stamp() - takenTime, 3) + 's';
-
-			if (ClientPrefs.showRemainingTime)
+			switch (ffmpegInfo)
 			{
-				var timeETA:String = CoolUtil.formatTime((FlxG.sound.music.length - Conductor.songPosition) * (60 / Main.fpsVar.currentFPS), 2);
-				if (ClientPrefs.showcaseMode || ffmpegInfo) botplayTxt.text += '\nTime Remaining: ' + timeETA;
-				else botplayTxt.text = ogBotTxt + '\nTime Remaining: ' + timeETA;
+				case 'Frame Time': botplayTxt.text = CoolUtil.floatToStringPrecision(haxe.Timer.stamp() - takenTime, 3) + 's';
+				case 'Time Remaining':
+					var timeETA:String = CoolUtil.formatTime((FlxG.sound.music.length - Conductor.songPosition) * (60 / Main.fpsVar.currentFPS), 2);
+					if (ClientPrefs.showcaseMode) botplayTxt.text += '\nTime Remaining: ' + timeETA;
+					else botplayTxt.text = ogBotTxt + '\nTime Remaining: ' + timeETA;
+				case 'Rendering Time':
+					totalRenderTime = haxe.Timer.stamp() - startingTime;
+					if (ClientPrefs.showcaseMode) botplayTxt.text += '\nTime Taken: ' + CoolUtil.formatTime(totalRenderTime * 1000, 2);
+					else botplayTxt.text = ogBotTxt + '\nTime Taken: ' + CoolUtil.formatTime(totalRenderTime * 1000, 2);
+
+				default: 
 			}
 		}
 		takenTime = haxe.Timer.stamp();
@@ -5058,7 +5064,7 @@ class PlayState extends MusicBeatState
 				if (!ffmpegMode) openChartEditor();
 				else 
 				{
-					endingTime = Sys.time();
+					endingTime = haxe.Timer.stamp();
 					FlxG.switchState(new RenderingDoneSubState(endingTime - startingTime));
 					chartingMode = true;
 				}
@@ -5135,7 +5141,7 @@ class PlayState extends MusicBeatState
 				if (!ffmpegMode) FlxG.switchState(new FreeplayState());
 				else 
 				{
-					endingTime = Sys.time();
+					endingTime = haxe.Timer.stamp();
 					FlxG.switchState(new RenderingDoneSubState(endingTime - startingTime));
 				}
 				FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));

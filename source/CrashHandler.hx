@@ -34,11 +34,10 @@ class CrashHandler
 
 	private static function onUncaughtError(e:UncaughtErrorEvent):Void
 	{
-		/* ill only add this back if its revealed to not be the cause of people not getting a crash log when crashing
-		e.preventDefault();
+		//update: moxie actually educated me on what these do. I'll only stop it from doing preventDefault in that case.
+		//e.preventDefault();
 		e.stopPropagation();
 		e.stopImmediatePropagation();
-		*/
 
 		var m:String = e.error;
 		if (Std.isOfType(e.error, Error)) {

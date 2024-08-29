@@ -152,7 +152,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 
 	// Game Renderer
 	public static var ffmpegMode:Bool = false;
-	public static var ffmpegInfo:Bool = false;
+	public static var ffmpegInfo:String = 'None';
 	public static var targetFPS:Float = 60;
 	public static var unlockFPS:Bool = false;
 	public static var renderBitrate:Float = 5.0;
