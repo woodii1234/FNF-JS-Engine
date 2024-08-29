@@ -442,13 +442,6 @@ class VisualsUISubState extends BaseOptionsMenu
 			true);
 		addOption(option);
 
-		var option:Option = new Option('Show MS Popup',
-			"If checked, hitting a note will also show how late/early you hit it.",
-			'showMS',
-			'bool',
-			false);
-		addOption(option);
-
 		var option:Option = new Option('Flashing Lights',
 			"Uncheck this if you're sensitive to flashing lights!",
 			'flashing',

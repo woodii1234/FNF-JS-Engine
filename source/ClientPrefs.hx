@@ -80,7 +80,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var longFCName:Bool = false;
 	public static var healthDisplay:Bool = false;
 	public static var opponentRateCount:Bool = true;
-	public static var showMS:Bool = false;
 	public static var flashing:Bool = true;
 	public static var camZooms:Bool = true;
 	public static var ratingCounter:Bool = false;
@@ -118,7 +117,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var opponentLightStrum:Bool = true;
 	public static var botLightStrum:Bool = true;
 	public static var playerLightStrum:Bool = true;
-	public static var ratesAndCombo:Bool = false;
+	public static var ratingPopups:Bool = true;
+	public static var comboPopups:Bool = true;
+	public static var showMS:Bool = false;
 	public static var songLoading:Bool = true;
 	public static var noSpawnFunc:Bool = false;
 	public static var noHitFuncs:Bool = false;

@@ -35,6 +35,7 @@ class EditorPlayState extends MusicBeatState
 	public var playerStrums:FlxTypedGroup<StrumNote>;
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 
+	public var sustainNotes:NoteGroup;
 	public var notes:NoteGroup;
 	public var unspawnNotes:Array<PreloadedChartNote> = [];
 
@@ -92,6 +93,9 @@ class EditorPlayState extends MusicBeatState
 		
 		comboGroup = new FlxTypedGroup<FlxSprite>();
 		add(comboGroup);
+
+		sustainNotes = new NoteGroup();
+		add(sustainNotes);
 
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		opponentStrums = new FlxTypedGroup<StrumNote>();
@@ -380,25 +384,25 @@ class EditorPlayState extends MusicBeatState
 				notesAddedCount -= (notesAddedCount - unspawnNotes.length);
 
 			while (unspawnNotes[notesAddedCount] != null && unspawnNotes[notesAddedCount].strumTime - Conductor.songPosition < (1500 / PlayState.SONG.speed / unspawnNotes[notesAddedCount].multSpeed)) {
-				if (ClientPrefs.fastNoteSpawn) notes.spawnNote(unspawnNotes[notesAddedCount]);
+				if (ClientPrefs.fastNoteSpawn) (unspawnNotes[notesAddedCount].isSustainNote ? sustainNotes : notes).spawnNote(unspawnNotes[notesAddedCount]);
 				else
-				{
-					notes.recycle(Note).setupNoteData(unspawnNotes[notesAddedCount]);
-				}
+					(unspawnNotes[notesAddedCount].isSustainNote ? sustainNotes : notes).recycle(Note).setupNoteData(unspawnNotes[notesAddedCount]);
+
 				notesAddedCount++;
 			}
-				if (notesAddedCount > 0)
-					unspawnNotes.splice(0, notesAddedCount);
+			if (notesAddedCount > 0)
+				unspawnNotes.splice(0, notesAddedCount);
 		}
 		
 		if (generatedMusic)
 		{
-			var noteIndex:Int = notes.members.length;
-			while (noteIndex >= 0)
+			for (group in [notes, sustainNotes])
 			{
-				var daNote:Note = notes.members[noteIndex--];
-				if (daNote != null) daNote.update(elapsed);
-				updateNote(daNote);
+				group.forEach(function(daNote)
+				{
+					updateNote(daNote);
+				});
+				group.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 			}
 			if (Conductor.songPosition >= FlxG.sound.music.length) endSong();
 		}
@@ -434,7 +438,8 @@ class EditorPlayState extends MusicBeatState
 
 		if (generatedMusic)
 		{
-			notes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
+			for (group in [notes, sustainNotes])
+				group.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 		}
 	}
 
@@ -493,7 +498,7 @@ class EditorPlayState extends MusicBeatState
 
 				//trace('test!');
 				var sortedNotesList:Array<Note> = [];
-				notes.forEachAlive(function(daNote:Note)
+				for (group in [notes, sustainNotes]) group.forEachAlive(function(daNote:Note)
 				{
 					if (daNote.canBeHit && daNote.mustPress && !daNote.tooLate && !daNote.wasGoodHit && !daNote.isSustainNote)
 					{
@@ -613,7 +618,7 @@ class EditorPlayState extends MusicBeatState
 		if (generatedMusic)
 		{
 			// rewritten inputs???
-			notes.forEachAlive(function(daNote:Note)
+			for (group in [notes, sustainNotes]) group.forEachAlive(function(daNote:Note)
 			{
 				// hold note functions
 				if (daNote.isSustainNote && controlHoldArray[daNote.noteData] && daNote.canBeHit 
@@ -657,7 +662,12 @@ class EditorPlayState extends MusicBeatState
 				if(daNote.isSustainNote && !daNote.animation.curAnim.name.endsWith('end')) {
 					time += 0.15;
 				}
-				StrumPlayAnim(true, Std.int(Math.abs(daNote.noteData)) % 4, time);
+				if (ClientPrefs.noteColorStyle != 'Normal' && ClientPrefs.showNotes && ClientPrefs.enableColorShader) {
+					inline opponentStrums.members[daNote.noteData].playAnim('confirm', true, daNote.rgbShader.r, daNote.rgbShader.g, daNote.rgbShader.b);
+				} else {
+					inline opponentStrums.members[daNote.noteData].playAnim('confirm', true);
+				}
+				opponentStrums.members[daNote.noteData].resetAnim = calculateResetTime(daNote.isSustainNote);
 				daNote.hitByOpponent = true;
 
 				if (!daNote.isSustainNote)
@@ -672,7 +682,6 @@ class EditorPlayState extends MusicBeatState
 				if (PlayState.SONG.needsVoices)
 					vocals.volume = 1;
 				goodNoteHit(daNote);
-				if (ClientPrefs.fastNoteSpawn) notes.pushToPool(daNote);
 			}
 			if (!daNote.exists) return;
 
@@ -683,10 +692,10 @@ class EditorPlayState extends MusicBeatState
 					if (daNote.tooLate || !daNote.wasGoodHit)
 					{
 						//Dupe note remove
-						notes.forEachAlive(function(note:Note) {
+						for (group in [notes, sustainNotes]) group.forEachAlive(function(note:Note) {
 							if (daNote != note && daNote.mustPress && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 10) {
 								daNote.exists = false;
-								if (ClientPrefs.fastNoteSpawn) notes.pushToPool(daNote);
+								if (ClientPrefs.fastNoteSpawn) (daNote.isSustainNote ? sustainNotes : notes).pushToPool(daNote);
 							}
 						});
 
@@ -697,7 +706,7 @@ class EditorPlayState extends MusicBeatState
 					}
 				}
 				daNote.exists = false;
-				if (ClientPrefs.fastNoteSpawn) notes.pushToPool(daNote);
+				if (ClientPrefs.fastNoteSpawn) (daNote.isSustainNote ? sustainNotes : notes).pushToPool(daNote);
 			}
 		}
 	}
@@ -723,6 +732,7 @@ class EditorPlayState extends MusicBeatState
 					if (!note.isSustainNote)
 					{
 						note.exists = false;
+						if (ClientPrefs.fastNoteSpawn) notes.pushToPool(note);
 					}
 					return;
 			}
@@ -736,20 +746,27 @@ class EditorPlayState extends MusicBeatState
 
 			if (cpuControlled)
 			{
-				var time:Float = 0.15;
-				if(note.isSustainNote && !note.animation.curAnim.name.endsWith('end')) {
-					time += 0.15;
+				if(playerStrums.members[note.noteData] != null) {
+					if (ClientPrefs.noteColorStyle != 'Normal' && ClientPrefs.showNotes && ClientPrefs.enableColorShader) {
+						inline playerStrums.members[note.noteData].playAnim('confirm', true, note.rgbShader.r, note.rgbShader.g, note.rgbShader.b);
+					} else {
+						inline playerStrums.members[note.noteData].playAnim('confirm', true);
+					}
+					playerStrums.members[note.noteData].resetAnim = calculateResetTime(note.isSustainNote);
 				}
-				StrumPlayAnim(false, Std.int(Math.abs(note.noteData)) % 4, time);
 			}
 			else
-			playerStrums.forEach(function(spr:StrumNote)
 			{
-				if (Math.abs(note.noteData) == spr.ID)
+				final spr = playerStrums.members[note.noteData];
+				if(spr != null)
 				{
-					spr.playAnim('confirm', true);
+					if (ClientPrefs.noteColorStyle != 'Normal' && ClientPrefs.showNotes && ClientPrefs.enableColorShader) {
+						inline spr.playAnim('confirm', true, note.rgbShader.r, note.rgbShader.g, note.rgbShader.b);
+					} else {
+						inline spr.playAnim('confirm', true);
+					}
 				}
-			});
+			}
 
 			note.wasGoodHit = true;
 			vocals.volume = 1;
@@ -757,6 +774,7 @@ class EditorPlayState extends MusicBeatState
 			if (!note.isSustainNote)
 			{
 				note.exists = false;
+				if (ClientPrefs.fastNoteSpawn) notes.pushToPool(note);
 			}
 		}
 	}
@@ -770,6 +788,11 @@ class EditorPlayState extends MusicBeatState
 
 		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
 		vocals.volume = 0;
+	}
+
+	function calculateResetTime(?sustainNote:Bool = false):Float {
+		if (ClientPrefs.strumLitStyle == 'BPM Based') return (Conductor.stepCrochet * 1.5 / 1000) * (!sustainNote ? 1 : 2);
+		return 0.15 * (!sustainNote ? 1 : 2);
 	}
 
 	var COMBO_X:Float = 400;
