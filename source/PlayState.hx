@@ -2697,10 +2697,10 @@ class PlayState extends MusicBeatState
 		else switch (ClientPrefs.scoreStyle)
 			{
 				case 'Kade Engine':
-					tempScore = 'Score: ' + formattedScore + ' $divider Combo Breaks: ' + formattedSongMisses  + (ClientPrefs.showComboInfo ? ' $divider Combo: ' + formattedCombo : '') + npsString + ' $divider Accuracy: ' + accuracy + ' $divider (' + fcString + ') ' + ratingCool;
+					tempScore = 'Score: ' + formattedScore + ' $divider Combo Breaks: ' + formattedSongMisses  + (ClientPrefs.showComboInfo ? ' $divider Combo: ' + formattedCombo : '') + npsString + ' $divider Accuracy: ' + accuracy + ' $divider (' + fcString + ') ' + ratingName;
 
 				case "Doki Doki+":
-					tempScore = 'Score: ' + formattedScore + ' $divider Breaks: ' + formattedSongMisses + (ClientPrefs.showComboInfo ? ' $divider Combo: ' + formattedCombo : '') + npsString + ' $divider Accuracy: ' + accuracy + ' $divider (' + fcString + ') ' + ratingCool;
+					tempScore = 'Score: ' + formattedScore + ' $divider Breaks: ' + formattedSongMisses + (ClientPrefs.showComboInfo ? ' $divider Combo: ' + formattedCombo : '') + npsString + ' $divider Accuracy: ' + accuracy + ' $divider (' + fcString + ') ' + ratingName;
 
 				case "Dave Engine":
 					tempScore = 'Score: ' + formattedScore + ' $divider Misses: ' + formattedSongMisses + (ClientPrefs.showComboInfo ? ' $divider Combo: ' + formattedCombo : '') + npsString + ' $divider Accuracy: ' + accuracy + ' $divider ' + fcString;
@@ -6986,7 +6986,6 @@ class PlayState extends MusicBeatState
 	public var ratingString:String;
 	public var ratingPercent:Float;
 	public var ratingFC:String;
-	public var ratingCool:String;
 	public function RecalculateRating(badHit:Bool = false) {
 		setOnLuas('score', songScore);
 		setOnLuas('misses', songMisses);
@@ -7063,39 +7062,6 @@ class PlayState extends MusicBeatState
 				cond--;
 			}
 
-			var accuracy:Float = (ratingPercent * 100);
-
-			final ratingConditions:Array<Dynamic> = [
-				[ accuracy >= 99.9935, "AAAAA" ],
-				[ accuracy >= 99.980, "AAAA:" ],
-				[ accuracy >= 99.970, "AAAA." ],
-				[ accuracy >= 99.955, "AAAA" ],
-				[ accuracy >= 99.90, "AAA:" ],
-				[ accuracy >= 99.80, "AAA." ],
-				[ accuracy >= 99.70, "AAA" ],
-				[ accuracy >= 99.00, "AA:" ],
-				[ accuracy >= 96.50, "AA." ],
-				[ accuracy >= 93.00, "AA" ],
-				[ accuracy >= 90.00, "A:" ],
-				[ accuracy >= 85.00, "A." ],
-				[ accuracy >= 80.00, "A" ],
-				[ accuracy >= 70.00, "B" ],
-				[ accuracy >= 60.00, "C" ],
-				[ accuracy >= 50.00, "D" ],
-				[ accuracy < 50.00, "F" ]
-			];
-
-			cond = ratingConditions.length;
-			ratingCool = "";
-			while (cond >= 0)
-			{
-				if (ratingConditions[cond] != null && ratingConditions[cond][0]) {
-					ratingCool = ratingConditions[cond][1];
-					break;
-				}
-				cond--;
-			}
-
 			// basically same stuff, doesn't update every frame but it also means no memory leaks during botplay
 			if (ClientPrefs.ratingCounter && judgementCounter != null)
 				updateRatingCounter();
@@ -7108,7 +7074,6 @@ class PlayState extends MusicBeatState
 		setOnLuas('rating', ratingPercent);
 		setOnLuas('ratingName', ratingName);
 		setOnLuas('ratingFC', ratingFC);
-		setOnLuas('ratingCool', ratingCool);
 	}
 
 	#if ACHIEVEMENTS_ALLOWED
