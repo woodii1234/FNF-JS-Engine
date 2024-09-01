@@ -12,19 +12,11 @@ final class RatingStuff {
     // basically to shorten playstate a little bit
     public static final ratingsMap:StringMap<MultiStringArray> = [
         'Tails Gets Trolled V4' => {
-            fc: (!ClientPrefs.longFCName) ? [
+            fc: [
                 'No Play', 'KFC', 'AFC', 'CFC', 'SDC', 'FC', 'SDCB', 'Clear', 'TDCB', 'QDCB'
-            ] : [
-                'No Play', 'Killer Full Combo', 'Awesome Full Combo', 'Cool Full Combo', 'Gay Full Combo', 'Full Combo', 'Single Digit Misses', 'Clear', 'TDCB', 'QDCB'
             ],
-            hit: (!ClientPrefs.longFCName) ? [
-                'Killer!!!', 'Awesome!!', 'Cool!', 'Gay.', 'Retarded.', 'Fail..'
-            ] : [
-                'Killer!!!', 'Awesome!!', 'Cool!', 'Gay.', 'Retarded.', 'Fail..'
-            ],
-            judgeCount: (!ClientPrefs.longFCName) ? [
-                'Killers', 'Awesomes', 'Cools', 'Gays', 'Retardeds', 'Fails'
-            ] : ['Killers', 'Awesomes', 'Cools', 'Gays', 'Retardeds', 'Fails']
+            hit: ['Killer!!!', 'Awesome!!', 'Cool!', 'Gay.', 'Retarded.', 'Fail..'],
+            judgeCount: ['Killers', 'Awesomes', 'Cools', 'Gays', 'Retardeds', 'Fails']
         },
         'Doki Doki+' => {
             fc: null,
