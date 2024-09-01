@@ -55,6 +55,7 @@ class NoteSplash extends FlxSprite
 	public function setupNoteSplash(x:Float, y:Float, direction:Int = 0, ?note:Note = null) {
 		setPosition(x - Note.swagWidth * 0.95, y - Note.swagWidth);
 		alpha = 0.6;
+		shader = (ClientPrefs.enableColorShader ? rgbShader.shader : null);
 
 		if(note != null && note.noteSplashData.texture.length > 0 && Paths.fileExists('images/' + note.noteSplashData.texture + '.png', IMAGE)) texture = note.noteSplashData.texture;
 		

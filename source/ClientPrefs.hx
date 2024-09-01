@@ -76,9 +76,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var bfIconStyle:String = 'Default';
 	public static var ratingType:String = 'Base FNF';
 	public static var iconBounceType:String = 'Golden Apple';
-	public static var longHPBar:Bool = false;
-	public static var longFCName:Bool = false;
-	public static var healthDisplay:Bool = false;
 	public static var opponentRateCount:Bool = true;
 	public static var flashing:Bool = true;
 	public static var camZooms:Bool = true;

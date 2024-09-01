@@ -414,27 +414,6 @@ class VisualsUISubState extends BaseOptionsMenu
 			['Golden Apple', 'Dave and Bambi', 'Old Psych', 'New Psych', 'VS Steve', 'Plank Engine', 'Strident Crisis', 'SB Engine', 'None']);
 		addOption(option);
 
-		var option:Option = new Option('long ass health bar',
-			"If this is checked, the Health Bar will become LOOOOOONG",
-			'longHPBar',
-			'bool',
-			false);
-		addOption(option);
-
-		var option:Option = new Option('Full FC Rating Name',
-			'If checked, the FC ratings will use their full name instead of their abbreviated form (so an SFC will become a Sick Full Combo).',
-			'longFCName',
-			'bool',
-			false);
-		addOption(option);
-
-		var option:Option = new Option('Display Health Remaining',
-			"If checked, shows how much health you have remaining.",
-			'healthDisplay',
-			'bool',
-			false);
-		addOption(option);
-
 		var option:Option = new Option('Opponent Note Hit Count',
 			"If checked, the rating counter will also show how many notes the opponent has hit.",
 			'opponentRateCount',
