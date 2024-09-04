@@ -85,6 +85,13 @@ class OptimizationSubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
+		var option:Option = new Option('Disable Skipped Note Lua Calls',
+			"If checked, the game will not call note hit functions for skipped notes.",
+			'noSkipFuncs',
+			'bool',
+			false);
+		addOption(option);
+
 		var option:Option = new Option('Even LESS Botplay Lag',
 			"Reduce Botplay lag even further.",
 			'lessBotLag',

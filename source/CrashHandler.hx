@@ -34,8 +34,7 @@ class CrashHandler
 
 	private static function onUncaughtError(e:UncaughtErrorEvent):Void
 	{
-		//update: moxie actually educated me on what these do. I'll only stop it from doing preventDefault in that case.
-		//e.preventDefault();
+		e.preventDefault();
 		e.stopPropagation();
 		e.stopImmediatePropagation();
 
@@ -60,21 +59,12 @@ class CrashHandler
 
 		path = "crash/" + "JSEngine_" + dateNow + ".log";
 
-		for(e in stack) {
-			switch(e) {
-				case CFunction: stackLabelArr.push("Non-Haxe (C) Function");
-				case Module(c): stackLabelArr.push('Module ${c}');
-				case FilePos(parent, file, line, col):
-					switch(parent) {
-						case Method(cla, func):
-							stackLabelArr.push('${file.replace('.hx', '')}.$func() [line $line]');
-						case _:
-							stackLabelArr.push('${file.replace('.hx', '')} [line $line]');
-					}
-				case LocalFunction(v):
-					stackLabelArr.push('Local Function ${v}');
-				case Method(cl, m):
-					stackLabelArr.push('${cl} - ${m}');
+		for (stackItem in callStack) {
+			switch (stackItem) {
+				case FilePos(s, file, line, column):
+					stackLabelArr.push(file + " (Line " + line + ")\n");
+				default:
+					Sys.println(stackItem);
 			}
 		}
 		stackLabel = stackLabelArr.join('\r\n');

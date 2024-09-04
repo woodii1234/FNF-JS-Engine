@@ -120,6 +120,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var songLoading:Bool = true;
 	public static var noSpawnFunc:Bool = false;
 	public static var noHitFuncs:Bool = false;
+	public static var noSkipFuncs:Bool = false;
 	public static var lessBotLag:Bool = false;
 	public static var fastNoteSpawn:Bool = false;
 
