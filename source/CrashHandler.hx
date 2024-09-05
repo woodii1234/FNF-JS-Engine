@@ -62,7 +62,7 @@ class CrashHandler
 		for (stackItem in stack) {
 			switch (stackItem) {
 				case FilePos(s, file, line, column):
-					stackLabelArr.push(file + " (Line " + line + ")\n");
+					stackLabelArr.push(file + " (Line " + line + ")");
 				default:
 					Sys.println(stackItem);
 			}
