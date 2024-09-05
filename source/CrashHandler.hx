@@ -59,7 +59,7 @@ class CrashHandler
 
 		path = "crash/" + "JSEngine_" + dateNow + ".log";
 
-		for (stackItem in callStack) {
+		for (stackItem in stack) {
 			switch (stackItem) {
 				case FilePos(s, file, line, column):
 					stackLabelArr.push(file + " (Line " + line + ")\n");
