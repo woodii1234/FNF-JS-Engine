@@ -1,3 +1,7 @@
+1.33.1;
+
+Fixed the game not creating a crash log on ANY crash for some users (thank you moxie)
+
 1.33.0;
 
 Note Skipping has been added! (i asked HRK_EXEX before adding this and he gave me permission to add it, and he has been given credit for said feature)
