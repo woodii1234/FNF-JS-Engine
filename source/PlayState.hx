@@ -4906,6 +4906,7 @@ class PlayState extends MusicBeatState
 				FlxG.sound.music.volume = 0;
 				vocals.volume = opponentVocals.volume = 0;
 			}
+			FlxG.mouse.unload(); // just in case you changed it beforehand
 			pauseVocals();
 			if(!ffmpegMode){
 				if(ClientPrefs.noteOffset <= 0 || ignoreNoteOffset) {
