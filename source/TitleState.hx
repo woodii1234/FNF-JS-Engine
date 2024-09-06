@@ -351,8 +351,10 @@ class TitleState extends MusicBeatState
 		}
 
 		// for testing purposes
+		/*
 		if (FlxG.keys.checkStatus(FlxKey.SEVEN, JUST_PRESSED))
 			throw 'Crash test';
+		*/
 
 		// EASTER EGG
 
