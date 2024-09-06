@@ -123,6 +123,7 @@ class Paths
 		// Use a for loop for adding all of the animations in the splash spritesheet, otherwise it won't find the animations for the next recycle
 		
 		var config = splashConfigs.get(splashSkin);
+		if (config == null) config = initSplashConfig(splashSkin);
 		var maxAnims:Int = 0;
 		var animName = config.anim;
 		if(animName == null)
@@ -810,6 +811,17 @@ class Paths
 		return list;
 	}
 	#end
+
+	public static function loadTopMod()
+	{
+		Paths.currentModDirectory = '';
+		
+		#if MODS_ALLOWED
+		var list:Array<String> = Paths.getGlobalMods();
+		if(list != null && list[0] != null)
+			Paths.currentModDirectory = list[0];
+		#end
+	}
 
 	#if flxanimate
 	public static function loadAnimateAtlas(spr:FlxAnimate, folderOrImg:Dynamic, spriteJson:Dynamic = null, animationJson:Dynamic = null)

@@ -11,6 +11,8 @@
 
 README.md revamped by [Nael2xd](https://youtube.com/@nael2xd?si=axwJrY_8jdlXUwSm)
 
+If you're looking for the mobile version, [go here!](https://github.com/MobilePorting/FNF-JS-Engine-Mobile)
+
 ## Welcome
 
 Hello and welcome to JS Engine's github repo, where you can download the engine and make spammy charts or have fun with the engine.

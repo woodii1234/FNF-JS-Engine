@@ -41,11 +41,12 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
-        	var option:Option = new Option('Show Debug Info',
-			"If checked, the Botplay text will show how long it took to render 1 frame.",
+		var option:Option = new Option('Info Shown: ',
+			"Choose what info it should show while rendering a song.",
 			'ffmpegInfo',
-			'bool',
-			false);
+			'string',
+			'None',
+			['None', 'Rendering Time', 'Time Remaining', 'Frame Time']);
 		addOption(option);
 
         	var option:Option = new Option('Video Framerate',
@@ -121,7 +122,7 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		option.decimals = 0;
 
 		var option:Option = new Option('Garbage Collection Rate',
-			"After how many seconds rendered should a garbage collection be performed?\nIf it's set to 0, the game will not garbage collect at all.",
+			"After how many seconds rendered should a garbage collection be performed?\nIf it's set to 0, the game will not run GC at all.",
 			'renderGCRate',
 			'float',
 			5.0);
@@ -133,13 +134,6 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		option.changeValue = 0.1;
 		option.decimals = 1;
 		option.displayFormat = '%vs';
-
-		var option:Option = new Option('Show Rendering Time Remaining', //Name
-			'If checked, the game will show how much time is remaining for your video to finish rendering,\nbased on your FPS.',
-			'showRemainingTime',
-			'bool',
-			false);
-		addOption(option);
 
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length-1]];
 		

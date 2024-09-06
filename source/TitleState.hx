@@ -91,7 +91,7 @@ class TitleState extends MusicBeatState
 		super.create();
 
 		#if (CHECK_FOR_UPDATES)
-		if(ClientPrefs.checkForUpdates && !closedState) {
+		if(ClientPrefs.checkForUpdates && !closedState && !Main.askedToUpdate) {
 			trace('checking for update');
 			var http = new haxe.Http("https://raw.githubusercontent.com/JordanSantiagoYT/FNF-JS-Engine/main/THECHANGELOG.md");
 			var returnedData:Array<String> = [];
@@ -110,6 +110,7 @@ class TitleState extends MusicBeatState
 					trace('versions arent matching!');
 					OutdatedState.currChanges = returnedData[1];
 					mustUpdate = true;
+					Main.askedToUpdate = true;
 				}
 				if(updateVersion == curVersion) {
 					trace('the versions match!');

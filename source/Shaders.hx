@@ -1007,7 +1007,6 @@ class GlitchEffect extends Effect
         shader.uTime.value[0] += elapsed;
     }
 
-
     function set_waveSpeed(v:Float):Float
     {
         waveSpeed = v;
@@ -1394,6 +1393,7 @@ class BlockedGlitchEffect
         set_resolution(res);
         set_colorMultiplier(colorMultiplier);
         set_hasColorTransform(colorTransform);
+        PlayState.instance.shaderUpdates.push(update);
     }
     public function update(elapsed:Float):Void
     {

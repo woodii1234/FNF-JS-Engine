@@ -357,7 +357,7 @@ class CharacterEditorState extends MusicBeatState
 		tab_group.name = "Settings";
 
 		check_player = new FlxUICheckBox(10, 60, null, null, "Playable Character", 100);
-		check_player.checked = char.usePlayerOffsets;
+		check_player.checked = daAnim.startsWith('bf');
 		check_player.callback = function()
 		{
 			char.isPlayer = !char.isPlayer;
@@ -1470,7 +1470,6 @@ class CharacterEditorState extends MusicBeatState
 			"position":	char.positionArray,
 			"camera_position": char.cameraPosition,
 
-			"isPlayer": check_player.checked,
 			"flip_x": char.originalFlipX,
 			"no_antialiasing": char.noAntialiasing,
 			"healthbar_colors": char.healthColorArray,

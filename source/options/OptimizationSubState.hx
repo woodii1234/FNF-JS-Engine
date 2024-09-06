@@ -43,9 +43,23 @@ class OptimizationSubState extends BaseOptionsMenu
 			true);
 		addOption(option);
 
-		var option:Option = new Option('Show Ratings & Combo',
-			"If checked, shows the ratings & combo. Kinda defeats the purpose of this engine though...",
-			'ratesAndCombo',
+		var option:Option = new Option('Show Ratings',
+			"If unchecked, the game will not show a rating sprite when hitting a note.",
+			'ratingPopups',
+			'bool',
+			true);
+		addOption(option);
+
+		var option:Option = new Option('Show Combo Numbers',
+			"If unchecked, the game will not show combo numbers when hitting a note.",
+			'comboPopups',
+			'bool',
+			true);
+		addOption(option);
+		
+		var option:Option = new Option('Show MS Popup',
+			"If checked, hitting a note will also show how late/early you hit it.",
+			'showMS',
 			'bool',
 			false);
 		addOption(option);
@@ -67,6 +81,13 @@ class OptimizationSubState extends BaseOptionsMenu
 		var option:Option = new Option('Disable Note Hit Lua Calls',
 			"If checked, the game will not call note hit functions when a note is hit.",
 			'noHitFuncs',
+			'bool',
+			false);
+		addOption(option);
+
+		var option:Option = new Option('Disable Skipped Note Lua Calls',
+			"If checked, the game will not call note hit functions for skipped notes.",
+			'noSkipFuncs',
 			'bool',
 			false);
 		addOption(option);

@@ -33,7 +33,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 
 	//Visuals & UI
 	public static var noteSkin:String = 'Default';
-	public static var splashType:String = 'Psych Engine';
+	public static var splashType:String = 'Default';
 	public static var noteSplashes:Bool = true;
 	public static var oppNoteSplashes:Bool = true;
 	public static var showNPS:Bool = true;
@@ -76,11 +76,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var bfIconStyle:String = 'Default';
 	public static var ratingType:String = 'Base FNF';
 	public static var iconBounceType:String = 'Golden Apple';
-	public static var longHPBar:Bool = false;
-	public static var longFCName:Bool = false;
-	public static var healthDisplay:Bool = false;
 	public static var opponentRateCount:Bool = true;
-	public static var showMS:Bool = false;
 	public static var flashing:Bool = true;
 	public static var camZooms:Bool = true;
 	public static var ratingCounter:Bool = false;
@@ -118,10 +114,13 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var opponentLightStrum:Bool = true;
 	public static var botLightStrum:Bool = true;
 	public static var playerLightStrum:Bool = true;
-	public static var ratesAndCombo:Bool = false;
+	public static var ratingPopups:Bool = true;
+	public static var comboPopups:Bool = true;
+	public static var showMS:Bool = false;
 	public static var songLoading:Bool = true;
 	public static var noSpawnFunc:Bool = false;
 	public static var noHitFuncs:Bool = false;
+	public static var noSkipFuncs:Bool = false;
 	public static var lessBotLag:Bool = false;
 	public static var fastNoteSpawn:Bool = false;
 
@@ -152,7 +151,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 
 	// Game Renderer
 	public static var ffmpegMode:Bool = false;
-	public static var ffmpegInfo:Bool = false;
+	public static var ffmpegInfo:String = 'None';
 	public static var targetFPS:Float = 60;
 	public static var unlockFPS:Bool = false;
 	public static var renderBitrate:Float = 5.0;
@@ -274,6 +273,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 		for (flixelS in importantMap.get("flixelSound"))
 			Reflect.setField(FlxG.save.data, flixelS, Reflect.field(FlxG.sound, flixelS));
 
+		#if ACHIEVEMENTS_ALLOWED Achievements.save(); #end
 		FlxG.save.flush();
 
 		var save:FlxSave = new FlxSave();
@@ -284,6 +284,8 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	}
 
 	public static function loadPrefs() { //loads settings if it finds a save file containing the settings
+		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
+		
 		for (field in Type.getClassFields(ClientPrefs))
 		{
 			if (Type.typeof(Reflect.field(ClientPrefs, field)) != TFunction)

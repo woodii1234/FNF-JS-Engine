@@ -260,26 +260,6 @@ class FunkinLua {
 			return false;
 		});
 
-		Lua_helper.add_callback(lua, "giveAchievement", function(name:String){
-			var me = this;
-			if(Achievements.isAchievementUnlocked(name)||!PlayState.instance.achievementArray.contains(me))
-			{
-				if(!PlayState.instance.achievementArray.contains(me)){
-					luaTrace("giveAchievement: This lua file is not a custom achievement lua.", false, false, FlxColor.RED);
-				}
-
-				return false;
-			}
-			@:privateAccess
-			if(PlayState.instance != null) {
-				Achievements.unlockAchievement(name);
-				PlayState.instance.startAchievement(name);
-				ClientPrefs.saveSettings();
-				return true;
-			}
-			else return false;
-		});
-
 		// shader shit
 		Lua_helper.add_callback(lua, "initLuaShader", function(name:String, glslVersion:Int = 120) {
 			if(!ClientPrefs.shaders) return false;
@@ -2354,6 +2334,8 @@ class FunkinLua {
 			closed = true;
 			return closed;
 		});
+		
+		#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(lua); #end
 
 		Lua_helper.add_callback(lua, "changePresence", function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float) {
 			#if DISCORD_ALLOWED
@@ -3239,7 +3221,7 @@ class FunkinLua {
 		return PlayState.instance.camGame;
 	}
 
-	public function luaTrace(text:String, ignoreCheck:Bool = false, deprecated:Bool = false, color:FlxColor = FlxColor.WHITE) {
+	public static function luaTrace(text:String, ignoreCheck:Bool = false, deprecated:Bool = false, color:FlxColor = FlxColor.WHITE) {
 		#if LUA_ALLOWED
 		if(ignoreCheck || getBool('luaDebugMode')) {
 			if(deprecated && !getBool('luaDeprecatedWarnings')) {
@@ -3272,11 +3254,13 @@ class FunkinLua {
 	}
 
 	var lastCalledFunction:String = '';
+	public static var lastCalledScript:FunkinLua = null;
 	public function call(func:String, args:Array<Dynamic>):Dynamic {
 		#if LUA_ALLOWED
 		if(closed) return Function_Continue;
 
 		lastCalledFunction = func;
+		lastCalledScript = this;
 		try {
 			if(lua == null) return Function_Continue;
 
@@ -3390,7 +3374,12 @@ class FunkinLua {
 	}
 
 	#if LUA_ALLOWED
-	public function getBool(variable:String) {
+	public static function getBool(variable:String) {
+		if(lastCalledScript == null) return false;
+
+		var lua:State = lastCalledScript.lua;
+		if(lua == null) return false;
+
 		var result:String = null;
 		Lua.getglobal(lua, variable);
 		result = Convert.fromLua(lua, -1);

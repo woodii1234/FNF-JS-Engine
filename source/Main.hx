@@ -107,6 +107,8 @@ class Main extends Sprite {
 		setupGame();
 	}
 
+	public static var askedToUpdate:Bool = false;
+
 	private function setupGame():Void {
 		var stageWidth:Int = Lib.current.stage.stageWidth;
 		var stageHeight:Int = Lib.current.stage.stageHeight;
@@ -121,6 +123,7 @@ class Main extends Sprite {
 
 		// #if LUA_ALLOWED Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(psychlua.CallbackHandler.call)); #end
 		ClientPrefs.loadDefaultStuff();
+		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
 
 		addChild(new FlxGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 

@@ -512,6 +512,14 @@ class NotesSubState extends MusicBeatSubstate
 	public function spawnNotes()
 	{
 		Paths.initDefaultSkin(Note.defaultNoteSkin + Note.getNoteSkinPostfix());
+		if (onPixel && !Paths.fileExists('images/pixelUI/' + Paths.defaultSkin + '.png', IMAGE))
+		{
+			CoolUtil.coolError("HEY! Your Noteskin doesn't have any Pixel sprites. The game will revert to non-pixel notes to prevent a crash."
+			+ "\n\nIf it DOES have Pixel sprites, make sure they're located in 'images/pixelUI/noteskins/'.", "JS Engine Anti-Crash Tool");
+			onPixel = false;
+			spawnNotes();
+			return;
+		}
 		dataArray = !onPixel ? ClientPrefs.arrowRGB : ClientPrefs.arrowRGBPixel;
 		if (onPixel) PlayState.stageUI = "pixel";
 
@@ -567,14 +575,22 @@ class NotesSubState extends MusicBeatSubstate
 		for (i in 0...dataArray.length)
 		{
 			Note.initializeGlobalRGBShader(i);
+			Note.globalRgbShaders[i].r = dataArray[i][0];
+			Note.globalRgbShaders[i].g = dataArray[i][1];
+			Note.globalRgbShaders[i].b = dataArray[i][2];
+
 			var newNote:StrumNote = new StrumNote(150 + (480 / dataArray.length * i), 200, i, 0);
+			newNote.rgbShader.r = dataArray[i][0];
+			newNote.rgbShader.g = dataArray[i][1];
+			newNote.rgbShader.b = dataArray[i][2];
+			
 			newNote.useRGBShader = true;
 			newNote.setGraphicSize(102);
 			newNote.updateHitbox();
 			newNote.ID = i;
 			myNotes.add(newNote);
 		}
-
+		
 		bigNote = new Note(0, 0);
 		bigNote.setPosition(250, 325);
 		bigNote.setGraphicSize(250);
