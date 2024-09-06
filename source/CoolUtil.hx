@@ -613,12 +613,7 @@ class CoolUtil
 	public static function showPopUp(message:String, title:String):Void
 	{
 		#if (!ios || !iphonesim)
-		try
-		{
-			lime.app.Application.current.window.alert(message, title);
-		}
-		catch (e:Dynamic)
-			trace('$title - $message');
+		lime.app.Application.current.window.alert(message, title);
 		#else
 		trace('$title - $message');
 		#end
