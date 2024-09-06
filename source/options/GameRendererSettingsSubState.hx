@@ -122,7 +122,7 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		option.decimals = 0;
 
 		var option:Option = new Option('Garbage Collection Rate',
-			"After how many seconds rendered should a garbage collection be performed?\nIf it's set to 0, the game will not garbage collect at all.",
+			"After how many seconds rendered should a garbage collection be performed?\nIf it's set to 0, the game will not run GC at all.",
 			'renderGCRate',
 			'float',
 			5.0);
