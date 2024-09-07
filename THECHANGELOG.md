@@ -1,4 +1,9 @@
+1.33.3;
+
+Fixed Note Splash offsets not savig properly
+
 1.33.2;
+
 Fixed a crash that would occur when accessing the Note Splash Editor menu
 The game will no longer crash if you don't have any weeks LOL
 
