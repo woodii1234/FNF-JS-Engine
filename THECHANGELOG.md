@@ -1,3 +1,7 @@
+1.33.2;
+Fixed a crash that would occur when accessing the Note Splash Editor menu
+The game will no longer crash if you don't have any weeks LOL
+
 1.33.1;
 
 Fixed the game not creating a crash log on ANY crash for some users (thank you moxie)
