@@ -533,15 +533,19 @@ class Note extends FlxSprite
 			CoolUtil.checkNoteQuant(this, (!isSustainNote ? strumTime : parentST), rgbShader);
 
 			case 'Char-Based':
-			var arr:Array<Int> = CoolUtil.getHealthColors(doOppStuff ? PlayState.instance.dad : PlayState.instance.boyfriend);
-			if (gfNote) arr = CoolUtil.getHealthColors(PlayState.instance.gf);
-			if (noteData > -1)
+			if (PlayState.instance != null)
 			{
-				rgbShader.r = FlxColor.fromRGB(arr[0], arr[1], arr[2]);
-				rgbShader.g = FlxColor.WHITE;
-				rgbShader.b = rgbShader.r;
-				rgbShader.b = rgbShader.b.getDarkened(0.7);
+				var arr:Array<Int> = CoolUtil.getHealthColors(doOppStuff ? PlayState.instance.dad : PlayState.instance.boyfriend);
+				if (gfNote) arr = CoolUtil.getHealthColors(PlayState.instance.gf);
+				if (noteData > -1)
+				{
+					rgbShader.r = FlxColor.fromRGB(arr[0], arr[1], arr[2]);
+					rgbShader.g = FlxColor.WHITE;
+					rgbShader.b = rgbShader.r;
+					rgbShader.b = rgbShader.b.getDarkened(0.7);
+				}
 			}
+			else defaultRGB();
 
 			default:
 
