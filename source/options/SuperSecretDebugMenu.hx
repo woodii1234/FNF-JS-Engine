@@ -79,6 +79,13 @@ class SuperSecretDebugMenu extends BaseOptionsMenu
 			false);
 		addOption(option);
 
+		var option:Option = new Option('Force Off GC while Rendering',
+			"If checked, the game will force GC off while rendering. Beware of memory leaks!",
+			'noRenderGC',
+			'bool',
+			false);
+		addOption(option);
+
 		super();
 	}
 	function crashDaEngine():Void {

@@ -2837,7 +2837,7 @@ class FunkinLua {
 			
 		});
 		Lua_helper.add_callback(lua, "addBlockedGlitchEffect", function(camera:String, res:Float = 1280, time:Float = 1, colorMult:Float = 1, colorTransform:Bool = true) {	
-			PlayState.instance.addShaderToCamera(camera, new BlockedGlitchEffect(res, time, colorMult, colorTransform));
+			if (colorTransform) PlayState.instance.addShaderToCamera(camera, new BlockedGlitchEffect(res, time, colorMult, colorTransform));
 		});
 		Lua_helper.add_callback(lua, "clearEffects", function(camera:String) {
 			PlayState.instance.clearShaderFromCamera(camera);

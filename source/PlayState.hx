@@ -523,7 +523,7 @@ class PlayState extends MusicBeatState
 
 		randomBotplayText = theListBotplay[FlxG.random.int(0, theListBotplay.length - 1)];
 
-		inline cpp.vm.Gc.enable(ClientPrefs.enableGC || ffmpegMode); //lagspike prevention
+		inline cpp.vm.Gc.enable(ClientPrefs.enableGC || ffmpegMode && !ClientPrefs.noRenderGC); //lagspike prevention
 		inline Paths.clearStoredMemory();
 
 		#if sys

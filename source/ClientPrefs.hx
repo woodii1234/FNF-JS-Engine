@@ -128,6 +128,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var noGunsRNG:Bool = false;
 	public static var pbRControls:Bool = false;
 	public static var rainbowFPS:Bool = false;
+	public static var noRenderGC:Bool = false;
 
 	//Unused
 	public static var cursing:Bool = true;

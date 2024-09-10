@@ -1432,7 +1432,6 @@ class BlockedGlitchShader extends FlxShader
 
     // ---- gllock required fields -----------------------------------------------------------------------------------------
     #define RATE 0.75
-    
     uniform float time;
     uniform float end;
     uniform sampler2D imageData;
