@@ -250,7 +250,8 @@ class EditorPlayState extends MusicBeatState
 						missHealth: 0.0475,
 						wasHit: false,
 						multSpeed: 1,
-						wasSpawned: false
+						wasSpawned: false,
+						ignoreNote: songNotes[3] == 'Hurt Note' && gottaHitNote
 					};
 					if (swagNote.noteskin.length > 0 && !Paths.noteSkinFramesMap.exists(swagNote.noteskin)) Paths.initNote(4, swagNote.noteskin);
 
@@ -670,11 +671,7 @@ class EditorPlayState extends MusicBeatState
 				opponentStrums.members[daNote.noteData].resetAnim = calculateResetTime(daNote.isSustainNote);
 				daNote.hitByOpponent = true;
 
-				if (!daNote.isSustainNote)
-				{
-					daNote.exists = false;
-					if (ClientPrefs.fastNoteSpawn) notes.pushToPool(daNote);
-				}
+				if (!daNote.isSustainNote) invalidateNote(daNote);
 			}
 
 			if (daNote.mustPress && cpuControlled && daNote.strumTime <= Conductor.songPosition)
@@ -682,6 +679,7 @@ class EditorPlayState extends MusicBeatState
 				if (PlayState.SONG.needsVoices)
 					vocals.volume = 1;
 				goodNoteHit(daNote);
+				if (!daNote.isSustainNote) invalidateNote(daNote);
 			}
 			if (!daNote.exists) return;
 
@@ -694,8 +692,7 @@ class EditorPlayState extends MusicBeatState
 						//Dupe note remove
 						for (group in [notes, sustainNotes]) group.forEachAlive(function(note:Note) {
 							if (daNote != note && daNote.mustPress && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 10) {
-								daNote.exists = false;
-								if (ClientPrefs.fastNoteSpawn) (daNote.isSustainNote ? sustainNotes : notes).pushToPool(daNote);
+								invalidateNote(daNote);
 							}
 						});
 
@@ -705,8 +702,7 @@ class EditorPlayState extends MusicBeatState
 						}
 					}
 				}
-				daNote.exists = false;
-				if (ClientPrefs.fastNoteSpawn) (daNote.isSustainNote ? sustainNotes : notes).pushToPool(daNote);
+				invalidateNote(daNote);
 			}
 		}
 	}
@@ -728,12 +724,6 @@ class EditorPlayState extends MusicBeatState
 
 					note.wasGoodHit = true;
 					vocals.volume = 0;
-
-					if (!note.isSustainNote)
-					{
-						note.exists = false;
-						if (ClientPrefs.fastNoteSpawn) notes.pushToPool(note);
-					}
 					return;
 			}
 
@@ -770,12 +760,6 @@ class EditorPlayState extends MusicBeatState
 
 			note.wasGoodHit = true;
 			vocals.volume = 1;
-
-			if (!note.isSustainNote)
-			{
-				note.exists = false;
-				if (ClientPrefs.fastNoteSpawn) notes.pushToPool(note);
-			}
 		}
 	}
 
@@ -788,6 +772,11 @@ class EditorPlayState extends MusicBeatState
 
 		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
 		vocals.volume = 0;
+	}
+
+	public function invalidateNote(note:Note):Void {
+		note.exists = note.wasGoodHit = note.hitByOpponent = note.tooLate = note.canBeHit = false; //apparently i have to do this, otherwise the game will still think the note should be hit
+		if (ClientPrefs.fastNoteSpawn) (note.isSustainNote ? sustainNotes : notes).pushToPool(note);
 	}
 
 	function calculateResetTime(?sustainNote:Bool = false):Float {
