@@ -58,7 +58,7 @@ Q: How do I (change the background, add characters, etc.)?
 
 A: You do it here the same way you'd do it in Psych Engine.
 
-Q: I found an bug!
+Q: I found a bug!
 
 A: Report [here.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/issues)
 
