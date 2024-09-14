@@ -11,7 +11,7 @@
 
 README.md revamped by [Nael2xd](https://youtube.com/@nael2xd?si=axwJrY_8jdlXUwSm)
 
-If you're looking for the mobile version, [go here!](https://github.com/MobilePorting/FNF-JS-Engine-Mobile)
+If you're looking for the mobile version, [go here!](https://github.com/JordanSantiagoYT/FNF-JS-Engine/tree/mobile)
 
 ## Welcome
 
