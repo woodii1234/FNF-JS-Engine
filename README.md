@@ -32,6 +32,7 @@ The features/performances included are:
 - Basic Shader Support! (for a full list, it can be seen in [here](https://github.com/JordanSantiagoYT/FNF-JS-Engine/wiki#q-what-are-all-the-basic-shaders-that-come-with-this-engine))
 - Rendering mode! (Originally used for lua and gamerenderer-engine)
 - Built in Song Credits! (on chart editor)
+- Spam modules! (for the DnB fans)
 
 There is like lots and lots of stuff i've missed, but at least you would like those features built in **JS ENGINE**
 
@@ -56,6 +57,10 @@ A: Yes, you can! just be sure to credit me (@JordanSantiago on YouTube) and give
 Q: How do I (change the background, add characters, etc.)?
 
 A: You do it here the same way you'd do it in Psych Engine.
+
+Q: I found a bug!
+
+A: Report [here.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/issues)
 
 # Compiling JS Engine
 
