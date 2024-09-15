@@ -1,0 +1,49 @@
+name: Mobile Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    uses: ./.github/workflows/mobile.yml
+    with:
+      buildFlags: officialBuild
+
+  release-android:
+    name: Release androidBuild
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download Android artifact
+      uses: actions/download-artifact@main
+      with:
+        name: androidBuild
+    - name: Upload androidBuild to release
+      uses: svenstaro/upload-release-action@2.5.0
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ github.ref_name }}
+        file: JSEngine-release.apk
+        asset_name: FNF-JS-Engine-android.apk
+        overwrite: false
+
+  release-ios:
+    name: Release iOSBuild
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download iOS artifact
+      uses: actions/download-artifact@main
+      with:
+        name: iOSBuild
+    - name: Zip For Release
+      run: zip -r JSEngine-iOS.zip JSEngine.ipa
+    - name: Upload androidBuild to release
+      uses: svenstaro/upload-release-action@2.5.0
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ github.ref_name }}
+        file: JSEngine-iOS.zip
+        asset_name: FNF-JS-Engine-ios.zip
+        overwrite: false
