@@ -1500,11 +1500,6 @@ class WiggleEffectLua extends Effect
 		}
 	}
 
-	public function setValue(value:Float):Void
-	{
-		shader.uTime.value[0] = value;
-	}
-
 	function set_effectType(v:WiggleEffectType):WiggleEffectType
 	{
 		effectType = v;
@@ -1535,7 +1530,7 @@ class WiggleEffectLua extends Effect
 }
 
 class Effect {
-	public function setValue(shader:FlxShader, variable:String, value:Float){
+	public function setValue(shader:FlxShader, variable:String, value:Float) {
 		Reflect.setProperty(Reflect.getProperty(shader, 'variable'), 'value', [value]);
 	}
 	
