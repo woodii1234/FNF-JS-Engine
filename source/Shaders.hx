@@ -1467,7 +1467,7 @@ class BlockedGlitchShader extends FlxShader
     }
 }
 
-class WiggleEffect extends Effect
+class WiggleEffectLua extends Effect
 {
 	public var shader(default, null):WiggleShader = new WiggleShader();
 	public var effectType(default, set):WiggleEffectType = DREAMY;
