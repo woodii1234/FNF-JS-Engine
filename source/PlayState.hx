@@ -4611,7 +4611,6 @@ class PlayState extends MusicBeatState
 							if(!boyfriendMap.exists(value2)) {
 								addCharacterToList(value2, charType);
 							}
-							var bfAnim:String = (boyfriend.animation.curAnim != null && boyfriend.animation.curAnim.name.startsWith('sing') ? boyfriend.animation.curAnim.name : '');
 
 							var lastAlpha:Float = boyfriend.alpha;
 							boyfriend.alpha = 0.00001;
@@ -4628,7 +4627,6 @@ class PlayState extends MusicBeatState
 								if (ClientPrefs.bfIconStyle == "OS 'Engine'") iconP1.changeIcon('bfos');
 							}
 							bfNoteskin = boyfriend.noteskin;
-							if (bfAnim != '') boyfriend.playAnim(bfAnim, true);
 						}
 						setOnLuas('boyfriendName', boyfriend.curCharacter);
 
