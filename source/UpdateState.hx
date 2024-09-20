@@ -174,7 +174,7 @@ class UpdateState extends MusicBeatState
 			return '';
 			#end
 		}
-		var fileEnd = #if android '.apk' #else '.zip' #end
+		var fileEnd = #if android 'apk' #else 'zip' #end
 		online_url = "https://github.com/JordanSantiagoYT/FNF-JS-Engine/releases/download/" + TitleState.updateVersion + '/FNF-JS-Engine-${getPlatform}.$fileEnd';
 		trace("update url: " + online_url);
 	}
