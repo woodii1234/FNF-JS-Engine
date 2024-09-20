@@ -41,7 +41,8 @@ typedef PreloadedChartNote = {
 	wasSpawned:Bool,
 	ignoreNote:Bool,
 	lowPriority:Bool,
-	wasMissed:Bool
+	wasMissed:Bool,
+	rgbShader:Array<Dynamic>
 }
 
 typedef NoteSplashData = {
@@ -516,9 +517,15 @@ class Note extends FlxSprite
 		_lastValidChecked = '';
 	}
 
-	public function updateRGBColors()
+	public function updateRGBColors(?rColor:FlxColor, ?gColor:FlxColor, ?bColor:FlxColor)
 	{
 		if (rgbShader == null && useRGBShader) rgbShader = new RGBShaderReference(this, initializeGlobalRGBShader(noteData, this));
+		if (rColor != null || gColor != null || bColor != null)
+		{
+			rgbShader.r = rColor;
+			rgbShader.g = gColor;
+			rgbShader.b = bColor;
+		}
 		else switch(ClientPrefs.noteColorStyle)
 		{
 			case 'Rainbow':
@@ -609,6 +616,7 @@ class Note extends FlxSprite
 		ignoreNote = chartNoteData.ignoreNote;
 		multSpeed = chartNoteData.multSpeed;
 		noteDensity = chartNoteData.noteDensity;
+		if (chartNoteData.rgbShader != null && chartNoteData.rgbShader[3] != null) useRGBShader = chartNoteData.rgbShader[3];
 
 		if (ClientPrefs.enableColorShader && useRGBShader)
 		{
