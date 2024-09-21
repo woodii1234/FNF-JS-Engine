@@ -168,8 +168,10 @@ class UpdateState extends MusicBeatState
 			return 'linux';
 			#elseif android
 			return 'android';
+			/*
 			#elseif ios
 			return 'iOS';
+			*/
 			#else
 			return '';
 			#end
@@ -197,15 +199,23 @@ class UpdateState extends MusicBeatState
 	}
 
 	var httpHandler:Http;
+	var fatalError:Bool = false;
 
 	public function startDownload()
 	{
 		trace("starting download process...");
 
-		zip.load(new URLRequest(online_url));
-		if (zip.bytesTotal <= 100) // since the games bytes are *way* more then that
+		final url:String = requestUrl(online_url);
+		if (url != null && url.indexOf('Not Found') != -1)
 		{
-			trace('File size is small! Assuming it couldn\'t find the url!');
+			trace('File not found error!');
+			fatalError = true;
+		}
+
+		zip.load(new URLRequest(online_url));
+		if (fatalError)
+		{
+			// trace('File size is small! Assuming it couldn\'t find the url!');
 			lime.app.Application.current.window.alert('Couldn\'t find the URL for the file! Cancelling download!');
 			FlxG.resetGame();
 			return;
@@ -234,6 +244,7 @@ class UpdateState extends MusicBeatState
 		httpHandler.onError = function(e)
 		{
 			trace("error while downloading file, error: " + e);
+			fatalError = true;
 		}
 		httpHandler.request(false);
 		return r;
