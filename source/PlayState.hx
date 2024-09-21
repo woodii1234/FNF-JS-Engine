@@ -1480,7 +1480,7 @@ class PlayState extends MusicBeatState
 			scoreTxt.scrollFactor.set();
 			add(scoreTxt);
 		}
-		if (ClientPrefs.hideScore || ClientPrefs.showcaseMode) {
+		if (ClientPrefs.showcaseMode) {
 			scoreTxt.visible = false;
 			healthBarBG.visible = false;
 			healthBar.visible = false;
@@ -1502,8 +1502,7 @@ class PlayState extends MusicBeatState
 			dadGroup.destroy();
 			boyfriendGroup.destroy();
 		}
-		if (ClientPrefs.scoreTxtSize > 0 && scoreTxt != null && !ClientPrefs.showcaseMode && !ClientPrefs.hideScore && !ClientPrefs.hideHud) scoreTxt.size = ClientPrefs.scoreTxtSize;
-		if (!ClientPrefs.hideScore) updateScore();
+		if (ClientPrefs.scoreTxtSize > 0 && scoreTxt != null && !ClientPrefs.showcaseMode && !ClientPrefs.hideHud) scoreTxt.size = ClientPrefs.scoreTxtSize;
 
 		final ytWMPosition = switch(ClientPrefs.ytWatermarkPosition)
 		{
@@ -2788,7 +2787,7 @@ class PlayState extends MusicBeatState
 		}
 
 		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4 && judgementCounter != null) updateRatingCounter();
-		if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
+		if (scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 
 		// TODO: Lock other note inputs
@@ -3065,7 +3064,7 @@ class PlayState extends MusicBeatState
 								strumTime: daStrumTime + (Conductor.stepCrochet * susNote),
 								noteData: daNoteData,
 								mustPress: bothSides || gottaHitNote,
-								oppNote: !gottaHitNote,
+								oppNote: (opponentChart ? gottaHitNote : !gottaHitNote),
 								noteType: songNotes[3],
 								animSuffix: (songNotes[3] == 'Alt Animation' || section.altAnim ? '-alt' : ''),
 								noteskin: (gottaHitNote ? bfNoteskin : dadNoteskin),
@@ -3609,7 +3608,7 @@ class PlayState extends MusicBeatState
 				notesHitDateArray.splice(0, notesToRemoveCount);
 				notesHitArray.splice(0, notesToRemoveCount);
 				if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4 && judgementCounter != null) updateRatingCounter();
-				if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
+				if (scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 					if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 			}
 
@@ -3658,7 +3657,7 @@ class PlayState extends MusicBeatState
 
 			if (npsIncreased || npsDecreased || oppNpsIncreased || oppNpsDecreased) {
 				if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 8 && judgementCounter != null) updateRatingCounter();
-				if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 8 && scoreTxt != null) updateScore();
+				if (scoreTxtUpdateFrame <= 8 && scoreTxt != null) updateScore();
 					if (ClientPrefs.compactNumbers && compactUpdateFrame <= 8) updateCompactNumbers();
 				if (npsIncreased) npsIncreased = false;
 				if (npsDecreased) npsDecreased = false;
@@ -4476,12 +4475,12 @@ class PlayState extends MusicBeatState
 				camTwistIntensity2 = _intensity2;
 				if (_intensity2 == 0)
 				{
-					FlxTween.cancelTweensOf(camHUD);
-					FlxTween.cancelTweensOf(camGame);
 					camTwist = false;
-					FlxTween.tween(camHUD, {angle: 0, x: 0, y: 0}, 1, {ease: FlxEase.sineInOut});
-					FlxTween.tween(camGame, {angle: 0, x: 0, y: 0}, 1, {ease: FlxEase.sineInOut});
-					FlxTween.tween(camGame.scroll, {y: 0}, 1, {ease: FlxEase.sineInOut});
+					for (i in [camHUD, camGame])
+					{
+						FlxTween.cancelTweensOf(i);
+						FlxTween.tween(i, {angle: 0, x: 0, y: 0}, 1, {ease: FlxEase.sineOut});
+					}
 				}
 			case 'Change Note Multiplier':
 				var noteMultiplier:Float = Std.parseFloat(value1);
@@ -4618,7 +4617,6 @@ class PlayState extends MusicBeatState
 							if(!boyfriendMap.exists(value2)) {
 								addCharacterToList(value2, charType);
 							}
-							var bfAnim:String = (boyfriend.animation.curAnim != null && boyfriend.animation.curAnim.name.startsWith('sing') ? boyfriend.animation.curAnim.name : '');
 
 							var lastAlpha:Float = boyfriend.alpha;
 							boyfriend.alpha = 0.00001;
@@ -4635,7 +4633,6 @@ class PlayState extends MusicBeatState
 								if (ClientPrefs.bfIconStyle == "OS 'Engine'") iconP1.changeIcon('bfos');
 							}
 							bfNoteskin = boyfriend.noteskin;
-							if (bfAnim != '') boyfriend.playAnim(bfAnim, true);
 						}
 						setOnLuas('boyfriendName', boyfriend.curCharacter);
 
@@ -4662,10 +4659,10 @@ class PlayState extends MusicBeatState
 							if (ClientPrefs.botTxtStyle == 'VS Impostor') {
 								if (botplayTxt != null) FlxTween.color(botplayTxt, 1, botplayTxt.color, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]));
 								
-								if (!ClientPrefs.hideScore && scoreTxt != null && !ClientPrefs.hideHud) FlxTween.color(scoreTxt, 1, scoreTxt.color, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]));
+								if (scoreTxt != null && !ClientPrefs.hideHud) FlxTween.color(scoreTxt, 1, scoreTxt.color, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]));
 							}
 							if (ClientPrefs.scoreStyle == 'JS Engine' && !ClientPrefs.hideHud) {
-								if (!ClientPrefs.hideScore && scoreTxt != null) FlxTween.color(scoreTxt, 1, scoreTxt.color, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]));
+								if (scoreTxt != null) FlxTween.color(scoreTxt, 1, scoreTxt.color, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]));
 							}
 							if (dadAnim != '') dad.playAnim(dadAnim, true);
 						}
@@ -5171,7 +5168,7 @@ class PlayState extends MusicBeatState
 		if (!miss && !ffmpegMode) (opponentChart ? opponentVocals : vocals).volume = 1;
 
 		final offset = FlxG.width * 0.35;
-		if(ClientPrefs.scoreZoom && !ClientPrefs.hideScore && scoreTxt != null && !cpuControlled && !miss)
+		if(ClientPrefs.scoreZoom && scoreTxt != null && !cpuControlled && !miss)
 		{
 			if(scoreTxtTween != null) {
 				scoreTxtTween.cancel();
@@ -5718,7 +5715,7 @@ class PlayState extends MusicBeatState
 				var animToPlay:String = singAnimations[Std.int(Math.abs(daNote.noteData))] + 'miss' + daNote.animSuffix;
 				char.playAnim(animToPlay, true);
 			}
-			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
+			if (scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
 		   		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 
@@ -5766,7 +5763,7 @@ class PlayState extends MusicBeatState
 				var animToPlay:String = singAnimations[Std.int(Math.abs(daNoteAlt.noteData))] + 'miss' + daNoteAlt.animSuffix;
 				char.playAnim(animToPlay, true);
 			}
-			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
+			if (scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
 		   		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 
@@ -5809,7 +5806,7 @@ class PlayState extends MusicBeatState
 			}
 			(opponentChart ? opponentVocals : vocals).volume = 0;
 		}
-		if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
+		if (scoreTxtUpdateFrame <= 4 && scoreTxt != null) updateScore();
 		if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
 		   	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 		callOnLuas('noteMissPress', [direction]);
@@ -6071,7 +6068,7 @@ class PlayState extends MusicBeatState
 				if (ClientPrefs.showNotes && !note.isSustainNote) invalidateNote(note);
 
 				if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
-				if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
+				if (scoreTxtUpdateFrame <= 4) updateScore();
 		   			if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 				if (ClientPrefs.iconBopWhen == 'Every Note Hit' && (iconBopsThisFrame <= 2 || ClientPrefs.noBopLimit) && !note.isSustainNote && iconP1.visible) bopIcons(!oppTrigger);
 			}
@@ -6218,7 +6215,7 @@ class PlayState extends MusicBeatState
 				invalidateNote(daNote);
 			}
 			if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
-			if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
+			if (scoreTxtUpdateFrame <= 4) updateScore();
 		   	if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 
 			if (shouldDrainHealth && health > (healthDrainFloor * polyphony) && !practiceMode || opponentDrain && practiceMode)
@@ -6278,7 +6275,7 @@ class PlayState extends MusicBeatState
 				enemyHits += 1 * polyphony;
 
 				if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
-				if (!ClientPrefs.hideScore && scoreTxtUpdateFrame <= 4) updateScore();
+				if (scoreTxtUpdateFrame <= 4) updateScore();
 		   		if (ClientPrefs.compactNumbers && compactUpdateFrame <= 4) updateCompactNumbers();
 
 				if (shouldDrainHealth && health > healthDrainFloor && !practiceMode || opponentDrain && practiceMode)
@@ -6473,21 +6470,6 @@ class PlayState extends MusicBeatState
 				resyncVocals();
 			}
 		}
-
-		if (camTwist)
-		{
-			if (curStep % (gfSpeed * 4) == 0)
-			{
-				FlxTween.tween(camHUD, {y: -6 * camTwistIntensity2}, Conductor.stepCrochet * (0.002 * gfSpeed), {ease: FlxEase.circOut});
-				FlxTween.tween(camGame.scroll, {y: 12}, Conductor.stepCrochet * (0.002 * gfSpeed), {ease: FlxEase.sineIn});
-			}
-
-			if (curStep % (gfSpeed * 4) == gfSpeed)
-			{
-				FlxTween.tween(camHUD, {y: 0}, Conductor.stepCrochet * (0.002 * gfSpeed), {ease: FlxEase.sineIn});
-				FlxTween.tween(camGame.scroll, {y: 0}, Conductor.stepCrochet * (0.002 * gfSpeed), {ease: FlxEase.sineIn});
-			}
-		}
 		
 		setOnLuas('curStep', curStep);
 		callOnLuas('onStepHit');
@@ -6526,22 +6508,20 @@ class PlayState extends MusicBeatState
 			camHUD.zoom += 0.03 * camBopIntensity;
 		} /// WOOO YOU CAN NOW MAKE IT AWESOME
 
-		if (camTwist)
+		if (camTwist && curBeat % gfSpeed == 0)
 		{
 			if (curBeat % (gfSpeed * 2) == 0)
-			{
-				twistShit = twistAmount;
-			}
+				twistShit = twistAmount * camTwistIntensity;
+
 			if (curBeat % (gfSpeed * 2) == gfSpeed)
+				twistShit = -twistAmount * camTwistIntensity2;
+				
+			for (i in [camHUD, camGame])
 			{
-				twistShit = -twistAmount;
+				FlxTween.cancelTweensOf(i);
+				i.angle = twistShit;
+				FlxTween.tween(i, {angle: 0}, 45 / Conductor.bpm * gfSpeed / playbackRate, {ease: FlxEase.circOut});
 			}
-			camHUD.angle = twistShit * camTwistIntensity2;
-			camGame.angle = twistShit * camTwistIntensity2;
-			FlxTween.tween(camHUD, {angle: twistShit * camTwistIntensity}, Conductor.stepCrochet * (0.0015 * gfSpeed), {ease: FlxEase.circOut});
-			FlxTween.tween(camHUD, {x: -twistShit * camTwistIntensity}, Conductor.crochet * (0.001 * gfSpeed), {ease: FlxEase.linear});
-			FlxTween.tween(camGame, {angle: twistShit * camTwistIntensity}, Conductor.stepCrochet * 0.0015, {ease: FlxEase.circOut});
-			FlxTween.tween(camGame, {x: -twistShit * camTwistIntensity}, Conductor.crochet * (0.001 * gfSpeed), {ease: FlxEase.linear});
 		}
 
 		if (ClientPrefs.iconBopWhen == 'Every Beat' && (iconP1.visible || iconP2.visible)) 
@@ -7026,7 +7006,7 @@ class PlayState extends MusicBeatState
 			// basically same stuff, doesn't update every frame but it also means no memory leaks during botplay
 			if (ClientPrefs.ratingCounter && judgementCounter != null)
 				updateRatingCounter();
-			if (!ClientPrefs.hideScore && scoreTxt != null)
+			if (scoreTxt != null)
 				updateScore(badHit);
 			if (ClientPrefs.compactNumbers)
 				updateCompactNumbers();

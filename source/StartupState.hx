@@ -2,12 +2,24 @@ package;
 
 import flixel.input.keyboard.FlxKey;
 
+#if VIDEOS_ALLOWED
+#if (hxCodec >= "3.0.0" || hxCodec == "git")
+import hxcodec.flixel.FlxVideo as MP4Handler;
+#elseif (hxCodec == "2.6.1")
+import hxcodec.VideoHandler as MP4Handler;
+#elseif (hxCodec == "2.6.0")
+import VideoHandler as MP4Handler;
+#else
+import vlc.MP4Handler;
+#end
+#end
+
 class StartupState extends MusicBeatState
 {
 	var logo:FlxSprite;
 	var skipTxt:FlxText;
 
-	var theIntro:Int = FlxG.random.int(0, 1);
+	var theIntro:Int = FlxG.random.int(0, #if VIDEOS_ALLOWED 2 #else 1 #end);
 
 	override public function create():Void
 	{
@@ -47,6 +59,23 @@ class StartupState extends MusicBeatState
 					logo.updateHitbox();
 					logo.screenCenter();
 					FlxTween.tween(logo, {alpha: 1, "scale.x": 1, "scale.y": 1}, 1.35, {ease: FlxEase.expoOut, onComplete: _ -> onIntroDone()});
+				case 2:
+					#if VIDEOS_ALLOWED
+						var vidSprite = new MP4Handler(); // it plays but it doesn't show???
+						#if (hxCodec < "3.0.0")
+						vidSprite.playVideo(Paths.video('bambiStartup'), false, false);
+						vidSprite.finishCallback = function()
+						{
+							FlxG.switchState(TitleState.new);
+						};
+						#else
+						vidSprite.play(Paths.video('bambiStartup'));
+						vidSprite.onEndReached.add(function(){
+							vidSprite.dispose();
+							FlxG.switchState(TitleState.new);
+						});
+						#end
+					#end
 			}
 		});
 

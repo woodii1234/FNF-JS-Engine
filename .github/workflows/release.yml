@@ -4,6 +4,9 @@ on:
   release:
     types: [ published ]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build
@@ -54,7 +57,7 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ github.ref_name }}
         file: build.zip
-        asset_name: FNF-JS-Engine.zip
+        asset_name: FNF-JS-Engine-windows.zip
         overwrite: false
 
   release-mac:
