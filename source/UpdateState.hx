@@ -156,26 +156,27 @@ class UpdateState extends MusicBeatState
 		}
 	}
 
+	inline function getPlatform():String
+	{
+		#if windows
+		return 'windows';
+		#elseif mac
+		return 'macOS';
+		#elseif linux
+		return 'linux';
+		#elseif android
+		return 'android';
+		/*
+		#elseif ios
+		return 'iOS';
+		*/
+		#else
+		return '';
+		#end
+	}
+
 	inline function getUpdateLink()
 	{
-		function getPlatform():String
-		{
-			#if windows
-			return 'windows';
-			#elseif mac
-			return 'macOS';
-			#elseif linux
-			return 'linux';
-			#elseif android
-			return 'android';
-			/*
-			#elseif ios
-			return 'iOS';
-			*/
-			#else
-			return '';
-			#end
-		}
 		var fileEnd = #if android 'apk' #else 'zip' #end;
 		online_url = "https://github.com/JordanSantiagoYT/FNF-JS-Engine/releases/download/" + TitleState.updateVersion + '/FNF-JS-Engine-${getPlatform}.$fileEnd';
 		trace("update url: " + online_url);
