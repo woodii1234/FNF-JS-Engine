@@ -419,20 +419,16 @@ class EditorPlayState extends MusicBeatState
 	
 	override public function onFocus():Void
 	{
-		if (vocals != null)
-			vocals.play();
-		if (opponentVocals != null)
-			opponentVocals.play();
+		for (i in [vocals, opponentVocals])
+			if (i != null) i.play();
 
 		super.onFocus();
 	}
 	
 	override public function onFocusLost():Void
 	{
-		if (vocals != null)
-			vocals.pause();
-		if (opponentVocals != null)
-			opponentVocals.pause();
+		for (i in [vocals, opponentVocals])
+			if (i != null) i.pause();
 
 		super.onFocusLost();
 	}
