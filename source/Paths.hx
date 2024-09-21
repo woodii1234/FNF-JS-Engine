@@ -365,7 +365,7 @@ class Paths
         #if sys
         return FileSystem.readDirectory(path);
         #else
-        // original by @MAJigsaw77
+        // original by Karim Akra
         var files:Array<String> = [];
 
         for (possibleFile in Assets.list().filter((f) -> f.contains(path))) {
