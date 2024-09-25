@@ -4706,7 +4706,7 @@ class PlayState extends MusicBeatState
 					for (note in notes){
 						if (note == null)
 							continue;
-						note.updateRGBColors();
+						if (ClientPrefs.enableColorShader) note.updateRGBColors();
 					}
 				}
 			}
