@@ -1482,6 +1482,7 @@ class WiggleEffectLua extends Effect
 		this.waveFrequency = waveFrequency;
 		this.waveAmplitude = waveAmplitude;
 		this.effectType = effectTypeFromString(typeOfEffect);
+		PlayState.instance.shaderUpdates.push(update);
 	}
 
 	public function update(elapsed:Float):Void
@@ -1531,7 +1532,6 @@ class WiggleEffectLua extends Effect
 
 class Effect {
 	public function setValue(shader:FlxShader, variable:String, value:Float) {
-		Reflect.setProperty(Reflect.getProperty(shader, 'variable'), 'value', [value]);
+		Reflect.setProperty(Reflect.getProperty(shader, variable), 'value', [value]);
 	}
-	
 }
