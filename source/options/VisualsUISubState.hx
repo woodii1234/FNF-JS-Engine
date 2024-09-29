@@ -140,13 +140,6 @@ class VisualsUISubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
-		var option:Option = new Option('Hide ScoreTxt',
-			'If checked, hides the score text. Dunno why you would enable this but eh, alright.',
-			'hideScore',
-			'bool',
-			false);
-		addOption(option);
-
 		var option:Option = new Option("Taunt on 'GO'",
 			"If checked, the characters will taunt on GO when you play.",
 			'tauntOnGo',
@@ -206,13 +199,6 @@ class VisualsUISubState extends BaseOptionsMenu
 		var option:Option = new Option('Miss Rating',
 			"If unchecked, a Miss rating won't popup when you miss a note.",
 			'missRating',
-			'bool',
-			false);
-		addOption(option);
-
-		var option:Option = new Option('Compact UI Numbers',
-			'If checked, Score, combo, misses and NPS will be compact.',
-			'compactNumbers',
 			'bool',
 			false);
 		addOption(option);

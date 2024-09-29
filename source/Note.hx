@@ -410,7 +410,7 @@ class Note extends FlxSprite
 			canBeHit = (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * lateHitMult) &&
 						strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * earlyHitMult));
 
-			if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit)
+			if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit && !ignoreNote)
 				tooLate = true;
 			else tooLate = false;
 		}
@@ -533,15 +533,19 @@ class Note extends FlxSprite
 			CoolUtil.checkNoteQuant(this, (!isSustainNote ? strumTime : parentST), rgbShader);
 
 			case 'Char-Based':
-			var arr:Array<Int> = CoolUtil.getHealthColors(doOppStuff ? PlayState.instance.dad : PlayState.instance.boyfriend);
-			if (gfNote) arr = CoolUtil.getHealthColors(PlayState.instance.gf);
-			if (noteData > -1)
+			if (PlayState.instance != null)
 			{
-				rgbShader.r = FlxColor.fromRGB(arr[0], arr[1], arr[2]);
-				rgbShader.g = FlxColor.WHITE;
-				rgbShader.b = rgbShader.r;
-				rgbShader.b = rgbShader.b.getDarkened(0.7);
+				var arr:Array<Int> = CoolUtil.getHealthColors(doOppStuff ? PlayState.instance.dad : PlayState.instance.boyfriend);
+				if (gfNote) arr = CoolUtil.getHealthColors(PlayState.instance.gf);
+				if (noteData > -1)
+				{
+					rgbShader.r = FlxColor.fromRGB(arr[0], arr[1], arr[2]);
+					rgbShader.g = FlxColor.WHITE;
+					rgbShader.b = rgbShader.r;
+					rgbShader.b = rgbShader.b.getDarkened(0.7);
+				}
 			}
+			else defaultRGB();
 
 			default:
 
@@ -557,6 +561,12 @@ class Note extends FlxSprite
 				noteSplashData.r = 0xFFFF0000;
 				noteSplashData.g = 0xFF101010;
 				noteSplashData.texture = 'noteSplashes/noteSplashes-electric';
+		}
+		else if (rgbShader != null)
+		{
+			noteSplashData.r = -1;
+			noteSplashData.g = -1;
+			noteSplashData.b = -1;
 		}
 	}
 

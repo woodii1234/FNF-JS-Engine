@@ -41,7 +41,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var maxSplashLimit:Int = 16;
 	public static var oppNoteAlpha:Float = 0.65;
 	public static var hideHud:Bool = false;
-	public static var hideScore:Bool = false;
 	public static var tauntOnGo:Bool = true;
 	public static var oldSusStyle:Bool = false;
 	public static var showRendered:Bool = false;
@@ -51,7 +50,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var timebarShowSpeed:Bool = false;
 	public static var botWatermark:Bool = true;
 	public static var missRating:Bool = false;
-	public static var compactNumbers:Bool = false;
 	public static var scoreTxtSize:Int = 0;
 	public static var noteColorStyle:String = 'Normal';
 	public static var enableColorShader:Bool = true;
@@ -128,6 +126,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var noGunsRNG:Bool = false;
 	public static var pbRControls:Bool = false;
 	public static var rainbowFPS:Bool = false;
+	public static var noRenderGC:Bool = false;
 
 	//Unused
 	public static var cursing:Bool = true;

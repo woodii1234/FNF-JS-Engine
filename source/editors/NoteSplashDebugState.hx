@@ -351,13 +351,14 @@ class NoteSplashDebugState extends MusicBeatState
 			curLen = config.offsets.length;
 		}
 
-		var strToSave = config.anim + '\n' + config.minFps + ' ' + config.maxFps + '\n' + curSelected;
+		var strToSave = config.anim + '\n' + config.minFps + ' ' + config.maxFps;
 		for (offGroup in config.offsets)
 			strToSave += '\n' + offGroup[0] + ' ' + offGroup[1];
 
-		var pathSplit:Array<String> = (Paths.getPath('images/$texturePath.png', IMAGE).split('.png')[0] + '.txt').split(':');
+		var pathSplit:Array<String> = (Paths.getPath('images/$texturePath.png', IMAGE, null, true).split('.png')[0] + '.txt').split(':');
 		var path:String = pathSplit[pathSplit.length-1];
 		savedText.text = 'Saved to: $path';
+		trace ('$path');
 		File.saveContent(path, strToSave);
 
 		//trace(strToSave);

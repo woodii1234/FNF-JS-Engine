@@ -128,12 +128,10 @@
 	<!--Disable the Flixel core debugger. Automatically gets set whenever you compile in release mode!-->
 	<haxedef name="FLX_NO_DEBUG" unless="debug" />
 	
-	<!--Used for Izzy Engine's crash handler-->
-	<section if="CRASH_HANDLER">
-		<haxedef name="HXCPP_CHECK_POINTER"/>
-		<haxedef name="HXCPP_STACK_LINE"/>
-		<haxedef name="HXCPP_STACK_TRACE"/>
-	</section>
+	<!--Used for the engine's crash handler-->
+	<haxedef name="HXCPP_CHECK_POINTER"/>
+	<haxedef name="HXCPP_STACK_LINE"/>
+	<haxedef name="HXCPP_STACK_TRACE"/>
 
 	<!-- Javascript breaks with inline for reasons unknown -->
 	<haxedef name="no-inline" if="html5"/>

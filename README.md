@@ -6,12 +6,12 @@
   <br>
 </h1>
 <h3 align="center">
-  <b>JS Engine is a heavily modified Psych Engine fork I made, with lower-end PCs and more customization in mind while also aiming to be a replacement for OS Engine.</b>
+  <b>JS Engine is a heavily modified Psych Engine fork I made, with lower-end PCs and more customization in mind while also aiming to be a replacement for OS "Engine".</b>
 </h3>
 
 README.md revamped by [Nael2xd](https://youtube.com/@nael2xd?si=axwJrY_8jdlXUwSm)
 
-If you're looking for the mobile version, [go here!](https://github.com/MobilePorting/FNF-JS-Engine-Mobile)
+If you're looking for the mobile version, [go here!](https://github.com/JordanSantiagoYT/FNF-JS-Engine/tree/mobile)
 
 ## Welcome
 
@@ -32,6 +32,7 @@ The features/performances included are:
 - Basic Shader Support! (for a full list, it can be seen in [here](https://github.com/JordanSantiagoYT/FNF-JS-Engine/wiki#q-what-are-all-the-basic-shaders-that-come-with-this-engine))
 - Rendering mode! (Originally used for lua and gamerenderer-engine)
 - Built in Song Credits! (on chart editor)
+- Spam modules! (for the DnB fans)
 
 There is like lots and lots of stuff i've missed, but at least you would like those features built in **JS ENGINE**
 
@@ -56,6 +57,14 @@ A: Yes, you can! just be sure to credit me (@JordanSantiago on YouTube) and give
 Q: How do I (change the background, add characters, etc.)?
 
 A: You do it here the same way you'd do it in Psych Engine.
+
+Q: I found a bug!
+
+A: Report [here.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/issues). Also, **please check if there are already posts about the same issue.**
+
+Q: I found a WAY to fix a bug!
+
+A: Send [here.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/pulls).
 
 # Compiling JS Engine
 

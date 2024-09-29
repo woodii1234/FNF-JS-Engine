@@ -245,6 +245,7 @@ class ChartingState extends MusicBeatState
 	];
 
 	public static var idleMusicAllow:Bool = false;
+	public static var unsavedChanges:Bool = false;
 
 	var text:String = "";
 	public static var vortex:Bool = false;
@@ -2358,6 +2359,18 @@ class ChartingState extends MusicBeatState
 			if(sender == noteSplashesInputText) {
 				_song.splashSkin = noteSplashesInputText.text;
 			}
+			else if(sender == gameOverCharacterInputText) {
+				_song.gameOverChar = gameOverCharacterInputText.text;
+			}
+			else if(sender == gameOverSoundInputText) {
+				_song.gameOverSound = gameOverSoundInputText.text;
+			}
+			else if(sender == gameOverLoopInputText) {
+				_song.gameOverLoop = gameOverLoopInputText.text;
+			}
+			else if(sender == gameOverEndInputText) {
+				_song.gameOverEnd = gameOverEndInputText.text;
+			}
 			else if(curSelectedNote != null)
 			{
 				if(sender == value1InputText) {
@@ -2651,16 +2664,22 @@ class ChartingState extends MusicBeatState
 
 
 			if (FlxG.keys.justPressed.BACKSPACE) {
-				// Protect against lost data when quickly leaving the chart editor.
-				autosaveSong();
+				if (!unsavedChanges)
+				{
+					// Protect against lost data when quickly leaving the chart editor.
+					autosaveSong();
 
-				CoolUtil.currentDifficulty = difficulty;
-				PlayState.chartingMode = false;
-				FlxG.switchState(editors.MasterEditorMenu.new);
-				FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
-				FlxG.mouse.visible = false;
-				if (idleMusic != null && idleMusic.music != null) idleMusic.destroy();
-				return;
+					CoolUtil.currentDifficulty = difficulty;
+					PlayState.chartingMode = false;
+					FlxG.switchState(editors.MasterEditorMenu.new);
+					FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic));
+					FlxG.mouse.visible = false;
+					if (idleMusic != null && idleMusic.music != null) idleMusic.destroy();
+					return;
+				}
+				else
+				openSubState(new Prompt('WARNING! This action will clear unsaved progress.\n\nProceed?', 0, 
+					function() FlxG.switchState(editors.MasterEditorMenu.new), null,ignoreWarnings));
 			}
 
 			if (FlxG.keys.pressed.CONTROL)
@@ -2731,8 +2750,7 @@ class ChartingState extends MusicBeatState
 				{
 					FlxG.sound.music.pause();
 					pauseVocals();
-					lilBf.animation.play("idle");
-					lilOpp.animation.play("idle");
+					resetBuddies();
 					lilBf.color = lilOpp.color = FlxColor.WHITE;
 					if (idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.unpauseMusic(2);
 				}
@@ -2746,8 +2764,7 @@ class ChartingState extends MusicBeatState
 						if(opponentVocals != null) opponentVocals.play();
 					}
 					if (idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.pauseMusic();
-					lilBf.animation.play("idle");
-					lilOpp.animation.play("idle");
+					resetBuddies();
 					lilBf.color = lilOpp.color = FlxColor.WHITE;
 				}
 			}
@@ -2785,8 +2802,7 @@ class ChartingState extends MusicBeatState
 			{
 				if (idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.unpauseMusic(2);
 				FlxG.sound.music.pause();
-				lilBf.animation.play("idle");
-				lilOpp.animation.play("idle");
+				resetBuddies();
 				lilBf.color = lilOpp.color = FlxColor.WHITE;
 				if (!mouseQuant)
 					FlxG.sound.music.time -= (FlxG.mouse.wheel * Conductor.stepCrochet*0.8);
@@ -2811,8 +2827,7 @@ class ChartingState extends MusicBeatState
 			if (FlxG.keys.pressed.W || FlxG.keys.pressed.S)
 			{
 				if (idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.unpauseMusic(2);
-				lilBf.animation.play("idle");
-				lilOpp.animation.play("idle");
+				resetBuddies();
 				lilBf.color = lilOpp.color = FlxColor.WHITE;
 				FlxG.sound.music.pause();
 
@@ -3106,6 +3121,11 @@ class ChartingState extends MusicBeatState
 		lastConductorPos = Conductor.songPosition;
 		super.update(elapsed);
 		idleMusic.update(elapsed);
+	}
+
+	function resetBuddies() {
+		lilBf.animation.play("idle");
+		lilOpp.animation.play("idle");
 	}
 
 	function updateZoom() {
@@ -3421,6 +3441,8 @@ class ChartingState extends MusicBeatState
 
 	function resetSection(songBeginning:Bool = false):Void
 	{
+		resetBuddies();
+
 		updateGrid((songBeginning ? true : false));
 
 			if (FlxG.sound.music.playing && idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.pauseMusic();
@@ -3446,8 +3468,7 @@ class ChartingState extends MusicBeatState
 		if (_song.notes[sec] != null)
 		{
 			if (FlxG.sound.music.playing && idleMusic != null && idleMusic.music != null && idleMusicAllow) idleMusic.pauseMusic();
-			lilBf.animation.play("idle");
-			lilOpp.animation.play("idle");
+			resetBuddies();
 			lilBf.color = lilOpp.color = FlxColor.WHITE;
 			curSec = sec;
 			if (updateMusic)
@@ -3892,7 +3913,6 @@ class ChartingState extends MusicBeatState
 		var noteDataToCheck:Int = note.noteData;
 		if(noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) noteDataToCheck += 4;
 
-
 		if(note.noteData > -1) //Normal Notes
 		{
 			for (i in _song.notes[curSec].sectionNotes)
@@ -3943,6 +3963,8 @@ class ChartingState extends MusicBeatState
 		}
 				curRenderedNotes.remove(note, true);
 				note.destroy();
+
+		if (!unsavedChanges) unsavedChanges = true;
 	}
 
 	public function doANoteThing(cs, d, style){
@@ -3973,6 +3995,7 @@ class ChartingState extends MusicBeatState
 			_song.notes[daSection].sectionNotes = [];
 		}
 
+		if (!unsavedChanges) unsavedChanges = true;
 		updateGrid();
 	}
 
@@ -4010,7 +4033,6 @@ class ChartingState extends MusicBeatState
 			updateGrid();
 		}
 
-		//trace(noteData + ', ' + noteStrum + ', ' + curSec);
 		strumTimeInputText.text = '' + curSelectedNote[0];
 		//wow its not laggy who wouldve guessed
 		if (gridUpdate) {
@@ -4058,6 +4080,7 @@ class ChartingState extends MusicBeatState
 				}
 			updateNoteUI();
 		}
+		if (!unsavedChanges) unsavedChanges = true;
 	}
 
 	// will figure this out l8r
@@ -4088,18 +4111,17 @@ class ChartingState extends MusicBeatState
 
     public function saveUndo(_song:SwagSong)
     {
+		if (CoolUtil.getNoteAmount(_song) <= 50000 && FlxG.save.data.allowUndo) {
+			var shit = Json.stringify({ //doin this so it doesnt act as a reference
+				"song": _song
+			});
+			var song:SwagSong = Song.parseJSONshit(shit);
 
-	if (CoolUtil.getNoteAmount(_song) <= 50000 && FlxG.save.data.allowUndo) {
-        var shit = Json.stringify({ //doin this so it doesnt act as a reference
-			"song": _song
-		});
-        var song:SwagSong = Song.parseJSONshit(shit);
-
-        undos.unshift(song.notes);
-		redos = []; //Reset redos
-        if (undos.length >= 100) //if you save more than 100 times, remove the oldest undo
-            undos.remove(undos[100]);
-	}
+			undos.unshift(song.notes);
+			redos = []; //Reset redos
+			if (undos.length >= 100) //if you save more than 100 times, remove the oldest undo
+				undos.remove(undos[100]);
+		}
     }
 
     public function undo()
@@ -4108,8 +4130,9 @@ class ChartingState extends MusicBeatState
 			_song.notes = undos[0];
 			redos.unshift(undos[0]);
 			undos.splice(0, 1);
-		trace("Performed an Undo! Undos remaining: " + undos.length);
-		updateGrid();
+			trace("Performed an Undo! Undos remaining: " + undos.length);
+			if (!unsavedChanges) unsavedChanges = true;
+			updateGrid();
 		}
     }
 
@@ -4159,10 +4182,12 @@ class ChartingState extends MusicBeatState
 			FlxTween.tween(autosaveIndicator, {alpha: 0}, 1, {ease: FlxEase.backInOut, type: ONESHOT});
 		});
 		FlxG.save.flush();
+		if (unsavedChanges) unsavedChanges = false;
 	}
 
 	function clearEvents() {
 		_song.events = [];
+		if (!unsavedChanges) unsavedChanges = true;
 		updateGrid();
 	}
 
@@ -4195,6 +4220,7 @@ class ChartingState extends MusicBeatState
 			_file.save(data.trim(), gamingName + ".json");
 		}
 			cpp.vm.Gc.enable(true);
+		if (unsavedChanges) unsavedChanges = false;
 	}
 
 	function sortByTime(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int

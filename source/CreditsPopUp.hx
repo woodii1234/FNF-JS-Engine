@@ -33,20 +33,28 @@ class CreditsPopUp extends FlxSpriteGroup
 		var songCreatorIcon:String = '';
 		var headingPath:SongHeading = null;
 
-				headingPath = {path: PlayState.SONG.songCreditBarPath.length <= 0 ? 'JSEHeading' : 'songHeadings/' + PlayState.SONG.songCreditBarPath, antiAliasing: false, iconOffset: 0};
+		headingPath = {path: PlayState.SONG.songCreditBarPath.length <= 0 ? 'JSEHeading' : 'songHeadings/' + PlayState.SONG.songCreditBarPath, antiAliasing: ClientPrefs.globalAntialiasing, iconOffset: 0};
+
 
 		if (PlayState.SONG.songCreditIcon.length >= 1) songCreatorIcon = PlayState.SONG.songCreditIcon;
 			else songCreatorIcon = 'ExampleIcon';
 
 		if (headingPath != null)
 		{
+			if (!Paths.fileExists(headingPath.path, TEXT))
 				bg.loadGraphic(Paths.image(headingPath.path));
+			else
+			{
+				bg.frames = Paths.getSparrowAtlas(headingPath.path);
+				bg.animation.addByPrefix('idle', 'idle', 24, true);
+				bg.animation.play('idle');
+			}
 			bg.antialiasing = headingPath.antiAliasing;
 			curHeading = headingPath;
 		}
 		createHeadingText(title + "\nComposed by" + ' ' + songCreator + (!ClientPrefs.ratingCounter ? '\nNote Count: ${FlxStringUtil.formatMoney(PlayState.instance.totalNotes, false)} / ${FlxStringUtil.formatMoney(PlayState.instance.opponentNoteTotal, false)}' : ''));
-			funnyIcon = new FlxSprite(0, 0).loadGraphic(Paths.image('songCreators/$songCreatorIcon'));
-			funnyIcon.visible = PlayState.SONG.songCreditIcon.length > 0;
+		funnyIcon = new FlxSprite(0, 0).loadGraphic(Paths.image('songCreators/$songCreatorIcon'));
+		funnyIcon.visible = PlayState.SONG.songCreditIcon.length > 0;
 		rescaleIcon();
 		add(funnyIcon);
 

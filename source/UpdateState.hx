@@ -156,9 +156,29 @@ class UpdateState extends MusicBeatState
 		}
 	}
 
-	function getUpdateLink()
+	inline function getPlatform():String
 	{
-		online_url = "https://github.com/JordanSantiagoYT/FNF-JS-Engine/releases/download/" + TitleState.updateVersion + "/FNF-JS-Engine.zip";
+		#if windows
+		return 'windows';
+		#elseif mac
+		return 'macOS';
+		#elseif linux
+		return 'linux';
+		#elseif android
+		return 'android';
+		/*
+		#elseif ios
+		return 'iOS';
+		*/
+		#else
+		return '';
+		#end
+	}
+
+	inline function getUpdateLink()
+	{
+		var fileEnd = #if android 'apk' #else 'zip' #end;
+		online_url = "https://github.com/JordanSantiagoYT/FNF-JS-Engine/releases/download/" + TitleState.updateVersion + '/FNF-JS-Engine-${getPlatform()}.$fileEnd';
 		trace("update url: " + online_url);
 	}
 
@@ -181,12 +201,27 @@ class UpdateState extends MusicBeatState
 	}
 
 	var httpHandler:Http;
+	var fatalError:Bool = false;
 
 	public function startDownload()
 	{
 		trace("starting download process...");
 
+		final url:String = requestUrl(online_url);
+		if (url != null && url.indexOf('Not Found') != -1)
+		{
+			trace('File not found error!');
+			fatalError = true;
+		}
+
 		zip.load(new URLRequest(online_url));
+		if (fatalError)
+		{
+			// trace('File size is small! Assuming it couldn\'t find the url!');
+			lime.app.Application.current.window.alert('Couldn\'t find the URL for the file! Cancelling download!');
+			FlxG.resetGame();
+			return;
+		}
 
 		/*var aa = new Http(online_url);
 			aa.request();
@@ -211,6 +246,7 @@ class UpdateState extends MusicBeatState
 		httpHandler.onError = function(e)
 		{
 			trace("error while downloading file, error: " + e);
+			fatalError = true;
 		}
 		httpHandler.request(false);
 		return r;
@@ -234,18 +270,18 @@ class UpdateState extends MusicBeatState
 		return FlxMath.roundDecimal(bytes / Math.pow(1024, digit), 2) + " " + size_name[digit];
 	}
 
-function convert_time(time:Float)
-{
-    var seconds = Std.int(time % 60);
-    var minutes = Std.int((time / 60) % 60);
-    var hours = Std.int((time / (60 * 60)) % 24);
+	function convert_time(time:Float)
+	{
+		var seconds = Std.int(time % 60);
+		var minutes = Std.int((time / 60) % 60);
+		var hours = Std.int((time / (60 * 60)) % 24);
 
-    var secStr:String = (seconds < 10) ? "0" + seconds : Std.string(seconds);
-    var minStr:String = (minutes < 10) ? "0" + minutes : Std.string(minutes);
-    var hoeStr:String = (hours < 10) ? "0" + hours : Std.string(hours);
+		var secStr:String = (seconds < 10) ? "0" + seconds : Std.string(seconds);
+		var minStr:String = (minutes < 10) ? "0" + minutes : Std.string(minutes);
+		var hoeStr:String = (hours < 10) ? "0" + hours : Std.string(hours);
 
-    return hoeStr + ':' + minStr + ':' + secStr;
-}
+		return hoeStr + ':' + minStr + ':' + secStr;
+	}
 
 	function onDownloadProgress(result:ProgressEvent)
 	{
