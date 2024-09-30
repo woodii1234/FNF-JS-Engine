@@ -2,6 +2,8 @@
 
 echo hello there!
 echo PS: this will only work if you have ffmpeg installed and are using the classic rendering mode.
+echo.
+echo Please only use this if you used the "lossless rendering" option.
 
 echo enter the name of the song you'd like to render! (this is the folder that you'll use)
 set /p "renderFolder="
