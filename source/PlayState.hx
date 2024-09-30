@@ -5383,7 +5383,8 @@ class PlayState extends MusicBeatState
 				judgeTxt.cameras = [camHUD];
 				judgeTxt.visible = true;
 				judgeTxt.screenCenter(X);
-				judgeTxt.y = !ClientPrefs.downScroll ? botplayTxt.y + 60 : botplayTxt.y - 60;
+				if (botplayTxt != null)
+					judgeTxt.y = !ClientPrefs.downScroll ? botplayTxt.y + 60 : botplayTxt.y - 60;
 				judgeTxt.alpha = 1;
 				if (!miss) switch (daRating.name)
 				{
