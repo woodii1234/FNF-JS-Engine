@@ -6,24 +6,23 @@
   <br>
 </h1>
 <h3 align="center">
-  <b>JS Engine is a heavily modified Psych Engine fork I made, with lower-end PCs and more customization in mind while also aiming to be a replacement for OS "Engine".</b>
+  <b>JS Engine is a heavily modified Psych Engine fork, with lower-end PCs and more customization in mind.</b>
 </h3>
 
 README.md revamped by [Nael2xd](https://youtube.com/@nael2xd?si=axwJrY_8jdlXUwSm)
 
-If you're looking for the mobile version, [go here!](https://github.com/JordanSantiagoYT/FNF-JS-Engine/tree/mobile)
+_If you're looking for the mobile version, [go here!](https://github.com/JordanSantiagoYT/FNF-JS-Engine/tree/mobile)_
 
 ## Welcome
 
-Hello and welcome to JS Engine's github repo, where you can download the engine and make spammy charts or have fun with the engine.
+Welcome to JS Engine's github repo, where you can download the engine and make spammy charts or have fun with the engine.
 
 This contains lots and lots of customizable and features built in to JS Engine, if you wanna see most of them listed, you can see it below this text
 
 # Features/Performances in JS ENGINE
 
-This fork of this engine has tons of features and performances, most will be listed but some of them won't because there's a lot of it.
+**This fork has tons of features and performances features, most will be listed:
 
-The features/performances included are:
 - No BotPlay lag!
 - Faster Song Loading!
 - Loading songs longer than 20 minutes!
@@ -37,8 +36,6 @@ The features/performances included are:
 There is like lots and lots of stuff i've missed, but at least you would like those features built in **JS ENGINE**
 
 # Screenshots
-
-Here are some screenshots of what the engine looks like. 
 
 ![Screenshot 2024-07-07 14-00-00](https://github.com/JordanSantiagoYT/FNF-JS-Engine/assets/108278470/d4e89995-fa14-40bf-a5d6-d1647548fd93)
 

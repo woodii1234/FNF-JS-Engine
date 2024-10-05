@@ -1031,7 +1031,7 @@ class PlayState extends MusicBeatState
 				timeBarBG.y = timeTxt.y + (timeTxt.height / 8);
 				timeBarBG.scrollFactor.set();
 				timeBarBG.alpha = 0;
-				timeBarBG.visible = showTime;
+				timeBarBG.visible = showTime && !ClientPrefs.timeBarType.contains('(No Bar)');
 				timeBarBG.color = FlxColor.BLACK;
 				timeBarBG.xAdd = -4;
 				timeBarBG.yAdd = -4;
@@ -1044,7 +1044,7 @@ class PlayState extends MusicBeatState
 				timeBar.createFilledBar(FlxColor.BLACK, FlxColor.WHITE);
 				timeBar.numDivisions = 400; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
 				timeBar.alpha = 0;
-				timeBar.visible = showTime;
+				timeBar.visible = showTime && !ClientPrefs.timeBarType.contains('(No Bar)');
 				add(timeBar);
 				timeBarBG.sprTracker = timeBar;
 
@@ -1058,7 +1058,7 @@ class PlayState extends MusicBeatState
 				timeBarBG.y = timeTxt.y + (timeTxt.height / 8);
 				timeBarBG.scrollFactor.set();
 				timeBarBG.alpha = 0;
-				timeBarBG.visible = showTime;
+				timeBarBG.visible = showTime && !ClientPrefs.timeBarType.contains('(No Bar)');
 				timeBarBG.color = FlxColor.BLACK;
 				timeBarBG.xAdd = -4;
 				timeBarBG.yAdd = -4;
@@ -1071,7 +1071,7 @@ class PlayState extends MusicBeatState
 				timeBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
 				timeBar.numDivisions = 800; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
 				timeBar.alpha = 0;
-				timeBar.visible = showTime;
+				timeBar.visible = showTime && !ClientPrefs.timeBarType.contains('(No Bar)');
 				add(timeBar);
 				timeBarBG.sprTracker = timeBar;
 
@@ -1085,7 +1085,7 @@ class PlayState extends MusicBeatState
 				timeBarBG.y = timeTxt.y + (timeTxt.height / 4);
 				timeBarBG.antialiasing = true;
 				timeBarBG.scrollFactor.set();
-				timeBarBG.visible = showTime;
+				timeBarBG.visible = showTime && !ClientPrefs.timeBarType.contains('(No Bar)');
 				timeBarBG.xAdd = -4;
 				timeBarBG.yAdd = -4;
 				add(timeBarBG);
@@ -1095,7 +1095,7 @@ class PlayState extends MusicBeatState
 				timeBar.scrollFactor.set();
 				timeBar.numDivisions = 800; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
 				timeBar.alpha = 0;
-				timeBar.visible = showTime;
+				timeBar.visible = showTime && !ClientPrefs.timeBarType.contains('(No Bar)');
 				timeBarBG.sprTracker = timeBar;
 				timeBar.createFilledBar(FlxColor.GRAY, FlxColor.fromRGB(57, 255, 20));
 				insert(members.indexOf(timeBarBG), timeBar);
@@ -1116,7 +1116,7 @@ class PlayState extends MusicBeatState
 				timeBarBG.y = timeTxt.y + (timeTxt.height / 8);
 				timeBarBG.scrollFactor.set();
 				timeBarBG.alpha = 0;
-				timeBarBG.visible = showTime;
+				timeBarBG.visible = showTime && !ClientPrefs.timeBarType.contains('(No Bar)');
 				timeBarBG.color = FlxColor.BLACK;
 				timeBarBG.xAdd = -4;
 				timeBarBG.yAdd = -4;
@@ -1128,7 +1128,7 @@ class PlayState extends MusicBeatState
 				timeBar.scrollFactor.set();
 				timeBar.numDivisions = 1000; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
 				timeBar.alpha = 0;
-				timeBar.visible = showTime;
+				timeBar.visible = showTime && !ClientPrefs.timeBarType.contains('(No Bar)');
 				timeBarBG.sprTracker = timeBar;
 				timeBar.createGradientBar([FlxColor.TRANSPARENT], [FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]), FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2])]);
 			add(timeBar);
@@ -2365,7 +2365,7 @@ class PlayState extends MusicBeatState
 
 	public static function formatNumber(number:Float, ?decimals:Bool = false):String //simplified number formatting
 	{
-		return (number < 10e12 ? FlxStringUtil.formatMoney(number, false) : formatCompactNumber(number));
+		return (number < 10e11 ? FlxStringUtil.formatMoney(number, false) : formatCompactNumber(number));
 	}
 
 	public function startCountdown():Void
@@ -3464,21 +3464,21 @@ class PlayState extends MusicBeatState
 			if (notesBeingHit && hitResetTimer >= 0)
 			{
 				health += elapsed / 2;
-				hitResetTimer -= elapsed;
+				hitResetTimer -= elapsed * playbackRate;
 				if (hitResetTimer <= 0) notesBeingHit = false;
-				if (missResetTimer > 0) missResetTimer -= 0.01 / (ClientPrefs.framerate / 60);
+				if (missResetTimer > 0) missResetTimer -= 0.01 / (ClientPrefs.framerate / 60) * playbackRate;
 			}
 			if (notesBeingMissed && missResetTimer >= 0)
 			{
 				if (missResetTimer > 0.1) missResetTimer = 0.1;
-				health -= missResetTimer / (ClientPrefs.framerate / 60);
-				missResetTimer -= elapsed;
+				health -= missResetTimer / (ClientPrefs.framerate / 60) * playbackRate;
+				missResetTimer -= elapsed * playbackRate;
 				if (missResetTimer <= 0) notesBeingMissed = false;
 			}
 			if (usingBotEnergy)
-				botEnergy -= (elapsed / ((!ffmpegMode ? ClientPrefs.framerate : targetFPS) / 60) / 4) * strumHeldAmount * energyDrainSpeed;
+				botEnergy -= (elapsed / 5) * strumHeldAmount * energyDrainSpeed * playbackRate;
 			else
-				botEnergy += (elapsed / ((!ffmpegMode ? ClientPrefs.framerate : targetFPS) / 60) / 2) * energyRefillSpeed;
+				botEnergy += (elapsed / 5) * energyRefillSpeed * playbackRate;
 
 			if (botEnergy > 2) botEnergy = 2;
 
@@ -5383,7 +5383,7 @@ class PlayState extends MusicBeatState
 				judgeTxt.cameras = [camHUD];
 				judgeTxt.visible = true;
 				judgeTxt.screenCenter(X);
-				judgeTxt.y = !ClientPrefs.downScroll ? botplayTxt.y + 60 : botplayTxt.y - 60;
+				if (botplayTxt != null) judgeTxt.y = !ClientPrefs.downScroll ? botplayTxt.y + 60 : botplayTxt.y - 60;
 				judgeTxt.alpha = 1;
 				if (!miss) switch (daRating.name)
 				{
