@@ -1496,6 +1496,7 @@ class WiggleEffectLua extends Effect
 			case 'horizontal' | 'heatwavehorizontal': HEAT_WAVE_HORIZONTAL;
 			case 'vertical' | 'heatwavevertical': HEAT_WAVE_VERTICAL;
 			case 'flag': FLAG;
+			case 'both' | 'heatwaveboth': HEAT_WAVE_BOTH;
 			default: DREAMY;
 		}
 	}
