@@ -1473,13 +1473,18 @@ class WiggleEffectLua extends Effect
 	public var waveSpeed(default, set):Float = 0;
 	public var waveFrequency(default, set):Float = 0;
 	public var waveAmplitude(default, set):Float = 0;
+	public var verticalStrength(default, set):Float = 1;
+	public var horizontalStrength(default, set):Float = 1;
 
-	public function new(typeOfEffect:String = 'DREAMY', waveSpeed:Float = 0, waveFrequency:Float = 0, waveAmplitude:Float = 0):Void
+	public function new(typeOfEffect:String = 'DREAMY', waveSpeed:Float = 0, waveFrequency:Float = 0, waveAmplitude:Float = 0,
+		?verticalStrength:Float = 1, ?horizontalStrength:Float = 1):Void
 	{
 		shader.uTime.value = [0];
 		this.waveSpeed = waveSpeed;
 		this.waveFrequency = waveFrequency;
 		this.waveAmplitude = waveAmplitude;
+		this.verticalStrength = verticalStrength;
+		this.horizontalStrength = horizontalStrength;
 		this.effectType = effectTypeFromString(typeOfEffect);
 		PlayState.instance.shaderUpdates.push(update);
 	}
@@ -1526,6 +1531,20 @@ class WiggleEffectLua extends Effect
 	{
 		waveAmplitude = v;
 		shader.uWaveAmplitude.value = [waveAmplitude];
+		return v;
+	}
+
+	function set_verticalStrength(v:Float):Float
+	{
+		verticalStrength = v;
+		shader.verticalStrength.value = [verticalStrength];
+		return v;
+	}
+
+	function set_horizontalStrength(v:Float):Float
+	{
+		horizontalStrength = v;
+		shader.horizontalStrength.value = [horizontalStrength];
 		return v;
 	}
 }
