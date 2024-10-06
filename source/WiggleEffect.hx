@@ -100,8 +100,8 @@ class WiggleShader extends FlxShader
 		 */
 		uniform float uWaveAmplitude;
 
-		uniform float verticalStrength = 1;
-		uniform float horizontalStrength = 1;
+		uniform float verticalStrength;// = 1;
+		uniform float horizontalStrength;// = 1;
 
 		vec2 sineWave(vec2 pt)
 		{
