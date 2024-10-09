@@ -3370,7 +3370,7 @@ class PlayState extends MusicBeatState
 
 			FlxG.sound.music.play();
 			for (i in [vocals, opponentVocals])
-				if (i.time <= i.length) i.play();
+				if (i != null && i.time <= i.length) i.play();
 		}
 		else
 		{
@@ -3381,7 +3381,7 @@ class PlayState extends MusicBeatState
 
 				FlxG.sound.music.play();
 				for (i in [vocals, opponentVocals])
-					if (i.time <= i.length) i.play();
+					if (i != null && i.time <= i.length) i.play();
 			}
 		}
 	}
@@ -3942,7 +3942,7 @@ class PlayState extends MusicBeatState
 		{
 			Conductor.songPosition += elapsed * 1000 * playbackRate;
 			for (i in [vocals, opponentVocals])
-				if (i.time >= i.length && i.playing) i.pause();
+				if (i != null && i.time >= i.length && i.playing) i.pause();
 		}
 
 		if (startingSong)
@@ -4828,24 +4828,20 @@ class PlayState extends MusicBeatState
 
 	public function unpauseVocals()
 	{
-		if (vocals.time <= FlxG.sound.music.length)
-		{
-			vocals.resume();
-			opponentVocals.resume();
-		}
+		for (i in [vocals, opponentVocals])
+			if (i != null && i.time <= FlxG.sound.music.length)
+				i.resume();
 	}
 	public function pauseVocals()
 	{
-		if (vocals.time <= FlxG.sound.music.length)
-		{
-			vocals.pause();
-			opponentVocals.pause();
-		}
+		for (i in [vocals, opponentVocals])
+			if (i != null && i.time <= FlxG.sound.music.length)
+				i.pause();
 	}
 	public function setVocalsTime(time:Float)
 	{
 		for (i in [vocals, opponentVocals])
-			if (i.time < vocals.length)
+			if (i != null && i.time < vocals.length)
 				i.time = time;
 	}
 
