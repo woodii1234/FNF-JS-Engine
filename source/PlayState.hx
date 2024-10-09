@@ -5185,6 +5185,7 @@ class PlayState extends MusicBeatState
 				}
 				switch (ClientPrefs.ratingType)
 				{
+					case 'NMCW': pixelShitPart1 = 'NMCW/';
 					case 'Doki Doki+': pixelShitPart1 = 'dokistuff/';
 					case 'Tails Gets Trolled V4': pixelShitPart1 = 'tgtstuff/';
 					case 'Kade Engine': pixelShitPart1 = 'kadethings/';
