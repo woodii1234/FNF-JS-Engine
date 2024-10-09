@@ -3016,7 +3016,7 @@ class PlayState extends MusicBeatState
 					final floorSus:Int = Math.floor(swagNote.sustainLength / Conductor.stepCrochet);
 					if (floorSus > 0) {
 						for (susNote in 0...floorSus + 1) {
-		
+
 							final sustainNote:PreloadedChartNote = cast {
 								strumTime: daStrumTime + (Conductor.stepCrochet * susNote),
 								noteData: daNoteData,
@@ -5087,6 +5087,7 @@ class PlayState extends MusicBeatState
 
 		switch (ClientPrefs.ratingType)
 		{
+			case 'NMCW': pixelShitPart1 = 'NMCW/';
 			case 'Doki Doki+': pixelShitPart1 = 'dokistuff/';
 			case 'Tails Gets Trolled V4': pixelShitPart1 = 'tgtstuff/';
 			case 'Kade Engine': pixelShitPart1 = 'kadethings/';
