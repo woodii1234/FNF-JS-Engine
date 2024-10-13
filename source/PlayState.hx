@@ -4379,10 +4379,10 @@ class PlayState extends MusicBeatState
 			case 'Credits Popup':
 			{
 				var string1:String = value1;
-				if (value1 == '') string1 = SONG.song;
+				if (value1.length < 1) string1 = SONG.song;
 				var string2:String = value2;
-				if (value2 == '') string2 = SONG.songCredit;
-			var creditsPopup:CreditsPopUp = new CreditsPopUp(FlxG.width, 200, value1, value2);
+				if (value2.length < 1) string2 = SONG.songCredit;
+				var creditsPopup:CreditsPopUp = new CreditsPopUp(FlxG.width, 200, string1, string2);
 				creditsPopup.camera = camHUD;
 				creditsPopup.scrollFactor.set();
 				creditsPopup.x = creditsPopup.width * -1;
