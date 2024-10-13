@@ -5916,22 +5916,25 @@ class PlayState extends MusicBeatState
 					final animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))];
 
 					playerChar = (doGf ? gf : (!oppTrigger ? boyfriend : dad));
-					playerChar.holdTimer = 0;
 					if (ClientPrefs.cameraPanning) inline camPanRoutine(animToPlay, (!oppTrigger ? 'bf' : 'oppt'));
-					inline playerChar.playAnim(animToPlay + note.animSuffix, true);
+					if (playerChar != null)
+					{
+						playerChar.holdTimer = 0;
+						inline playerChar.playAnim(animToPlay + note.animSuffix, true);
 
-					if(note.noteType == 'Hey!') {
-						playerChar = !doGf ? !oppTrigger ? boyfriend : dad : gf;
-						if(playerChar.animOffsets.exists('hey')) {
-							playerChar.playAnim('hey', true);
-							playerChar.specialAnim = true;
-							playerChar.heyTimer = 0.6;
-						}
+						if(note.noteType == 'Hey!') {
+							playerChar = !doGf ? !oppTrigger ? boyfriend : dad : gf;
+							if(playerChar.animOffsets.exists('hey')) {
+								playerChar.playAnim('hey', true);
+								playerChar.specialAnim = true;
+								playerChar.heyTimer = 0.6;
+							}
 
-						if(gf != null && gf.animOffsets.exists('cheer')) {
-							gf.playAnim('cheer', true);
-							gf.specialAnim = true;
-							gf.heyTimer = 0.6;
+							if(gf != null && gf.animOffsets.exists('cheer')) {
+								gf.playAnim('cheer', true);
+								gf.specialAnim = true;
+								gf.heyTimer = 0.6;
+							}
 						}
 					}
 				}
