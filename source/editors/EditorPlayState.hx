@@ -229,8 +229,6 @@ class EditorPlayState extends MusicBeatState
 
 					final gottaHitNote:Bool = (songNotes[1] < 4 ? section.mustHitSection : !section.mustHitSection);
 		
-					var oldNote:PreloadedChartNote = unspawnNotes[unspawnNotes.length - 1];
-		
 					final swagNote:PreloadedChartNote = cast {
 						strumTime: daStrumTime,
 						noteData: daNoteData,
@@ -244,8 +242,6 @@ class EditorPlayState extends MusicBeatState
 						isSustainEnd: false,
 						sustainLength: songNotes[2],
 						sustainScale: 0,
-						parent: null,
-						prevNote: oldNote,
 						hitHealth: 0.023,
 						missHealth: 0.0475,
 						wasHit: false,
@@ -264,8 +260,6 @@ class EditorPlayState extends MusicBeatState
 					final floorSus:Int = Math.floor(swagNote.sustainLength / Conductor.stepCrochet);
 					if (floorSus > 0) {
 						for (susNote in 0...floorSus + 1) {
-							oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
-		
 							final sustainNote:PreloadedChartNote = cast {
 								strumTime: daStrumTime + (Conductor.stepCrochet * susNote),
 								noteData: daNoteData,
@@ -279,8 +273,7 @@ class EditorPlayState extends MusicBeatState
 								isSustainEnd: susNote == floorSus, 
 								sustainLength: 0,
 								sustainScale: 1 / ratio,
-								parent: swagNote,
-								prevNote: oldNote,
+								parentST: swagNote.strumTime,
 								hitHealth: 0.023,
 								missHealth: 0.0475,
 								wasHit: false,

@@ -1274,6 +1274,7 @@ class ChartingState extends MusicBeatState
 
 		copyMultiSectButton = new FlxButton(CopyFutureSectionCount.x, CopyLastSectionCount.y + 40, "Copy from the last " + Std.int(CopyFutureSectionCount.value) + " to the next " + Std.int(CopyFutureSectionCount.value) + " sections, " + Std.int(CopyLoopCount.value) + " times", function()
 		{
+			var swapNotes:Bool = FlxG.keys.pressed.CONTROL;
 			var daSec = FlxMath.maxInt(curSec, Std.int(CopyLastSectionCount.value));
 			var value1:Int = Std.int(CopyLastSectionCount.value);
 			var value2:Int = Std.int(CopyFutureSectionCount.value) * Std.int(CopyLoopCount.value);
@@ -1293,7 +1294,7 @@ class ChartingState extends MusicBeatState
 				{
 					var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(daSec - value1) * 4 * value1);
 
-
+					if (swapNotes) note[1] = (note[1] + 4) % 8;
 					var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
 					inline _song.notes[daSec].sectionNotes.push(copiedNote);
 				}
@@ -1320,6 +1321,7 @@ class ChartingState extends MusicBeatState
 
 		var copyNextButton:FlxButton = new FlxButton(CopyNextSectionCount.x, CopyNextSectionCount.y + 20, "Copy to the next..", function()
 		{
+			var swapNotes:Bool = FlxG.keys.pressed.CONTROL;
 			var value:Int = Std.int(CopyNextSectionCount.value);
 			if(value == 0) {
 			return;
@@ -1331,15 +1333,15 @@ class ChartingState extends MusicBeatState
 			saveUndo(_song); //I don't even know why.
 
 			for(i in 0...value) {
-			changeSection(curSec+1);
-			for (note in _song.notes[curSec-1].sectionNotes)
-			{
-				var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(curSec-1) * 4);
+				changeSection(curSec+1);
+				for (note in _song.notes[curSec-1].sectionNotes)
+				{
+					var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(curSec-1) * 4);
 
-
-				var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
-				_song.notes[curSec].sectionNotes.push(copiedNote);
-			}
+					if (swapNotes) note[1] = (note[1] + 4) % 8;
+					var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
+					_song.notes[curSec].sectionNotes.push(copiedNote);
+				}
 			}
 			updateGrid(false);
 		});
