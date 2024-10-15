@@ -1130,7 +1130,6 @@ class ChartingState extends MusicBeatState
 				{
 					var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(daSec) * 4 * value);
 
-	
 					var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
 					_song.notes[daSec].sectionNotes.push(copiedNote);
 				}
@@ -1294,8 +1293,9 @@ class ChartingState extends MusicBeatState
 				{
 					var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(daSec - value1) * 4 * value1);
 
-					if (swapNotes) note[1] = (note[1] + 4) % 8;
-					var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
+					var data = note[1];
+					if (swapNotes) data = Std.int(note[1] + 4) % 8;
+					var copiedNote:Array<Dynamic> = [strum, data, note[2], note[3]];
 					inline _song.notes[daSec].sectionNotes.push(copiedNote);
 				}
 					if (curSection - value1 < 0)
@@ -1338,8 +1338,9 @@ class ChartingState extends MusicBeatState
 				{
 					var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(curSec-1) * 4);
 
-					if (swapNotes) note[1] = (note[1] + 4) % 8;
-					var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
+					var data = note[1];
+					if (swapNotes) data = Std.int(note[1] + 4) % 8;
+					var copiedNote:Array<Dynamic> = [strum, data, note[2], note[3]];
 					_song.notes[curSec].sectionNotes.push(copiedNote);
 				}
 			}
