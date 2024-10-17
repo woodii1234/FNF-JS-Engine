@@ -106,6 +106,14 @@ class StartupState extends MusicBeatState
 						});
 						#end
 					#end
+				case 5:
+					// secret muaahahhahhahaahha
+					FlxG.sound.play(Paths.sound('tada', 'splash'));
+					logo.loadGraphic(Paths.image('JavaScriptLogo.png', 'splash'));
+					logo.scale.set(0.1,0.1);
+					logo.updateHitbox();
+					logo.screenCenter();
+					FlxTween.tween(logo, {alpha: 1, "scale.x": 1, "scale.y": 1}, 1.35, {ease: FlxEase.expoOut, onComplete: _ -> onIntroDone(0.6)});
 			}
 		});
 
