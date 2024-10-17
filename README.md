@@ -53,19 +53,19 @@ There is like lots and lots of stuff i've missed, but at least you would like th
 
 Frequently Asked Questions (FAQs) are found in [here](https://github.com/JordanSantiagoYT/FNF-JS-Engine/wiki) or you can simply see it below.
 
-Q: Can I use this engine for my mod(s)?
+**Q: Can I use this engine for my mod(s)?**
 
-A: Yes, you can! just be sure to credit me (@JordanSantiago on YouTube) and give a link to this page. or [the link to download the latest release.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/releases/latest)
+A: Yes, you can! just be sure to credit me ([@JordanSantiago on YouTube](https://www.youtube.com/@JordanSantiago)) and give a link to this page. or [the link to download the latest release.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/releases/latest)
 
-Q: How do I (change the background, add characters, etc.)?
+**Q: How do I (change the background, add characters, etc.)?**
 
-A: You do it here the same way you'd do it in Psych Engine.
+A: You do it here the [same way you'd do it in Psych Engine.](https://github.com/ShadowMario/FNF-PsychEngine/wiki)
 
-Q: I found a bug!
+**Q: I found a bug!**
 
 A: Report [here.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/issues). Also, **please check if there are already posts about the same issue.**
 
-Q: I found a WAY to fix a bug!
+**Q: I found a *WAY* to fix a bug!**
 
 A: Send [here.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/pulls).
 
