@@ -71,7 +71,7 @@ class StartupState extends MusicBeatState
 				case 3:
 					// secret muaahahhahhahaahha
 					FlxG.sound.play(Paths.sound('tada', 'splash'));
-					logo.loadGraphic(Paths.image('JavaScriptLogo.png', 'splash'));
+					logo.loadGraphic(Paths.image('JavaScriptLogo', 'splash'));
 					logo.scale.set(0.1,0.1);
 					logo.updateHitbox();
 					logo.screenCenter();
