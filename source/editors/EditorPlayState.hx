@@ -47,6 +47,9 @@ class EditorPlayState extends MusicBeatState
 	var startOffset:Float = 0;
 	var startPos:Float = 0;
 
+	var pixelShitPart1:String = "";
+	var pixelShitPart2:String = '';
+
 	public function new(startPos:Float) {
 		this.startPos = startPos;
 		Conductor.songPosition = startPos - startOffset;
@@ -819,14 +822,15 @@ class EditorPlayState extends MusicBeatState
 			spawnNoteSplashOnNote(note);
 		}
 
-		var pixelShitPart1:String = "";
-		var pixelShitPart2:String = '';
-
 		if (PlayState.isPixelStage)
 		{
 			pixelShitPart1 = 'pixelUI/';
 			pixelShitPart2 = '-pixel';
 		}
+
+		var normalRating:String = 'ratings/' + ClientPrefs.ratingType.toLowerCase().replace(' ', '-').trim() + '/';
+
+		pixelShitPart1 += normalRating;
 
 		rating.loadGraphic(Paths.image(pixelShitPart1 + daRating + pixelShitPart2));
 		rating.screenCenter();
