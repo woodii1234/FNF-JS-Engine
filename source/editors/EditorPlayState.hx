@@ -168,6 +168,7 @@ class EditorPlayState extends MusicBeatState
 
 		Paths.initNote(4, PlayState.SONG.arrowSkin);
 		Paths.initDefaultSkin(PlayState.SONG.arrowSkin);
+		cachePopUpScore();
 
 		super.create();
 	}
@@ -781,6 +782,28 @@ class EditorPlayState extends MusicBeatState
 		return 0.15 * (!sustainNote ? 1 : 2);
 	}
 
+		private function cachePopUpScore()
+	{
+		if (PlayState.isPixelStage)
+		{
+			pixelShitPart1 = 'pixelUI/';
+			pixelShitPart2 = '-pixel';
+		}
+
+		var normalRating:String = 'ratings/' + ClientPrefs.ratingType.toLowerCase().replace(' ', '-').trim() + '/';
+
+		pixelShitPart1 += normalRating;
+
+		Paths.image(pixelShitPart1 + "perfect" + pixelShitPart2);
+		Paths.image(pixelShitPart1 + "sick" + pixelShitPart2);
+		Paths.image(pixelShitPart1 + "good" + pixelShitPart2);
+		Paths.image(pixelShitPart1 + "bad" + pixelShitPart2);
+		Paths.image(pixelShitPart1 + "shit" + pixelShitPart2);
+		Paths.image(pixelShitPart1 + "miss" + pixelShitPart2);
+
+		for (i in 0...10) Paths.image(pixelShitPart1 + 'num' + i + pixelShitPart2);
+	}
+
 	var COMBO_X:Float = 400;
 	var COMBO_Y:Float = 340;
 	private function popUpScore(note:Note = null):Void
@@ -821,16 +844,6 @@ class EditorPlayState extends MusicBeatState
 		{
 			spawnNoteSplashOnNote(note);
 		}
-
-		if (PlayState.isPixelStage)
-		{
-			pixelShitPart1 = 'pixelUI/';
-			pixelShitPart2 = '-pixel';
-		}
-
-		var normalRating:String = 'ratings/' + ClientPrefs.ratingType.toLowerCase().replace(' ', '-').trim() + '/';
-
-		pixelShitPart1 += normalRating;
 
 		rating.loadGraphic(Paths.image(pixelShitPart1 + daRating + pixelShitPart2));
 		rating.screenCenter();
