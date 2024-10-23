@@ -6,7 +6,7 @@
   <br>
 </h1>
 <h3 align="center">
-  <b>JS Engine is a heavily modified Psych Engine fork, with lower-end PCs and more customization in mind.</b>
+  <b>JS Engine is a heavily modified Psych Engine fork, with lower-end devices and more customization in mind.</b>
 </h3>
 
 <p align="center">
