@@ -1,3 +1,7 @@
+1.37.1;
+
+Fixed a crash that would occur when entering the Character Editor
+
 1.37.0;
 
 Added the Hold Note Splashes from Base 0.3.X and up (special thanks to Psych Online (more specifically, NotMagniill and Snirozu) for the code. Also no, you currently cannot turn them off separately)
