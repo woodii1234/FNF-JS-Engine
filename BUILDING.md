@@ -22,7 +22,7 @@ For Haxe, you can get it from [the Haxe website](https://haxe.org/download/)
 
 ---
 
-**(Next step is Windows only, Mac users may skip this)**
+**(Next step is Windows only, _Mac users may skip this_)**
 
 After installing `git`, it is RECOMMENDED that you
 open up a command prompt window and type the following
