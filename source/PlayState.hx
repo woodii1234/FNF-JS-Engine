@@ -3097,11 +3097,12 @@ class PlayState extends MusicBeatState
 
 		if (ClientPrefs.noteColorStyle == 'Char-Based')
 		{
-			for (note in notes){
-				if (note == null)
-					continue;
-				note.updateRGBColors();
-			}
+			for (group in [notes, sustainNotes])
+				for (note in group){
+					if (note == null)
+						continue;
+					if (ClientPrefs.enableColorShader) note.updateRGBColors();
+				}
 		}
 
 		unspawnNotes.sort(sortByTime);
@@ -4670,11 +4671,12 @@ class PlayState extends MusicBeatState
 				}
 				if (ClientPrefs.noteColorStyle == 'Char-Based')
 				{
-					for (note in notes){
-						if (note == null)
-							continue;
-						if (ClientPrefs.enableColorShader) note.updateRGBColors();
-					}
+					for (group in [notes, sustainNotes])
+						for (note in group){
+							if (note == null)
+								continue;
+							if (ClientPrefs.enableColorShader) note.updateRGBColors();
+						}
 				}
 			}
 
