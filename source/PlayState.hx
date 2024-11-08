@@ -1532,7 +1532,7 @@ class PlayState extends MusicBeatState
 		iconP2.cameras = [camHUD];
 		if (EngineWatermark != null) EngineWatermark.cameras = [camHUD];
 		judgementCounter.cameras = [camHUD];
-		if (scoreTxt != null) scoreTxt.cameras = [camHUD];
+		scoreTxt.cameras = [camHUD];
 		if (botplayTxt != null) botplayTxt.cameras = [camHUD];
 		timeBar.cameras = [camHUD];
 		timeBarBG.cameras = [camHUD];
