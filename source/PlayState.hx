@@ -5079,15 +5079,8 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.songLoading) FlxG.sound.music.volume = 0;
 		if (ClientPrefs.songLoading) vocals.volume = opponentVocals.volume = 0;
 
-		if(noTrans)
-		{
-			FlxTransitionableState.skipNextTransOut = true;
-			FlxG.resetState();
-		}
-		else
-		{
-			FlxG.resetState();
-		}
+		FlxTransitionableState.skipNextTransOut = noTrans;
+		FlxG.resetState();
 	}
 
 	public var totalPlayed:Int = 0;
