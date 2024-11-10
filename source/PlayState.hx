@@ -1349,7 +1349,7 @@ class PlayState extends MusicBeatState
 				EngineWatermark.text = "JS Engine v" + MainMenuState.psychEngineJSVersion;
 				EngineWatermark.x = FlxG.width - EngineWatermark.width - 5;
 			case 'JS Engine': 
-				if (!ClientPrefs.downScroll) EngineWatermark.y = FlxG.height * 0.1 + 50;
+				if (!ClientPrefs.downScroll) EngineWatermark.y = FlxG.height * 0.1 - 70;
 				EngineWatermark.text = "Playing " + SONG.song + " on " + CoolUtil.difficultyString() + " - JSE v" + MainMenuState.psychEngineJSVersion;
 			case 'Dave Engine':
 				EngineWatermark.setFormat(Paths.font("comic.ttf"), 16, FlxColor.WHITE, RIGHT, OUTLINE,FlxColor.BLACK);
@@ -1532,7 +1532,7 @@ class PlayState extends MusicBeatState
 		iconP2.cameras = [camHUD];
 		if (EngineWatermark != null) EngineWatermark.cameras = [camHUD];
 		judgementCounter.cameras = [camHUD];
-		scoreTxt.cameras = [camHUD];
+		if (scoreTxt != null) scoreTxt.cameras = [camHUD];
 		if (botplayTxt != null) botplayTxt.cameras = [camHUD];
 		timeBar.cameras = [camHUD];
 		timeBarBG.cameras = [camHUD];
@@ -4965,8 +4965,15 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.songLoading) FlxG.sound.music.volume = 0;
 		if (ClientPrefs.songLoading) vocals.volume = opponentVocals.volume = 0;
 
-		FlxTransitionableState.skipNextTransOut = noTrans;
-		FlxG.resetState();
+		if(noTrans)
+		{
+			FlxTransitionableState.skipNextTransOut = true;
+			FlxG.resetState();
+		}
+		else
+		{
+			FlxG.resetState();
+		}
 	}
 
 	public var totalPlayed:Int = 0;
