@@ -107,6 +107,7 @@
 	<haxelib name="flixel" />
 	<haxelib name="flixel-ui" />
 	<haxelib name="flixel-addons" />
+	<haxelib name="away3d" />
 	
 	<!--JS stuff needed-->
 	<haxelib name="hscript" />
