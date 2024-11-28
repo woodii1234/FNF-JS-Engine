@@ -1,6 +1,6 @@
 package editors;
 
-import flash.geom.Rectangle;
+import openfl.geom.Rectangle;
 import haxe.Json;
 import haxe.format.JsonParser;
 import haxe.io.Bytes;
@@ -49,7 +49,7 @@ import openfl.utils.ByteArray;
 import openfl.events.UncaughtErrorEvent;
 using StringTools;
 #if sys
-import flash.media.Sound;
+import openfl.media.Sound;
 import sys.FileSystem;
 import sys.io.File;
 #end
@@ -251,6 +251,9 @@ class ChartingState extends MusicBeatState
 	public static var vortex:Bool = false;
 	public var mouseQuant:Bool = false;
 	public var hitsoundVol:Float = 1;
+
+	var autoSaveTimer:FlxTimer;
+	public var autoSaveLength:Float = 90; // 2 minutes
 	override function create()
 	{
 		idleMusic = new EditingMusic();
@@ -301,6 +304,8 @@ class ChartingState extends MusicBeatState
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("Chart Editor - Charting " + StringTools.replace(_song.song, '-', ' '), '${FlxStringUtil.formatMoney(CoolUtil.getNoteAmount(_song), false)} Notes');
 		#end
+
+		FlxG.autoPause = true; // this might help with some issues
 
 		vortex = FlxG.save.data.chart_vortex;
 		showTheGrid = FlxG.save.data.showGrid;
@@ -498,6 +503,24 @@ class ChartingState extends MusicBeatState
 		autosaveIndicator.scrollFactor.set();
 		autosaveIndicator.antialiasing = ClientPrefs.globalAntialiasing;
 		add(autosaveIndicator);
+		if(autoSaveTimer != null) {
+			autoSaveTimer.cancel();
+			autoSaveTimer = null;
+			autosaveIndicator.alpha = 0;
+		}
+		// TODO: expand this more & maybe port the 1.0 system to here
+		autoSaveTimer = new FlxTimer().start(autoSaveLength, function(tmr:FlxTimer) {
+			FlxTween.tween(autosaveIndicator, {alpha: 1}, 1, {
+				ease: FlxEase.quadInOut,
+				onComplete: function (twn:FlxTween) {
+					FlxTween.tween(autosaveIndicator, {alpha: 0}, 1, {
+						startDelay: 0.1,
+						ease: FlxEase.quadInOut
+					});
+				}
+			});
+			autosaveSong();
+		}, 0);
 
 		addSongUI();
 		addSectionUI();
@@ -659,6 +682,9 @@ class ChartingState extends MusicBeatState
 		});
 		var autosaveButton:FlxButton = new FlxButton(saveEvents.x, reloadSongJson.y + 60, "Save to Autosave", function()
 		{
+			if (autoSaveTimer != null)
+				autoSaveTimer.reset(autoSaveLength);
+
 			autosaveSong();
 		});
 
@@ -1130,7 +1156,6 @@ class ChartingState extends MusicBeatState
 				{
 					var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(daSec) * 4 * value);
 
-	
 					var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
 					_song.notes[daSec].sectionNotes.push(copiedNote);
 				}
@@ -1210,7 +1235,7 @@ class ChartingState extends MusicBeatState
 		});
 		var clearLeftSectionButton:FlxButton = new FlxButton(duetButton.x, duetButton.y + 30, "Clear Left Side", function()
 		{
-			if (_song.notes[curSection].sectionNotes == null) return;
+			if (_song.notes[curSection] == null || _song.notes[curSection] != null && _song.notes[curSection].sectionNotes == null) return;
 			saveUndo(_song); //this is really weird so im saving it as an undoable action just in case it does the wrong section
 			var removeThese = [];
 			for (noteIndex in 0..._song.notes[curSection].sectionNotes.length) {
@@ -1229,7 +1254,7 @@ class ChartingState extends MusicBeatState
 		});
 		var clearRightSectionButton:FlxButton = new FlxButton(clearLeftSectionButton.x + 100, clearLeftSectionButton.y, "Clear Right Side", function()
 		{
-			if (_song.notes[curSection].sectionNotes == null) return;
+			if (_song.notes[curSection] == null || _song.notes[curSection] != null && _song.notes[curSection].sectionNotes == null) return;
 			saveUndo(_song); //this is really weird so im saving it as an undoable action just in case it does the wrong section
 			var removeThese = [];
 			for (noteIndex in 0..._song.notes[curSection].sectionNotes.length) {
@@ -1274,6 +1299,7 @@ class ChartingState extends MusicBeatState
 
 		copyMultiSectButton = new FlxButton(CopyFutureSectionCount.x, CopyLastSectionCount.y + 40, "Copy from the last " + Std.int(CopyFutureSectionCount.value) + " to the next " + Std.int(CopyFutureSectionCount.value) + " sections, " + Std.int(CopyLoopCount.value) + " times", function()
 		{
+			var swapNotes:Bool = FlxG.keys.pressed.CONTROL;
 			var daSec = FlxMath.maxInt(curSec, Std.int(CopyLastSectionCount.value));
 			var value1:Int = Std.int(CopyLastSectionCount.value);
 			var value2:Int = Std.int(CopyFutureSectionCount.value) * Std.int(CopyLoopCount.value);
@@ -1293,8 +1319,9 @@ class ChartingState extends MusicBeatState
 				{
 					var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(daSec - value1) * 4 * value1);
 
-
-					var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
+					var data = note[1];
+					if (swapNotes) data = Std.int(note[1] + 4) % 8;
+					var copiedNote:Array<Dynamic> = [strum, data, note[2], note[3]];
 					inline _song.notes[daSec].sectionNotes.push(copiedNote);
 				}
 					if (curSection - value1 < 0)
@@ -1320,6 +1347,7 @@ class ChartingState extends MusicBeatState
 
 		var copyNextButton:FlxButton = new FlxButton(CopyNextSectionCount.x, CopyNextSectionCount.y + 20, "Copy to the next..", function()
 		{
+			var swapNotes:Bool = FlxG.keys.pressed.CONTROL;
 			var value:Int = Std.int(CopyNextSectionCount.value);
 			if(value == 0) {
 			return;
@@ -1331,15 +1359,17 @@ class ChartingState extends MusicBeatState
 			saveUndo(_song); //I don't even know why.
 
 			for(i in 0...value) {
-			changeSection(curSec+1);
-			for (note in _song.notes[curSec-1].sectionNotes)
-			{
-				var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(curSec-1) * 4);
+				if (_song.notes[curSec + 1] == null) addSection(getSectionBeats());
+				changeSection(curSec+1);
+				for (note in _song.notes[curSec-1].sectionNotes)
+				{
+					var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(curSec-1) * 4);
 
-
-				var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
-				_song.notes[curSec].sectionNotes.push(copiedNote);
-			}
+					var data = note[1];
+					if (swapNotes) data = Std.int(note[1] + 4) % 8;
+					var copiedNote:Array<Dynamic> = [strum, data, note[2], note[3]];
+					_song.notes[curSec].sectionNotes.push(copiedNote);
+				}
 			}
 			updateGrid(false);
 		});
@@ -1446,6 +1476,21 @@ class ChartingState extends MusicBeatState
 			noteTypeMap.set(noteTypeList[key], key);
 			noteTypeIntMap.set(key, noteTypeList[key]);
 			key++;
+		}
+		var notetypeFiles:Array<String> = Paths.mergeAllTextsNamed('data/' + Paths.formatToSongPath(_song.song) + '/notetypes.txt', '', true);
+		if(notetypeFiles.length > 0)
+		{
+			for (ntTyp in notetypeFiles)
+			{
+				var name:String = ntTyp.trim();
+				if(!displayNameList.contains(name))
+				{
+					displayNameList.push(name);
+					noteTypeMap.set(name, key);
+					noteTypeIntMap.set(key, name);
+					key++;
+				}
+			}
 		}
 
 		#if LUA_ALLOWED
@@ -2359,6 +2404,18 @@ class ChartingState extends MusicBeatState
 			if(sender == noteSplashesInputText) {
 				_song.splashSkin = noteSplashesInputText.text;
 			}
+			else if(sender == gameOverCharacterInputText) {
+				_song.gameOverChar = gameOverCharacterInputText.text;
+			}
+			else if(sender == gameOverSoundInputText) {
+				_song.gameOverSound = gameOverSoundInputText.text;
+			}
+			else if(sender == gameOverLoopInputText) {
+				_song.gameOverLoop = gameOverLoopInputText.text;
+			}
+			else if(sender == gameOverEndInputText) {
+				_song.gameOverEnd = gameOverEndInputText.text;
+			}
 			else if(curSelectedNote != null)
 			{
 				if(sender == value1InputText) {
@@ -3023,15 +3080,19 @@ class ChartingState extends MusicBeatState
 		opponentVocals.pitch = playbackSpeed;
 		#end
 
-		if (bpmTxt != null) bpmTxt.text =
-		CoolUtil.formatTime(Conductor.songPosition, 2) + ' / ' + CoolUtil.formatTime(FlxG.sound.music.length, 2) +
-		"\nSection: " + curSec +
-		"\n\nBeat: " + Std.string(curDecBeat).substring(0,4) +
-		"\nStep: " + curStep +
-		"\nBeat Snap: " + quantization + "th" + 
-		"\n\n" + FlxStringUtil.formatMoney(CoolUtil.getNoteAmount(_song), false) + ' Notes' + 
-		"\n\nRendered Notes: " + FlxStringUtil.formatMoney(Math.abs(curRenderedNotes.length + nextRenderedNotes.length), false) +
-		"\n\nSection Notes: " + FlxStringUtil.formatMoney(_song.notes[curSec].sectionNotes.length, false);
+		if (bpmTxt != null) 
+		{
+			bpmTxt.text =
+			CoolUtil.formatTime(Conductor.songPosition, 2) + ' / ' + CoolUtil.formatTime(FlxG.sound.music.length, 2) +
+			"\nSection: " + curSec +
+			"\n\nBeat: " + Std.string(curDecBeat).substring(0,4) +
+			"\nStep: " + curStep +
+			"\nBeat Snap: " + quantization + "th" +
+			"\n\n" + FlxStringUtil.formatMoney(CoolUtil.getNoteAmount(_song), false) + ' Notes' +
+			"\n\nRendered Notes: " + FlxStringUtil.formatMoney(Math.abs(curRenderedNotes.length + nextRenderedNotes.length), false);
+			
+			if (_song.notes[curSec] != null) bpmTxt.text += "\n\nSection Notes: " + FlxStringUtil.formatMoney(_song.notes[curSec].sectionNotes.length, false);
+		}
 
 		var playedSound:Array<Bool> = [false, false, false, false]; //Prevents ouchy GF sex sounds
 		curRenderedNotes.forEachAlive(function(note:Note) {
@@ -4120,6 +4181,7 @@ class ChartingState extends MusicBeatState
 			undos.splice(0, 1);
 			trace("Performed an Undo! Undos remaining: " + undos.length);
 			if (!unsavedChanges) unsavedChanges = true;
+			if (curSection > _song.notes.length) changeSection(_song.notes.length-1);
 			updateGrid();
 		}
     }
@@ -4209,6 +4271,8 @@ class ChartingState extends MusicBeatState
 		}
 			cpp.vm.Gc.enable(true);
 		if (unsavedChanges) unsavedChanges = false;
+		if (autoSaveTimer != null)
+				autoSaveTimer.reset(autoSaveLength);
 	}
 
 	function sortByTime(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int
@@ -4305,6 +4369,12 @@ class ChartingState extends MusicBeatState
 
 		    super.destroy();
 	    }
+
+	override function startOutro(onOutroComplete:()->Void):Void
+	{
+		FlxG.autoPause = ClientPrefs.autoPause;
+		onOutroComplete();
+	}
 }
 
 class AttachedFlxText extends FlxText

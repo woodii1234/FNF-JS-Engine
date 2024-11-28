@@ -84,7 +84,7 @@ class MusicBeatState extends FlxUIState
 
 	override function update(elapsed:Float)
 	{
-		if (oldStep != curStep) oldStep = curStep;
+		oldStep = curStep;
 
 		updateCurStep();
 		updateBeat();
@@ -92,8 +92,6 @@ class MusicBeatState extends FlxUIState
 		if (oldStep != curStep && curStep > 0)
 		{
 			stepHit();
-			if (curStep % 4 == 0)
-				beatHit(); //troll mode no longer breaks beats
 
 			if(PlayState.SONG != null)
 			{
@@ -188,6 +186,9 @@ class MusicBeatState extends FlxUIState
 			stage.curDecStep = curDecStep;
 			stage.stepHit();
 		});
+
+		if (curStep % 4 == 0)
+			beatHit();
 	}
 
 	//runs whenever the game hits a beat

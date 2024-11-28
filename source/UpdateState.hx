@@ -153,6 +153,7 @@ class UpdateState extends MusicBeatState
 				progressText.text = FlxMath.roundDecimal(entire_progress, 2) + "%";
 				download_info.text = currentFile;
 				download_info.x = (progBar_bg.x + progBar_bg.width) - download_info.width;
+			default: 
 		}
 	}
 
@@ -178,7 +179,7 @@ class UpdateState extends MusicBeatState
 	inline function getUpdateLink()
 	{
 		var fileEnd = #if android 'apk' #else 'zip' #end;
-		online_url = "https://github.com/JordanSantiagoYT/FNF-JS-Engine/releases/download/" + TitleState.updateVersion + '/FNF-JS-Engine-${getPlatform}.$fileEnd';
+		online_url = "https://github.com/JordanSantiagoYT/FNF-JS-Engine/releases/download/" + TitleState.updateVersion + '/FNF-JS-Engine-${getPlatform()}.$fileEnd';
 		trace("update url: " + online_url);
 	}
 
@@ -309,10 +310,18 @@ class UpdateState extends MusicBeatState
 		File.saveBytes(path + "JS Engine v" + TitleState.updateVersion + ".zip", fileBytes);
 		text.text = "Unpacking update file...";
 		text.screenCenter(X);
-		// Uncompress.run(File.getBytes(path + "JS Engine v" + TitleState.updateVersion + ".zip"))
+
 		JSEZip.unzip(path + "JS Engine v" + TitleState.updateVersion + ".zip", "./update/raw/");
 		text.text = "Update has finished! The update will be installed shortly..";
 		text.screenCenter(X);
+
+		zip.removeEventListener(ProgressEvent.PROGRESS, onDownloadProgress);
+		zip.removeEventListener(openfl.events.Event.COMPLETE, onDownloadComplete);
+
+		progressText.text = 'Complete';
+		progressText.screenCenter(X);
+
+		currentTask = 'complete';
 
 		FlxG.sound.play(Paths.sound('confirmMenu'));
 

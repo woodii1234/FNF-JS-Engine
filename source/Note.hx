@@ -6,6 +6,8 @@ import flixel.util.FlxColor;
 import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
 
+import objects.SustainSplash;
+
 using StringTools;
 
 typedef EventNote = {
@@ -31,17 +33,17 @@ typedef PreloadedChartNote = {
 	isSustainEnd:Bool,
 	sustainLength:Float,
 	sustainScale:Float,
-	parent:PreloadedChartNote,
+	parentST:Float,
+	parentSL:Float,
 	hitHealth:Float,
 	missHealth:Float,
 	hitCausesMiss:Null<Bool>,
 	wasHit:Bool,
 	multSpeed:Float,
 	noteDensity:Float,
-	wasSpawned:Bool,
 	ignoreNote:Bool,
-	lowPriority:Bool,
-	wasMissed:Bool
+	blockHit:Bool,
+	lowPriority:Bool
 }
 
 typedef NoteSplashData = {
@@ -67,6 +69,7 @@ class Note extends FlxSprite
 	public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
 
 	public var parentST:Float = 0;
+	public var parentSL:Float = 0;
 	public var strumTime:Float = 0;
 	public var mustPress:Bool = false;
 	public var doOppStuff:Bool = false;
@@ -83,6 +86,7 @@ class Note extends FlxSprite
 
 	public var sustainLength:Float = 0;
 	public var isSustainNote:Bool = false;
+	public var isSustainEnd:Bool = false;
 	public var noteType(default, set):String = null;
 
 	public var eventName:String = '';
@@ -116,6 +120,7 @@ class Note extends FlxSprite
 		b: -1,
 		a: 1
 	};
+	public var noteHoldSplash:SustainSplash;
 
 	// Lua shit
 	public var noteSplashDisabled:Bool = false;
@@ -524,7 +529,6 @@ class Note extends FlxSprite
 			case 'Rainbow':
 			var superCoolColor = new FlxColor(0xFFFF0000);
 			superCoolColor.hue = (strumTime / 5000 * 360) % 360;
-			var coolDarkColor = superCoolColor;
 			rgbShader.r = superCoolColor;
 			rgbShader.g = FlxColor.WHITE;
 			rgbShader.b = superCoolColor.getDarkened(0.7);
@@ -572,6 +576,7 @@ class Note extends FlxSprite
 
 	// this is used for note recycling
 	var firstOffX = false;
+	var shouldCenterOffsets:Bool = true;
 	public function setupNoteData(chartNoteData:PreloadedChartNote):Void 
 	{
 		wasGoodHit = hitByOpponent = tooLate = canBeHit = false; // Don't make an update call of this for the note group
@@ -581,11 +586,16 @@ class Note extends FlxSprite
 			texture = 'noteskins/' + chartNoteData.noteskin;
 			useRGBShader = false;
 		}
-		if (chartNoteData.texture.length > 0 && chartNoteData.texture != texture) texture = chartNoteData.texture;
+		if (chartNoteData.texture.length > 0 && chartNoteData.texture != texture) 
+		{
+			texture = chartNoteData.texture;
+			shouldCenterOffsets = false;
+		}
 		if ((chartNoteData.noteskin.length < 1 && chartNoteData.texture.length < 1) && chartNoteData.texture != Paths.defaultSkin)
 		{
 			texture = Paths.defaultSkin;
 			useRGBShader = ClientPrefs.enableColorShader;
+			shouldCenterOffsets = ClientPrefs.enableColorShader;
 		}
 
 		strumTime = chartNoteData.strumTime;
@@ -598,15 +608,19 @@ class Note extends FlxSprite
 		doOppStuff = chartNoteData.oppNote;
 		gfNote = chartNoteData.gfNote;
 		isSustainNote = chartNoteData.isSustainNote;
-		sustainLength = chartNoteData.sustainLength;
+		isSustainEnd = chartNoteData.isSustainEnd;
 		sustainScale = chartNoteData.sustainScale;
 		lowPriority = chartNoteData.lowPriority;
-		if (isSustainNote) parentST = chartNoteData.parent.strumTime;
+		if (isSustainNote) {
+			parentST = chartNoteData.parentST;
+			parentSL = chartNoteData.parentSL;
+		}
 		
 		hitHealth = chartNoteData.hitHealth;
 		missHealth = chartNoteData.missHealth;
 		hitCausesMiss = chartNoteData.hitCausesMiss;
 		ignoreNote = chartNoteData.ignoreNote;
+		blockHit = chartNoteData.blockHit;
 		multSpeed = chartNoteData.multSpeed;
 		noteDensity = chartNoteData.noteDensity;
 
@@ -641,7 +655,7 @@ class Note extends FlxSprite
 
 		if (isSustainNote) {
 			offsetX += width / 2;
-			copyAngle = !chartNoteData.isSustainEnd;
+			copyAngle = false;
 			animation.play(colArray[noteData % 4] + (chartNoteData.isSustainEnd ? 'holdend' : 'hold'));
 			updateHitbox();
 			offsetX -= width / 2;
@@ -650,7 +664,7 @@ class Note extends FlxSprite
 			animation.play(colArray[noteData % 4] + 'Scroll');
 			if (!copyAngle) copyAngle = true;
 			offsetX = 0; //Juuuust in case we recycle a sustain note to a regular note
-			if (useRGBShader)
+			if (useRGBShader && shouldCenterOffsets)
 			{
 				centerOffsets();
 				centerOrigin();
@@ -661,7 +675,7 @@ class Note extends FlxSprite
 		clipRect = null;
 		if (!mustPress) 
 		{
-			visible = !ClientPrefs.opponentStrums ? false : true;
+			visible = ClientPrefs.opponentStrums;
 			alpha = ClientPrefs.middleScroll ? ClientPrefs.oppNoteAlpha : 1;
 		}
 		else

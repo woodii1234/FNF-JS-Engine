@@ -1,29 +1,37 @@
+<!-- this is an secret -->
 <h1 align="center">
   <br>
   <a href="https://github.com/JordanSantiagoYT/FNF-JS-Engine"><img src="assets/exclude/images/jslol.png" alt="JSengine" width="150"></a>
   <br>
   <b>JS Engine</b>
   <br>
+  <i>(JordanSantiago engine)</i>
+  <br>
 </h1>
 <h3 align="center">
-  <b>JS Engine is a heavily modified Psych Engine fork I made, with lower-end PCs and more customization in mind while also aiming to be a replacement for OS "Engine".</b>
+  <b>JS Engine is a heavily modified Psych Engine fork, with lower-end devices and more customization in mind.</b>
 </h3>
+
+<p align="center">
+<img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/JordanSantiagoYT/FNF-JS-Engine">
+<img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/w/JordanSantiagoYT/FNF-JS-Engine">
+<img alt="GitHub contributors" src="https://img.shields.io/github/contributors/JordanSantiagoYT/FNF-JS-Engine">
+</p>
 
 README.md revamped by [Nael2xd](https://youtube.com/@nael2xd?si=axwJrY_8jdlXUwSm)
 
-If you're looking for the mobile version, [go here!](https://github.com/JordanSantiagoYT/FNF-JS-Engine/tree/mobile)
+_If you're looking for the Android/IOS version, [go here!](https://github.com/JordanSantiagoYT/FNF-JS-Engine/tree/mobile)_
 
 ## Welcome
 
-Hello and welcome to JS Engine's github repo, where you can download the engine and make spammy charts or have fun with the engine.
+Welcome to JS Engine's github repo, where you can download the engine and make spammy charts or have fun with the engine.
 
 This contains lots and lots of customizable and features built in to JS Engine, if you wanna see most of them listed, you can see it below this text
 
 # Features/Performances in JS ENGINE
 
-This fork of this engine has tons of features and performances, most will be listed but some of them won't because there's a lot of it.
+**This fork has tons of features and performances features, most will be listed:**
 
-The features/performances included are:
 - No BotPlay lag!
 - Faster Song Loading!
 - Loading songs longer than 20 minutes!
@@ -38,8 +46,6 @@ There is like lots and lots of stuff i've missed, but at least you would like th
 
 # Screenshots
 
-Here are some screenshots of what the engine looks like. 
-
 ![Screenshot 2024-07-07 14-00-00](https://github.com/JordanSantiagoYT/FNF-JS-Engine/assets/108278470/d4e89995-fa14-40bf-a5d6-d1647548fd93)
 
 ![Screenshot 2024-07-07 14-01-15](https://github.com/JordanSantiagoYT/FNF-JS-Engine/assets/108278470/b6d7d5ef-196d-4c39-9055-97815d63cdf0)
@@ -50,19 +56,19 @@ Here are some screenshots of what the engine looks like.
 
 Frequently Asked Questions (FAQs) are found in [here](https://github.com/JordanSantiagoYT/FNF-JS-Engine/wiki) or you can simply see it below.
 
-Q: Can I use this engine for my mod(s)?
+**Q: Can I use this engine for my mod(s)?**
 
-A: Yes, you can! just be sure to credit me (@JordanSantiago on YouTube) and give a link to this page. or [the link to download the latest release.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/releases/latest)
+A: Yes, you can! just be sure to credit me ([@JordanSantiago on YouTube](https://www.youtube.com/@JordanSantiago)) and give a link to this page. or [the link to download the latest release.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/releases/latest)
 
-Q: How do I (change the background, add characters, etc.)?
+**Q: How do I (change the background, add characters, etc.)?**
 
-A: You do it here the same way you'd do it in Psych Engine.
+A: You do it here the [same way you'd do it in Psych Engine.](https://github.com/ShadowMario/FNF-PsychEngine/wiki)
 
-Q: I found a bug!
+**Q: I found a bug!**
 
 A: Report [here.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/issues). Also, **please check if there are already posts about the same issue.**
 
-Q: I found a WAY to fix a bug!
+**Q: I found a *WAY* to fix a bug!**
 
 A: Send [here.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/pulls).
 

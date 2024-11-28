@@ -50,7 +50,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var timebarShowSpeed:Bool = false;
 	public static var botWatermark:Bool = true;
 	public static var missRating:Bool = false;
-	public static var compactNumbers:Bool = false;
 	public static var scoreTxtSize:Int = 0;
 	public static var noteColorStyle:String = 'Normal';
 	public static var enableColorShader:Bool = true;
@@ -58,12 +57,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var cameraPanning:Bool = true;
 	public static var panIntensity:Float = 1;
 	public static var rateNameStuff:String = 'Quotes';
-	public static var colorRatingHit:Bool = true;
-	public static var marvRateColor:String = 'Golden';
-	public static var smoothHealth:Bool = true;
-	public static var smoothHPBug:Bool = false;
-	public static var noBopLimit:Bool = false;
-	public static var ogHPColor:Bool = false;
 	public static var timeBarType:String = 'Time Left';
 	public static var scoreStyle:String = 'Psych Engine';
 	public static var timeBarStyle:String = 'Vanilla';
@@ -74,7 +67,13 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var strumLitStyle:String = 'Full Anim';
 	public static var bfIconStyle:String = 'Default';
 	public static var ratingType:String = 'Base FNF';
+	public static var simplePopups:Bool = false;
 	public static var iconBounceType:String = 'Golden Apple';
+	public static var colorRatingHit:Bool = true;
+	public static var smoothHealth:Bool = true;
+	public static var smoothHPBug:Bool = false;
+	public static var noBopLimit:Bool = false;
+	public static var ogHPColor:Bool = false;
 	public static var opponentRateCount:Bool = true;
 	public static var flashing:Bool = true;
 	public static var camZooms:Bool = true;
@@ -116,7 +115,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var ratingPopups:Bool = true;
 	public static var comboPopups:Bool = true;
 	public static var showMS:Bool = false;
-	public static var songLoading:Bool = true;
 	public static var noSpawnFunc:Bool = false;
 	public static var noHitFuncs:Bool = false;
 	public static var noSkipFuncs:Bool = false;
