@@ -24,7 +24,7 @@ class MasterEditorMenu extends MusicBeatState
 		'Dialogue Portrait Editor',
 		'Character Editor',
 		'Chart Editor',
-		'Note Splash Debug'
+		'Note Splash Debug',
 		'3D Benchmark'
 	];
 	private var grpTexts:FlxTypedGroup<Alphabet>;
