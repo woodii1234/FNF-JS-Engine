@@ -8,7 +8,7 @@
 			"loop": false,
 			"anim": "singLEFT",
 			"fps": 24,
-			"name": "dad sing note right",
+			"name": "Dad Sing Note LEFT",
 			"indices": []
 		},
 		{
@@ -41,7 +41,7 @@
 			"loop": false,
 			"anim": "singRIGHT",
 			"fps": 24,
-			"name": "Dad Sing Note LEFT",
+			"name": "Dad Sing Note RIGHT",
 			"indices": []
 		},
 		{
@@ -85,7 +85,7 @@
 				14,
 				15
 			],
-			"name": "dad sing note right"
+			"name": "Dad Sing Note LEFT"
 		},
 		{
 			"offsets": [
@@ -101,7 +101,7 @@
 				17,
 				18
 			],
-			"name": "Dad Sing Note LEFT"
+			"name": "Dad Sing Note RIGHT"
 		},
 		{
 			"offsets": [
@@ -117,7 +117,7 @@
 				58,
 				59
 			],
-			"name": "Dad Sing note UP"
+			"name": "Dad Sing Note UP"
 		}
 	],
 	"vocals_file": "dad",
@@ -128,7 +128,7 @@
 	],
 	"isPlayer": false,
 	"no_antialiasing": false,
-	"image": "characters/Dad_assets",
+	"image": "characters/DADDY_DEAREST",
 	"shake_duration": 0,
 	"position": [
 		0,
