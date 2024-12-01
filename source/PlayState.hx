@@ -1960,8 +1960,6 @@ class PlayState extends MusicBeatState
 		else{
 			videoCutscene.finishCallback = function()
 			{
-				try { videoCutscene.dispose(); }
-				catch(e) {videoCutscene.finishVideo(); }
 				startAndEnd();
 				if (heyStopTrying) openfl.system.System.exit(0);
 				return;
@@ -1973,8 +1971,6 @@ class PlayState extends MusicBeatState
 			videoCutscene.onEndReached.add(callback);
 		else{
 			videoCutscene.onEndReached.add(function(){
-				try { videoCutscene.dispose(); }
-				catch(e) {videoCutscene.finishVideo(); }
 				startAndEnd();
 				if (heyStopTrying) openfl.system.System.exit(0);
 				return;
