@@ -48,7 +48,7 @@ class StartupState extends MusicBeatState
 		FlxTween.tween(skipTxt, {alpha: 1}, 1);
 
 		new FlxTimer().start(0.1, function(tmr:FlxTimer) {
-			/*if (!FlxG.random.bool(0.25)){
+			if (!FlxG.random.bool(0.25)){
 				switch (theIntro) {
 					case 0:
 						FlxG.sound.play(Paths.sound('startup', 'splash'));
@@ -85,7 +85,7 @@ class StartupState extends MusicBeatState
 						playVideo('broCopiedDenpa');
 				}
 			}
-			else*/
+			else
 			{
 				switch (theSecretIntro)
 				{
