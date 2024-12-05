@@ -20,11 +20,14 @@ class StartupState extends MusicBeatState
 	var skipTxt:FlxText;
 
 	var maxIntros:Int = 3;
-	var maxSecretIntros:Int = -1; // trolley
+	var maxSecretIntros:Int = 0; // trolley
 
 	override public function create():Void
 	{
-		#if VIDEOS_ALLOWED maxIntros = maxSecretIntros += 2; #end
+		#if VIDEOS_ALLOWED
+		maxIntros += 2;
+		maxSecretIntros += 1;
+		#end
 		var theIntro:Int = FlxG.random.int(0, maxIntros);
 		var theSecretIntro:Int = FlxG.random.int(0, maxSecretIntros);
 		FlxTransitionableState.skipNextTransIn = true;
@@ -89,10 +92,10 @@ class StartupState extends MusicBeatState
 			{
 				switch (theSecretIntro)
 				{
+					case 0:
+						playVideo('oops');
 					case 1:
 						playVideo('haxe');
-					default:
-						playVideo('oops');
 				}
 			}
 		});
