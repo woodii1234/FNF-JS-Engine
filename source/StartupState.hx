@@ -20,11 +20,13 @@ class StartupState extends MusicBeatState
 	var skipTxt:FlxText;
 
 	var maxIntros:Int = 3;
+	var maxSecretIntros:Int = -1; // trolley
 
 	override public function create():Void
 	{
-		#if VIDEOS_ALLOWED maxIntros += 2; #end
+		#if VIDEOS_ALLOWED maxIntros = maxSecretIntros += 2; #end
 		var theIntro:Int = FlxG.random.int(0, maxIntros);
+		var theSecretIntro:Int = FlxG.random.int(0, maxSecretIntros);
 		FlxTransitionableState.skipNextTransIn = true;
 		FlxTransitionableState.skipNextTransOut = true;
 		logo = new FlxSprite().loadGraphic(Paths.image('sillyLogo', 'splash'));
@@ -46,7 +48,7 @@ class StartupState extends MusicBeatState
 		FlxTween.tween(skipTxt, {alpha: 1}, 1);
 
 		new FlxTimer().start(0.1, function(tmr:FlxTimer) {
-			if (!FlxG.random.bool(0.1)){
+			/*if (!FlxG.random.bool(0.25)){
 				switch (theIntro) {
 					case 0:
 						FlxG.sound.play(Paths.sound('startup', 'splash'));
@@ -83,8 +85,16 @@ class StartupState extends MusicBeatState
 						playVideo('broCopiedDenpa');
 				}
 			}
-			else
-				playVideo('haxe'); // Lily wanted this
+			else*/
+			{
+				switch (theSecretIntro)
+				{
+					case 1:
+						playVideo('haxe');
+					default:
+						playVideo('oops');
+				}
+			}
 		});
 
 		super.create();
@@ -96,7 +106,7 @@ class StartupState extends MusicBeatState
 		#if VIDEOS_ALLOWED
 			var vidSprite = new MP4Handler(); // it plays but it doesn't show???
 			#if (hxCodec < "3.0.0")
-			vidSprite.playVideo(Paths.video(name), false, false);
+			vidSprite.playVideo(Paths.video(name, 'splash'), false, false);
 			vidSprite.finishCallback = function()
 			{
 				try { vidSprite.dispose(); }
@@ -107,7 +117,7 @@ class StartupState extends MusicBeatState
 					FlxG.switchState(TitleState.new);
 			};
 			#else
-			vidSprite.play(Paths.video(name));
+			vidSprite.play(Paths.video(name, 'splash'));
 			vidSprite.onEndReached.add(function(){
 				vidSprite.dispose();
 				if (callback != null)
