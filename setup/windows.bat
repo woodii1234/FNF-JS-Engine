@@ -6,13 +6,14 @@ echo This might take a few moments depending on your internet speed.
 @echo on
 haxelib install lime
 haxelib install openfl
-haxelib install flixel 5.6.2
-haxelib install flixel-addons 3.2.2
-haxelib install flixel-tools 1.5.1
+haxelib install flixel
+haxelib install flixel-addons
+haxelib install flixel-tools
 haxelib install flixel-ui
 haxelib install hxCodec 2.5.1
 haxelib install hscript
 haxelib install hxcpp-debug-server
+haxelib install away3d
 haxelib git hxcpp https://github.com/HaxeFoundation/hxcpp/
 haxelib git flxanimate https://github.com/Dot-Stuff/flxanimate 768740a56b26aa0c072720e0d1236b94afe68e3e
 haxelib git linc_luajit https://github.com/superpowers04/linc_luajit
