@@ -107,9 +107,7 @@ class MasterEditorMenu extends MusicBeatState
 		#end
 
 		if (controls.BACK)
-		{
 			FlxG.switchState(MainMenuState.new);
-		}
 
 		if (controls.ACCEPT)
 		{
