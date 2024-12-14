@@ -1253,7 +1253,7 @@ class CharacterEditorState extends MusicBeatState
 	function reloadCharacterOptions() {
 		if(UI_characterbox != null) {
 			imageInputText.text = char.imageFile;
-			noteskinText.text = char.noteskin;
+			if (char.noteskin != null) noteskinText.text = char.noteskin;
 			healthIconInputText.text = char.healthIcon;
 			vocalsInputText.text = char.vocalsFile != null ? char.vocalsFile : '';
 			singDurationStepper.value = char.singDuration;
