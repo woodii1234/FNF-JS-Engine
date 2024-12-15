@@ -44,6 +44,7 @@ to Download the binary for Microsoft Visual Studio with the specific package you
 For getting all the packages you need, distros often have similar or near identical names
 
 for pretty much every distro, install the `git`, `haxe` and `vlc` packages
+-# Note: This can be skipped if you installed Arch Linux via `archinstall` as it preinstalls vlc ahead of time
 
 Commands will vary depending on your distro, refer to your package manager's install command syntax.
 ### Installation for common Linux distros
