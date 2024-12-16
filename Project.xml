@@ -140,6 +140,7 @@
 	<haxedef name="HXCPP_CHECK_POINTER"/>
 	<haxedef name="HXCPP_STACK_LINE"/>
 	<haxedef name="HXCPP_STACK_TRACE"/>
+	<haxedef name="HXCPP_CATCH_SEGV" />
 
 	<!-- Javascript breaks with inline for reasons unknown -->
 	<haxedef name="no-inline" if="html5"/>
