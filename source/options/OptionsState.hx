@@ -213,7 +213,7 @@ class OptionsState extends MusicBeatState
 				selectorRight.x = item.x + item.width + 15;
 				selectorRight.y = item.y;
 				try { camFollow.setPosition(item.getGraphicMidpoint().x, item.getGraphicMidpoint().y - thing); }
-				catch(e) {}
+				catch(e) {camFollow.setPosition(FlxG.width / 2, FlxG.height / 2 - thing);}
 			}
 		}
 		FlxG.sound.play(Paths.sound('scrollMenu'));
