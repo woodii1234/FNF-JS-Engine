@@ -1316,7 +1316,6 @@ class PlayState extends MusicBeatState
 				case 'Leather Engine': 'bfleather';
 				case "Mic'd Up": 'bfmup';
 				case "FPS Plus": 'bffps';
-				case "SB Engine": 'bfsb';
 				case "OS 'Engine'": 'bfos';
 				default: 'bf';
 			}
@@ -2994,11 +2993,11 @@ class PlayState extends MusicBeatState
 
 		sectionsLoaded = 0;
 
-		var endTime = haxe.Timer.stamp();
+		final endTime = haxe.Timer.stamp();
 
 		openfl.system.System.gc();
 
-		var elapsedTime = endTime - startTime;
+		final elapsedTime = endTime - startTime;
 
 		trace('\nDone! \n\nTime taken: ' + CoolUtil.formatTime(elapsedTime * 1000) + "\nAverage NPS while loading: " + Math.floor(notesLoadedRN / elapsedTime));
 		notesLoadedRN = 0;
@@ -4008,7 +4007,7 @@ class PlayState extends MusicBeatState
 			iconP1.offset.y = Math.abs(Math.sin(funnyBeat * Math.PI))  * 16 - 4;
 			iconP2.offset.y = Math.abs(Math.sin(funnyBeat * Math.PI))  * 16 - 4;
 		}
-		if (ClientPrefs.iconBounceType == 'New Psych' || ClientPrefs.iconBounceType == 'SB Engine' || ClientPrefs.iconBounceType == 'VS Steve') {
+		if (ClientPrefs.iconBounceType == 'New Psych' || ClientPrefs.iconBounceType == 'VS Steve') {
 			final mult:Float = FlxMath.lerp(1, iconP1.scale.x, CoolUtil.boundTo(1 - (elapsed * 9 * playbackRate), 0, 1));
 			iconP1.scale.set(mult, mult);
 			iconP1.updateHitbox();
@@ -4021,27 +4020,6 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.iconBounceType == 'Golden Apple') {
 			iconP1.centerOffsets();
 			iconP2.centerOffsets();
-		}
-		//you're welcome Stefan2008 :)
-		if (ClientPrefs.iconBounceType == 'SB Engine') {
-			if (iconP1.angle >= 0) {
-				if (iconP1.angle != 0) {
-					iconP1.angle -= 1 * playbackRate;
-				}
-			} else {
-				if (iconP1.angle != 0) {
-					iconP1.angle += 1 * playbackRate;
-				}
-			}
-			if (iconP2.angle >= 0) {
-				if (iconP2.angle != 0) {
-					iconP2.angle -= 1 * playbackRate;
-				}
-			} else {
-				if (iconP2.angle != 0) {
-					iconP2.angle += 1 * playbackRate;
-				}
-			}
 		}
 		iconP1.updateHitbox();
 		iconP2.updateHitbox();
@@ -4481,7 +4459,6 @@ class PlayState extends MusicBeatState
 								if (ClientPrefs.bfIconStyle == 'Leather Engine') iconP1.changeIcon('bfleather');
 								if (ClientPrefs.bfIconStyle == "Mic'd Up") iconP1.changeIcon('bfmup');
 								if (ClientPrefs.bfIconStyle == "FPS Plus") iconP1.changeIcon('bffps');
-								if (ClientPrefs.bfIconStyle == "SB Engine") iconP1.changeIcon('bfsb');
 								if (ClientPrefs.bfIconStyle == "OS 'Engine'") iconP1.changeIcon('bfos');
 							}
 							if (boyfriend.noteskin.length > 0) bfNoteskin = boyfriend.noteskin;
@@ -5385,7 +5362,6 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		// FlxG.watch.addQuick('asdfa', upP);
 		var char:Character = boyfriend;
 		if (opponentChart) char = dad;
 		if (startedCountdown && !char.stunned && generatedMusic)
@@ -6382,24 +6358,6 @@ class PlayState extends MusicBeatState
 				iconP1.scale.set(1.2, 1.2);
 				iconP2.scale.set(1.2, 1.2);
 			}
-			//you're welcome Stefan2008 :)
-			if (ClientPrefs.iconBounceType == 'SB Engine') {
-				if (curBeat % gfSpeed == 0) {
-					if (curBeat % (gfSpeed * 2) == 0) {
-						iconP1.scale.set(0.8, 0.8);
-						iconP2.scale.set(1.2, 1.3);
-
-						iconP1.angle = -15;
-						iconP2.angle = 15;
-					} else {
-						iconP2.scale.set(0.8, 0.8);
-						iconP1.scale.set(1.2, 1.3);
-
-						iconP2.angle = -15;
-						iconP1.angle = 15;
-					}
-				}
-			}
 
 			if (curBeat % gfSpeed == 0 && ClientPrefs.iconBounceType == 'Golden Apple') {
 				curBeat % (gfSpeed * 2) == 0 * playbackRate ? {
@@ -6495,24 +6453,6 @@ class PlayState extends MusicBeatState
 			if (ClientPrefs.iconBounceType == 'New Psych') {
 				if (bopBF) iconP1.scale.set(1.2, 1.2);
 				else iconP2.scale.set(1.2, 1.2);
-			}
-			//you're welcome Stefan2008 :)
-			if (ClientPrefs.iconBounceType == 'SB Engine') {
-				if (iconBopsTotal % 2 == 0) {
-					if (iconBopsTotal % 2 == 0) {
-						iconP1.scale.set(0.8, 0.8);
-						iconP2.scale.set(1.2, 1.3);
-
-						iconP1.angle = -15;
-						iconP2.angle = 15;
-					} else {
-						iconP2.scale.set(0.8, 0.8);
-						iconP1.scale.set(1.2, 1.3);
-
-						iconP2.angle = -15;
-						iconP1.angle = 15;
-					}
-				}
 			}
 			if (ClientPrefs.iconBounceType == 'Golden Apple') {
 				FlxTween.cancelTweensOf(iconP1);
