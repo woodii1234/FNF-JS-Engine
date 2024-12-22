@@ -10,19 +10,6 @@ class FPSCounter extends TextField
 {
 	public var currentFPS(default, null):Float;
 
-	/*
-	inline function gay():Float
-	{
-		#if (cpp && windows)
-		return 0;
-		#elseif cpp
-		return cpp.vm.Gc.memInfo64(cpp.vm.Gc.MEM_INFO_USAGE);
-		#else
-		return cast(openfl.system.System.totalMemory, UInt);
-		#end
-	}
-	*/
-
 	/**
 		The current memory usage (WARNING: this is NOT your total program memory usage, rather it shows the garbage collector memory)
 	**/
@@ -56,17 +43,17 @@ class FPSCounter extends TextField
 
 	var fpsMultiplier:Float = 1.0;
     var deltaTimeout:Float = 0.0;
+	public var timeoutDelay:Float = 500;
 	// Event Handlers
 	override function __enterFrame(deltaTime:Float):Void
 	{
-		if (deltaTimeout > 1000) {
-			deltaTimeout = 0.0;
-			return;
-		}
-
 		final now:Float = haxe.Timer.stamp() * 1000;
 		times.push(now);
 		while (times[0] < now - 1000 / fpsMultiplier) times.shift();
+		if (deltaTimeout < timeoutDelay) {
+			deltaTimeout += deltaTime;
+			return;
+		}
 
 		if (Std.isOfType(FlxG.state, PlayState) && !PlayState.instance.trollingMode) { 
 			try { fpsMultiplier = PlayState.instance.playbackRate; }
@@ -78,7 +65,6 @@ class FPSCounter extends TextField
 
         currentFPS = Math.min(FlxG.drawFramerate, times.length) / fpsMultiplier;
         updateText();
-        deltaTimeout += deltaTime;
 
 		if (ClientPrefs.rainbowFPS)
 		{
@@ -97,6 +83,7 @@ class FPSCounter extends TextField
 			if (currentFPS <= ClientPrefs.framerate / 4)
 				textColor = 0xFFFF0000;
 		}
+		deltaTimeout = 0.0;
 	}
 
 	public dynamic function updateText():Void { // so people can override it in hscript
