@@ -13,11 +13,11 @@ class FPSCounter extends TextField
 	/**
 		The current memory usage (WARNING: this is NOT your total program memory usage, rather it shows the garbage collector memory)
 	**/
-    public var memory(get, never):Float;
+    	public var memory(get, never):Float;
 	inline function get_memory():Float
 		return Memory.gay();
 
-    var mempeak:Float = 0;
+    	var mempeak:Float = 0;
 
 	@:noCompletion private var times:Array<Float>;
 
@@ -39,11 +39,11 @@ class FPSCounter extends TextField
 		times = [];
 	}
 
-    var timeColor:Float = 0.0;
+    	var timeColor:Float = 0.0;
 
 	var fpsMultiplier:Float = 1.0;
-    var deltaTimeout:Float = 0.0;
-	public var timeoutDelay:Float = 500;
+    	var deltaTimeout:Float = 0.0;
+	public var timeoutDelay:Float = 50;
 	// Event Handlers
 	override function __enterFrame(deltaTime:Float):Void
 	{
@@ -61,10 +61,10 @@ class FPSCounter extends TextField
 		}
 		else fpsMultiplier = 1.0;
 
-        if (memory > mempeak) mempeak = memory;
-
-        currentFPS = Math.min(FlxG.drawFramerate, times.length) / fpsMultiplier;
-        updateText();
+	        if (memory > mempeak) mempeak = memory;
+	
+	        currentFPS = Math.min(FlxG.drawFramerate, times.length) / fpsMultiplier;
+	        updateText();
 
 		if (ClientPrefs.rainbowFPS)
 		{
