@@ -73,7 +73,7 @@ class DiscordClient
 
 	public static function initialize()
 	{
-		final handlers:DiscordEventHandlers = new DiscordEventHandlers();
+		final discordHandlers:DiscordEventHandlers = new DiscordEventHandlers();
 		discordHandlers.ready = Function.fromStaticFunction(onReady);
 		discordHandlers.disconnected = Function.fromStaticFunction(onDisconnected);
 		discordHandlers.errored = Function.fromStaticFunction(onError);
