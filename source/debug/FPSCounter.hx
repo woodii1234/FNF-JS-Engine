@@ -43,7 +43,7 @@ class FPSCounter extends TextField
 
 	var fpsMultiplier:Float = 1.0;
     var deltaTimeout:Float = 0.0;
-	public var timeoutDelay:Float = 1000;
+	public var timeoutDelay:Float = 500;
 	// Event Handlers
 	override function __enterFrame(deltaTime:Float):Void
 	{
