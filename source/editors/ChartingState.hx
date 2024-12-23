@@ -2691,18 +2691,12 @@ class ChartingState extends MusicBeatState
 			}
 
 			if(curSelectedNote != null && curSelectedNote[1] > -1) {
-				if (FlxG.keys.justPressed.E)
+				if (FlxG.keys.justPressed.E || FlxG.keys.pressed.CONTROL && FlxG.mouse.wheel < 0)
 				{
 					changeNoteSustain(Conductor.stepCrochet);
 				}
-				if (FlxG.keys.justPressed.Q)
+				if (FlxG.keys.justPressed.Q || FlxG.keys.pressed.CONTROL && FlxG.mouse.wheel > 0)
 				{
-					changeNoteSustain(-Conductor.stepCrochet);
-				}
-				if (FlxG.keys.pressed.CONTROL && FlxG.mouse.wheel < 0) {
-					changeNoteSustain(Conductor.stepCrochet);
-				}
-				if (FlxG.keys.pressed.CONTROL && FlxG.mouse.wheel > 0) {
 					changeNoteSustain(-Conductor.stepCrochet);
 				}
 			}
@@ -3461,6 +3455,9 @@ class ChartingState extends MusicBeatState
 			if (curSelectedNote[2] != null)
 			{
 				curSelectedNote[2] += value;
+
+				//actually fixes an issue where step-long sustain lengths would round down instead of up
+				curSelectedNote[2] = Math.ceil(curSelectedNote[2] * 13) / 13;
 				curSelectedNote[2] = Math.max(curSelectedNote[2], 0);
 			}
 		}
@@ -4272,7 +4269,7 @@ class ChartingState extends MusicBeatState
 			cpp.vm.Gc.enable(true);
 		if (unsavedChanges) unsavedChanges = false;
 		if (autoSaveTimer != null)
-				autoSaveTimer.reset(autoSaveLength);
+			autoSaveTimer.reset(autoSaveLength);
 	}
 
 	function sortByTime(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int
@@ -4358,18 +4355,18 @@ class ChartingState extends MusicBeatState
 	    }
 
 	override public function destroy():Void
-	    {
-			Paths.noteSkinFramesMap.clear();
-			Paths.noteSkinAnimsMap.clear();
-			Paths.splashSkinFramesMap.clear();
-			Paths.splashSkinAnimsMap.clear();
-			Paths.splashConfigs.clear();
-			Paths.splashAnimCountMap.clear();
-			Note.globalRgbShaders = [];
+	{
+		Paths.noteSkinFramesMap.clear();
+		Paths.noteSkinAnimsMap.clear();
+		Paths.splashSkinFramesMap.clear();
+		Paths.splashSkinAnimsMap.clear();
+		Paths.splashConfigs.clear();
+		Paths.splashAnimCountMap.clear();
+		Note.globalRgbShaders = [];
 
-		    super.destroy();
-	    }
-
+		super.destroy();
+	}
+	
 	override function startOutro(onOutroComplete:()->Void):Void
 	{
 		FlxG.autoPause = ClientPrefs.autoPause;

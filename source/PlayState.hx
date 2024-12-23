@@ -2844,9 +2844,11 @@ class PlayState extends MusicBeatState
 							case 0:
 								var boyfriendToGrab:Boyfriend = boyfriendMap.get(charChangeNames[0]);
 								if (boyfriendToGrab != null && boyfriendToGrab.noteskin.length > 0) bfNoteskin = boyfriendToGrab.noteskin;
+								else bfNoteskin = '';
 							case 1:
 								var dadToGrab:Character = dadMap.get(charChangeNames[0]);
 								if (dadToGrab != null && dadToGrab.noteskin.length > 0) dadNoteskin = dadToGrab.noteskin;
+								else dadNoteskin = '';
 						}
 						charChangeTimes.shift();
 						charChangeNames.shift();
@@ -4462,6 +4464,7 @@ class PlayState extends MusicBeatState
 								if (ClientPrefs.bfIconStyle == "OS 'Engine'") iconP1.changeIcon('bfos');
 							}
 							if (boyfriend.noteskin.length > 0) bfNoteskin = boyfriend.noteskin;
+							else bfNoteskin = '';
 						}
 						setOnLuas('boyfriendName', boyfriend.curCharacter);
 
@@ -4490,12 +4493,13 @@ class PlayState extends MusicBeatState
 								
 								if (scoreTxt != null && !ClientPrefs.hideHud) FlxTween.color(scoreTxt, 1, scoreTxt.color, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]));
 							}
-							if (ClientPrefs.scoreStyle == 'JS Engine' && !ClientPrefs.hideHud) {
+							if (ClientPrefs.scoreStyle == 'JS Engine' && !ClientPrefs.hideHud)
 								if (scoreTxt != null) FlxTween.color(scoreTxt, 1, scoreTxt.color, FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]));
-							}
+
 							if (dadAnim != '') dad.playAnim(dadAnim, true);
 						}
 							if (dad.noteskin.length > 0) dadNoteskin = dad.noteskin;
+							else dadNoteskin = '';
 						setOnLuas('dadName', dad.curCharacter);
 
 					case 2:
@@ -4523,7 +4527,7 @@ class PlayState extends MusicBeatState
 				if (ClientPrefs.showNotes)
 				{
 					for (i in strumLineNotes.members)
-						if ((i.player == 0 ? dadNoteskin : bfNoteskin).length > 0) 
+						if ((i.player == 0 ? dadNoteskin : bfNoteskin) != null) 
 						{
 							i.updateNoteSkin(i.player == 0 ? dadNoteskin : bfNoteskin);
 							i.useRGBShader = false;
