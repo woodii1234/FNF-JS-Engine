@@ -4530,7 +4530,7 @@ class PlayState extends MusicBeatState
 						if ((i.player == 0 ? dadNoteskin : bfNoteskin) != null) 
 						{
 							i.updateNoteSkin(i.player == 0 ? dadNoteskin : bfNoteskin);
-							i.useRGBShader = false;
+							i.useRGBShader = (i.player == 0 ? dadNoteskin : bfNoteskin).length < 1;
 						}
 				}
 				if (ClientPrefs.noteColorStyle == 'Char-Based')

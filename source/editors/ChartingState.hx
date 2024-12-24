@@ -4363,14 +4363,9 @@ class ChartingState extends MusicBeatState
 		Paths.splashConfigs.clear();
 		Paths.splashAnimCountMap.clear();
 		Note.globalRgbShaders = [];
+		FlxG.autoPause = ClientPrefs.autoPause;
 
 		super.destroy();
-	}
-	
-	override function startOutro(onOutroComplete:()->Void):Void
-	{
-		FlxG.autoPause = ClientPrefs.autoPause;
-		onOutroComplete();
 	}
 }
 
