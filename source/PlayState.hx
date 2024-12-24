@@ -2925,9 +2925,9 @@ class PlayState extends MusicBeatState
 				
 					var ratio:Float = Conductor.bpm / currentBPMLol;
 		
-					final floorSus:Int = Math.floor(swagNote.sustainLength / Conductor.stepCrochet);
-					if (floorSus > 0) {
-						for (susNote in 0...floorSus + 1) {
+					final roundSus:Int = Math.round(swagNote.sustainLength / Conductor.stepCrochet);
+					if (roundSus > 0) {
+						for (susNote in 0...roundSus + 1) {
 
 							final sustainNote:PreloadedChartNote = cast {
 								strumTime: daStrumTime + (Conductor.stepCrochet * susNote),
@@ -2940,7 +2940,7 @@ class PlayState extends MusicBeatState
 								gfNote: songNotes[3] == 'GF Sing' || (section.gfSection && songNotes[1] < 4),
 								noAnimation: songNotes[3] == 'No Animation',
 								isSustainNote: true,
-								isSustainEnd: susNote == floorSus,
+								isSustainEnd: susNote == roundSus,
 								sustainScale: 1 / ratio,
 								parentST: swagNote.strumTime,
 								parentSL: swagNote.sustainLength,
