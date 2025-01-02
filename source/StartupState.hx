@@ -71,6 +71,7 @@ class StartupState extends MusicBeatState
 	}
 
 	function doIntro() {
+		/*
 		#if debug // for testing purposes
 			final vidSprite = new MP4Handler(); // it plays but it doesn't show???
 			#if (hxCodec < "3.0.0")
@@ -89,6 +90,7 @@ class StartupState extends MusicBeatState
 			});
 			#end
 		#else
+		*/
 		final theIntro:Int = FlxG.random.int(0, maxIntros);
 		switch (theIntro) {
 			case 0:
@@ -169,7 +171,7 @@ class StartupState extends MusicBeatState
 					FlxTween.tween(logo, {alpha: 1, "scale.x": 1, "scale.y": 1}, 2, {ease: FlxEase.expoOut, onComplete: _ -> onIntroDone(1.5)});
 				} else doIntro();
 		}
-		#end
+		// #end
 	}
 
 	override function update(elapsed:Float)

@@ -460,7 +460,7 @@ class Paths
 		}
 		#end
 		final path:String = ('assets/${(library != null) ? '$library/' : ''}videos/$key.$VIDEO_EXT');
-		trace('Video Path before being passed to hxCodec: $path');
+		// trace('Video Path before being passed to hxCodec: $path');
 		return path;
 	}
 	//Sound loading.
