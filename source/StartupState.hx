@@ -236,7 +236,7 @@ class StartupState extends MusicBeatState
 			case 5:
 				#if VIDEOS_ALLOWED
 					var vidSprite = new MP4Handler(); // it plays but it doesn't show???
-					#if (hxCodec < "3.0.0")
+					//#if (hxCodec < "3.0.0")
 					var vidSprite = new FlxVideoSprite(); // it plays but it doesn't show??
 					vidSprite.load(Paths.video('broCopiedDenpa', 'splash'));
 					vidSprite.finishCallback = function()
