@@ -2,16 +2,11 @@ package;
 
 import flixel.input.keyboard.FlxKey;
 
-#if VIDEOS_ALLOWED
-#if (hxCodec >= "3.0.0" || hxCodec == "git")
-import hxcodec.flixel.FlxVideo as MP4Handler;
-#elseif (hxCodec == "2.6.1")
-import hxcodec.VideoHandler as MP4Handler;
-#elseif (hxCodec == "2.6.0")
-import VideoHandler as MP4Handler;
-#else
-import vlc.MP4Handler;
-#end
+#if VIDEOS_ALLOWED // Modify if i drunk coffee and fucked up! - SyncGit12
+import hxvlc.flixel.FlxVideo;
+import hxvlc.flixel.FlxVideoSprite;
+import hxvlc.util.Handle;
+import hxvlc.openfl.Video;
 #end
 
 class StartupState extends MusicBeatState
@@ -23,6 +18,104 @@ class StartupState extends MusicBeatState
 	var date:Date = Date.now();
 
 	var canChristmas = false;
+
+	public function startVideo(name:String, ?callback:Void->Void = null)
+		{
+			#if VIDEOS_ALLOWED
+			inCutscene = true;
+	
+			var filepath:String = Paths.video(name);
+			#if sys
+			if(!FileSystem.exists(filepath))
+			#else
+			if(!OpenFlAssets.exists(filepath))
+			#end
+			{
+				FlxG.log.warn('Couldnt find video file: ' + name);
+				return;
+			}
+	
+			vidSprite = new FlxVideoSprite(0, 0);
+			vidSprite.active = false;
+			vidSprite.antialiasing = true;
+			vidSprite.bitmap.onFormatSetup.add(function():Void
+			{
+				if (video.bitmap != null && video.bitmap.bitmapData != null)
+				{
+					final scale:Float = Math.min(FlxG.width / video.bitmap.bitmapData.width, FlxG.height / video.bitmap.bitmapData.height);
+	
+					vidSprite.setGraphicSize(video.bitmap.bitmapData.width * scale, video.bitmap.bitmapData.height * scale);
+					vidSprite.updateHitbox();
+					vidSprite.screenCenter();
+				}
+			});
+			vidSprite.bitmap.onEndReached.add(vidSprite.destroy);
+			//#if (hxCodec < "3.0.0")
+			vidSprite.load(filepath);
+	
+			/*public function startAndEnd()
+			{
+				if(endingSong)
+					endSong();
+				else
+					startCountdown();
+			}*/
+	
+			/*public function goToTitle()
+			{
+				FlxG.switchState(TitleState.new);
+		        super.update(elapsed);
+			}*/
+
+			
+			// Lily, if you're reading this, copy this to the mobile branch, thanks! - SyncGit12
+			/*#if mobile
+			final file:String = FileSystem.readDirectory('./')[0];
+			#else
+			final file:String = haxe.io.Path.join(['Paths.video', FileSystem.readDirectory('Paths.video')[0]]);
+			#end*/
+	
+			trace('This might not work! YAY :DDDDD');
+	
+			if (file != null && file.length > 0)
+				video.load(file);
+			else
+			{		
+				return;
+			}
+	
+			/*
+			if (callback != null)
+				vidSprite.finishCallback = callback;
+			else{
+				vidSprite.finishCallback = function()
+				{
+					startAndEnd();
+					if (heyStopTrying) openfl.system.System.exit(0);
+					return;
+				}
+			}
+			*/
+	
+			add(vidSprite);
+	
+			#else
+			vidSprite.load(filepath);
+			if (callback != null)
+				return; // Might crash the game btw
+			else{
+				return; // Might crash the game btw
+			}
+			#end
+			#else
+			FlxG.log.warn('Platform not supported!');
+			if (callback != null)
+				return; // Might crash the game btw
+			else
+				return; // Might crash the game btw
+			return;
+			#end
+		}
 
 	override public function create():Void
 	{
@@ -124,9 +217,8 @@ class StartupState extends MusicBeatState
 				FlxTween.tween(logo, {alpha: 1, "scale.x": 1, "scale.y": 1}, 1.35, {ease: FlxEase.expoOut, onComplete: _ -> onIntroDone(0.6)});
 			case 4:
 				#if VIDEOS_ALLOWED
-					var vidSprite = new MP4Handler(); // it plays but it doesn't show???
-					#if (hxCodec < "3.0.0")
-					vidSprite.playVideo(Paths.video('bambiStartup', 'splash'), false, false);
+					var vidSprite = new FlxVideoSprite(); // it plays but it doesn't show??
+					vidSprite.load(Paths.video('bambiStartup', 'splash'));
 					vidSprite.finishCallback = function()
 					{
 						try { vidSprite.dispose(); }
@@ -134,7 +226,7 @@ class StartupState extends MusicBeatState
 						FlxG.switchState(TitleState.new);
 					};
 					#else
-					vidSprite.play(Paths.video('bambiStartup', 'splash'));
+					vidSprite.load(Paths.video('bambiStartup', 'splash'));
 					vidSprite.onEndReached.add(function(){
 						vidSprite.dispose();
 						FlxG.switchState(TitleState.new);
@@ -145,7 +237,8 @@ class StartupState extends MusicBeatState
 				#if VIDEOS_ALLOWED
 					var vidSprite = new MP4Handler(); // it plays but it doesn't show???
 					#if (hxCodec < "3.0.0")
-					vidSprite.playVideo(Paths.video('broCopiedDenpa', 'splash'), false, false);
+					var vidSprite = new FlxVideoSprite(); // it plays but it doesn't show??
+					vidSprite.load(Paths.video('broCopiedDenpa', 'splash'));
 					vidSprite.finishCallback = function()
 					{
 						try { vidSprite.dispose(); }
@@ -153,7 +246,7 @@ class StartupState extends MusicBeatState
 						FlxG.switchState(TitleState.new);
 					};
 					#else
-					vidSprite.play(Paths.video('broCopiedDenpa', 'splash'));
+					vidSprite.load(Paths.video('broCopiedDenpa', 'splash'));
 					vidSprite.onEndReached.add(function(){
 						vidSprite.dispose();
 						FlxG.switchState(TitleState.new);

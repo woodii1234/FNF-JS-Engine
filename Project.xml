@@ -116,7 +116,11 @@
 	<haxelib name="hscript" />
 	<haxedef name="hscriptPos" />
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
-	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
+	<!--<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>-->
+
+	<section if="cpp">
+	<haxelib name="hxvlc" if="VIDEOS_ALLOWED" /> <!--Welcome home, hxvlc!-->
+    </section>
 
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED" />
 	<haxelib name="flxanimate"/>

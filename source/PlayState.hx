@@ -30,16 +30,11 @@ import flixel.addons.display.FlxRuntimeShader;
 import openfl.filters.ShaderFilter;
 #end
 
-#if VIDEOS_ALLOWED
-#if (hxCodec >= "3.0.0" || hxCodec == "git")
-import hxcodec.flixel.FlxVideo as MP4Handler;
-#elseif (hxCodec == "2.6.1")
-import hxcodec.VideoHandler as MP4Handler;
-#elseif (hxCodec == "2.6.0")
-import VideoHandler as MP4Handler;
-#else
-import vlc.MP4Handler;
-#end
+#if VIDEOS_ALLOWED // Modify if i drunk coffee and fucked up! - SyncGit12
+import hxvlc.flixel.FlxVideo;
+import hxvlc.flixel.FlxVideoSprite;
+import hxvlc.util.Handle;
+import hxvlc.openfl.Video;
 #end
 
 import Note;
@@ -1929,7 +1924,10 @@ class PlayState extends MusicBeatState
 		char.y += char.positionArray[1];
 	}
 
-	var videoCutscene:MP4Handler = null;
+	/***************/
+    /*    VIDEO    */
+	/***************/
+	var videoCutscene:FlxVideoSprite = null;
 	public function startVideo(name:String, ?callback:Void->Void = null)
 	{
 		#if VIDEOS_ALLOWED
@@ -1943,16 +1941,52 @@ class PlayState extends MusicBeatState
 		#end
 		{
 			FlxG.log.warn('Couldnt find video file: ' + name);
-			if (callback != null)
-				callback();
+            return;
+		}
+
+		videoCutscene = new FlxVideoSprite(0, 0);
+		videoCutscene.active = false;
+		videoCutscene.antialiasing = true;
+		videoCutscene.bitmap.onFormatSetup.add(function():Void
+		{
+			if (video.bitmap != null && video.bitmap.bitmapData != null)
+			{
+				final scale:Float = Math.min(FlxG.width / video.bitmap.bitmapData.width, FlxG.height / video.bitmap.bitmapData.height);
+
+				videoCutscene.setGraphicSize(video.bitmap.bitmapData.width * scale, video.bitmap.bitmapData.height * scale);
+				videoCutscene.updateHitbox();
+				videoCutscene.screenCenter();
+			}
+		});
+		videoCutscene.bitmap.onEndReached.add(videoCutscene.destroy);
+		//#if (hxCodec < "3.0.0")
+		videoCutscene.load(filepath);
+
+		public function startAndEnd()
+		{
+			if(endingSong)
+				endSong();
 			else
-				startAndEnd();
+				startCountdown();
+		}
+
+        // Lily, if you're reading this, copy this to the mobile branch, thanks! - SyncGit12
+		/*#if mobile
+		final file:String = FileSystem.readDirectory('./')[0];
+		#else
+		final file:String = haxe.io.Path.join(['Paths.video', FileSystem.readDirectory('Paths.video')[0]]);
+		#end*/
+
+		trace('This might not work! YAY :DDDDD');
+
+		if (file != null && file.length > 0)
+			video.load(file);
+		else
+		{		
 			return;
 		}
 
-		videoCutscene = new MP4Handler();
-		#if (hxCodec < "3.0.0")
-		videoCutscene.playVideo(filepath);
+		/*
 		if (callback != null)
 			videoCutscene.finishCallback = callback;
 		else{
@@ -1963,22 +1997,22 @@ class PlayState extends MusicBeatState
 				return;
 			}
 		}
+		*/
+
+		add(videoCutscene);
+
 		#else
 		videoCutscene.play(filepath);
 		if (callback != null)
-			videoCutscene.onEndReached.add(callback);
+			return; // Might crash the game btw
 		else{
-			videoCutscene.onEndReached.add(function(){
-				startAndEnd();
-				if (heyStopTrying) openfl.system.System.exit(0);
-				return;
-			});
+			return; // Might crash the game btw
 		}
 		#end
 		#else
 		FlxG.log.warn('Platform not supported!');
 		if (callback != null)
-			callback();
+			return;
 		else
 			startAndEnd();
 		return;
