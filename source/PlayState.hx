@@ -1962,7 +1962,7 @@ class PlayState extends MusicBeatState
 		//#if (hxCodec < "3.0.0")
 		videoCutscene.load(filepath);
 
-		public function startAndEnd()
+		function startAndEnd()
 		{
 			if(endingSong)
 				endSong();
@@ -2008,7 +2008,7 @@ class PlayState extends MusicBeatState
 		else{
 			return; // Might crash the game btw
 		}
-		#end
+		//#end // No...
 		#else
 		FlxG.log.warn('Platform not supported!');
 		if (callback != null)

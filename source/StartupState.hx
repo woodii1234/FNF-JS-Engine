@@ -67,7 +67,7 @@ class StartupState extends MusicBeatState
 		        super.update(elapsed);
 			}*/
 
-			
+
 			// Lily, if you're reading this, copy this to the mobile branch, thanks! - SyncGit12
 			/*#if mobile
 			final file:String = FileSystem.readDirectory('./')[0];
@@ -106,7 +106,7 @@ class StartupState extends MusicBeatState
 			else{
 				return; // Might crash the game btw
 			}
-			#end
+			//#end // No...
 			#else
 			FlxG.log.warn('Platform not supported!');
 			if (callback != null)
@@ -232,7 +232,7 @@ class StartupState extends MusicBeatState
 						FlxG.switchState(TitleState.new);
 					});
 					#end
-				#end
+				//#end // No...
 			case 5:
 				#if VIDEOS_ALLOWED
 					var vidSprite = new MP4Handler(); // it plays but it doesn't show???
