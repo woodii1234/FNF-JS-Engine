@@ -1958,7 +1958,13 @@ class PlayState extends MusicBeatState
 				videoCutscene.screenCenter();
 			}
 		});
-		videoCutscene.bitmap.onEndReached.add(videoCutscene.destroy);
+		videoCutscene.bitmap.onEndReached.add(function(){
+			videoCutscene.destroy();
+			if (callback != null)
+				callback();
+			else
+				startAndEnd();
+		});
 		videoCutscene.load(filepath);
 
 		function startAndEnd()
@@ -1971,10 +1977,6 @@ class PlayState extends MusicBeatState
 
 		add(videoCutscene);
 		videoCutscene.play();
-		if (callback != null)
-			callback();
-		else
-			startAndEnd();
 		#else
 		FlxG.log.warn('Platform not supported!');
 		if (callback != null)

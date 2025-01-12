@@ -51,7 +51,10 @@ class StartupState extends MusicBeatState
 		});
 		vidSprite.bitmap.onEndReached.add(function(){
 			vidSprite.destroy();
-			FlxG.switchState(TitleState.new);
+			if (callback != null)
+				callback();
+			else
+				FlxG.switchState(TitleState.new);
 		});
 		vidSprite.load(filepath);
 
@@ -59,9 +62,6 @@ class StartupState extends MusicBeatState
 
 		insert(0, vidSprite);
 		vidSprite.play();
-
-		if (callback != null)
-			callback();
 		#else
 		FlxG.log.warn('Platform not supported!');
 		if (callback != null)
