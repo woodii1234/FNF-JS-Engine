@@ -669,12 +669,12 @@ class Note extends FlxSprite
 		if (!mustPress) 
 		{
 			visible = ClientPrefs.opponentStrums;
-			alpha = multAlpha = ClientPrefs.middleScroll ? ClientPrefs.oppNoteAlpha : 1;
+			alpha = ClientPrefs.middleScroll ? ClientPrefs.oppNoteAlpha : 1;
 		}
 		else
 		{
 			if (!visible) visible = true;
-			for (i in [alpha, multAlpha]) if (i != 1) i = 1;
+			if (alpha != 1) alpha = 1; //if (multAlpha != 1) multAlpha = 1;
 		}
 		if (flipY) flipY = false;
 	}
