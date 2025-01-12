@@ -365,6 +365,7 @@ class PhillyStreets extends BaseStage
 
 			spraycan.visible = spraycan.active = spraycan.cutscene = false;
 			camHUD.alpha = 1;
+			game.canPause = true;
 			startCountdown();
 		};
 		cutsceneHandler.skipCallback = function()
