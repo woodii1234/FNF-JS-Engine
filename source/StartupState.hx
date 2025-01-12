@@ -2,13 +2,6 @@ package;
 
 import flixel.input.keyboard.FlxKey;
 
-#if VIDEOS_ALLOWED // Modify if i drunk coffee and fucked up! - SyncGit12
-import hxvlc.flixel.FlxVideo;
-import hxvlc.flixel.FlxVideoSprite;
-import hxvlc.util.Handle;
-import hxvlc.openfl.Video;
-#end
-
 class StartupState extends MusicBeatState
 {
 	var logo:FlxSprite;
@@ -19,58 +12,51 @@ class StartupState extends MusicBeatState
 
 	var canChristmas = false;
 
-	var vidSprite:FlxVideoSprite = null;
-
-	public function startVideo(name:String, ?library:String = null, ?callback:Void->Void = null)
+	private var vidSprite:VideoSprite = null;
+	private function startVideo(name:String, ?library:String = null, ?callback:Void->Void = null, canSkip:Bool = true, loop:Bool = false, playOnLoad:Bool = true)
 	{
 		#if VIDEOS_ALLOWED
-		var filepath:String = Paths.video(name, library);
+		var foundFile:Bool = false;
+		var fileName:String = Paths.video(name, library);
+
 		#if sys
-		if(!FileSystem.exists(filepath))
+		if (FileSystem.exists(fileName))
 		#else
-		if(!OpenFlAssets.exists(filepath))
+		if (OpenFlAssets.exists(fileName))
 		#end
-		{
-			FlxG.log.warn('Couldnt find video file: ' + name);
-			return;
-		}
+		foundFile = true;
 
-		vidSprite = new FlxVideoSprite(0, 0);
-		vidSprite.active = false;
-		vidSprite.antialiasing = true;
-		vidSprite.bitmap.onFormatSetup.add(function()
+		if (foundFile)
 		{
-			if (vidSprite.bitmap != null && vidSprite.bitmap.bitmapData != null)
+			vidSprite = new VideoSprite(fileName, false, canSkip, loop);
+
+			// Finish callback
+			function onVideoEnd()
 			{
-				final scale:Float = Math.min(FlxG.width / vidSprite.bitmap.bitmapData.width, FlxG.height / vidSprite.bitmap.bitmapData.height);
-
-				vidSprite.setGraphicSize(vidSprite.bitmap.bitmapData.width * scale, vidSprite.bitmap.bitmapData.height * scale);
-				vidSprite.updateHitbox();
-				vidSprite.screenCenter();
-			}
-		});
-		vidSprite.bitmap.onEndReached.add(function(){
-			vidSprite.destroy();
-			if (callback != null)
-				callback();
-			else
+				vidSprite = null;
 				FlxG.switchState(TitleState.new);
-		});
-		vidSprite.load(filepath);
+			}
+			vidSprite.finishCallback = (callback != null) ? callback.bind() : onVideoEnd;
+			vidSprite.onSkip = (callback != null) ? callback.bind() : onVideoEnd;
+			insert(0, vidSprite);
 
-		trace('This might not work! YAY :DDDDD');
-
-		insert(0, vidSprite);
-		vidSprite.play();
+			if (playOnLoad)
+				vidSprite.videoSprite.play();
+			return vidSprite;
+		}
+		else {
+			FlxG.log.error("Video not found: " + fileName);
+			new FlxTimer().start(0.1, function(tmr:FlxTimer) {
+				doIntro();
+			});
+		}
 		#else
 		FlxG.log.warn('Platform not supported!');
-		if (callback != null)
-			callback();
-		else
-			FlxG.switchState(TitleState.new);
-
-		return;
+		new FlxTimer().start(0.1, function(tmr:FlxTimer) {
+			doIntro();
+		});
 		#end
+		return null;
 	}
 
 	override public function create():Void

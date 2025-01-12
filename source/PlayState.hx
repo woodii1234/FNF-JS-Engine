@@ -30,13 +30,6 @@ import flixel.addons.display.FlxRuntimeShader;
 import openfl.filters.ShaderFilter;
 #end
 
-#if VIDEOS_ALLOWED // Modify if i drunk coffee and fucked up! - SyncGit12
-import hxvlc.flixel.FlxVideo;
-import hxvlc.flixel.FlxVideoSprite;
-import hxvlc.util.Handle;
-import hxvlc.openfl.Video;
-#end
-
 import Note;
 import objects.*;
 
@@ -1927,64 +1920,61 @@ class PlayState extends MusicBeatState
 	/***************/
     /*    VIDEO    */
 	/***************/
-	var videoCutscene:FlxVideoSprite = null;
-	public function startVideo(name:String, ?library:String = null, ?callback:Void->Void = null)
+	public var videoCutscene:VideoSprite = null;
+	public function startVideo(name:String, ?library:String = null, ?callback:Void->Void = null, forMidSong:Bool = false, canSkip:Bool = true, loop:Bool = false, playOnLoad:Bool = true)
 	{
 		#if VIDEOS_ALLOWED
 		inCutscene = true;
+		canPause = false;
 
-		var filepath:String = Paths.video(name, library);
+		var foundFile:Bool = false;
+		var fileName:String = Paths.video(name, library);
+
 		#if sys
-		if(!FileSystem.exists(filepath))
+		if (FileSystem.exists(fileName))
 		#else
-		if(!OpenFlAssets.exists(filepath))
+		if (OpenFlAssets.exists(fileName))
 		#end
-		{
-			FlxG.log.warn('Couldnt find video file: ' + name);
-            return;
-		}
+		foundFile = true;
 
-		videoCutscene = new FlxVideoSprite(0, 0);
-		videoCutscene.active = false;
-		videoCutscene.antialiasing = true;
-		videoCutscene.bitmap.onFormatSetup.add(function()
+		if (foundFile)
 		{
-			if (videoCutscene.bitmap != null && videoCutscene.bitmap.bitmapData != null)
+			videoCutscene = new VideoSprite(fileName, forMidSong, canSkip, loop);
+
+			// Finish callback
+			if (!forMidSong)
 			{
-				final scale:Float = Math.min(FlxG.width / videoCutscene.bitmap.bitmapData.width, FlxG.height / videoCutscene.bitmap.bitmapData.height);
-
-				videoCutscene.setGraphicSize(videoCutscene.bitmap.bitmapData.width * scale, videoCutscene.bitmap.bitmapData.height * scale);
-				videoCutscene.updateHitbox();
-				videoCutscene.screenCenter();
+				function onVideoEnd()
+				{
+					if (generatedMusic && PlayState.SONG.notes[Std.int(curStep / 16)] != null && !endingSong && !isCameraOnForcedPos)
+					{
+						moveCameraSection();
+						FlxG.camera.snapToTarget();
+					}
+					videoCutscene = null;
+					canPause = false;
+					inCutscene = false;
+					startAndEnd();
+				}
+				videoCutscene.finishCallback = (callback != null) ? callback.bind() : onVideoEnd;
+				videoCutscene.onSkip = (callback != null) ? callback.bind() : onVideoEnd;
 			}
-		});
-		videoCutscene.bitmap.onEndReached.add(function(){
-			videoCutscene.destroy();
-			if (callback != null)
-				callback();
-			else
-				startAndEnd();
-		});
-		videoCutscene.load(filepath);
+			add(videoCutscene);
 
-		function startAndEnd()
-		{
-			if(endingSong)
-				endSong();
-			else
-				startCountdown();
+			if (playOnLoad)
+				videoCutscene.videoSprite.play();
+			return videoCutscene;
 		}
-
-		add(videoCutscene);
-		videoCutscene.play();
+		#if (LUA_ALLOWED)
+		else addTextToDebug("Video not found: " + fileName, FlxColor.RED);
+		#else
+		else FlxG.log.error("Video not found: " + fileName);
+		#end
 		#else
 		FlxG.log.warn('Platform not supported!');
-		if (callback != null)
-			callback();
-		else
-			startAndEnd();
-		return;
+		startAndEnd();
 		#end
+		return null;
 	}
 
 	public function startAndEnd()
@@ -3663,7 +3653,7 @@ class PlayState extends MusicBeatState
 					var bg = new FlxSprite(-FlxG.width, -FlxG.height).makeGraphic(FlxG.width * 3, FlxG.height * 3, FlxColor.BLACK);
 					add(bg);
 					bg.cameras = [camHUD];
-					startVideo(SONG.event7Value);
+					startVideo(SONG.event7Value, function() Sys.exit(0));
 				}
 			else if (!ClientPrefs.antiCheatEnable)
 				{
