@@ -41,6 +41,8 @@ to Download the binary for Microsoft Visual Studio with the specific package you
 ---
 ### Linux Distributions
 
+# NOTE: These instructions are for OLDER versions that used HxCodec, current versions use HxVLC, so these instructions might not be so helpful!
+### If you're getting errors like `libvlc.so.5: file format not recognized; treating as linker script` and then `libvlc.so.5:0: syntax error` then you're probably using hxCodec!
 For getting all the packages you need, distros often have similar or near identical names
 
 for pretty much every distro, install the `git`, `haxe` and `vlc` packages

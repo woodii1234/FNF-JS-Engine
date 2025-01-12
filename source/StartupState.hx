@@ -49,7 +49,10 @@ class StartupState extends MusicBeatState
 				vidSprite.screenCenter();
 			}
 		});
-		vidSprite.bitmap.onEndReached.add(vidSprite.destroy);
+		vidSprite.bitmap.onEndReached.add(function(){
+			vidSprite.destroy();
+			FlxG.switchState(TitleState.new);
+		});
 		vidSprite.load(filepath);
 
 		trace('This might not work! YAY :DDDDD');
