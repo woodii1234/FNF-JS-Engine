@@ -371,7 +371,7 @@ class TitleState extends MusicBeatState
 			switch(sarcasmEasterEgg.toUpperCase())
 			{
 				case 'ANNOUNCER':
-					FlxG.sound.play(Paths.sound('sarcasmComplete'))
+					FlxG.sound.play(Paths.sound('sarcasmComplete'));
 			}
 		}
 
