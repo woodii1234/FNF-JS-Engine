@@ -66,6 +66,8 @@ class StartupState extends MusicBeatState
 		FlxG.log.warn('Platform not supported!');
 		if (callback != null)
 			callback();
+		else
+			FlxG.switchState(TitleState.new);
 
 		return;
 		#end
