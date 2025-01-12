@@ -53,6 +53,8 @@ class TitleState extends MusicBeatState
 
 	public static var initialized:Bool = false;
 
+	public static var sarcasmEgg:String;
+
 	final sarcasmKeys:Array<String> = [
 		'ANNOUNCER'
 	];
@@ -226,8 +228,6 @@ class TitleState extends MusicBeatState
 		logoBl.animation.play('bump');
 		logoBl.updateHitbox();
 
-        sarcasmEasterEgg();
-
 		swagShader = new ColorSwap();
 		gfDance = new FlxSprite(titleJSON.gfx, titleJSON.gfy);
 
@@ -367,13 +367,15 @@ class TitleState extends MusicBeatState
 		// Sarcasm Easter Egg, this might not work! :D
 		function sarcasmEasterEgg()
 		{
-			if(FlxG.save.data == null) FlxG.save.data = ''; // Crash prevention
-			switch(sarcasmEasterEgg.toUpperCase())
+			//if(FlxG.save.data == null) FlxG.save.data = ''; // Crash prevention
+			switch(sarcasmEgg)
 			{
 				case 'ANNOUNCER':
 					FlxG.sound.play(Paths.sound('sarcasmComplete'));
 			}
 		}
+
+		sarcasmEasterEgg();
 
 		if (initialized && !transitioning && skippedIntro)
 		{
