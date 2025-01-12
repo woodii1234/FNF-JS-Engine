@@ -76,7 +76,7 @@ A: Send [here.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/pulls).
 
 Refer to [the Build Instructions](./BUILDING.md)
 
-If you get an error related to hxCodec, run `haxelib set hxCodec 2.5.1` if you're using an older version BEFORE 1.41.2 (Latest Nightly build)
+If you get an error related to hxCodec, run `haxelib set hxCodec 2.5.1` if you're using an older version BEFORE 1.41.1 (Latest Nightly build)
 Otherwise, make *sure* you use hxvlc 1.9.2, not anything newer
 If graphics are all white and don't have color, run `haxelib git hxcpp https://github.com/HaxeFoundation/hxcpp`
 
@@ -100,7 +100,8 @@ same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, 
 * SqirraRNG - Crash Handler and Base code for Chart Editor's Waveform
 * KadeDev - Fixed some cool stuff on Chart Editor and other PRs
 * iFlicky - Composer of Psync and Tea Time, also made the Dialogue Sounds
-* PolybiusProxy - .MP4 Video Loader Library (hxCodec)
+* PolybiusProxy - Former .MP4 Video Loader Library (hxCodec)
+* MAJigsaw77 - .MP4 Video Loader Library (hxVLC)
 * Keoiki - Note Splash Animations
 * Smokey - Sprite Atlas Support
 * Nebula the Zorua - LUA JIT Fork and some Lua reworks
