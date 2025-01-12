@@ -53,6 +53,12 @@ class TitleState extends MusicBeatState
 
 	public static var initialized:Bool = false;
 
+	final sarcasmKeys:Array<String> = [
+		'ANNOUNCER'
+	];
+	final allowedKeys:String = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	var sarcasmKeysBuffer:String = '';
+
 	var blackScreen:FlxSprite;
 	var credGroup:FlxGroup;
 	var credTextShit:Alphabet;
@@ -220,6 +226,8 @@ class TitleState extends MusicBeatState
 		logoBl.animation.play('bump');
 		logoBl.updateHitbox();
 
+        sarcasmEasterEgg();
+
 		swagShader = new ColorSwap();
 		gfDance = new FlxSprite(titleJSON.gfx, titleJSON.gfy);
 
@@ -356,7 +364,16 @@ class TitleState extends MusicBeatState
 			throw 'Crash test';
 		*/
 
-		// EASTER EGG
+		// Sarcasm Easter Egg, this might not work! :D
+		function sarcasmEasterEgg()
+		{
+			if(FlxG.save.data == null) FlxG.save.data = ''; // Crash prevention
+			switch(sarcasmEasterEgg.toUpperCase())
+			{
+				case 'ANNOUNCER':
+					FlxG.sound.play(Paths.sound('sarcasmComplete'))
+			}
+		}
 
 		if (initialized && !transitioning && skippedIntro)
 		{
