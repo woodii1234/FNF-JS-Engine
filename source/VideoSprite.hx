@@ -28,6 +28,8 @@ class VideoSprite extends FlxSpriteGroup
 	public var waiting:Bool = false;
 	public var didPlay:Bool = false;
 
+	public var addCover:Bool = true;
+
 	private var controls(get, never):Controls;
 
 	inline function get_controls():Controls
@@ -42,7 +44,7 @@ class VideoSprite extends FlxSpriteGroup
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 
 		waiting = isWaiting;
-		if (!waiting) // for mid song videos, if not mid song, don't add the cover since it's not needed
+		if (!waiting || addCover) // for mid song videos, if not mid song, don't add the cover since it's not needed
 		{
 			cover = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
 			cover.scale.set(FlxG.width + 100, FlxG.height + 100);
@@ -73,7 +75,12 @@ class VideoSprite extends FlxSpriteGroup
 					cover.destroy();
 				}
 
-				PlayState.instance.remove(this);
+				final curState = FlxG.state;
+
+				if (PlayState.instance != null)
+					PlayState.instance.remove(this);
+				else if (curState != null)
+					curState.remove(this, true);
 				destroy();
 				alreadyDestroyed = true;
 			});
@@ -119,7 +126,12 @@ class VideoSprite extends FlxSpriteGroup
 			finishCallback();
 		onSkip = null;
 
-		PlayState.instance.remove(this);
+		final curState = FlxG.state;
+
+		if (PlayState.instance != null)
+			PlayState.instance.remove(this);
+		else if (curState != null)
+			curState.remove(this, true);
 		super.destroy();
 	}
 
