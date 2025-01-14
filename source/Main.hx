@@ -91,7 +91,7 @@ class Main extends Sprite {
         "did you know theres a total of 51 silly messages",
         "whoopsies looks like i forgot to fix this",
         "Game used Crash. It's super effective!",
-		"ARK: Survival Evolved"
+	"ARK: Survival Evolved"
     ];
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
