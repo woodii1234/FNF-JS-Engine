@@ -378,6 +378,7 @@ class TitleState extends MusicBeatState
 				{
 					case 'ANNOUNCER':
 						FlxG.sound.play(Paths.sound('sarcasmComplete'));
+						trace('Were you talking about Portal 2?')
 						sarcasmKeysBuffer = '';
 				}
 			}
