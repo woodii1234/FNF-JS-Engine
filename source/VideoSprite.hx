@@ -132,7 +132,6 @@ class VideoSprite extends FlxSpriteGroup
 			PlayState.instance.remove(this);
 		else if (curState != null)
 			curState.remove(this, true);
-		super.destroy();
 	}
 
 	override function update(elapsed:Float)
@@ -157,6 +156,7 @@ class VideoSprite extends FlxSpriteGroup
 				videoSprite.bitmap.onEndReached.dispatch();
 				PlayState.instance.remove(this);
 				trace('Skipped video');
+				super.destroy();
 				return;
 			}
 		}
