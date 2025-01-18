@@ -2837,12 +2837,10 @@ class PlayState extends MusicBeatState
 						{
 							case 0:
 								var boyfriendToGrab:Boyfriend = boyfriendMap.get(charChangeNames[0]);
-								if (boyfriendToGrab != null && boyfriendToGrab.noteskin.length > 0) bfNoteskin = boyfriendToGrab.noteskin;
-								else bfNoteskin = '';
+								if (boyfriendToGrab != null) bfNoteskin = boyfriendToGrab.noteskin;
 							case 1:
 								var dadToGrab:Character = dadMap.get(charChangeNames[0]);
-								if (dadToGrab != null && dadToGrab.noteskin.length > 0) dadNoteskin = dadToGrab.noteskin;
-								else dadNoteskin = '';
+								if (dadToGrab != null) dadNoteskin = dadToGrab.noteskin;
 						}
 						charChangeTimes.shift();
 						charChangeNames.shift();
@@ -3094,7 +3092,7 @@ class PlayState extends MusicBeatState
 				else if(middleScroll) targetAlpha = ClientPrefs.oppNoteAlpha;
 			}
 
-			final noteSkinExists:Bool = FileSystem.exists("assets/shared/images/noteskins/" + (player == 0 ? dadNoteskin : bfNoteskin)) || FileSystem.exists(Paths.modsImages("noteskins/" + (player == 0 ? dadNoteskin : bfNoteskin)));
+			final noteSkinExists:Bool = Paths.fileExists("images/noteskins/" + (player == 0 ? dadNoteskin : bfNoteskin) + '.png', IMAGE);
 
 			var babyArrow:StrumNote = new StrumNote(middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X, strumLine.y, i, player);
 			babyArrow.downScroll = ClientPrefs.downScroll;
@@ -4439,8 +4437,7 @@ class PlayState extends MusicBeatState
 								if (ClientPrefs.bfIconStyle == "FPS Plus") iconP1.changeIcon('bffps');
 								if (ClientPrefs.bfIconStyle == "OS 'Engine'") iconP1.changeIcon('bfos');
 							}
-							if (boyfriend.noteskin.length > 0) bfNoteskin = boyfriend.noteskin;
-							else bfNoteskin = '';
+							if (boyfriend.noteskin != null) bfNoteskin = boyfriend.noteskin;
 						}
 						setOnLuas('boyfriendName', boyfriend.curCharacter);
 
@@ -4474,8 +4471,7 @@ class PlayState extends MusicBeatState
 
 							if (dadAnim != '') dad.playAnim(dadAnim, true);
 						}
-							if (dad.noteskin.length > 0) dadNoteskin = dad.noteskin;
-							else dadNoteskin = '';
+							if (dad.noteskin != null) dadNoteskin = dad.noteskin;
 						setOnLuas('dadName', dad.curCharacter);
 
 					case 2:
