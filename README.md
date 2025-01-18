@@ -76,7 +76,7 @@ A: Send [here.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/pulls).
 
 Refer to [the Build Instructions](./BUILDING.md)
 
-If you get an error related to hxCodec, run `haxelib set hxCodec 2.5.1` if you're using an older version BEFORE 1.41.1 (Latest Nightly build)
+If you get an error related to hxCodec, run `haxelib set hxCodec 2.5.1` if you're using an older version BEFORE 1.41.1
 
 ### Otherwise, make *sure* you use HxVLC 1.9.2, not anything newer
 
