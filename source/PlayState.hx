@@ -1321,6 +1321,11 @@ class PlayState extends MusicBeatState
 		EngineWatermark = new FlxText(4,FlxG.height * 0.9 + 50,0,"", 16);
 		EngineWatermark.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, OUTLINE,FlxColor.BLACK);
 		EngineWatermark.scrollFactor.set();
+		EngineWatermark.text = SONG.song;
+		if (ClientPrefs.downScroll) EngineWatermark.y = healthbar.y + 50;
+			else {
+				return; // replace if wrong
+			}
 		add(EngineWatermark);
 
 		switch(ClientPrefs.watermarkStyle)
