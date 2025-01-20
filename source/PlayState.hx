@@ -1349,9 +1349,6 @@ class PlayState extends MusicBeatState
 				EngineWatermark.setFormat(Paths.font("comic.ttf"), 16, FlxColor.WHITE, RIGHT, OUTLINE,FlxColor.BLACK);
 				EngineWatermark.text = SONG.song;
 				if (ClientPrefs.downScroll) EngineWatermark.y = healthBar.y + 50;
-				else {
-					return; // replace if wrong
-				}
 
 			default: 
 		}
@@ -2497,11 +2494,8 @@ class PlayState extends MusicBeatState
 	public function updateScore(miss:Bool = false)
 	{
 		scoreTxtUpdateFrame++;
-		if (scoreTxt != null && !scoreTxt.visible || scoreTxt == null)
+		if (!scoreTxt.visible || scoreTxt == null)
 			return;
-		else {
-			return;
-		}
 		//GAH DAYUM THIS IS MORE OPTIMIZED THAN BEFORE
 		var divider = switch (ClientPrefs.scoreStyle)
 		{
