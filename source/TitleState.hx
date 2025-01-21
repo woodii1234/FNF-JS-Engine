@@ -207,6 +207,8 @@ class TitleState extends MusicBeatState
 				Conductor.changeBPM(115);
 			case 'Base Game' | 'Default': // just in case you're not making a source mod & wanna change this
 				Conductor.changeBPM(titleJSON.bpm);
+			case 'None':
+				Conductor.changeBPM(titleJSON.bpm);
 			default: // fallback
 				Conductor.changeBPM(titleJSON.bpm);
 		}
@@ -497,6 +499,7 @@ class TitleState extends MusicBeatState
 			{
 				case 1:
 					FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic), 0);
+
 					FlxG.sound.music.fadeIn(4, 0, 0.7);
 				case 2:
 					#if PSYCH_WATERMARKS
