@@ -24,6 +24,7 @@ import Conductor.Rating;
 import Character.Boyfriend;
 import Shaders;
 import Note.PreloadedChartNote;
+import utils.*;
 
 #if !flash
 import flixel.addons.display.FlxRuntimeShader;
@@ -4359,6 +4360,12 @@ class PlayState extends MusicBeatState
 				{
 					char.playAnim(value1, true);
 					char.specialAnim = true;
+				}
+
+			// Evil
+			case 'Windows Notification':
+				{
+					PlatformUtil.sendWindowsNotification(value1, value2);
 				}
 
 			case 'Camera Follow Pos':
