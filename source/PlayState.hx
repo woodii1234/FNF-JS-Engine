@@ -4366,6 +4366,14 @@ class PlayState extends MusicBeatState
 			case 'Windows Notification':
 				{
 					PlatformUtil.sendWindowsNotification(value1, value2);
+
+					#if linux
+					addTextToDebug('Windows Notifications on Linux is not implemented right now!', FlxColor.RED);
+					return;
+					#else
+					trace('Windows Notifications on Linux is not implemented right now!');
+					return;
+					#end
 				}
 
 			case 'Camera Follow Pos':
