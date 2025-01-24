@@ -4368,10 +4368,10 @@ class PlayState extends MusicBeatState
 					PlatformUtil.sendWindowsNotification(value1, value2);
 
 					#if linux
-					addTextToDebug('Windows Notifications on Linux is not implemented right now!', FlxColor.RED);
+					addTextToDebug('Windows Notifications on Linux are not currently supported on Linux!', FlxColor.RED);
 					return;
 					#else
-					trace('Windows Notifications on Linux is not implemented right now!');
+					trace('Windows Notifications are not currently supported on this platform!');
 					return;
 					#end
 				}
