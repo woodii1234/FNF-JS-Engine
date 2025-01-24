@@ -21,6 +21,7 @@ import openfl.utils.Assets;
 #end
 import flixel.text.FlxText;
 import shaders.RGBPalette.RGBShaderReference;
+import utils.CoolSystemStuff;
 
 using StringTools;
 
@@ -70,23 +71,9 @@ class CoolUtil
 	}
 	#end
 
-	public static function getUsername():String
-	{
-		// uhh this one is self explanatory
-		return Sys.getEnv("USERNAME");
-	}
-
-	public static function getUserPath():String
-	{
-		// this one is also self explantory
-		return Sys.getEnv("USERPROFILE");
-	}
-
-	public static function getTempPath():String
-	{
-		// gets appdata temp folder lol
-		return Sys.getEnv("TEMP");
-	}
+	public static var getUsername = CoolSystemStuff.getUsername;
+	public static var getUserPath = CoolSystemStuff.getUserPath;
+	public static var getTempPath = CoolSystemStuff.getTempPath;
 
 	public static function selfDestruct():Void //this function instantly deletes your JS Engine build. i stole this from vs marcello source so if this gets used for malicious purposes im removing it
 	{
