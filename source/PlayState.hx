@@ -4282,7 +4282,7 @@ class PlayState extends MusicBeatState
 
 				camBopIntensity = _intensity;
 				camBopInterval = _interval;
-				if (_intensity != 4) usingBopIntervalEvent = true;
+				if (_interval != 4) usingBopIntervalEvent = true;
 					else usingBopIntervalEvent = false;
 
 			case 'Camera Twist':
@@ -6197,7 +6197,7 @@ class PlayState extends MusicBeatState
 			var randomShit = FlxMath.roundDecimal(FlxG.random.float(minSpeed, maxSpeed), 2);
 			lerpSongSpeed(randomShit, 1);
 		}
-		if (camZooming && !endingSong && !startingSong && FlxG.camera.zoom < 1.35 && ClientPrefs.camZooms && (curBeat % camBopInterval == 0))
+		if (camZooming && !endingSong && !startingSong && FlxG.camera.zoom < 1.35 && usingBopIntervalEvent && ClientPrefs.camZooms && (curBeat % camBopInterval == 0))
 		{
 			FlxG.camera.zoom += 0.015 * camBopIntensity;
 			camHUD.zoom += 0.03 * camBopIntensity;
@@ -6274,7 +6274,11 @@ class PlayState extends MusicBeatState
 			setOnLuas('mustHitSection', SONG.notes[curSection].mustHitSection);
 			setOnLuas('altAnim', SONG.notes[curSection].altAnim);
 			setOnLuas('gfSection', SONG.notes[curSection].gfSection);
-			if (!usingBopIntervalEvent) camBopInterval = getBeatsOnSection();
+			if (camZooming && !endingSong && !startingSong && FlxG.camera.zoom < 1.35 && !usingBopIntervalEvent && ClientPrefs.camZooms)
+			{
+				FlxG.camera.zoom += 0.015 * camBopIntensity;
+				camHUD.zoom += 0.03 * camBopIntensity;
+			}
 		}
 
 		setOnLuas('curSection', curSection);
