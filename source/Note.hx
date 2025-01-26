@@ -32,7 +32,6 @@ typedef PreloadedChartNote = {
 	isSustainNote:Bool,
 	isSustainEnd:Bool,
 	sustainLength:Float,
-	sustainScale:Float,
 	parentST:Float,
 	parentSL:Float,
 	hitHealth:Float,
@@ -104,6 +103,7 @@ class Note extends FlxSprite
 	public var lateHitMult:Float = 1;
 	public var lowPriority:Bool = false;
 
+	public static final SUSTAIN_SIZE:Int = 44;
 	public static final swagWidth:Float = 160 * 0.7;
 	
 	public static final colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
@@ -144,7 +144,7 @@ class Note extends FlxSprite
 
 	public var texture(default, set):String = null;
 
-	public var sustainScale:Float = 1;
+	public var sustainScale:Float = 1.0;
 
 	public var noAnimation:Bool = false;
 	public var noMissAnimation:Bool = false;
@@ -602,7 +602,6 @@ class Note extends FlxSprite
 		gfNote = chartNoteData.gfNote;
 		isSustainNote = chartNoteData.isSustainNote;
 		isSustainEnd = chartNoteData.isSustainEnd;
-		sustainScale = chartNoteData.sustainScale;
 		lowPriority = chartNoteData.lowPriority;
 		if (isSustainNote) {
 			parentST = chartNoteData.parentST;
@@ -652,6 +651,11 @@ class Note extends FlxSprite
 			animation.play(colArray[noteData % 4] + (chartNoteData.isSustainEnd ? 'holdend' : 'hold'));
 			updateHitbox();
 			offsetX -= width / 2;
+
+			if (PlayState.isPixelStage)
+				scale.y *= 1.19 * (6 / height);
+			else
+				sustainScale = Note.SUSTAIN_SIZE / frameHeight;
 		}
 		else {
 			animation.play(colArray[noteData % 4] + 'Scroll');
