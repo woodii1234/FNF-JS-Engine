@@ -5566,7 +5566,7 @@ class PlayState extends MusicBeatState
 				opponentNoteHit(daNote);
 
 			if(daNote.mustPress) {
-				if((cpuControlled || usingBotEnergy && strumsHeld[daNote.noteData]) && daNote.strumTime <= Conductor.songPosition && !daNote.ignoreNote)
+				if((cpuControlled || usingBotEnergy && strumsHeld[daNote.noteData]) && !daNote.wasGoodHit && daNote.strumTime <= Conductor.songPosition && !daNote.ignoreNote)
 					goodNoteHit(daNote);
 			}
 			if (!daNote.exists) return;
