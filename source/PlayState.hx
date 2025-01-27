@@ -2794,6 +2794,7 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
+		var stepCrochet:Float = 0.0;
 		var currentBPMLol:Float = Conductor.bpm;
 		var currentMultiplier:Float = 1;
 		var gottaHitNote:Bool = false;
@@ -2927,13 +2928,15 @@ class PlayState extends MusicBeatState
 					}
 
 					if (swagNote.sustainLength < 1) continue;
+
+					stepCrochet = 15000 / currentBPMLol;
 		
-					final roundSus:Int = Math.round(swagNote.sustainLength / Conductor.stepCrochet);
+					final roundSus:Int = Math.round(swagNote.sustainLength / stepCrochet);
 					if (roundSus > 0) {
 						for (susNote in 0...roundSus + 1) {
 
 							final sustainNote:PreloadedChartNote = cast {
-								strumTime: daStrumTime + (Conductor.stepCrochet * susNote),
+								strumTime: daStrumTime + (stepCrochet * susNote),
 								noteData: daNoteData,
 								mustPress: bothSides || gottaHitNote,
 								oppNote: (opponentChart ? gottaHitNote : !gottaHitNote),
@@ -4452,7 +4455,7 @@ class PlayState extends MusicBeatState
 							boyfriend.alpha = 0.00001;
 							boyfriend = boyfriendMap.get(value2);
 							boyfriend.alpha = lastAlpha;
-							if (!value2.startsWith('bf') || !value2.startsWith('boyfriend')) iconP1.changeIcon(boyfriend.healthIcon);
+							if (!value2.startsWith('bf') && !value2.startsWith('boyfriend')) iconP1.changeIcon(boyfriend.healthIcon);
 							else {
 								if (ClientPrefs.bfIconStyle == 'VS Nonsense V2') iconP1.changeIcon('bfnonsense');
 								if (ClientPrefs.bfIconStyle == 'Doki Doki+') iconP1.changeIcon('bfdoki');
