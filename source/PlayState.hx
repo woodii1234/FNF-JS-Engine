@@ -1323,10 +1323,6 @@ class PlayState extends MusicBeatState
 		EngineWatermark.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, OUTLINE,FlxColor.BLACK);
 		EngineWatermark.scrollFactor.set();
 		EngineWatermark.text = SONG.song;
-		/*if (ClientPrefs.downScroll) EngineWatermark.y = healthBar.y + 50;
-			else {
-				return; // replace if wrong
-			}*/
 		add(EngineWatermark);
 
 		switch(ClientPrefs.watermarkStyle)
@@ -1353,6 +1349,8 @@ class PlayState extends MusicBeatState
 
 			default: 
 		}
+
+		if (ClientPrefs.watermarkStyle == 'Hide' && EngineWatermark != null) EngineWatermark.visible = false;
 
 		if (ClientPrefs.showcaseMode && !ClientPrefs.charsAndBG) {
 			hitTxt = new FlxText(0, 20, 10000, "test", 42);
@@ -2915,7 +2913,6 @@ class PlayState extends MusicBeatState
 								gfNote: swagNote.gfNote,
 								isSustainNote: false,
 								isSustainEnd: false,
-								sustainScale: 0,
 								parentST: 0,
 								hitHealth: swagNote.hitHealth,
 								missHealth: swagNote.missHealth,
@@ -2930,8 +2927,6 @@ class PlayState extends MusicBeatState
 					}
 
 					if (swagNote.sustainLength < 1) continue;
-				
-					var ratio:Float = Conductor.bpm / currentBPMLol;
 		
 					final roundSus:Int = Math.round(swagNote.sustainLength / Conductor.stepCrochet);
 					if (roundSus > 0) {
@@ -2949,7 +2944,6 @@ class PlayState extends MusicBeatState
 								noAnimation: songNotes[3] == 'No Animation',
 								isSustainNote: true,
 								isSustainEnd: susNote == roundSus,
-								sustainScale: 1 / ratio,
 								parentST: swagNote.strumTime,
 								parentSL: swagNote.sustainLength,
 								hitHealth: 0.023,
