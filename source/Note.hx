@@ -243,7 +243,7 @@ class Note extends FlxSprite
 				var newRGB:RGBPalette = new RGBPalette();
 				globalRgbShaders[noteData] = newRGB;
 
-				var arr:Array<FlxColor> = (!PlayState.isPixelStage) ? ClientPrefs.arrowRGB[noteData] : ClientPrefs.arrowRGBPixel[noteData];
+				var arr:Array<FlxColor> = ClientPrefs.noteColorStyle != 'Quant-Based' ? (!PlayState.isPixelStage) ? ClientPrefs.arrowRGB[noteData] : ClientPrefs.arrowRGBPixel[noteData] : ClientPrefs.quantRGB[noteData];
 				if (noteData > -1 && noteData <= arr.length)
 				{
 					newRGB.r = arr[0];
@@ -432,7 +432,7 @@ class Note extends FlxSprite
 		if (isSustainNote) 
 		{
 			flipY = ClientPrefs.downScroll;
-			scale.y = (animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? 1 : Conductor.stepCrochet * 0.0105 * (songSpeed * multSpeed) * sustainScale);
+			scale.set(0.7, animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? 1 : Conductor.stepCrochet * 0.0105 * (songSpeed * multSpeed) * sustainScale);
 
 			if (PlayState.isPixelStage) 
 			{
@@ -653,9 +653,11 @@ class Note extends FlxSprite
 			offsetX -= width / 2;
 
 			if (PlayState.isPixelStage)
-				scale.y *= 1.19 * (6 / height);
+				if (!isSustainEnd) scale.y *= 1.19 * (6 / height);
 			else
 				sustainScale = Note.SUSTAIN_SIZE / frameHeight;
+				
+			updateHitbox();
 		}
 		else {
 			animation.play(colArray[noteData % 4] + 'Scroll');
