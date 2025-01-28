@@ -209,6 +209,8 @@ class TitleState extends MusicBeatState
 				Conductor.changeBPM(titleJSON.bpm);
 			case 'None':
 				Conductor.changeBPM(titleJSON.bpm);
+			case 'Christmas':
+				Conductor.changeBPM(titleJSON.bpm);
 			default: // fallback
 				Conductor.changeBPM(titleJSON.bpm);
 		}
