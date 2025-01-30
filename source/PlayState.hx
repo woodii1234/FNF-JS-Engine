@@ -223,7 +223,8 @@ class PlayState extends MusicBeatState
 	public var maxOppNPS:Float = 0;
 	public var enemyHits:Float = 0;
 	public var opponentNoteTotal:Float = 0;
-	public var polyphony(default, set):Float = 1;
+	public var polyphonyOppo:Float = 1;
+	public var polyphonyBF:Float = 1;
 
 	var pixelShitPart1:String = "";
 	var pixelShitPart2:String = '';
@@ -1726,10 +1727,21 @@ class PlayState extends MusicBeatState
 		return playbackRate;
 	}
 
-	inline function set_polyphony(value:Float):Float
+	inline function set_polyphony(value:Float, which:Int):Float
 	{
-		polyphony = value;
-		setOnLuas('polyphony', value);
+		switch (which) {
+		    case 0:
+		        polyphonyOppo = value;
+		        polyphonyBF = value;
+		    case 1:
+		        polyphonyOppo = value;
+		    case 2:
+		        polyphonyBF = value;
+		    // just in case, as an anti-crash prevention maybe?
+		    default:
+			polyphonyOppo = value;
+		        polyphonyBF = value;
+		}
 		return value;
 	}
 
@@ -3389,9 +3401,10 @@ class PlayState extends MusicBeatState
 
 		if (ClientPrefs.showcaseMode && botplayTxt != null)
 		{
-			botplayTxt.text = '${formatNumber(Math.abs(totalNotesPlayed))}/${formatNumber(Math.abs(enemyHits))}\nNPS: ${formatNumber(nps)}/${formatNumber(maxNPS)}\nOpp NPS: ${formatNumber(oppNPS)}/${formatNumber(maxOppNPS)}';
-			if (polyphony != 1)
-				botplayTxt.text += '\nNote Multiplier: ' + formatNumber(polyphony);
+			// formatNumber(Math.abs(totalNotesPlayed))
+			botplayTxt.text = '${formatNumber(Math.abs(enemyHits))}/${formatNumber(Math.abs(totalNotesPlayed))}\nNPS: ${formatNumber(nps)}/${formatNumber(maxNPS)}\nOpp NPS: ${formatNumber(oppNPS)}/${formatNumber(maxOppNPS)}';
+			if (polyphonyOppo != 1 || polyphonyBF != 1)
+				botplayTxt.text += '\nNote Multiplier: ' + formatNumber(polyphonyOppo) + "/" + formatNumber(polyphonyBF);
 		}
 
 		callOnLuas('onUpdate', [elapsed]);
@@ -4306,7 +4319,16 @@ class PlayState extends MusicBeatState
 				if (Math.isNaN(noteMultiplier))
 					noteMultiplier = 1;
 
-				polyphony = noteMultiplier;
+				if (value2 == "") {
+					polyphonyOppo = noteMultiplier;
+					polyphonyBF = noteMultiplier;
+				} else {
+					switch(value2) {
+						case "1": polyphonyOppo = noteMultiplier;
+						case "2": polyphonyBF = noteMultiplier;
+					}
+				}
+				//trace(value2 + " | " + polyphonyBF + ", " + polyphonyOppo);
 
 			case 'Set Camera Zoom':
 				var newZoom:Float = Std.parseFloat(value1);
@@ -5017,7 +5039,7 @@ class PlayState extends MusicBeatState
 			spawnNoteSplashOnNote(false, note);
 
 		if(!practiceMode && !miss) {
-			songScore += daRating.score * polyphony;
+			songScore += daRating.score * (opponentChart ? polyphonyOppo : polyphonyBF);
 			if(!cpuControlled && !note.ratingDisabled)
 			{
 				songHits++;
@@ -5428,7 +5450,7 @@ class PlayState extends MusicBeatState
 		{
 			if (combo > 0)
 				combo = 0;
-			else combo -= 1 * polyphony;
+			else combo -= 1 * (opponentChart ? polyphonyOppo : polyphonyBF);
 			if (health > 0 && !usingBotEnergy)
 			{
 				health -= daNote.missHealth * healthLoss;
@@ -5440,11 +5462,12 @@ class PlayState extends MusicBeatState
 				doDeathCheck(true);
 			}
 
-			songMisses += 1 * polyphony;
+			songMisses += 1 * (opponentChart ? polyphonyOppo : polyphonyBF);
 			if (SONG.needsVoices && !ffmpegMode)
 				if (opponentChart && opponentVocals != null && opponentVocals.volume != 0) opponentVocals.volume = 0;
 				else if (!opponentChart && vocals.volume != 0 || vocals.volume != 0) vocals.volume = 0;
-			if(!practiceMode) songScore -= 10 * Std.int(polyphony);
+			if (!practiceMode)
+				songScore -= 10 * Std.int((opponentChart ? polyphonyOppo : polyphonyBF));
 
 			totalPlayed++;
 			if (missRecalcsPerFrame <= 3) RecalculateRating(true);
@@ -5482,7 +5505,7 @@ class PlayState extends MusicBeatState
 		{
 			if (combo > 0)
 				combo = 0;
-			else combo -= 1 * polyphony;
+			else combo -= 1 * (opponentChart ? polyphonyOppo : polyphonyBF);
 			if (health > 0)
 			{
 				health -= daNoteAlt.missHealth * healthLoss;
@@ -5494,9 +5517,10 @@ class PlayState extends MusicBeatState
 				doDeathCheck(true);
 			}
 
-			songMisses += 1 * polyphony;
+			songMisses += 1 * (opponentChart ? polyphonyOppo : polyphonyBF);
 			(opponentChart ? opponentVocals : vocals).volume = 0;
-			if(!practiceMode) songScore -= 10 * Std.int(polyphony);
+			if (!practiceMode)
+				songScore -= 10 * Std.int((opponentChart ? polyphonyOppo : polyphonyBF));
 
 			totalPlayed++;
 			if (missRecalcsPerFrame <= 3) RecalculateRating(true);
@@ -5639,13 +5663,14 @@ class PlayState extends MusicBeatState
 			if(!note.hitCausesMiss) {
 				if (!note.isSustainNote)
 				{
+					trace(opponentChart);
 					if (combo < 0) combo = 0;
-					if (polyphony > 1 && !note.isSustainNote) totalNotes += polyphony - 1;
+					if ((opponentChart ? polyphonyOppo : polyphonyBF) > 1 && !note.isSustainNote) totalNotes += polyphonyBF - 1;
 					missCombo = 0;
-					combo += 1 * polyphony;
-					totalNotesPlayed += 1 * polyphony;
+					combo += 1 * (opponentChart ? polyphonyOppo : polyphonyBF);
+					totalNotesPlayed += 1 * (opponentChart ? polyphonyOppo : polyphonyBF);
 					if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
-						notesHitArray.push(1 * polyphony);
+						notesHitArray.push(1 * (opponentChart ? polyphonyOppo : polyphonyBF));
 						notesHitDateArray.push(Conductor.songPosition);
 					}
 					if (!ClientPrefs.lessBotLag) popUpScore(note);
@@ -5653,7 +5678,7 @@ class PlayState extends MusicBeatState
 					maxCombo = Math.max(maxCombo, combo);
 				}
 
-				if (!usingBotEnergy) health += note.hitHealth * healthGain * polyphony;
+				if (!usingBotEnergy) health += note.hitHealth * healthGain * (opponentChart ? polyphonyOppo : polyphonyBF);
 
 				if (bothSides) oppTrigger = bothSides && note.doOppStuff;
 				else if (opponentChart && !oppTrigger) oppTrigger = true;
@@ -5796,17 +5821,17 @@ class PlayState extends MusicBeatState
 			}
 			if (!noteAlt.isSustainNote && cpuControlled)
 			{
-				combo += 1 * polyphony;
-				songScore += (ClientPrefs.noMarvJudge ? 350 : 500) * polyphony;
-				totalNotesPlayed += 1 * polyphony;
+				combo += 1 * (opponentChart ? polyphonyOppo : polyphonyBF);
+				songScore += (ClientPrefs.noMarvJudge ? 350 : 500) * (opponentChart ? polyphonyOppo : polyphonyBF);
+				totalNotesPlayed += 1 * (opponentChart ? polyphonyOppo : polyphonyBF);
 				if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
-					notesHitArray.push(1 * polyphony);
+					notesHitArray.push(1 * (opponentChart ? polyphonyOppo : polyphonyBF));
 					notesHitDateArray.push(Conductor.songPosition);
 				}
-				if (polyphony > 1) totalNotes += polyphony - 1;
+				if ((opponentChart ? polyphonyOppo : polyphonyBF) > 1) totalNotes += (opponentChart ? polyphonyOppo : polyphonyBF) - 1;
 			}
 			if (!ClientPrefs.noSkipFuncs) callOnLuas((oppTrigger ? 'opponentNoteSkip' : 'goodNoteSkip'), [null, Math.abs(noteAlt.noteData), noteAlt.noteType, noteAlt.isSustainNote]);
-			health += noteAlt.hitHealth * healthGain * polyphony;
+			health += noteAlt.hitHealth * healthGain * (opponentChart ? polyphonyOppo : polyphonyBF);
 			if (!ffmpegMode) (opponentChart ? opponentVocals : vocals).volume = 1;
 		}
 		return;
@@ -5857,10 +5882,10 @@ class PlayState extends MusicBeatState
 			if (!daNote.isSustainNote)
 			{
 				if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
-					oppNotesHitArray.push(1 * polyphony);
+					oppNotesHitArray.push(1 * polyphonyOppo);
 					oppNotesHitDateArray.push(Conductor.songPosition);
 				}
-				enemyHits += 1 * polyphony;
+				enemyHits += 1 * polyphonyOppo;
 				invalidateNote(daNote);
 			}
 
@@ -5871,7 +5896,7 @@ class PlayState extends MusicBeatState
 				if (!opponentChart && opponentVocals != null && opponentVocals.volume != 1) opponentVocals.volume = 1;
 				else if (opponentChart && vocals.volume != 1 || vocals.volume != 1) vocals.volume = 1;
 
-			if (polyphony > 1 && !daNote.isSustainNote) opponentNoteTotal += polyphony - 1;
+			if (polyphonyOppo > 1 && !daNote.isSustainNote) opponentNoteTotal += polyphonyOppo - 1;
 
 			if (ClientPrefs.opponentLightStrum && !strumsHit[daNote.noteData % 4])
 			{
@@ -5894,8 +5919,8 @@ class PlayState extends MusicBeatState
 				stagesFunc(function(stage:BaseStage) (!opponentChart ? stage.opponentNoteHit(daNote) : stage.goodNoteHit(daNote)));
 			}
 
-			if (shouldDrainHealth && health > (healthDrainFloor * polyphony) && !practiceMode || opponentDrain && practiceMode)
-				health -= (opponentDrain ? daNote.hitHealth : healthDrainAmount) * hpDrainLevel * polyphony;
+			if (shouldDrainHealth && health > (healthDrainFloor * polyphonyOppo) && !practiceMode || opponentDrain && practiceMode)
+				health -= (opponentDrain ? daNote.hitHealth : healthDrainAmount) * hpDrainLevel * polyphonyOppo;
 
 			if (oppChar != null && oppChar.shakeScreen)
 			{
@@ -5936,16 +5961,16 @@ class PlayState extends MusicBeatState
 			if (!noteAlt.isSustainNote)
 			{
 				if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
-					oppNotesHitArray.push(1 * polyphony);
+					oppNotesHitArray.push(1 * polyphonyOppo);
 					oppNotesHitDateArray.push(Conductor.songPosition);
 				}
-				enemyHits += 1 * polyphony;
+				enemyHits += 1 * polyphonyOppo;
 
 				if (ClientPrefs.ratingCounter && judgeCountUpdateFrame <= 4) updateRatingCounter();
 				if (scoreTxtUpdateFrame <= 4) updateScore();
 
 				if (shouldDrainHealth && health > healthDrainFloor && !practiceMode || opponentDrain && practiceMode)
-					health -= (opponentDrain ? noteAlt.hitHealth : healthDrainAmount) * hpDrainLevel * polyphony;
+					health -= (opponentDrain ? noteAlt.hitHealth : healthDrainAmount) * hpDrainLevel * polyphonyOppo;
 			}
 			if ((!noteAlt.gfNote ? !opponentChart ? dad : boyfriend : gf) != null && (!noteAlt.gfNote ? !opponentChart ? dad : boyfriend : gf).shakeScreen)
 			{
