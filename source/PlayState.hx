@@ -1729,14 +1729,19 @@ class PlayState extends MusicBeatState
 
 	inline function set_polyphony(value:Float, which:Int):Float
 	{
-		if (which == 0) {
+		switch (which) {
+		    case 0:
+		        polyphonyOppo = value;
+		        polyphonyBF = value;
+		    case 1:
+		        polyphonyOppo = value;
+		    case 2:
+		        polyphonyBF = value;
+		    // just in case, as an anti-crash prevention maybe?
+		    default:
 			polyphonyOppo = value;
-			polyphonyBF = value;
+		        polyphonyBF = value;
 		}
-		else if (which == 1)
-			polyphonyOppo = value;
-		else if (which == 2)
-			polyphonyBF = value;
 		return value;
 	}
 
