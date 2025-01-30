@@ -176,7 +176,10 @@ class FunkinLua {
 		set('gfSection', false);
 
 		set('npsSpeedMult', PlayState.instance.npsSpeedMult);
-		set('polyphony', PlayState.instance.polyphony);
+
+		// these things are useless
+		set('polyphonyOppo', PlayState.instance.polyphonyOppo);
+		set('polyphonyBF', PlayState.instance.polyphonyBF);
 
 		// Gameplay settings
 		set('healthGainMult', PlayState.instance.healthGain);
