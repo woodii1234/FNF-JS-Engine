@@ -31,6 +31,9 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var trollMaxSpeed:String = 'Medium';
 	public static var missSoundShit:Bool = false;
 
+	// Should i put the note combo shit on here on Gameplay settings?
+	public static var noteComboShit:Bool = false;
+
 	//Visuals & UI
 	public static var noteSkin:String = 'Default';
 	public static var splashType:String = 'Default';
