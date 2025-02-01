@@ -27,7 +27,7 @@ class ComboShit extends FlxTypedSpriteGroup<FlxSprite>
 		effectStuff.animation.addByPrefix('funny1', 'appear', 24, false);
 		effectStuff.animation.play('funny1');
 
-        // after ig
+        // TODO: time it so its good, and make the shit work
         effectStuff.animation.addByPrefix('funny2', 'disappear', 24, false);
 		effectStuff.animation.play('funny2');
 
@@ -52,7 +52,7 @@ class ComboShit extends FlxTypedSpriteGroup<FlxSprite>
 			});
 		}
 		else
-			effectStuff.animation.play('funny', true, false, 18);
+			effectStuff.animation.play('funny1', true, false, 18);
 	}
 
 	override function update(elapsed:Float)
@@ -107,12 +107,12 @@ class ComboShit extends FlxTypedSpriteGroup<FlxSprite>
 		var comboNumber:ComboNumber = new ComboNumber(420, 0, 0);
 
 		// add to both, in the group just for ez organize/accessing
-		grpNumbers.add(comboNumber);
-		add(comboNumber);
+		//grpNumbers.add(comboNumber);
+		//add(comboNumber);
 
-		var comboNumber2:ComboNumber = new ComboNumber(420 - 134, 44, 0);
-		grpNumbers.add(comboNumber2);
-		add(comboNumber2);
+		//var comboNumber2:ComboNumber = new ComboNumber(420 - 134, 44, 0);
+		//grpNumbers.add(comboNumber2);
+		//add(comboNumber2);
 	}
 }
 

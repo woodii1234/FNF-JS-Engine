@@ -6257,6 +6257,9 @@ class PlayState extends MusicBeatState
 			animShit.scrollFactor.set(0.6, 0.6);
 			add(animShit);
 
+			// debug trace
+			trace('NOTE COMBO: $combo');
+
 			var frameShit:Float = (1 / 24) * 2; // equals 2 frames in the animation
 
 			new FlxTimer().start(((Conductor.crochet / 1000) * 1.25) - frameShit, function(tmr)
