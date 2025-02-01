@@ -145,15 +145,15 @@ class StartupState extends MusicBeatState
 			case 4:
 				#if VIDEOS_ALLOWED
 					startVideo('bambiStartup', 'splash');
-					return;
+				#else
+					doIntro();
 				#end
-				doIntro();
 			case 5:
 				#if VIDEOS_ALLOWED
 					startVideo('broCopiedDenpa', 'splash');
-					return;
+				#else
+					doIntro();
 				#end
-				doIntro();
 			case 6:
 				if (canChristmas)
 				{

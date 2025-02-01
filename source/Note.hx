@@ -437,6 +437,7 @@ class Note extends FlxSprite
 			if (PlayState.isPixelStage) 
 			{
 				scale.y *= PlayState.daPixelZoom * 1.20;
+				scale.x *= PlayState.daPixelZoom;
 			}
 			updateHitbox();
 		}
@@ -652,9 +653,7 @@ class Note extends FlxSprite
 			updateHitbox();
 			offsetX -= width / 2;
 
-			if (PlayState.isPixelStage)
-				if (!isSustainEnd) scale.y *= 1.19 * (6 / height);
-			else
+			if (!PlayState.isPixelStage)
 				sustainScale = Note.SUSTAIN_SIZE / frameHeight;
 				
 			updateHitbox();

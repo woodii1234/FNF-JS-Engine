@@ -5664,7 +5664,6 @@ class PlayState extends MusicBeatState
 			if(!note.hitCausesMiss) {
 				if (!note.isSustainNote)
 				{
-					trace(opponentChart); // it says false............................
 					if (combo < 0) combo = 0;
 					if ((opponentChart ? polyphonyOppo : polyphonyBF) > 1 && !note.isSustainNote) totalNotes += polyphonyBF - 1;
 					missCombo = 0;
