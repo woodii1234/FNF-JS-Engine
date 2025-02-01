@@ -2865,10 +2865,10 @@ class FunkinLua {
 			
 		});
 		// accurate vhs effect on shadertoy, all credits to int_45h
-		Lua_helper.add_callback(lua, "addVHSFilter", function(camera:String,lockAlpha:Bool=false) {
+		/*Lua_helper.add_callback(lua, "addVHSFilter", function(camera:String,lockAlpha:Bool=false) {
 
 			PlayState.instance.addShaderToCamera(camera, new VHSFilterAccurate(lockAlpha));
-		});
+		});*/
 		
 		// shader clear
 		
