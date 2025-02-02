@@ -161,14 +161,6 @@ class VisualsUISubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
-                // Note combo shit!!
-                var option:Option = new Option('Note Combo', //Name
-			'This adds the old Note Combo from 2021', //Description
-			'noteComboShit', //Save data variable name
-			'bool', //Variable type
-			false); //Default value
-		addOption(option);
-
 		var option:Option = new Option('Showcase Mode',
 			'If checked, hides all the UI elements except for the time bar and notes\nand enables Botplay.',
 			'showcaseMode',
