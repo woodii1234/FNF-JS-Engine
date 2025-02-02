@@ -33,6 +33,7 @@ import openfl.filters.ShaderFilter;
 
 import Note;
 import objects.*;
+import ComboShit;
 
 using StringTools;
 
@@ -6248,6 +6249,24 @@ class PlayState extends MusicBeatState
 
 		setOnLuas('curBeat', curBeat); //DAWGG?????
 		callOnLuas('onBeatHit');
+	
+		// note combo!!!! WOOOOOOOOOOOOOOOOWWWWWWWWWWWWWWWWWWWWWW
+		if (ClientPrefs.noteComboShit && curBeat % 8 == 7 && SONG.notes[Math.floor(curStep / 16)].mustHitSection && combo > 5 && !SONG.notes[Math.floor(curStep / 16) + 1].mustHitSection)
+		{
+			var animShit:ComboShit = new ComboShit(-100, 300);
+			animShit.scrollFactor.set(0.6, 0.6);
+			add(animShit);
+
+			// debug trace
+			trace('NOTE COMBO: $combo');
+
+			var frameShit:Float = (1 / 24) * 2; // equals 2 frames in the animation
+
+			new FlxTimer().start(((Conductor.crochet / 1000) * 1.25) - frameShit, function(tmr)
+			{
+				animShit.forceFinish();
+			});
+		}
 	}
 	public function characterBopper(beat:Int):Void
 	{

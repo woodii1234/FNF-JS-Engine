@@ -46,6 +46,13 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			false); //Default value
 		addOption(option);
 
+		var option:Option = new Option('Note Combo', //Name
+			'This adds the old Note Combo from 2021', //Description
+			'noteComboShit', //Save data variable name
+			'bool', //Variable type
+			false); //Default value
+		addOption(option);
+
 		var option:Option = new Option('Middlescroll',
 			'If checked, your notes get centered.',
 			'middleScroll',
