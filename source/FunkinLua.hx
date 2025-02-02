@@ -1363,7 +1363,7 @@ class FunkinLua {
 			var testicle:StrumNote = PlayState.instance.strumLineNotes.members[note % PlayState.instance.strumLineNotes.length];
 			
 			if(testicle != null) {
-				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(testicle, {"scale.x": value}, duration, {ease: getFlxEaseByString(ease),
+				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(testicle, {"scale.x": value - 0.3}, duration, {ease: getFlxEaseByString(ease),
 					onComplete: function(twn:FlxTween) {
 						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
 						PlayState.instance.modchartTweens.remove(tag);
@@ -1377,7 +1377,7 @@ class FunkinLua {
 			var testicle:StrumNote = PlayState.instance.strumLineNotes.members[note % PlayState.instance.strumLineNotes.length];
 			
 			if(testicle != null) {
-				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(testicle, {"scale.y": value}, duration, {ease: getFlxEaseByString(ease),
+				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(testicle, {"scale.y": value - 0.3}, duration, {ease: getFlxEaseByString(ease),
 					onComplete: function(twn:FlxTween) {
 						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
 						PlayState.instance.modchartTweens.remove(tag);
@@ -2864,11 +2864,6 @@ class FunkinLua {
 			PlayState.instance.addShaderToCamera(camera, new VCRDistortionEffect(glitchFactor,distortion,perspectiveOn,vignetteMoving));
 			
 		});
-		// accurate vhs effect on shadertoy, all credits to int_45h
-		/*Lua_helper.add_callback(lua, "addVHSFilter", function(camera:String,lockAlpha:Bool=false) {
-
-			PlayState.instance.addShaderToCamera(camera, new VHSFilterAccurate(lockAlpha));
-		});*/
 		
 		// shader clear
 		
