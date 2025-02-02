@@ -6805,6 +6805,3 @@ class PlayState extends MusicBeatState
 		FlxG.autoPause = ClientPrefs.autoPause;
 	}
 }
-
-
-// -.-- --- ..- / .- .-. . / .. -. -- .- - ..- .-. . / --. . - / --- ..- - .-.-.- / --. ... ..-. .- --.- -.- -- -. ..-. ..... .
