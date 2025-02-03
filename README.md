@@ -44,7 +44,7 @@ This contains lots and lots of customizable and features built in to JS Engine, 
 
 There is like lots and lots of stuff i've missed, but at least you would like those features built in **JS ENGINE**
 
-# Screenshots
+# Screenshots and Gameplays
 
 ![Screenshot 2024-07-07 14-00-00](https://github.com/JordanSantiagoYT/FNF-JS-Engine/assets/108278470/d4e89995-fa14-40bf-a5d6-d1647548fd93)
 
@@ -52,6 +52,11 @@ There is like lots and lots of stuff i've missed, but at least you would like th
 
 ![Screenshot 2024-07-07 13-58-45](https://github.com/JordanSantiagoYT/FNF-JS-Engine/assets/108278470/a65ea8b5-8b0d-4643-b7e0-cddd3972422b)
 
+![image](https://github.com/user-attachments/assets/aea20297-1695-4b83-b17e-342685490414)
+- Gameplay from @StinkTheStinker
+
+![0203(1)](https://github.com/user-attachments/assets/15620fa6-52a9-4090-996f-80a80bda32ef)
+- Gameplay from @StinkTheStinker
 # FAQs
 
 Frequently Asked Questions (FAQs) are found in [here](https://github.com/JordanSantiagoYT/FNF-JS-Engine/wiki) or you can simply see it below.
