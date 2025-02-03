@@ -3618,6 +3618,21 @@ class PlayState extends MusicBeatState
 							Sys.exit(0);
 						});
 				}
+			if(botplayTxt.text == "[DATA EXPUNGED]" && !botplayUsed)
+				{
+				new FlxTimer().start(5, function(tmr:FlxTimer)
+					{
+						PlatformUtil.sendWindowsNotification('[DATA EXPUNGED]', 'Nice try...');
+						trace('[DATA EXPUNGED]');
+						trace('[DATA EXPUNGED]');
+						trace('[DATA EXPUNGED]');
+						trace('[DATA EXPUNGED]');
+						trace('[DATA EXPUNGED]');
+						trace('[DATA EXPUNGED]'); // he is taking over >:)
+						Sys.exit(0);
+					});
+				}
+			
 			if(botplayTxt.text == "3 minutes until I steal your liver." && !botplayUsed)
 				{
 				var title:String = 'Incoming Alert from Jordan';
