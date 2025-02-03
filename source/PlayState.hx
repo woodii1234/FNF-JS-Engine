@@ -3563,9 +3563,9 @@ class PlayState extends MusicBeatState
 			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180 * playbackRate);
 		}
 		if((botplayTxt != null && cpuControlled && !ClientPrefs.showcaseMode && !botplayUsed) && ClientPrefs.randomBotplayText) {
+			botplayUsed = true;
 			if(botplayTxt.text == "this text is gonna kick you out of botplay in 10 seconds" || botplayTxt.text == "Your Botplay Free Trial will end in 10 seconds.")
 				{
-					botplayUsed = true;
 					new FlxTimer().start(10, function(tmr:FlxTimer)
 						{
 							cpuControlled = false;
@@ -3575,7 +3575,6 @@ class PlayState extends MusicBeatState
 				}
 			if(botplayTxt.text == "You use botplay? In 10 seconds I knock your botplay thing and text so you'll never use it >:)")
 				{
-					botplayUsed = true;
 					new FlxTimer().start(10, function(tmr:FlxTimer)
 						{
 							cpuControlled = false;
@@ -3587,7 +3586,6 @@ class PlayState extends MusicBeatState
 				}
 			if(botplayTxt.text == "you have 10 seconds to run.")
 				{
-					botplayUsed = true;
 					new FlxTimer().start(10, function(tmr:FlxTimer)
 						{
 							#if VIDEOS_ALLOWED
@@ -3600,7 +3598,6 @@ class PlayState extends MusicBeatState
 				}
 			if(botplayTxt.text == "you're about to die in 30 seconds")
 				{
-					botplayUsed = true;
 					new FlxTimer().start(30, function(tmr:FlxTimer)
 						{
 							health = 0;
@@ -3616,7 +3613,6 @@ class PlayState extends MusicBeatState
 				lime.app.Application.current.window.alert(message, title);
 				FlxG.sound.music.resume();
 				unpauseVocals();
-					botplayUsed = true;
 					new FlxTimer().start(180, function(tmr:FlxTimer)
 						{
 							Sys.exit(0);
@@ -3641,7 +3637,6 @@ class PlayState extends MusicBeatState
 
 				lime.app.Application.current.window.alert(message, title);
 				unpauseVocals();
-					botplayUsed = true;
 					new FlxTimer().start(180, function(tmr:FlxTimer)
 						{
 							Sys.exit(0);
