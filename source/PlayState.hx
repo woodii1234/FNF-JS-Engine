@@ -3401,10 +3401,14 @@ class PlayState extends MusicBeatState
 
 		if (ClientPrefs.showcaseMode && botplayTxt != null)
 		{
-			// formatNumber(Math.abs(totalNotesPlayed))
 			botplayTxt.text = '${formatNumber(Math.abs(enemyHits))}/${formatNumber(Math.abs(totalNotesPlayed))}\nNPS: ${formatNumber(nps)}/${formatNumber(maxNPS)}\nOpp NPS: ${formatNumber(oppNPS)}/${formatNumber(maxOppNPS)}';
 			if (polyphonyOppo != 1 || polyphonyBF != 1)
-				botplayTxt.text += '\nNote Multiplier: ' + formatNumber(polyphonyOppo) + "/" + formatNumber(polyphonyBF);
+			{
+				var set:String = formatNumber(polyphonyBF);
+				if (formatNumber(polyphonyOppo) != formatNumber(polyphonyBF))
+					set = formatNumber(polyphonyOppo) + "/" + formatNumber(polyphonyBF);
+				botplayTxt.text += '\nNote Multiplier: ' + set;
+			}
 		}
 
 		callOnLuas('onUpdate', [elapsed]);
@@ -3558,10 +3562,10 @@ class PlayState extends MusicBeatState
 			botplaySine += 180 * elapsed;
 			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180 * playbackRate);
 		}
-		if((botplayTxt != null && cpuControlled && !ClientPrefs.showcaseMode) && ClientPrefs.randomBotplayText) {
-			if(botplayTxt.text == "this text is gonna kick you out of botplay in 10 seconds" && !botplayUsed || botplayTxt.text == "Your Botplay Free Trial will end in 10 seconds." && !botplayUsed)
+		if((botplayTxt != null && cpuControlled && !ClientPrefs.showcaseMode && !botplayUsed) && ClientPrefs.randomBotplayText) {
+			botplayUsed = true;
+			if(botplayTxt.text == "this text is gonna kick you out of botplay in 10 seconds" || botplayTxt.text == "Your Botplay Free Trial will end in 10 seconds.")
 				{
-					botplayUsed = true;
 					new FlxTimer().start(10, function(tmr:FlxTimer)
 						{
 							cpuControlled = false;
@@ -3569,9 +3573,8 @@ class PlayState extends MusicBeatState
 							botplayTxt.visible = false;
 						});
 				}
-			if(botplayTxt.text == "You use botplay? In 10 seconds I knock your botplay thing and text so you'll never use it >:)" && !botplayUsed)
+			if(botplayTxt.text == "You use botplay? In 10 seconds I knock your botplay thing and text so you'll never use it >:)")
 				{
-					botplayUsed = true;
 					new FlxTimer().start(10, function(tmr:FlxTimer)
 						{
 							cpuControlled = false;
@@ -3581,9 +3584,8 @@ class PlayState extends MusicBeatState
 							PauseSubState.botplayLockout = true;
 						});
 				}
-			if(botplayTxt.text == "you have 10 seconds to run." && !botplayUsed)
+			if(botplayTxt.text == "you have 10 seconds to run.")
 				{
-					botplayUsed = true;
 					new FlxTimer().start(10, function(tmr:FlxTimer)
 						{
 							#if VIDEOS_ALLOWED
@@ -3594,15 +3596,14 @@ class PlayState extends MusicBeatState
 							#end
 						});
 				}
-			if(botplayTxt.text == "you're about to die in 30 seconds" && !botplayUsed)
+			if(botplayTxt.text == "you're about to die in 30 seconds")
 				{
-					botplayUsed = true;
 					new FlxTimer().start(30, function(tmr:FlxTimer)
 						{
 							health = 0;
 						});
 				}
-			if(botplayTxt.text == "3 minutes until Boyfriend steals your liver." && !botplayUsed)
+			if(botplayTxt.text == "3 minutes until Boyfriend steals your liver.")
 				{
 				var title:String = 'Incoming Alert from Boyfriend';
 				var message:String = '3 minutes until Boyfriend steals your liver!';
@@ -3612,28 +3613,22 @@ class PlayState extends MusicBeatState
 				lime.app.Application.current.window.alert(message, title);
 				FlxG.sound.music.resume();
 				unpauseVocals();
-					botplayUsed = true;
 					new FlxTimer().start(180, function(tmr:FlxTimer)
 						{
 							Sys.exit(0);
 						});
 				}
-			if(botplayTxt.text == "[DATA EXPUNGED]" && !botplayUsed)
+			if(botplayTxt.text == "[DATA EXPUNGED]")
 				{
 				new FlxTimer().start(5, function(tmr:FlxTimer)
 					{
 						PlatformUtil.sendWindowsNotification('[DATA EXPUNGED]', 'Nice try...');
-						trace('[DATA EXPUNGED]');
-						trace('[DATA EXPUNGED]');
-						trace('[DATA EXPUNGED]');
-						trace('[DATA EXPUNGED]');
-						trace('[DATA EXPUNGED]');
-						trace('[DATA EXPUNGED]'); // he is taking over >:)
+						for (i in 0...5) trace('[DATA EXPUNGED]'); // he is taking over >:)
 						Sys.exit(0);
 					});
 				}
 			
-			if(botplayTxt.text == "3 minutes until I steal your liver." && !botplayUsed)
+			if(botplayTxt.text == "3 minutes until I steal your liver.")
 				{
 				var title:String = 'Incoming Alert from Jordan';
 				var message:String = '3 minutes until I steal your liver.';
@@ -3642,7 +3637,6 @@ class PlayState extends MusicBeatState
 
 				lime.app.Application.current.window.alert(message, title);
 				unpauseVocals();
-					botplayUsed = true;
 					new FlxTimer().start(180, function(tmr:FlxTimer)
 						{
 							Sys.exit(0);
