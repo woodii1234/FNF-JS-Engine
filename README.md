@@ -93,9 +93,28 @@ if you wish to disable things like *Lua Scripts* or *Video Cutscenes*, you can r
 
 inside `Project.xml`, you will find several variables to customize JS Engine to your liking
 
-to start you off, disabling Videos should be simple, simply Delete the line `"VIDEOS_ALLOWED"` or comment it out by wrapping the line in XML-like comments, like this `<!-- YOUR_LINE_HERE -->`
+to start you off, disabling Videos should be simple, simply Delete the line `"VIDEOS_ALLOWED"` or comment it out by wrapping the line in XML-like comments, like this: `<!-- YOUR_LINE_HERE -->`
 
-same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, this and other customization options are all available within the `Project.xml` file
+same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, this and other customization options are all available within the `Project.xml` file.
+
+# Contributers
+
+@JordanSantiagoYT (of course)
+- He's the owner... What do you think?
+
+@TheStinkern
+- Was originaly going to only answer issues and try to fix it.
+  - Also trying to learn haxe a bit.
+
+@moxie-coder
+- Codes part of the engine
+
+@NAEL2XD
+- Does pull requests
+
+@PatoFlamejanteTV
+- Small coding, also made a PDF guide for JS Engine.
+
 <details>
   <summary><h2>OG Psych Engine Credits and Stuff</h2></summary>
   
