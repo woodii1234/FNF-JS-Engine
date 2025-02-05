@@ -65,7 +65,7 @@ Frequently Asked Questions (FAQs) are found in [here](https://github.com/JordanS
 
 A: Yes, you can! just be sure to credit me ([@JordanSantiago on YouTube](https://www.youtube.com/@JordanSantiago)) and give a link to this page. or [the link to download the latest release.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/releases/latest)
 
-**Q: How do I (change the background, add characters, etc.)?**
+**Q: How do I change and add things?**
 
 A: You do it here the [same way you'd do it in Psych Engine.](https://github.com/ShadowMario/FNF-PsychEngine/wiki)
 
