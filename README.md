@@ -115,6 +115,9 @@ same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, 
 @PatoFlamejanteTV
 - Small coding, also made a PDF guide for JS Engine.
 
+@mcagabe19
+- Ported JS Engine to mobile
+
 <details>
   <summary><h2>OG Psych Engine Credits and Stuff</h2></summary>
   
