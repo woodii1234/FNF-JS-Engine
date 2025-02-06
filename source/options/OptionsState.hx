@@ -137,6 +137,7 @@ class OptionsState extends MusicBeatState
 	override function closeSubState() {
 		super.closeSubState();
 		ClientPrefs.saveSettings();
+		FlxG.mouse.visible = false;
 	}
 
 	override function update(elapsed:Float) {

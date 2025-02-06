@@ -451,7 +451,6 @@ class PlayState extends MusicBeatState
 
 	override public function create()
 	{
-		FlxG.mouse.visible = false;
 		//Stops playing on a height that isn't divisible by 2
 		if (ClientPrefs.ffmpegMode && ClientPrefs.resolution != null) {
 			var resolutionValue = cast(ClientPrefs.resolution, String);
