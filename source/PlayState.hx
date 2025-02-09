@@ -8,6 +8,7 @@ import flixel.util.FlxSort;
 import flixel.util.FlxStringUtil;
 import haxe.Json;
 import lime.utils.Assets;
+import lime.system.System;
 import openfl.filters.BitmapFilter;
 import openfl.utils.Assets as OpenFlAssets;
 import editors.ChartingState;
@@ -1332,17 +1333,9 @@ class PlayState extends MusicBeatState
 			case 'Forever Engine': 
 				EngineWatermark.text = "JS Engine v" + MainMenuState.psychEngineJSVersion;
 				EngineWatermark.x = FlxG.width - EngineWatermark.width - 5;
-				/*if (ClientPrefs.downScroll) EngineWatermark.y = healthBar.y + 50;
-				else {
-					return; // replace if wrong
-				}*/
 			case 'JS Engine': 
 				if (!ClientPrefs.downScroll) EngineWatermark.y = FlxG.height * 0.1 - 70;
 				EngineWatermark.text = "Playing " + SONG.song + " on " + CoolUtil.difficultyString() + " - JSE v" + MainMenuState.psychEngineJSVersion;
-				/*if (ClientPrefs.downScroll) EngineWatermark.y = healthBar.y + 50;
-				else {
-					return; // replace if wrong
-				}*/
 			case 'Dave Engine':
 				EngineWatermark.setFormat(Paths.font("comic.ttf"), 16, FlxColor.WHITE, RIGHT, OUTLINE,FlxColor.BLACK);
 				EngineWatermark.text = SONG.song;
@@ -1976,7 +1969,6 @@ class PlayState extends MusicBeatState
 						moveCameraSection();
 						FlxG.camera.snapToTarget();
 					}
-					videoCutscene = null;
 					canPause = false;
 					inCutscene = false;
 					startAndEnd();
@@ -3622,7 +3614,7 @@ class PlayState extends MusicBeatState
 				{
 				new FlxTimer().start(5, function(tmr:FlxTimer)
 					{
-						PlatformUtil.sendWindowsNotification('[DATA EXPUNGED]', 'Nice try...');
+						sendWindowsNotification('[DATA EXPUNGED]', 'Nice try...');
 						for (i in 0...5) trace('[DATA EXPUNGED]'); // he is taking over >:)
 						Sys.exit(0);
 					});
@@ -4392,17 +4384,9 @@ class PlayState extends MusicBeatState
 
 			// Evil
 			case 'Windows Notification':
-				{
-					PlatformUtil.sendWindowsNotification(value1, value2);
-
-					#if linux
-					addTextToDebug('Windows Notifications are not currently supported on Linux!', FlxColor.RED);
-					return;
-					#else
-					trace('Windows Notifications are not currently supported on this platform!');
-					return;
-					#end
-				}
+				if (value1 == "") value1 = "JS Engine";
+				if (value2 == "") value2 = "Are you doing that one bambi song?";
+				sendWindowsNotification(value1, value2, true);
 
 			case 'Camera Follow Pos':
 				if(camFollow != null)
@@ -4666,6 +4650,66 @@ class PlayState extends MusicBeatState
 		}
 		stagesFunc(function(stage:BaseStage) stage.eventCalled(eventName, value1, value2, flValue1, flValue2, strumTime));
 		callOnLuas('onEvent', [eventName, value1, value2, strumTime]);
+	}
+		
+	function sendWindowsNotification(title:String, desc:String, isEvent:Bool = false) {
+		// haha i got them from slushi engine :) (by nael2xd)
+		#if windows
+		function getWindowsVersion() {
+			var windowsVersions:Map<String, Int> = [
+				"Windows 11" => 11,
+				"Windows 10" => 10,
+				"Windows 8.1" => 8,
+				"Windows 8" => 8,
+				"Windows 7" => 7,
+			];
+
+			var platformLabel = System.platformLabel;
+			var words = platformLabel.split(" ");
+			var windowsIndex = words.indexOf("Windows");
+			var result = "";
+			if (windowsIndex != -1 && windowsIndex < words.length - 1)
+			{
+				result = words[windowsIndex] + " " + words[windowsIndex + 1];
+			}
+
+			if (windowsVersions.exists(result)) return windowsVersions.get(result);
+
+			return 0;
+		}
+		
+		var powershellCommand = "powershell -Command \"& {$ErrorActionPreference = 'Stop';"
+		+ "$title = '"
+		+ desc
+		+ "';"
+		+ "[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null;"
+		+ "$template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText01);"
+		+ "$toastXml = [xml] $template.GetXml();"
+		+ "$toastXml.GetElementsByTagName('text').AppendChild($toastXml.CreateTextNode($title)) > $null;"
+		+ "$xml = New-Object Windows.Data.Xml.Dom.XmlDocument;"
+		+ "$xml.LoadXml($toastXml.OuterXml);"
+		+ "$toast = [Windows.UI.Notifications.ToastNotification]::new($xml);"
+		+ "$toast.Tag = 'Test1';"
+		+ "$toast.Group = 'Test2';"
+		+ "$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('"
+		+ title
+		+ "');"
+		+ "$notifier.Show($toast);}\"";
+
+		if (title != null && title != "" && desc != null && desc != "" && getWindowsVersion() != 7)
+			new HiddenProcess(powershellCommand);
+
+		#else
+		if (isEvent) {
+			#if linux
+			addTextToDebug('Windows Notifications are not currently supported on Linux!', FlxColor.RED);
+			return;
+			#else
+			trace('Windows Notifications are not currently supported on this platform!');
+			return;
+			#end
+		}
+		#end
 	}
 
 	public function moveCameraSection():Void {

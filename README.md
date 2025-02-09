@@ -57,6 +57,8 @@ There is like lots and lots of stuff i've missed, but at least you would like th
 
 ![0203(1)](https://github.com/user-attachments/assets/15620fa6-52a9-4090-996f-80a80bda32ef)
 - Gameplay from @TheStinkern
+  - See the full gameplay [here](https://www.youtube.com/watch?v=Z2iXD1FbX1I)
+
 # FAQs
 
 Frequently Asked Questions (FAQs) are found in [here](https://github.com/JordanSantiagoYT/FNF-JS-Engine/wiki) or you can simply see it below.

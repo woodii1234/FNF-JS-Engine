@@ -80,6 +80,9 @@ class CrashHandler
 
 		errorMessage += "Uncaught Error: " 
 			+ '$m\n$stackLabel'
+			+ '\n'
+			+ "\nCrash happened in JS Engine v" + MainMenuState.psychEngineJSVersion //used to see if the issue is occuring in latest version
+			+ '\n'
 			+ "\nPlease report this error to the GitHub page: https://github.com/JordanSantiagoYT/FNF-JS-Engine"
 			+ "\nThe engine has saved a crash log inside the crash folder, If you're making a GitHub issue you might want to send that!";
 
