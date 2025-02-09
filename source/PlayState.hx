@@ -26,7 +26,6 @@ import Character.Boyfriend;
 import Shaders;
 import Note.PreloadedChartNote;
 import utils.*;
-import HiddenProcess;
 
 #if !flash
 import flixel.addons.display.FlxRuntimeShader;
