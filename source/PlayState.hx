@@ -1969,7 +1969,6 @@ class PlayState extends MusicBeatState
 						moveCameraSection();
 						FlxG.camera.snapToTarget();
 					}
-					videoCutscene = null;
 					canPause = false;
 					inCutscene = false;
 					startAndEnd();

@@ -40,6 +40,7 @@ enum abstract Action(String) to String from String
 	var NOTE_DOWN_R = "note_down-release";
 	var BOT_ENERGY_P = "bot_energy-press";
 	var ACCEPT = "accept";
+	var ACCEPT_P = "accept-press";
 	var BACK = "back";
 	var PAUSE = "pause";
 	var RESET = "reset";
@@ -74,6 +75,7 @@ abstract Action(String) to String from String
 	var NOTE_DOWN_R = "note_down-release";
 	var BOT_ENERGY_P = "bot_energy-press";
 	var ACCEPT = "accept";
+	var ACCEPT_P = "accept-press";
 	var BACK = "back";
 	var PAUSE = "pause";
 	var RESET = "reset";
@@ -148,6 +150,7 @@ class Controls extends FlxActionSet
 	var _note_downR = new FlxActionDigital(Action.NOTE_DOWN_R);
 	var _bot_energyP = new FlxActionDigital(Action.BOT_ENERGY_P);
 	var _accept = new FlxActionDigital(Action.ACCEPT);
+	var _acceptP = new FlxActionDigital(Action.ACCEPT_P);
 	var _back = new FlxActionDigital(Action.BACK);
 	var _pause = new FlxActionDigital(Action.PAUSE);
 	var _reset = new FlxActionDigital(Action.RESET);
@@ -291,6 +294,11 @@ class Controls extends FlxActionSet
 	inline function get_ACCEPT()
 		return _accept.check();
 
+	public var ACCEPT_P(get, never):Bool;
+
+	inline function get_ACCEPT_P()
+		return _acceptP.check();
+
 	public var BACK(get, never):Bool;
 
 	inline function get_BACK()
@@ -339,6 +347,7 @@ class Controls extends FlxActionSet
 		add(_note_downR);
 		add(_bot_energyP);
 		add(_accept);
+		add(_acceptP);
 		add(_back);
 		add(_pause);
 		add(_reset);
@@ -347,6 +356,8 @@ class Controls extends FlxActionSet
 			byName[action.name] = action;
 
 		setKeyboardScheme(scheme, false);
+
+		instance = this;
 	}
 	#else
 	public function new(name, scheme:KeyboardScheme = null)
@@ -379,6 +390,7 @@ class Controls extends FlxActionSet
 		add(_note_downR);
 		add(_bot_energyP);
 		add(_accept);
+		add(_acceptP);
 		add(_back);
 		add(_pause);
 		add(_reset);
@@ -389,6 +401,7 @@ class Controls extends FlxActionSet
 		if (scheme == null)
 			scheme = None;
 		setKeyboardScheme(scheme, false);
+		instance = this;
 	}
 	#end
 
@@ -495,6 +508,7 @@ class Controls extends FlxActionSet
 				func(_bot_energyP, PRESSED);
 			case ACCEPT:
 				func(_accept, JUST_PRESSED);
+				func(_acceptP, PRESSED);
 			case BACK:
 				func(_back, JUST_PRESSED);
 			case PAUSE:
