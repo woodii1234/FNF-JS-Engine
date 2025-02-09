@@ -102,9 +102,6 @@ same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, 
 @JordanSantiagoYT (of course)
 - He's the owner... What do you think?
 
-@SyncGit12
-- Same reason as @TheStinkern.
-
 @TheStinkern
 - Was originaly going to only answer issues and try to fix it.
   - Also trying to learn haxe a bit.
