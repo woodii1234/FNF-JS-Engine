@@ -31,6 +31,10 @@ import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import openfl.Assets;
 
+#if VIDEOS_ALLOWED
+import VideoSprite;
+#end
+
 using StringTools;
 typedef TitleData =
 {
@@ -54,6 +58,8 @@ class TitleState extends MusicBeatState
 	public static var initialized:Bool = false;
 
 	public static var sarcasmEgg:String;
+	public var inCutscene:Bool = false;
+	var canPause:Bool = true;
 
 	final sarcasmKeys:Array<String> = [
 		'ANNOUNCER'
@@ -67,6 +73,7 @@ class TitleState extends MusicBeatState
 	var credTextShit:Alphabet;
 	var textGroup:FlxGroup;
 	var ngSpr:FlxSprite;
+	public var wheatleySpace:Bool = false; // wheatley in space easter
 	
 	var titleTextColors:Array<FlxColor> = [0xFF33FFFF, 0xFF3333CC];
 	var titleTextAlphas:Array<Float> = [1, .64];
@@ -184,6 +191,49 @@ class TitleState extends MusicBeatState
 	var titleText:FlxSprite;
 	var swagShader:ColorSwap = null;
 
+
+	/***************/
+    /*    VIDEO    */
+	/***************/
+	public var vidSprite:VideoSprite = null;
+	private function startVideo(name:String, ?library:String = null, ?callback:Void->Void = null, canSkip:Bool = true, loop:Bool = false, playOnLoad:Bool = true)
+		{
+			#if VIDEOS_ALLOWED
+			var foundFile:Bool = false;
+			var fileName:String = Paths.video(name, library);
+	
+			#if sys
+			if (FileSystem.exists(fileName))
+			#else
+			if (OpenFlAssets.exists(fileName))
+			#end
+			foundFile = true;
+	
+			if (foundFile)
+			{
+				vidSprite = new VideoSprite(fileName, false, canSkip, loop);
+	
+				// Finish callback
+				function onVideoEnd()
+				{
+					FlxG.switchState(TitleState.new);
+				}
+				vidSprite.finishCallback = (callback != null) ? callback.bind() : onVideoEnd;
+				vidSprite.onSkip = (callback != null) ? callback.bind() : onVideoEnd;
+				insert(0, vidSprite);
+	
+				if (playOnLoad)
+					vidSprite.videoSprite.play();
+				return vidSprite;
+			}
+			else {
+				FlxG.log.error("Video not found: " + fileName);
+			}
+			#else
+			FlxG.log.warn('Platform not supported!');
+			#end
+			return null;
+		}
 	function startIntro()
 	{
 		if (!initialized)
@@ -365,6 +415,8 @@ class TitleState extends MusicBeatState
 			throw 'Crash test';
 		*/
 
+
+		
 		sarcasmKeysBuffer += KeyboardFunctions.keypressToString();
 		if (sarcasmKeysBuffer.length >= 32)
 			sarcasmKeysBuffer = sarcasmKeysBuffer.substring(1);
@@ -380,9 +432,36 @@ class TitleState extends MusicBeatState
 						FlxG.sound.play(Paths.sound('sarcasmComplete'));
 						trace('Were you talking about Portal 2?');
 						sarcasmKeysBuffer = '';
+
+		                var randomVar:Int = 0;
+						if (!ClientPrefs.wheatleySpace) randomVar = Std.random(15);
+			            if (ClientPrefs.wheatleySpace) randomVar = 8;
+		                trace(randomVar);
+	                	if (randomVar == 8)
+		                {
+			                trace('Hello? Anyone in there? Hello?...');
+			                wheatleySpace = true;
+		                }
 				}
 			}
 		}
+
+		/*var wheatleySpace:Bool = false;
+		var randomVar:Int = 0;
+		trace(randomVar);
+		if (randomVar == 8)
+		{
+			trace('Hello? Anyone in there? Hello?...');
+			wheatleySpace = true;
+		}*/
+		#if VIDEOS_ALLOWED
+		if(wheatleySpace)
+            startVideo('alone'); 
+		    #else 
+		    throw 'Is anyone there?';
+			#else
+			Sys.exit(0);
+		#end
 
 		if (initialized && !transitioning && skippedIntro)
 		{
