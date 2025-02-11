@@ -365,6 +365,8 @@ class TitleState extends MusicBeatState
 			throw 'Crash test';
 		*/
 
+
+		
 		sarcasmKeysBuffer += KeyboardFunctions.keypressToString();
 		if (sarcasmKeysBuffer.length >= 32)
 			sarcasmKeysBuffer = sarcasmKeysBuffer.substring(1);
@@ -380,9 +382,29 @@ class TitleState extends MusicBeatState
 						FlxG.sound.play(Paths.sound('sarcasmComplete'));
 						trace('Were you talking about Portal 2?');
 						sarcasmKeysBuffer = '';
+
+						var wheatleySpace:Bool = false;
+		                var randomVar:Int = 0;
+		                trace(randomVar);
+	                	if (randomVar == 8)
+		                {
+			                trace('Hello? Anyone in there? Hello?...');
+			                wheatleySpace = true;
+		                }
 				}
 			}
 		}
+
+		/*var wheatleySpace:Bool = false;
+		var randomVar:Int = 0;
+		trace(randomVar);
+		if (randomVar == 8)
+		{
+			trace('Hello? Anyone in there? Hello?...');
+			wheatleySpace = true;
+		}*/
+
+		if(wheatleySpace = true) #if VIDEOS_ALLOWED startVideo('alone', function() Sys.exit(0)); #else throw 'Is anyone there?'; #end
 
 		if (initialized && !transitioning && skippedIntro)
 		{
