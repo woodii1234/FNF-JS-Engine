@@ -434,6 +434,8 @@ class TitleState extends MusicBeatState
 						sarcasmKeysBuffer = '';
 
 		                var randomVar:Int = 0;
+						if (!ClientPrefs.wheatleySpace) randomVar = Std.random(15);
+			            if (ClientPrefs.wheatleySpace) randomVar = 8;
 		                trace(randomVar);
 	                	if (randomVar == 8)
 		                {
