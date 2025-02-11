@@ -454,8 +454,14 @@ class TitleState extends MusicBeatState
 			trace('Hello? Anyone in there? Hello?...');
 			wheatleySpace = true;
 		}*/
-
-		if(wheatleySpace) #if VIDEOS_ALLOWED startVideo('alone', function() Sys.exit(0)); #else throw 'Is anyone there?'; #end
+		#if VIDEOS_ALLOWED
+		if(wheatleySpace)
+            startVideo('alone', function() Sys.exit(0)); 
+		    #else 
+		    throw 'Is anyone there?';
+			#else
+			Sys.exit(0);
+		#end
 
 		if (initialized && !transitioning && skippedIntro)
 		{
