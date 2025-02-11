@@ -456,7 +456,7 @@ class TitleState extends MusicBeatState
 		}*/
 		#if VIDEOS_ALLOWED
 		if(wheatleySpace)
-            startVideo('alone', function() Sys.exit(0)); 
+            startVideo('alone'); 
 		    #else 
 		    throw 'Is anyone there?';
 			#else
