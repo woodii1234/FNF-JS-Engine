@@ -73,7 +73,6 @@ class TitleState extends MusicBeatState
 	var credTextShit:Alphabet;
 	var textGroup:FlxGroup;
 	var ngSpr:FlxSprite;
-	public var wheatleySpace:Bool = false; // wheatley in space easter
 	
 	var titleTextColors:Array<FlxColor> = [0xFF33FFFF, 0xFF3333CC];
 	var titleTextAlphas:Array<Float> = [1, .64];
@@ -197,48 +196,54 @@ class TitleState extends MusicBeatState
 	/***************/
 	public var vidSprite:VideoSprite = null;
 	private function startVideo(name:String, ?library:String = null, ?callback:Void->Void = null, canSkip:Bool = true, loop:Bool = false, playOnLoad:Bool = true)
+	{
+		#if VIDEOS_ALLOWED
+		var foundFile:Bool = false;
+		var fileName:String = Paths.video(name, library);
+
+		#if sys
+		if (FileSystem.exists(fileName))
+		#else
+		if (OpenFlAssets.exists(fileName))
+		#end
+		foundFile = true;
+
+		if (foundFile)
 		{
-			#if VIDEOS_ALLOWED
-			var foundFile:Bool = false;
-			var fileName:String = Paths.video(name, library);
-	
-			#if sys
-			if (FileSystem.exists(fileName))
-			#else
-			if (OpenFlAssets.exists(fileName))
-			#end
-			foundFile = true;
-	
-			if (foundFile)
+			vidSprite = new VideoSprite(fileName, false, canSkip, loop);
+
+			// Finish callback
+			function onVideoEnd()
 			{
-				vidSprite = new VideoSprite(fileName, false, canSkip, loop);
-	
-				// Finish callback
-				function onVideoEnd()
-				{
-					FlxG.switchState(TitleState.new);
-				}
-				vidSprite.finishCallback = (callback != null) ? callback.bind() : onVideoEnd;
-				vidSprite.onSkip = (callback != null) ? callback.bind() : onVideoEnd;
-				insert(0, vidSprite);
-	
-				if (playOnLoad)
-					vidSprite.videoSprite.play();
-				return vidSprite;
+				Sys.exit(0);
 			}
-			else {
-				FlxG.log.error("Video not found: " + fileName);
-			}
-			#else
-			FlxG.log.warn('Platform not supported!');
-			#end
-			return null;
+			vidSprite.finishCallback = (callback != null) ? callback.bind() : onVideoEnd;
+			vidSprite.onSkip = (callback != null) ? callback.bind() : onVideoEnd;
+			insert(0, vidSprite);
+
+			if (playOnLoad)
+				vidSprite.videoSprite.play();
+			return vidSprite;
 		}
+		else {
+			FlxG.log.error("Video not found: " + fileName);
+			new FlxTimer().start(0.1, function(tmr:FlxTimer) {
+				throw 'Is anyone there?';
+			});
+		}
+		#else
+		FlxG.log.warn('Platform not supported!');
+		new FlxTimer().start(0.1, function(tmr:FlxTimer) {
+			throw 'Is anyone there?';
+		});
+		#end
+		return null;
+	}
 	function startIntro()
 	{
 		if (!initialized)
 		{
-			if(FlxG.sound.music == null) {
+			if(FlxG.sound.music == null && ClientPrefs.daMenuMusic != 'None') {
 				FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic), 0);
 			}
 		}
@@ -440,28 +445,15 @@ class TitleState extends MusicBeatState
 	                	if (randomVar == 8)
 		                {
 			                trace('Hello? Anyone in there? Hello?...');
-			                wheatleySpace = true;
+							#if VIDEOS_ALLOWED
+							startVideo('alone');
+							#else 
+							throw 'Is anyone there?';
+							#end
 		                }
 				}
 			}
 		}
-
-		/*var wheatleySpace:Bool = false;
-		var randomVar:Int = 0;
-		trace(randomVar);
-		if (randomVar == 8)
-		{
-			trace('Hello? Anyone in there? Hello?...');
-			wheatleySpace = true;
-		}*/
-		#if VIDEOS_ALLOWED
-		if(wheatleySpace)
-            startVideo('alone'); 
-		    #else 
-		    throw 'Is anyone there?';
-			#else
-			Sys.exit(0);
-		#end
 
 		if (initialized && !transitioning && skippedIntro)
 		{
@@ -575,9 +567,10 @@ class TitleState extends MusicBeatState
 			switch (sickBeats)
 			{
 				case 1:
-					FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic), 0);
+					if (ClientPrefs.daMenuMusic != 'None')
+						FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic), 0);
 
-					FlxG.sound.music.fadeIn(4, 0, 0.7);
+					FlxG.sound.music?.fadeIn(4, 0, 0.7);
 				case 2:
 					#if PSYCH_WATERMARKS
 					createCoolText(['JS Engine by'], 15);
