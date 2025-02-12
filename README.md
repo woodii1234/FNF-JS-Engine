@@ -41,6 +41,7 @@ This contains lots and lots of customizable and features built in to JS Engine, 
 - Rendering mode! (Originally used for lua and gamerenderer-engine)
 - Built in Song Credits! (on chart editor)
 - Spam modules! (for the DnB fans)
+- Cool customizable UI!
 
 There is like lots and lots of stuff i've missed, but at least you would like those features built in **JS ENGINE**
 
@@ -73,7 +74,7 @@ A: You do it here the [same way you'd do it in Psych Engine.](https://github.com
 
 **Q: I found a bug!**
 
-A: Report [here.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/issues). Also, **please check if there are already posts about the same issue.**
+A: Report [here.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/issues) Also, **please check if there are already posts about the same issue.**
 
 **Q: I found a *WAY* to fix a bug!**
 
