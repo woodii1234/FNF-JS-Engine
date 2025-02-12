@@ -77,7 +77,7 @@ A: Report [here.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/issues). Als
 
 **Q: I found a *WAY* to fix a bug!**
 
-A: Send [here.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/pulls).
+A: Send [here.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/pulls)
 
 # Compiling JS Engine
 
