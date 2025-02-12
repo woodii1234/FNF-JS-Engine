@@ -12,7 +12,7 @@ body:
   - type: dropdown
     id: Measures
     attributes:
-      label: 'Did you see if the "bug" occurs on the latest commit?'
+      label: "Did you see if the bug occurs on the latest commit?"
       options:
         - Yes
         - No
