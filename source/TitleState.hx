@@ -190,6 +190,7 @@ class TitleState extends MusicBeatState
 	var titleText:FlxSprite;
 	var swagShader:ColorSwap = null;
 
+	var wheatley:Bool = false;
 
 	/***************/
     /*    VIDEO    */
@@ -200,6 +201,13 @@ class TitleState extends MusicBeatState
 		#if VIDEOS_ALLOWED
 		var foundFile:Bool = false;
 		var fileName:String = Paths.video(name, library);
+
+		var insertWhateveryouWantHere:Dynamic = null;
+		// for source modders
+		insertWhateveryouWantHere = function(){
+			if (wheatley)
+				throw 'Is anyone there?';
+		}
 
 		#if sys
 		if (FileSystem.exists(fileName))
@@ -228,13 +236,13 @@ class TitleState extends MusicBeatState
 		else {
 			FlxG.log.error("Video not found: " + fileName);
 			new FlxTimer().start(0.1, function(tmr:FlxTimer) {
-				throw 'Is anyone there?';
+				insertWhateveryouWantHere?.bind();
 			});
 		}
 		#else
 		FlxG.log.warn('Platform not supported!');
 		new FlxTimer().start(0.1, function(tmr:FlxTimer) {
-			throw 'Is anyone there?';
+			insertWhateveryouWantHere?.bind(); // idk in case your source modding or whatever the fuck
 		});
 		#end
 		return null;
@@ -364,8 +372,6 @@ class TitleState extends MusicBeatState
 			skipIntro();
 		else
 			initialized = true;
-
-		// credGroup.add(credTextShit);
 	}
 
 	function getIntroTextShit():Array<Array<String>>
@@ -447,6 +453,7 @@ class TitleState extends MusicBeatState
 			                trace('Hello? Anyone in there? Hello?...');
 							#if VIDEOS_ALLOWED
 							startVideo('alone');
+							wheatley = true; // I actually needed this for an check :P
 							#else 
 							throw 'Is anyone there?';
 							#end
