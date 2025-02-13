@@ -243,7 +243,7 @@ class TitleState extends MusicBeatState
 	{
 		if (!initialized)
 		{
-			if(FlxG.sound.music == null && ClientPrefs.daMenuMusic != 'None') {
+			if(FlxG.sound.music == null) {
 				FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic), 0);
 			}
 		}
@@ -567,10 +567,9 @@ class TitleState extends MusicBeatState
 			switch (sickBeats)
 			{
 				case 1:
-					if (ClientPrefs.daMenuMusic != 'None')
-						FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic), 0);
+					FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic), 0);
 
-					FlxG.sound.music?.fadeIn(4, 0, 0.7);
+					FlxG.sound.music.fadeIn(4, 0, 0.7);
 				case 2:
 					#if PSYCH_WATERMARKS
 					createCoolText(['JS Engine by'], 15);

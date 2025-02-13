@@ -34,9 +34,6 @@ class StartupState extends MusicBeatState
 			function onVideoEnd()
 			{
 				FlxG.switchState(TitleState.new);
-				vidSprite?.destroy();
-				if (vidSprite != null)
-					vidSprite = null;
 			}
 			vidSprite.finishCallback = (callback != null) ? callback.bind() : onVideoEnd;
 			vidSprite.onSkip = (callback != null) ? callback.bind() : onVideoEnd;
