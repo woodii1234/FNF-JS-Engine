@@ -219,7 +219,7 @@ class TitleState extends MusicBeatState
 			}
 			vidSprite.finishCallback = (callback != null) ? callback.bind() : onVideoEnd;
 			vidSprite.onSkip = (callback != null) ? callback.bind() : onVideoEnd;
-			insert(0, vidSprite);
+			add(vidSprite); // not do insert because you were putting it in the back lol
 
 			if (playOnLoad)
 				vidSprite.videoSprite.play();
