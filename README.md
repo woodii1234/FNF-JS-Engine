@@ -84,11 +84,7 @@ A: Send [here.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/pulls)
 
 Refer to [the Build Instructions](./BUILDING.md)
 
-If you get an error related to hxCodec, run `haxelib set hxCodec 2.5.1` if you're using an older version BEFORE 1.42.0
-
-### Otherwise, make *sure* you use HxVLC 1.9.2, not anything newer
-
-If graphics are all white and don't have color, run `haxelib git hxcpp https://github.com/HaxeFoundation/hxcpp`
+If you get an error while Compiling, go [here](https://github.com/JordanSantiagoYT/FNF-JS-Engine/issues/359) to see if the issue is on there, if not, make an issue
 
 ## Customization:
 
