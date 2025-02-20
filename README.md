@@ -66,7 +66,7 @@ Frequently Asked Questions (FAQs) are found in [here](https://github.com/JordanS
 
 **Q: Can I use this engine for my mod(s)?**
 
-A: Yes, you can! just be sure to credit me ([@JordanSantiago on YouTube](https://www.youtube.com/@JordanSantiago)) and give a link to this page. or [the link to download the latest release.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/releases/latest)
+A: Yes, you can! just be sure to credit me ([@JordanSantiago on YouTube](https://www.youtube.com/@JordanSantiago)) and give a link to the Engine's github/gamebanana, or [the link to download the latest release.](https://github.com/JordanSantiagoYT/FNF-JS-Engine/releases/latest)
 
 **Q: How do I change and add things?**
 
