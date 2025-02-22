@@ -7,7 +7,7 @@ class StartupState extends MusicBeatState
 	var logo:FlxSprite;
 	var skipTxt:FlxText;
 
-	var maxIntros:Int = 6;
+	var maxIntros:Int = 7;
 	var date:Date = Date.now();
 
 	var canChristmas = false;
@@ -170,18 +170,18 @@ class StartupState extends MusicBeatState
 					else 
 						doIntro();
 					
-					case 7:
-						if (canAutism)
-						{
-							FlxG.sound.play(Paths.sound('aprilFools', 'splash'));
-							logo.loadGraphic(Paths.image('autism', 'splash'));
-							logo.scale.set(0.1,0.1);
-							logo.updateHitbox();
-							logo.screenCenter();
-							FlxTween.tween(logo, {alpha: 1, "scale.x": 1, "scale.y": 1}, 0.95, {ease: FlxEase.linear, onComplete: _ -> onIntroDone()});
-						} 
-						else 
-							doIntro();
+				case 7:
+					if (canAutism)
+					{
+						FlxG.sound.play(Paths.sound('aprilFools', 'splash'));
+						logo.loadGraphic(Paths.image('autism', 'splash'));
+						logo.scale.set(0.1,0.1);
+						logo.updateHitbox();
+						logo.screenCenter();
+						FlxTween.tween(logo, {alpha: 1, "scale.x": 1, "scale.y": 1}, 0.95, {ease: FlxEase.linear, onComplete: _ -> onIntroDone()});
+					} 
+					else 
+						doIntro();
 					
 			}
 		}
