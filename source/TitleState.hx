@@ -251,7 +251,12 @@ class TitleState extends MusicBeatState
 	{
 		if (!initialized)
 		{
-			if(FlxG.sound.music == null) {
+			if (date.getMonth() == 4 && date.getDate() == 1)
+			{
+				FlxG.sound.playMusic(Paths.music('aprilFools'), 0);
+			}
+			else if(FlxG.sound.music == null)
+			{
 				FlxG.sound.playMusic(Paths.music('freakyMenu-' + ClientPrefs.daMenuMusic), 0);
 			}
 		}

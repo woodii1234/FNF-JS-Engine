@@ -65,6 +65,11 @@ class StartupState extends MusicBeatState
 			canChristmas = true;
 			maxIntros += 1; //JOLLY SANTA!!!
 		}
+		else if (date.getMonth() == 4 && date.getDate() == 1) // funny
+		{
+			canAutism = true;
+			maxIntros += 1; //autism!!!!!!!!!!!!!!!!!!!!!!oubgrebiugerbiuegrs
+		}
 
 		FlxTransitionableState.skipNextTransIn = true;
 		FlxTransitionableState.skipNextTransOut = true;
@@ -162,6 +167,20 @@ class StartupState extends MusicBeatState
 					} 
 					else 
 						doIntro();
+					
+					case 7:
+						if (canAutism)
+						{
+							FlxG.sound.play(Paths.sound('aprilFools', 'splash'));
+							logo.loadGraphic(Paths.image('autism', 'splash'));
+							logo.scale.set(0.1,0.1);
+							logo.updateHitbox();
+							logo.screenCenter();
+							FlxTween.tween(logo, {alpha: 1, "scale.x": 1, "scale.y": 1}, 0.95, {ease: FlxEase.linear, onComplete: _ -> onIntroDone()});
+						} 
+						else 
+							doIntro();
+					
 			}
 		}
 		#end
