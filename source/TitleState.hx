@@ -60,6 +60,7 @@ class TitleState extends MusicBeatState
 	public static var sarcasmEgg:String;
 	public var inCutscene:Bool = false;
 	var canPause:Bool = true;
+	var date:Date = Date.now();
 
 	final sarcasmKeys:Array<String> = [
 		'ANNOUNCER'

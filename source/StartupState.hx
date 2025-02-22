@@ -11,6 +11,8 @@ class StartupState extends MusicBeatState
 	var date:Date = Date.now();
 
 	var canChristmas = false;
+	var canAutism = false;
+
 
 	private var vidSprite:VideoSprite = null;
 	private function startVideo(name:String, ?library:String = null, ?callback:Void->Void = null, canSkip:Bool = true, loop:Bool = false, playOnLoad:Bool = true)
