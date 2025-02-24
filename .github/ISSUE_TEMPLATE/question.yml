@@ -11,10 +11,10 @@ body:
   - type: dropdown
     id: outdatedBuildCheck
     attributes:
-      label: "Did you check if the problem occurs in the latest build?"
+      label: "If its a problem you are having, did you check if the problem occurs in the latest build?"
       options:
-        - "Yes"
         - "No"
+        - "Yes"
     validations:
       required: true
 
