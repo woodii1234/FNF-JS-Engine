@@ -15,6 +15,7 @@ body:
       options:
         - "No"
         - "Yes"
+        - "No, it's not a problem.
     validations:
       required: true
 
