@@ -18,17 +18,16 @@ import Achievements;
 import editors.MasterEditorMenu;
 import flixel.input.keyboard.FlxKey;
 import flixel.util.FlxTimer;
+import backend.HaxeCommit;
 
 using StringTools;
 
 class MainMenuState extends MusicBeatState
 {
+	public static final gitCommit:String = HaxeCommit.getGitCommitHash();
+
 	public static var psychEngineJSVersionNumber:String = '1.44.0'; //This is also used for Discord RPC
-	#if commit
-		public static var psychEngineJSVersion:String = psychEngineJSVersionNumber + '(Commit Build)'; //This is also used for Discord RPC
-	#else
-		public static var psychEngineJSVersion:String = psychEngineJSVersionNumber; //This is also used for Discord RPC
-	#end
+	public static var psychEngineJSVersion:String = psychEngineJSVersionNumber #if commit + ' ($gitCommit)' #end; //This is also used for Discord RPC
 	public static var psychEngineVersion:String = '0.6.3'; //This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 
@@ -42,7 +41,7 @@ class MainMenuState extends MusicBeatState
 		#if MODS_ALLOWED 'mods', #end
 		#if ACHIEVEMENTS_ALLOWED 'awards', #end
 		'credits',
-		#if !switch 'donate', #end
+		'donate',
 		'options'
 	];
 
