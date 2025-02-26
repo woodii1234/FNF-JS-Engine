@@ -61,7 +61,7 @@ jobs:
           haxe compile.hxml
           cd ../..
       - name: Compile
-        run: haxelib run lime build linux -commit ${{ inputs.buildFlags }}
+        run: haxelib run lime build linux -D commit -D ${{ inputs.buildFlags }}
       - name: Clear Previous Cache
         uses: actions/github-script@main
         with:
@@ -138,7 +138,7 @@ jobs:
           haxe compile.hxml
           cd ../..
       - name: Compile
-        run: haxelib run lime build windows -commit ${{ inputs.buildFlags }}
+        run: haxelib run lime build windows -D commit -D ${{ inputs.buildFlags }}
       - name: Clear Previous Cache
         uses: actions/github-script@main
         with:
@@ -214,7 +214,7 @@ jobs:
           haxe compile.hxml
           cd ../..
       - name: Compile
-        run: haxelib run lime build mac -commit ${{ inputs.buildFlags }}
+        run: haxelib run lime build mac -D commit -D ${{ inputs.buildFlags }}
       - name: Clear Previous Cache
         uses: actions/github-script@main
         with:
