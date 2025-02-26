@@ -40,8 +40,8 @@ jobs:
         with:
           path: |
             .haxelib/
-            export/release/linux/haxe/
-            export/release/linux/obj/
+            export/commit/linux/haxe/
+            export/commit/linux/obj/
           key: cache-linux-build
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
@@ -94,14 +94,14 @@ jobs:
         with:
           path: |
             .haxelib/
-            export/release/linux/haxe/
-            export/release/linux/obj/
+            export/commit/linux/haxe/
+            export/commit/linux/obj/
           key: cache-linux-build
       - name: Publish Artifact
         uses: actions/upload-artifact@main
         with:
           name: linuxBuild
-          path: export/release/linux/bin
+          path: export/commit/linux/bin
 
   buildWindows:
     runs-on: windows-latest
@@ -119,8 +119,8 @@ jobs:
         with:
           path: |
             .haxelib/
-            export/release/windows/haxe/
-            export/release/windows/obj/
+            export/commit/windows/haxe/
+            export/commit/windows/obj/
           key: cache-windows-build
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
@@ -171,14 +171,14 @@ jobs:
         with:
           path: |
             .haxelib/
-            export/release/windows/haxe/
-            export/release/windows/obj/
+            export/commit/windows/haxe/
+            export/commit/windows/obj/
           key: cache-windows-build
       - name: Publish Artifact
         uses: actions/upload-artifact@main
         with:
           name: windowsBuild
-          path: export/release/windows/bin
+          path: export/commit/windows/bin
   buildMac:
     runs-on: macos-latest
 
@@ -195,8 +195,8 @@ jobs:
         with:
           path: |
             .haxelib/
-            export/release/macos/haxe/
-            export/release/macos/obj/
+            export/commit/macos/haxe/
+            export/commit/macos/obj/
           key: cache-macos-build
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
@@ -247,11 +247,11 @@ jobs:
         with:
           path: |
             .haxelib/
-            export/release/macos/haxe/
-            export/release/macos/obj/
+            export/commit/macos/haxe/
+            export/commit/macos/obj/
           key: cache-macos-build
       - name: Publish Artifact
         uses: actions/upload-artifact@main
         with:
           name: macBuild
-          path: export/release/macos/bin
+          path: export/commit/macos/bin
