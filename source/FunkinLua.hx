@@ -35,6 +35,7 @@ import flixel.addons.transition.FlxTransitionableState;
 import flixel.system.FlxAssets.FlxShader;
 import Shaders;
 import openfl.filters.ShaderFilter;
+import utils.*;
 
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
@@ -226,6 +227,10 @@ class FunkinLua {
 		set('shadersEnabled', ClientPrefs.shaders);
 		set('scriptName', scriptName);
 		set('currentModDirectory', Paths.currentModDirectory);
+
+		// breaking the fourth wall shit
+		set('user_path', CoolSystemStuff.getUserPath);
+		set("user_name", CoolSystemStuff.getUsername); // usable for things like Exploitation
 
 		#if windows
 		set('buildTarget', 'windows');
