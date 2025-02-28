@@ -229,9 +229,13 @@ class FunkinLua {
 		set('currentModDirectory', Paths.currentModDirectory);
 
 		// breaking the fourth wall shit
-		set('user_path', CoolSystemStuff.getUserPath);
-		set("user_name", CoolSystemStuff.getUsername); // usable for things like Exploitation
-
+   if (ClientPrefs.SAM)
+       set('user_path', 'Boyfriend.dat");
+		    set("user_name", "Boyfriend"); // usable for things like Exploitation
+   else
+       set('user_path', CoolSystemStuff.getUserPath);
+		    set("user_name", CoolSystemStuff.getUsername); 
+   end
 		#if windows
 		set('buildTarget', 'windows');
 		#elseif linux
