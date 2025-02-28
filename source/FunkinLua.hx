@@ -230,7 +230,7 @@ class FunkinLua {
 
 		// breaking the fourth wall shit
    if (ClientPrefs.SAM)
-       set('user_path', 'Boyfriend.dat");
+       set('user_path', 'Boyfriend.dat');
 		    set("user_name", "Boyfriend"); // usable for things like Exploitation
    else
        set('user_path', CoolSystemStuff.getUserPath);
