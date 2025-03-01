@@ -126,6 +126,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var pbRControls:Bool = false;
 	public static var rainbowFPS:Bool = false;
 	public static var noRenderGC:Bool = false;
+	public static var wheatleySpace:Bool = true;
 
 	//Unused
 	public static var cursing:Bool = true;
@@ -187,6 +188,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 
 	//Misc
 	public static var JSEngineRecharts:Bool = false;
+	public static var SAM:Bool = false;
 	public static var alwaysTriggerCutscene:Bool = false;
 	public static var disableSplash:Bool = false;
 	public static var rainbowTime:Float = 5.0;
