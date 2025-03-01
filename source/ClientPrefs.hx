@@ -48,7 +48,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var showcaseST:String = 'JS';
 	public static var timeBounce:Bool = true;
 	public static var lengthIntro:Bool = true;
-	public static var timebarShowSpeed:Bool = false;
 	public static var botWatermark:Bool = true;
 	public static var missRating:Bool = false;
 	public static var scoreTxtSize:Int = 0;
@@ -69,7 +68,7 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var bfIconStyle:String = 'Default';
 	public static var ratingType:String = 'Base FNF';
 	public static var simplePopups:Bool = false;
-	public static var iconBounceType:String = 'Golden Apple';
+	public static var iconBounceType:String = 'New Psych';
 	public static var colorRatingHit:Bool = true;
 	public static var smoothHealth:Bool = true;
 	public static var smoothHPBug:Bool = false;
@@ -127,7 +126,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 	public static var pbRControls:Bool = false;
 	public static var rainbowFPS:Bool = false;
 	public static var noRenderGC:Bool = false;
-	public static var wheatleySpace:Bool = true;
 
 	//Unused
 	public static var cursing:Bool = true;
@@ -189,7 +187,6 @@ class ClientPrefs { //default settings if it can't find a save file containing y
 
 	//Misc
 	public static var JSEngineRecharts:Bool = false;
-	public static var SAM:Bool = false;
 	public static var alwaysTriggerCutscene:Bool = false;
 	public static var disableSplash:Bool = false;
 	public static var rainbowTime:Float = 5.0;
